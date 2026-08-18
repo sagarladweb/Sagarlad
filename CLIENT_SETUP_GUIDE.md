@@ -158,3 +158,103 @@ When you are ready to unlock Phase 2 (Full Admin Panel):
 5. Go to **Deployments** -> click **Redeploy**.
 
 **Result**: The complete Admin Panel (Dashboard, Books, Videos, Social Links, Newsletter, Comments, Security, Sandbox) is instantly active! Zero data is changed or lost.
+
+
+
+
+
+
+
+
+
+
+
+
+
+// strictly follow after this //
+## Do't remove this ## 
+
+---
+
+## 1. What is `ADMIN_PHASE` & How to Change It ("1" to "2")
+
+`ADMIN_PHASE` is a single variable you set inside Vercel that controls what features appear in your Admin Panel.
+
+### What happens in each Phase:
+- **When set to `1` (Phase 1 - Initial Launch)**:
+  - When Sagar logs into `https://admin.sagarlad.com`, the sidebar shows **only Blog Writing, Editing, Drafting, and Live Previewing**.
+  - All other admin sections (Books, Videos, Newsletter, Dashboard Analytics) are cleanly hidden.
+- **When changed to `2` (Phase 2 - Full Unlock)**:
+  - All admin sections automatically unlock: Dashboard Analytics, Books Manager, Videos Manager, Social Links 3x4 Grid, Newsletter Composer & Queue, and Comment Moderation.
+  - **Zero data is lost.** All your blogs, photos, and settings remain 100% intact.
+
+---
+
+### Step-by-Step: How to Change `ADMIN_PHASE` on Vercel (Button by Button)
+
+1. Log in to [Vercel](https://vercel.com).
+2. Click on your **Admin Project** (the project rooted at `apps/admin`).
+3. Click **Settings** (top menu bar).
+4. Click **Environment Variables** (left sidebar).
+5. Scroll down to find `ADMIN_PHASE`:
+   - Click the **3 dots `...`** on the right side of `ADMIN_PHASE` and click **Edit**.
+   - Change the value from `1` to `2`.
+   - Click **Save**.
+6. Click **Deployments** (top menu bar).
+7. Click the **3 dots `...`** next to your latest deployment and click **Redeploy**.
+
+*Done! Your Admin Panel instantly updates to Phase 2 with full access.*
+
+---
+
+## 2. Step-by-Step BigRock DNS Setup (Domain + Subdomain)
+
+Since your domain is purchased on **BigRock**, follow these exact steps to connect your main domain (`sagarlad.com`) and admin subdomain (`admin.sagarlad.com`) to Vercel:
+
+### Step 1: Open DNS Management in BigRock
+1. Log in to your [BigRock Control Panel](https://www.bigrock.in).
+2. Click **Manage Orders** -> **List/Search Orders**.
+3. Click on your domain name (e.g. `sagarlad.com`).
+4. Scroll down to the **DNS Management** section and click **Manage DNS**.
+
+---
+
+### Step 2: Add DNS Records in BigRock
+
+You will add **3 records** inside BigRock DNS Manager:
+
+#### Record 1: Main Domain (`sagarlad.com`)
+- Click **Add A Record**.
+- **Host Name**: `@` *(or leave blank if BigRock leaves it empty)*
+- **IP Address / Points to**: `76.76.21.21`
+- Click **Add Record**.
+
+#### Record 2: `www` Subdomain (`www.sagarlad.com`)
+- Click **Add CNAME Record**.
+- **Host Name**: `www`
+- **Value / Points to**: `cname.vercel-dns.com`
+- Click **Add Record**.
+
+#### Record 3: Admin Subdomain (`admin.sagarlad.com`)
+- Click **Add CNAME Record**.
+- **Host Name**: `admin`
+- **Value / Points to**: `cname.vercel-dns.com`
+- Click **Add Record**.
+
+---
+
+### Step 3: Connect Domains on Vercel
+
+1. In your **Public Site Vercel Project** (`apps/site`):
+   - Go to **Settings -> Domains**.
+   - Type `sagarlad.com` and click **Add**.
+2. In your **Admin Vercel Project** (`apps/admin`):
+   - Go to **Settings -> Domains**.
+   - Type `admin.sagarlad.com` and click **Add**.
+
+---
+
+### What to Expect Next:
+- BigRock DNS updates usually take **10 to 30 minutes**.
+- Vercel will automatically generate **free SSL certificates** (`https://`) for both `sagarlad.com` and `admin.sagarlad.com`.
+- Your public website will be live at `https://sagarlad.com` and your admin panel at `https://admin.sagarlad.com`!
