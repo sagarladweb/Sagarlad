@@ -5,12 +5,9 @@ import { WifiOff, RefreshCw, Loader2, CheckCircle2, CloudUpload } from "lucide-r
 import { getQueue, syncQueue, QUEUE_EVENT } from "@/lib/offline-queue";
 
 export function OfflineSync() {
-  const [online, setOnline] = useState(
-    typeof navigator !== "undefined" ? navigator.onLine : true
-  );
-  const [pending, setPending] = useState(() =>
-    typeof window !== "undefined" ? getQueue().length : 0
-  );
+  const [mounted, setMounted] = useState(false);
+  const [online, setOnline] = useState(true);
+  const [pending, setPending] = useState(0);
   const [syncing, setSyncing] = useState(false);
   const [justSynced, setJustSynced] = useState(false);
 
@@ -32,6 +29,12 @@ export function OfflineSync() {
   }, [syncing, refresh]);
 
   useEffect(() => {
+    setMounted(true);
+    if (typeof navigator !== "undefined") {
+      setOnline(navigator.onLine);
+    }
+    refresh();
+
     const onOnline = () => {
       setOnline(true);
       void sync();
@@ -48,7 +51,7 @@ export function OfflineSync() {
     };
   }, [sync, refresh]);
 
-  if (online && pending === 0 && !justSynced) return null;
+  if (!mounted || (online && pending === 0 && !justSynced)) return null;
 
   return (
     <div className="fixed inset-x-0 bottom-20 z-50 px-4 md:bottom-5 md:px-6">
