@@ -1,0 +1,25 @@
+name: newsletter-drain
+
+# Vercel Cron requires the paid Pro plan, so on the free (Hobby) tier the
+# newsletter queue is drained on a schedule by GitHub Actions instead. It hits
+# the same CRON_SECRET-protected endpoint Vercel Cron would use.
+#
+# Set the CRON_SECRET repository secret to the same value used on Vercel.
+# "Daily Newsletter is not required for the demo to work — the queue also
+# drains every time you press "Send newsletter" in the admin."
+
+on:
+  schedule:
+    # 04:30 UTC every day (matches the old Vercel Cron schedule).
+    - cron: "30 4 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger newsletter queue drain
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://sagarlad.com/api/newsletter/process"

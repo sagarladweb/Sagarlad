@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ---------------------------------------------------------------------------
+// Auth & Admin
+// ---------------------------------------------------------------------------
+
+model User {
+  id                  String    @id @default(cuid())
+  name                String?
+  email               String    @unique
+  emailVerified       DateTime?
+  image               String?
+  passwordHash        String?
+  role                String    @default("ADMIN")
+  // Two-factor authentication (TOTP / Google Authenticator)
+  twoFactorEnabled    Boolean   @default(false)
+  twoFactorSecret     String?
+  twoFactorRecovery   String?
+  lastLoginAt         DateTime?
+  lastLoginIp         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+  posts               Post[]
+  sessions            Session[]
+  accounts            Account[]
+  comments            Comment[]
+  auditLogs           AuditLogEntry[]
+}
+
+model Account {
+  id                String   @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expires])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@id([identifier, token])
+  @@index([expires])
+}
+
+// Immutable audit trail for admin/security actions.
+model AuditLogEntry {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action    String // e.g. LOGIN_OK, LOGIN_FAIL, POST_CREATE, POST_DELETE, CONTACT
+  meta      Json?
+  ip        String?
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([action])
+}
+
+// ---------------------------------------------------------------------------
+// Blog content
+// ---------------------------------------------------------------------------
+
+model Post {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  excerpt     String?
+  content     String // sanitized TipTap HTML
+  coverImage  String?
+  featured    Boolean    @default(false)
+  published   Boolean    @default(true)
+  publishedAt DateTime   @default(now())
+  kicker      String?
+  showCover   Boolean    @default(true)
+  showAuthorBox Boolean  @default(true)
+  footerNote  String?
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  authorId    String?
+  author      User?      @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  categoryId  String?
+  category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  comments    Comment[]
+  views       Int        @default(0)
+
+  @@index([deletedAt, published, publishedAt])
+  @@index([categoryId])
+  @@index([featured])
+  @@index([createdAt])
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  posts     Post[]
+  videos    Video[]
+
+  @@index([slug])
+}
+
+model Comment {
+  id          String   @id @default(cuid())
+  content     String
+  name        String
+  email       String
+  approved    Boolean  @default(false)
+  // Device token lets the submitter see their own pending comment before approval.
+  clientToken String?
+  postId      String
+  post        Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  @@index([postId, approved, createdAt])
+  @@index([approved])
+  @@index([clientToken])
+  @@index([createdAt])
+}
+
+model NewsletterSubscriber {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  name             String?
+  acceptedTerms    Boolean  @default(false)
+  unsubscribed     Boolean  @default(false)
+  unsubscribeToken String   @unique @default(cuid())
+  createdAt        DateTime @default(now())
+  deliveries       NewsletterDelivery[]
+
+  @@index([createdAt])
+  @@index([unsubscribed])
+}
+
+// One broadcast. Admin composes it; the queue drains it within the daily quota.
+model NewsletterCampaign {
+  id         String               @id @default(cuid())
+  subject    String
+  html       String
+  createdAt  DateTime             @default(now())
+  deliveries NewsletterDelivery[]
+
+  @@index([createdAt])
+}
+
+// Per-subscriber send record. `@@unique([campaignId, subscriberId])` is the
+// guarantee that nobody is emailed twice for the same campaign, no matter how
+// many cron runs, redeploys or manual triggers fire the queue.
+model NewsletterDelivery {
+  id           String   @id @default(cuid())
+  campaignId   String
+  campaign     NewsletterCampaign     @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  subscriberId String
+  subscriber   NewsletterSubscriber   @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+  status       String   @default("QUEUED") // QUEUED | SENDING | SENT | FAILED
+  sentAt       DateTime?
+  error        String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([campaignId, subscriberId])
+  @@index([status, createdAt])
+  @@index([campaignId, status])
+}
+
+model ContactRequest {
+  id            String   @id @default(cuid())
+  firstName     String
+  lastName      String?
+  email         String
+  phone         String?
+  organization  String
+  eventDate     String?
+  message       String?
+  type          String   @default("EVENT")
+  createdAt     DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([type])
+}
+
+// ---------------------------------------------------------------------------
+// Content libraries (books)
+// ---------------------------------------------------------------------------
+
+model Book {
+  id          String   @id @default(cuid())
+  type        String   @default("PUBLISHED") // PUBLISHED | READ | EBOOK
+  title       String
+  author      String? // READ: book author
+  tagline     String?
+  description String?
+  learning    String? // READ: the one lesson left by the book
+  note        String? // READ: short personal note
+  imageUrl    String?
+  buyUrl      String?
+  fileKey     String? // EBOOK: private storage path, never exposed to client
+  free        Boolean  @default(false) // EBOOK: free vs premium
+  featured    Boolean  @default(false)
+  published   Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  deletedAt   DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([deletedAt, published, type, featured, sortOrder])
+  @@index([type, published, sortOrder])
+}
+
+// Video testimonials shown in the site's video testimonials section.
+// Video articles shown across the site: embedded video + optional article
+// text + a layout picker controlling how the two scale together.
+model Video {
+  id        String    @id @default(cuid())
+  title     String
+  slug      String?   @unique
+  embedUrl  String
+  thumbnail String?
+  content   String? // sanitized HTML article body
+  layout    String    @default("video-first") // video-first | text-first | split
+  published Boolean   @default(true)
+  sortOrder Int       @default(0)
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  categoryId String?
+  category  Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  @@index([deletedAt, published, sortOrder])
+  @@index([categoryId])
+  @@index([createdAt])
+}
+
+// Social profiles linked across the site (footer, home section, JSON-LD).
+model SocialLink {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  label     String
+  handle    String?
+  href      String
+  icon      String
+  logoUrl   String?
+  color     String?
+  sortOrder Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([active, sortOrder])
+}
+
+// Short sayings shown on /quotes and offered as newsletter suggestions.
+model Quote {
+  id        String   @id @default(cuid())
+  text      String
+  tag       String
+  createdAt DateTime @default(now())
+
+  @@index([createdAt])
+}
+
+model RateLimitEntry {
+  key       String   @id
+  count     Int      @default(1)
+  resetAt   DateTime
+  updatedAt DateTime @updatedAt
+
+  @@index([resetAt])
+}

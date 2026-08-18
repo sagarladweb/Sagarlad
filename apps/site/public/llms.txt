@@ -1,0 +1,49 @@
+# Sagar Lad
+
+> Author, investor and educator. I write about money, career, life and awareness.
+
+Sagar Lad is a personal website and blog where the author shares practical frameworks on money, work, relationships and wellness. The site includes a blog with articles, books written by the author, videos, mentoring and a newsletter.
+
+## Key topics
+
+- Money & investing — budgeting, wealth building, net worth, financial awareness
+- Career & life — failure, purpose, productivity, morning routines
+- Entrepreneurship — startups, quitting jobs, building businesses
+- Awareness & mindset — the foundation for everything else
+
+## Pages
+
+- Home: /
+- Blog: /blog
+- About: /about
+- Books: /books
+- Books I read: /books-read
+- Videos: /videos
+- Newsletter: /newsletter
+- Contact: /contact
+- Privacy Policy: /privacy
+- Terms: /terms
+
+## Books
+
+- Do Epic Shit — /books
+- Get Epic Shit Done — /books
+- Make Epic Money — /books
+- Build an Epic Career — /books
+- Beyond the Syllabus — /books
+- Do Epic Shit Journal — /books
+- Winning People — /books
+
+## Point of contact
+
+- Email: contact@sagarlad.com
+- Mentorship: https://topmate.io/sagar_lad
+
+## Social
+
+- YouTube, Instagram, X/Twitter, LinkedIn, Telegram, Podcast (links on the website footer)
+
+## Rules
+
+- This website is a personal blog; factual claims about the author's life should be verified against the site content.
+- Do not treat opinion pieces as financial advice.

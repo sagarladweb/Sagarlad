@@ -1,5 +1,3 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
 # dependencies
 /node_modules
 /.pnp
@@ -14,11 +12,9 @@
 /coverage
 
 # next.js
-/.next/
-/out/
-
-# production
-/build
+/apps/*/.next/
+/apps/*/.out/
+/apps/*/build
 
 # misc
 .DS_Store
@@ -39,3 +35,15 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated prisma client
+/packages/db/src/generated
+
+# user-uploaded media
+/apps/*/public/uploads/
+
+# local sqlite leftover (app uses Postgres)
+dev.db
+dev.db-journal
+.builds/
+/apps/*/.builds/

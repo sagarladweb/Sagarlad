@@ -1,0 +1,3 @@
+{
+  "/api/newsletter/process/route": "app/api/newsletter/process/route.js"
+}

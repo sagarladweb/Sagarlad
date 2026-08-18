@@ -1,0 +1,852 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  Save,
+  Lock,
+  Clock,
+  Type,
+  Upload,
+  X,
+  ImageIcon,
+  Plus,
+  RefreshCw,
+} from "lucide-react";
+import { TipTapEditor } from "@/components/admin/TipTapEditor";
+import { Dropdown } from "@/components/ui/Dropdown";
+import { showToast } from "@/components/admin/Toast";
+import { slugify, stripHtml, SITE } from "@/lib/site";
+import { enqueue } from "@/lib/offline-queue";
+
+type Category = { id: string; name: string };
+type SaveState = "idle" | "loading" | "saved" | "error";
+
+export function PostForm({
+  categories,
+  initial,
+}: {
+  categories: Category[];
+  initial?: {
+    id: string;
+    title: string;
+    slug: string;
+    excerpt: string;
+    content: string;
+    coverImage: string;
+    categoryId: string | null;
+    featured: boolean;
+    published: boolean;
+  };
+}) {
+  const router = useRouter();
+  const [slugTouched, setSlugTouched] = useState(false);
+  // Identity of the post in the DB. `initial` may be absent (new post); once
+  // a draft is created (e.g. to preview it), `postId` is set and later saves
+  // become updates instead of creates.
+  const [postId, setPostId] = useState<string | null>(initial?.id ?? null);
+  const postIdRef = useRef(postId);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    title: initial?.title ?? "",
+    slug: initial?.slug ?? "",
+    excerpt: initial?.excerpt ?? "",
+    content: initial?.content ?? "",
+    coverImage: initial?.coverImage ?? "",
+    categoryId: initial?.categoryId ?? "",
+    featured: initial?.featured ?? false,
+    published: initial?.published ?? true,
+  });
+  const [message, setMessage] = useState("");
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [previewError, setPreviewError] = useState("");
+
+  const [uploadState, setUploadState] = useState<"idle" | "loading" | "error">(
+    "idle"
+  );
+  const [uploadMessage, setUploadMessage] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [newCategory, setNewCategory] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState(categories);
+  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
+  const [categoryError, setCategoryError] = useState("");
+
+  async function onCreateCategory() {
+    const name = newCategory.trim();
+    if (!name) return;
+    setCreatingCategory(true);
+    setCategoryError("");
+    try {
+      const res = await fetch("/api/admin/categories", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.category) {
+        setCategoryOptions((prev) => [...prev, data.category]);
+        setForm((f) => ({ ...f, categoryId: data.category.id }));
+        setNewCategory("");
+        setCategoryModalOpen(false);
+      } else {
+        setCategoryError(data.error ?? "Could not create category.");
+      }
+    } catch {
+      setCategoryError("Network error. Please try again.");
+    } finally {
+      setCreatingCategory(false);
+    }
+  }
+
+  async function onUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) await uploadFile(file);
+  }
+
+  async function uploadFile(file: File) {
+    setUploadState("loading");
+    setUploadMessage("");
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        setForm((f) => ({ ...f, coverImage: data.url }));
+        setUploadState("idle");
+      } else {
+        setUploadState("error");
+        setUploadMessage(data.error ?? "Upload failed.");
+      }
+    } catch {
+      setUploadState("error");
+      setUploadMessage("Upload failed. Please try again.");
+    }
+  }
+
+  async function onPasteCoverImage(dataUrl: string) {
+    setUploadState("loading");
+    setUploadMessage("");
+    try {
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dataUrl, folder: "covers" }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        setForm((f) => ({ ...f, coverImage: data.url }));
+        setUploadState("idle");
+      } else {
+        setUploadState("error");
+        setUploadMessage(data.error ?? "Upload failed.");
+      }
+    } catch {
+      setUploadState("error");
+      setUploadMessage("Upload failed. Please try again.");
+    }
+  }
+
+  // Shared paste target: pasting an image (or a copied image data URL) anywhere
+  // on the cover box uploads it, exactly like the file picker.
+  function onCoverPaste(e: React.ClipboardEvent) {
+    e.preventDefault();
+    if (uploadState === "loading") return;
+    const items = e.clipboardData?.items;
+    const img =
+      items &&
+      Array.from(items).find((i) => i.type.startsWith("image/"));
+    const file = img?.getAsFile();
+    if (file) {
+      void uploadFile(file);
+      return;
+    }
+    const text = e.clipboardData?.getData("text/plain");
+    if (text && text.startsWith("data:image/")) {
+      void onPasteCoverImage(text);
+    }
+  }
+
+  function validate(): string | null {
+    if (!form.title.trim()) return "Please add a title.";
+    if (!form.slug.trim()) return "Please add a web address.";
+    if (form.content.trim().length < 10) return "Your post is too short. Add a few lines.";
+    return null;
+  }
+
+  async function save(isRealtime = false) {
+    const error = validate();
+    if (error) {
+      setMessage(error);
+      if (!isRealtime) setSaveState("error");
+      return false;
+    }
+
+    setMessage("");
+    if (!isRealtime) setSaveState("loading");
+
+    const url = postId
+      ? `/api/admin/posts?id=${postId}`
+      : "/api/admin/posts";
+    const method = postId ? "PUT" : "POST";
+
+    // Offline: keep the change in the local sync queue instead of failing.
+    // The OfflineSync banner replays it when the connection returns, and the
+    // API revalidates the public site, so the update lands there too.
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      enqueue(url, method, form, postId ? undefined : "new-post-draft");
+      setMessage("Saved on this device — will sync when you're back online.");
+      if (!isRealtime) {
+        setSaveState("saved");
+        showToast("Saved offline — syncs automatically when online", undefined, "success");
+      }
+      return true;
+    }
+
+    try {
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => ({}));
+        if (data.post?.id && !postId) setPostId(data.post.id);
+        clearDraft?.();
+        const msg = postId ? "Post updated successfully." : "Post created successfully.";
+        setMessage(msg);
+        if (!isRealtime) {
+          setSaveState("saved");
+          showToast(msg, undefined, "success");
+        }
+        router.refresh();
+        if (!isRealtime && !initial) {
+          setTimeout(() => {
+            setSaveState("idle");
+            router.push("/admin/posts");
+          }, 1200);
+        }
+        return true;
+      } else {
+        const data = await res.json().catch(() => ({}));
+        const errMsg = data.error ?? "Something went wrong.";
+        setMessage(errMsg);
+        if (!isRealtime) {
+          setSaveState("error");
+          showToast("Failed to save post", errMsg, "error");
+        }
+        return false;
+      }
+    } catch {
+      const errMsg = "Network error. Please try again.";
+      setMessage(errMsg);
+      if (!isRealtime) {
+        setSaveState("error");
+        showToast("Network error", errMsg, "error");
+      }
+      return false;
+    }
+  }
+
+  const saveRef = useRef(save);
+  useEffect(() => {
+    saveRef.current = save;
+    postIdRef.current = postId;
+  });
+
+  // Preview loads the real post page (see /preview/[slug]). New posts must
+  // exist in the DB first, so on first preview we create them as a draft.
+  async function onPreview() {
+    setPreviewError("");
+    if (!form.title.trim()) {
+      setPreviewError("Please add a title before previewing.");
+      return;
+    }
+    if (!form.slug.trim()) {
+      setPreviewError("Please add a web address before previewing.");
+      return;
+    }
+    if (form.content.trim().length < 10) {
+      setPreviewError("Your post is too short. Add a few lines to preview.");
+      return;
+    }
+    if (!postId) {
+      try {
+        const res = await fetch("/api/admin/posts", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, published: false }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || !data.post?.id) {
+          setPreviewError(data.error ?? "Could not save draft. Please try again.");
+          return;
+        }
+        setPostId(data.post.id);
+        router.refresh();
+        setPreviewUrl(`/preview/${data.post.slug}`);
+      } catch {
+        setPreviewError("Network error. Please try again.");
+      }
+      return;
+    }
+    // Existing post: flush latest content, then load the real page.
+    if (await saveRef.current(true)) {
+      setPreviewUrl(`/preview/${form.slug || "your-post"}`);
+    } else {
+      setPreviewError("Could not save the post before previewing.");
+    }
+  }
+
+  // Real-time autosave (debounced) so work is never lost.
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autosave = useCallback(() => {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      if (!postIdRef.current) return; // only autosave existing posts to avoid accidental creates
+      saveRef.current(true);
+    }, 2500);
+  }, []);
+
+  // ------------------------------------------------------------------
+  // Offline draft for the new-post page. Every keystroke is mirrored to
+  // localStorage on a short debounce; when the tab is closed without an
+  // explicit save we flush it to the server as a draft (best-effort), and
+  // if we're offline the draft stays local and syncs the next time the
+  // browser finds a connection. Existing posts already autosave above.
+  // ------------------------------------------------------------------
+  const DRAFT_KEY = "sl:admin:new-post-draft";
+  const isNew = !initial;
+  const formRef = useRef(form);
+  useEffect(() => {
+    formRef.current = form;
+  }, [form]);
+  const offlineDraftRef = useRef(false);
+  const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (!isNew) return;
+    const f = formRef.current;
+    if (!f.title.trim() && !f.content.trim() && !f.excerpt.trim()) return;
+    offlineDraftRef.current = true;
+    if (draftTimer.current) clearTimeout(draftTimer.current);
+    draftTimer.current = setTimeout(() => {
+      try {
+        localStorage.setItem(
+          DRAFT_KEY,
+          JSON.stringify({ form: formRef.current, postId: postIdRef.current, savedAt: Date.now() })
+        );
+      } catch {}
+    }, 400);
+  }, [form, isNew]);
+
+  function clearDraft() {
+    offlineDraftRef.current = false;
+    if (draftTimer.current) clearTimeout(draftTimer.current);
+    try {
+      localStorage.removeItem(DRAFT_KEY);
+    } catch {}
+  }
+
+  // Server rejects below: title >= 3 chars, slug >= 3, content >= 10.
+  const syncDraft = useCallback(async () => {
+    if (!offlineDraftRef.current || !navigator.onLine) return;
+    let draft: { form: typeof form; postId: string | null } | null = null;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) draft = JSON.parse(raw);
+    } catch {}
+    if (!draft) return;
+    const title = draft.form.title.trim();
+    const slug = draft.form.slug.trim();
+    if (title.length < 3 || slug.length < 3 || draft.form.content.trim().length < 10) return;
+    const res = await fetch(draft.postId ? `/api/admin/posts?id=${draft.postId}` : "/api/admin/posts", {
+      method: draft.postId ? "PUT" : "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...draft.form, published: false }),
+      keepalive: true,
+    });
+    if (res.ok) clearDraft();
+  }, []);
+
+  // Restore a saved draft on load, then sync it if we're back online.
+  useEffect(() => {
+    if (!isNew) return;
+    let draft: { form: typeof form; postId: string | null } | null = null;
+    try {
+      const raw = localStorage.getItem(DRAFT_KEY);
+      if (raw) draft = JSON.parse(raw);
+    } catch {}
+    if (!draft || typeof draft.form !== "object") return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time draft restore on mount, guarded by the localStorage read above
+    setForm((f) => ({ ...f, ...draft!.form }));
+    if (draft.postId) setPostId(draft.postId);
+    offlineDraftRef.current = !!draft.postId; // postId => already on the server
+    void syncDraft();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Coming back online -> push any leftover local draft.
+  useEffect(() => {
+    if (!isNew) return;
+    const handler = () => {
+      if (navigator.onLine) void syncDraft();
+    };
+    window.addEventListener("online", handler);
+    return () => window.removeEventListener("online", handler);
+  }, [isNew, syncDraft]);
+
+  // Leaving the tab -> flush the local draft to the server as a draft.
+  useEffect(() => {
+    if (!isNew) return;
+    const handler = () => {
+      if (!offlineDraftRef.current || !navigator.onLine) return;
+      const f = formRef.current;
+      const title = f.title.trim();
+      const slug = f.slug.trim();
+      if (title.length < 3 || slug.length < 3 || f.content.trim().length < 10) return;
+      try {
+        fetch(postIdRef.current ? `/api/admin/posts?id=${postIdRef.current}` : "/api/admin/posts", {
+          method: postIdRef.current ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...f, published: false }),
+          keepalive: true,
+        }).then((r) => {
+          if (r.ok) clearDraft();
+        });
+      } catch {}
+    };
+    window.addEventListener("pagehide", handler);
+    return () => window.removeEventListener("pagehide", handler);
+  }, [isNew]);
+
+  // Cmd/Ctrl+S saves
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        saveRef.current(false);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
+
+  const words = stripHtml(form.content).split(/\s+/).filter(Boolean).length;
+  const readTime = Math.max(1, Math.round(words / 200));
+
+  const input =
+    "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
+  const label = "block text-sm font-medium mb-1.5";
+
+  const publishFooter = (
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center gap-4">
+        <button
+          type="button"
+          onClick={() => setForm((f) => ({ ...f, featured: !f.featured }))}
+          aria-pressed={form.featured}
+          className="flex items-center gap-2 text-sm font-medium"
+        >
+          Featured
+          <span
+            className={`inline-flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
+              form.featured ? "bg-accent" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                form.featured ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setForm((f) => ({ ...f, published: !f.published }))}
+          aria-pressed={form.published}
+          className="flex items-center gap-2 text-sm font-medium"
+        >
+          Published
+          <span
+            className={`inline-flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
+              form.published ? "bg-green-600" : "bg-muted"
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+                form.published ? "translate-x-4" : "translate-x-0"
+              }`}
+            />
+          </span>
+        </button>
+      </div>
+
+      <div className="ml-auto flex items-center gap-3">
+        {saveState === "loading" && (
+          <p className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+          </p>
+        )}
+        {saveState === "saved" && (
+          <p className="hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium">
+            <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
+          </p>
+        )}
+        {saveState === "error" && (
+          <p className="flex items-center gap-1.5 text-xs text-red-600">
+            <AlertCircle className="w-3.5 h-3.5" /> {message}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={saveState === "loading"}
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+        >
+          {saveState === "loading" ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          {initial ? "Save changes" : "Publish post"}
+        </button>
+      </div>
+    </div>
+  );
+
+  return (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        save(false);
+      }}
+      className="space-y-6"
+      noValidate
+    >
+      {/* ---- Write area ---- */}
+      <div className="space-y-5">
+        <div>
+          <label htmlFor="title" className={label}>Title *</label>
+          <input
+            id="title"
+            value={form.title}
+            onChange={(e) => {
+              const t = e.target.value;
+              setForm((f) => ({
+                ...f,
+                title: t,
+                slug: initial && slugTouched ? f.slug : slugify(t),
+              }));
+              autosave();
+            }}
+            placeholder="Give your post a title"
+            className={`${input} text-lg font-semibold`}
+            required
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <label htmlFor="slug" className="text-sm font-medium">Web address</label>
+          <span className="text-sm text-muted-foreground">
+            sagarlad.com/blog/{form.slug || "your-post"}
+          </span>
+          <button
+            type="button"
+            onClick={() => {
+              setSlugTouched((prev) => !prev);
+            }}
+            aria-pressed={slugTouched}
+            title={
+              slugTouched
+                ? "The web address is locked — click to make it match your title automatically"
+                : "The web address matches your title — click to change it yourself"
+            }
+            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+              slugTouched
+                ? "border-accent text-accent"
+                : "border-border text-muted-foreground hover:bg-muted"
+            }`}
+          >
+            <Lock className="w-3 h-3" />
+            {slugTouched ? "Locked" : "Automatic"}
+          </button>
+        </div>
+
+        <div>
+          <span className={label}>Post *</span>
+          <TipTapEditor
+            initialContent={form.content}
+            onChange={(html) => {
+              setForm((f) => ({ ...f, content: html }));
+              autosave();
+            }}
+            preview={{
+              url: previewUrl,
+              liveUrl: `${SITE.url}/blog/${form.slug || "your-post"}`,
+              onPreview,
+              error: previewError,
+            }}
+            footer={publishFooter}
+          />
+        </div>
+      </div>
+
+      {/* ---- Details grid ---- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+            Details
+          </h3>
+          <div>
+            <span id="categoryId-label" className={label}>Category</span>
+            <Dropdown
+              id="categoryId"
+              label="Category"
+              value={form.categoryId}
+              onChange={(value) => setForm({ ...form, categoryId: value })}
+              placeholder="— Uncategorized —"
+              options={[
+                { value: "", label: "— Uncategorized —" },
+                ...categoryOptions.map((c) => ({ value: c.id, label: c.name })),
+              ]}
+            />
+            <div className="mt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setNewCategory("");
+                  setCategoryError("");
+                  setCategoryModalOpen(true);
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
+              >
+                <Plus className="w-3.5 h-3.5" /> New category
+              </button>
+            </div>
+          </div>
+          <div>
+            <span className={label}>Cover image</span>
+            <div
+              role="button"
+              tabIndex={0}
+              aria-label="Upload or paste a cover image"
+              onPaste={onCoverPaste}
+              onClick={() => fileInputRef.current?.click()}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  fileInputRef.current?.click();
+                }
+              }}
+              className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                form.coverImage ? "border-border" : "border-border hover:border-brand-light/60"
+              } ${
+                uploadState === "loading"
+                  ? "pointer-events-none opacity-70"
+                  : "cursor-pointer"
+              }`}
+            >
+              {form.coverImage ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={form.coverImage}
+                    alt="Cover preview"
+                    className="w-full aspect-video object-cover"
+                  />
+                  <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/40" />
+                  <span className="pointer-events-none absolute inset-0 hidden items-center justify-center gap-2 text-sm font-semibold text-white group-hover:flex">
+                    <RefreshCw className="w-4 h-4" /> Click to replace
+                  </span>
+                </>
+              ) : (
+                <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-muted/40 px-4 text-center">
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand/10 text-brand">
+                    {uploadState === "loading" ? (
+                      <Loader2 className="h-5 w-5 animate-spin" />
+                    ) : (
+                      <ImageIcon className="h-5 w-5" />
+                    )}
+                  </div>
+                  <p className="text-sm font-medium">
+                    {uploadState === "loading"
+                      ? "Uploading…"
+                      : "Click to upload, or paste an image"}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    JPEG · PNG · WebP · GIF · AVIF — max 8MB, saved as WebP
+                  </p>
+                </div>
+              )}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Copy an image, then paste it here (⌘V / Ctrl+V)
+              </p>
+              <div className="flex items-center gap-2">
+                {form.coverImage && (
+                  <button
+                    type="button"
+                    onClick={() => setForm((f) => ({ ...f, coverImage: "" }))}
+                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" /> Remove
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadState === "loading"}
+                  className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors disabled:opacity-60"
+                >
+                  {uploadState === "loading" ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : (
+                    <Upload className="w-3.5 h-3.5" />
+                  )}
+                  {form.coverImage ? "Replace" : "Upload"}
+                </button>
+              </div>
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+              className="hidden"
+              onChange={onUploadFile}
+            />
+            {uploadState === "error" && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {uploadMessage}
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="excerpt" className={label}>
+              Short summary
+              <span className="ml-1 text-xs text-muted-foreground">
+                ({form.excerpt.length}/400)
+              </span>
+            </label>
+            <textarea
+              id="excerpt"
+              value={form.excerpt}
+              onChange={(e) => {
+                setForm({ ...form, excerpt: e.target.value.slice(0, 400) });
+                autosave();
+              }}
+              rows={4}
+              placeholder="A line or two that shows up on the post card."
+              className={`${input} resize-y`}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Live stats
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl bg-muted/60 p-3">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Type className="w-3.5 h-3.5" /> Words
+                </p>
+                <p className="mt-1 font-display text-xl font-bold tabular-nums">
+                  {words.toLocaleString()}
+                </p>
+              </div>
+              <div className="rounded-xl bg-muted/60 p-3">
+                <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Clock className="w-3.5 h-3.5" /> Read time
+                </p>
+                <p className="mt-1 font-display text-xl font-bold tabular-nums">
+                  {readTime} min
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {categoryModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="new-category-title"
+        >
+          <div
+            className="absolute inset-0 bg-black/50"
+            onClick={() => setCategoryModalOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
+            <div className="flex items-center justify-between">
+              <h3 id="new-category-title" className="font-display text-base font-bold">
+                New category
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCategoryModalOpen(false)}
+                aria-label="Close"
+                className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              value={newCategory}
+              onChange={(e) => setNewCategory(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  onCreateCategory();
+                }
+                if (e.key === "Escape") setCategoryModalOpen(false);
+              }}
+              placeholder="Category name…"
+              aria-label="New category name"
+              className="mt-4 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
+            />
+            {categoryError && (
+              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {categoryError}
+              </p>
+            )}
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setCategoryModalOpen(false)}
+                className="rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onCreateCategory}
+                disabled={creatingCategory || !newCategory.trim()}
+                className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity"
+              >
+                {creatingCategory ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Plus className="w-3.5 h-3.5" />
+                )}
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </form>
+  );
+}

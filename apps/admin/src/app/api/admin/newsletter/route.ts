@@ -1,0 +1,97 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { prisma } from "@/lib/db";
+import { requireAdmin } from "@/lib/requireAdmin";
+import { enqueueCampaign, processNewsletterQueue } from "@/lib/newsletter";
+
+export const runtime = "nodejs";
+
+const campaignSchema = z.object({
+  subject: z.string().trim().min(3, "Subject is too short").max(200),
+  html: z.string().trim().min(10, "Email body is too short").max(100_000),
+});
+
+// Campaigns with per-status delivery counts + the current active subscriber count.
+export async function GET() {
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const [campaigns, byCampaign, subscriberCount, subscribers] =
+    await Promise.all([
+      prisma.newsletterCampaign.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 50,
+      }),
+      prisma.newsletterDelivery.groupBy({
+        by: ["campaignId", "status"],
+        _count: { _all: true },
+      }),
+      prisma.newsletterSubscriber.count({ where: { unsubscribed: false } }),
+      prisma.newsletterSubscriber.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 100,
+        select: {
+          id: true,
+          email: true,
+          name: true,
+          acceptedTerms: true,
+          unsubscribed: true,
+          createdAt: true,
+        },
+      }),
+    ]);
+
+  const counts = new Map<string, Record<string, number>>();
+  for (const row of byCampaign) {
+    const m = counts.get(row.campaignId) ?? {};
+    m[row.status] = row._count._all;
+    counts.set(row.campaignId, m);
+  }
+
+  return NextResponse.json({
+    subscriberCount,
+    subscribers,
+    campaigns: campaigns.map((c) => {
+      const m = counts.get(c.id) ?? {};
+      const queued = m.QUEUED ?? 0;
+      const sending = m.SENDING ?? 0;
+      const sent = m.SENT ?? 0;
+      const failed = m.FAILED ?? 0;
+      return {
+        id: c.id,
+        subject: c.subject,
+        createdAt: c.createdAt,
+        total: queued + sending + sent + failed,
+        queued,
+        sent,
+        failed,
+      };
+    }),
+  });
+}
+
+export async function POST(request: Request) {
+  const session = await requireAdmin();
+  if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const body = await request.json().catch(() => null);
+  const parsed = campaignSchema.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: parsed.error.issues[0]?.message ?? "Invalid input" },
+      { status: 400 }
+    );
+  }
+
+  const { campaign, queued } = await enqueueCampaign(
+    parsed.data.subject,
+    parsed.data.html
+  );
+  // Drain whatever fits in today's quota right away; the cron keeps draining.
+  const result = await processNewsletterQueue();
+
+  return NextResponse.json(
+    { campaign, queued, sentNow: result.sent, remainingToday: result.remaining },
+    { status: 201 }
+  );
+}

@@ -1,0 +1,160 @@
+# Complete Step-by-Step 2-Phase Deployment & Handover Guide
+
+Welcome! This simple, step-by-step guide will walk you through setting up, deploying, and managing the **Sagar Lad Website & Admin Platform**.
+
+Even if you have zero coding experience, you can follow these exact steps to launch the platform in 2 phases using 100% free-tier services (**Vercel, Supabase, Brevo, Google Analytics**).
+
+---
+
+## 1. How the Platform Is Split (Two Apps, One Database)
+
+The platform consists of **two separate applications living in ONE code repository**. Each app is deployed independently on Vercel, ensuring maximum performance:
+
+| App | Folder in Repository | Public URL / Domain | Who Uses It |
+| :--- | :--- | :--- | :--- |
+| **Public Website** | `apps/site` | `https://sagarlad.com` | Everyone (Home, About, Books, Blogs, Videos, Speaking, Contact) |
+| **Admin Panel** | `apps/admin` | `https://admin.sagarlad.com` | Sagar / Admins (2FA Login, Blog Writer, Books, Videos, Newsletter, Socials) |
+
+- Both apps talk to the **same Supabase database**. Any content created in the Admin Panel appears on the public website instantly.
+- The public site stays lightning-fast because zero admin or editor code is downloaded by visitors.
+
+---
+
+## 2. The 2-Phase Deployment Strategy
+
+The platform is designed for a seamless **2-Phase rollout**, controlled by one setting (`ADMIN_PHASE`) inside the Vercel project for `apps/admin`:
+
+### Phase 1: Blog Authoring & Public Site Release (Initial Launch)
+- **Public Website (`sagarlad.com`)**: Live in full with all pages (Home, About Me, Books, Blog articles, Videos, Public Speaking, and Contact).
+- **Admin Panel (`admin.sagarlad.com`)**: Live with secure 2FA login, giving direct access to create, edit, draft, and live-preview blog posts. Non-blog sections are cleanly hidden.
+- **Environment Setting**: `ADMIN_PHASE="1"` in the `apps/admin` Vercel project.
+
+### Phase 2: Full Admin Panel Unlock (Complete Control)
+- **What Unlocks**: The entire admin platform unlocks: Dashboard analytics, Books manager, Video manager, Social links 3x4 manager, Newsletter composer & queue, Comment moderation, Security settings, and Sandbox.
+- **How to Switch**: Simply change `ADMIN_PHASE` from `"1"` to `"2"` in Vercel environment variables and click **Redeploy** on the Admin project.
+- **Zero Downtime & Zero Data Loss**: All existing blogs, images, comments, and database records remain 100% untouched.
+
+---
+
+## 3. Local Development Servers
+
+To run both applications locally on your machine at the same time:
+
+- **Public Website**: Runs permanently on **`http://localhost:3000`**
+  ```bash
+  npm run dev:site
+  ```
+- **Admin Panel**: Runs permanently on **`http://localhost:3001`**
+  ```bash
+  npm run dev:admin
+  ```
+
+---
+
+## 4. Step-by-Step Deployment Instructions
+
+### Step 1: Create Your Free Accounts
+1. **GitHub** ([github.com](https://github.com)): To host your private code repository.
+2. **Vercel** ([vercel.com](https://vercel.com)): To host both `apps/site` and `apps/admin` for free.
+3. **Supabase** ([supabase.com](https://supabase.com)): Free PostgreSQL database & image storage.
+4. **Brevo** ([brevo.com](https://brevo.com)): Free email service for newsletters and contact forms (300 emails/day).
+5. **Google Analytics** ([analytics.google.com](https://analytics.google.com)): To track visitor analytics.
+
+---
+
+### Step 2: Set Up Supabase Database & Storage
+1. Log in to [Supabase](https://supabase.com) and click **New Project** (e.g. `sagarlad-prod`).
+2. Under **Project Settings -> Database**:
+   - Copy **Transaction Pooler URL (port 6543)**. This is your `DATABASE_URL`.
+   - Copy **Direct Connection URL (port 5432)**. This is your `DIRECT_URL`.
+3. Under **Project Settings -> API**:
+   - Copy **Project URL**. This is your `SUPABASE_URL`.
+   - Copy `service_role` secret (reveal key). This is your `SUPABASE_SERVICE_ROLE_KEY`.
+4. Initialize database schema & seed initial content in terminal:
+   ```bash
+   npm install
+   npm run db:migrate
+   npm run db:seed
+   ```
+
+---
+
+### Step 3: Set Up Brevo Email Service
+1. Log in to [Brevo](https://brevo.com).
+2. Go to **SMTP & API** -> **API Keys** -> click **Generate a new API key** (starts with `xkeysib-...`). This is your `BREVO_API_KEY`.
+3. Verify your domain `sagarlad.com` under **Senders & IP -> Domains** for inbox delivery.
+
+---
+
+### Step 4: Set Up Google Analytics
+1. Log in to [Google Analytics](https://analytics.google.com).
+2. Create a Property for `sagarlad.com` and copy your **Measurement ID** (`G-XXXXXXXXXX`). This is your `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+
+---
+
+### Step 5: Push Code to GitHub
+1. Create a private repository on GitHub named `sagarlad-platform`.
+2. Push your code:
+   ```bash
+   git remote add origin https://github.com/YOUR_USERNAME/sagarlad-platform.git
+   git add .
+   git commit -m "Initial website and admin monorepo"
+   git push -u origin main
+   ```
+
+---
+
+### Step 6: Deploy Both Projects on Vercel
+
+#### 6A. Deploy Public Website (`apps/site`)
+1. In Vercel, click **Add New -> Project** and select your `sagarlad-platform` repository.
+2. Set **Root Directory** to: **`apps/site`**.
+3. Add environment variables for `apps/site` (see table below).
+4. Click **Deploy**. (Connect custom domain `sagarlad.com` in Project Settings -> Domains).
+
+#### 6B. Deploy Admin Panel (`apps/admin`)
+1. In Vercel, click **Add New -> Project** again and select the **same repository**.
+2. Set **Root Directory** to: **`apps/admin`**.
+3. Add environment variables for `apps/admin` (see table below). Set `ADMIN_PHASE="1"`.
+4. Click **Deploy**. (Connect custom domain `admin.sagarlad.com` in Project Settings -> Domains).
+
+---
+
+### Step 7: Environment Variables Checklist
+
+#### Environment Variables for BOTH Projects (Shared Database & Services)
+- `DATABASE_URL`: Supabase Transaction Pooler URL (port 6543)
+- `DIRECT_URL`: Supabase Direct Connection URL (port 5432)
+- `AUTH_SECRET`: Secret random string (same in both apps, e.g. `your-super-secret-key-123456`)
+- `SUPABASE_URL`: Supabase Project URL
+- `SUPABASE_SERVICE_ROLE_KEY`: Supabase `service_role` secret
+- `BREVO_API_KEY`: Brevo Key (`xkeysib-...`)
+- `BREVO_FROM_EMAIL`: `hello@sagarlad.com`
+- `BREVO_FROM_NAME`: `Sagar Lad`
+- `DATABASE_POOL_MAX`: `5`
+
+#### Environment Variables for PUBLIC WEBSITE (`apps/site`)
+- `AUTH_URL`: `https://sagarlad.com`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID`: `G-XXXXXXXXXX`
+- `DAILY_EMAIL_LIMIT`: `300`
+- `NEWSLETTER_BATCH_SIZE`: `20`
+
+#### Environment Variables for ADMIN PANEL (`apps/admin`)
+- `AUTH_URL`: `https://admin.sagarlad.com`
+- `ADMIN_EMAIL`: `sagarlad692@gmail.com`
+- `ADMIN_PASSWORD`: Your chosen admin password
+- `ADMIN_PHASE`: `"1"` *(for Phase 1)* or `"2"` *(for Phase 2)*
+
+---
+
+## 5. How to Transition from Phase 1 to Phase 2
+
+When you are ready to unlock Phase 2 (Full Admin Panel):
+
+1. Log in to [Vercel](https://vercel.com).
+2. Open the **`apps/admin` project** (Admin Panel).
+3. Go to **Settings -> Environment Variables**.
+4. Edit `ADMIN_PHASE` and change its value from `"1"` to `"2"`.
+5. Go to **Deployments** -> click **Redeploy**.
+
+**Result**: The complete Admin Panel (Dashboard, Books, Videos, Social Links, Newsletter, Comments, Security, Sandbox) is instantly active! Zero data is changed or lost.

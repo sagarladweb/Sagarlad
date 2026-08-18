@@ -7,3 +7,9 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Design decisions
+
+Read `design.md` (repo root) before touching any UI: brand colours, radius
+scale, section rhythm, and conventions. Match existing patterns; don't invent
+new ones.

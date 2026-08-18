@@ -1,0 +1,205 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { X, Play } from "lucide-react";
+import { FaYoutube, FaInstagram } from "react-icons/fa6";
+import { youtubeId, youtubeEmbedUrl, youtubeWatchUrl, youtubeThumb } from "@/lib/youtube";
+import { instagramEmbedUrl, isInstagramUrl } from "@/lib/instagram";
+
+type Video = {
+  id: string;
+  title: string;
+  slug?: string | null;
+  embedUrl: string;
+  thumbnail: string | null;
+  content?: string | null;
+};
+
+export function BlogVideoGrid({
+  videos,
+  masonry = false,
+}: {
+  videos: Video[];
+  masonry?: boolean;
+}) {
+  const [playing, setPlaying] = useState<Video | null>(null);
+
+  const close = () => setPlaying(null);
+
+  useEffect(() => {
+    if (!playing) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [playing]);
+
+  if (videos.length === 0) {
+    return (
+      <div className="mt-10 grid min-h-[30vh] place-items-center text-center text-muted-foreground">
+        <div>
+          <FaYoutube className="mx-auto h-10 w-10 opacity-40" />
+          <p className="mt-4">No videos available right now.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Pinterest-style masonry when both platforms share a page. Pure CSS columns
+  // — no JS, no library — each card keeps its native aspect ratio (9:16 reels,
+  // 16:9 widescreen) and the columns pack them tightly.
+  const mixed = videos.some((v) => isInstagramUrl(v.embedUrl));
+  const useMasonry = masonry || mixed;
+
+  const cardWrapper = (masonryActive: boolean, children: React.ReactNode) =>
+    masonryActive ? (
+      <div className="mt-8 columns-2 lg:columns-3 gap-3 sm:gap-5 [&>*]:mb-3 sm:[&>*]:mb-5 [&>*]:break-inside-avoid">
+        {children}
+      </div>
+    ) : (
+      <div className="mt-8 grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">{children}</div>
+    );
+
+  return (
+    <>
+      {cardWrapper(
+        useMasonry,
+        videos.map((v) => {
+          const thumb = v.thumbnail ?? youtubeThumb(v.embedUrl);
+          const embedId = youtubeId(v.embedUrl);
+          const ig = isInstagramUrl(v.embedUrl);
+
+          const badge = ig ? (
+            <span className="absolute top-2.5 right-2.5 grid h-7 w-8 place-items-center rounded-lg bg-[#E4405F] text-white shadow-md z-10">
+              <FaInstagram className="h-3.5 w-3.5" />
+            </span>
+          ) : embedId ? (
+            <span className="absolute top-2.5 right-2.5 grid h-7 w-9 place-items-center rounded-lg bg-[#FF0000] text-white shadow-md z-10">
+              <FaYoutube className="h-3.5 w-3.5" />
+            </span>
+          ) : null;
+
+          // Every card opens the overlay player — Instagram embeds and YouTube
+          // both play in-page, so users never leave the site or jump to an app.
+          const handleCardClick = () => {
+            setPlaying(v);
+          };
+
+          return (
+            <article
+              key={v.id}
+              onClick={handleCardClick}
+              className="group flex flex-col rounded-3xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer"
+            >
+              {/* Image Container with precise aspect ratio. Reels are capped so
+                  a 9:16 portrait never towers over the feed. */}
+              <div
+                className={`relative w-full overflow-hidden bg-black text-left ${
+                  ig
+                    ? "aspect-[9/16] max-h-[460px] sm:max-h-[540px]"
+                    : "aspect-[16/9]"
+                }`}
+              >
+                {thumb ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={thumb}
+                    alt={v.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-brand-light/40 via-brand-light/20 to-brand-light/10" />
+                )}
+                {/* Dark overlay & Play button */}
+                <span className="absolute inset-0 grid place-items-center bg-black/25 group-hover:bg-black/40 transition-colors">
+                  <span className="grid h-11 w-11 sm:h-12 sm:w-12 place-items-center rounded-full bg-black/70 text-white backdrop-blur-md transition-transform group-hover:scale-110 shadow-lg border border-white/20">
+                    <Play className="w-4 h-4 ml-0.5 fill-current" />
+                  </span>
+                </span>
+                {badge}
+              </div>
+
+              {/* Text content area — just the title */}
+              <div className="p-3 sm:p-4 flex flex-col flex-1">
+                <h3 className="font-display text-xs sm:text-sm font-bold leading-snug line-clamp-2 text-foreground group-hover:text-accent-strong transition-colors">
+                  {v.title}
+                </h3>
+              </div>
+            </article>
+          );
+        })
+      )}
+
+      {/* Video Modal Player — plays both Instagram and YouTube in-page. */}
+      {playing && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md overflow-y-auto"
+          role="dialog"
+          aria-modal="true"
+          aria-label={playing.title}
+          onClick={close}
+        >
+          <button
+            type="button"
+            onClick={close}
+            aria-label="Close video"
+            className="fixed top-4 right-4 z-[110] grid h-11 w-11 place-items-center rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
+
+          <div className="min-h-full grid place-items-center py-6 sm:py-10">
+            <div
+              className="w-full max-w-3xl px-4 sm:px-6"
+              onClick={(e) => e.stopPropagation()}
+            >
+            <div className="flex items-start gap-4">
+              <div className="min-w-0 flex-1">
+                <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+                  {isInstagramUrl(playing.embedUrl) ? "Instagram reel" : "YouTube"}
+                </p>
+                <h3 className="mt-1 text-white font-display text-base sm:text-xl font-bold leading-snug line-clamp-2">
+                  {playing.title}
+                </h3>
+              </div>
+            </div>
+            <div
+              className={`mt-4 overflow-hidden rounded-3xl bg-black shadow-2xl border border-white/10 ${
+                isInstagramUrl(playing.embedUrl)
+                  ? "aspect-[9/16] sm:aspect-[9/16] max-h-[75vh] sm:max-h-[70vh] mx-auto w-full max-w-[420px]"
+                  : "aspect-video"
+              }`}
+            >
+              <iframe
+                src={
+                  isInstagramUrl(playing.embedUrl)
+                    ? instagramEmbedUrl(playing.embedUrl) ?? ""
+                    : `${youtubeEmbedUrl(playing.embedUrl) ?? youtubeWatchUrl(playing.embedUrl)}?autoplay=1&rel=0`
+                }
+                title={playing.title}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
+            </div>
+
+            {playing.content && (
+              <div
+                className="mt-4 rounded-2xl bg-white p-5 text-sm text-neutral-800 leading-relaxed max-h-[40vh] overflow-y-auto prose prose-sm prose-neutral max-w-none [&_p]:my-3 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+                dangerouslySetInnerHTML={{ __html: playing.content }}
+              />
+            )}
+          </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}

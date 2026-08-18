@@ -1,0 +1,20 @@
+# Drains the newsletter queue every 30 minutes. Vercel Hobby only allows a
+# daily cron, so this free scheduler is what actually delivers the overflow
+# (300+/day) on schedule. Requires two repo secrets:
+#   NEWSLETTER_PROCESS_URL  -> https://<your-domain>/api/newsletter/process
+#   NEWSLETTER_CRON_SECRET  -> same value as the CRON_SECRET env var
+name: Newsletter queue drain
+on:
+  schedule:
+    - cron: "*/30 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  drain:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Drain newsletter queue
+        run: |
+          curl -fsS -X POST \
+            -H "Authorization: Bearer ${{ secrets.NEWSLETTER_CRON_SECRET }}" \
+            "${{ secrets.NEWSLETTER_PROCESS_URL }}" || true
