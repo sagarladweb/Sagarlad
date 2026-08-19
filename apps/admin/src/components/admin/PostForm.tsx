@@ -15,7 +15,6 @@ import {
   ImageIcon,
   Plus,
   RefreshCw,
-  Eye,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -316,36 +315,51 @@ export function PostForm({
   }, []);
 
   // ------------------------------------------------------------------
-  // Offline draft for the new-post page. Every keystroke is mirrored to
-  // localStorage on a short debounce; when the tab is closed without an
-  // explicit save we flush it to the server as a draft (best-effort), and
-  // if we're offline the draft stays local and syncs the next time the
-  // browser finds a connection. Existing posts already autosave above.
+  // Draft persistence. Every keystroke is mirrored to localStorage on a short
+  // debounce so a refresh or accidental tab close never loses work:
+  //   - new posts   -> "sl:admin:new-post-draft" (+ server sync when back online)
+  //   - existing    -> "sl:admin:post-draft:<id>", restored only after a
+  //                    same-session refresh so a stale draft from a previous
+  //                    visit never clobbers the server's current data.
+  // The editor is gated on `hydrated` so the restored content actually reaches
+  // the TipTapEditor (it only reads its content once, on mount).
   // ------------------------------------------------------------------
   const DRAFT_KEY = "sl:admin:new-post-draft";
   const isNew = !initial;
+  const EDIT_DRAFT_KEY = initial ? `sl:admin:post-draft:${initial.id}` : null;
   const formRef = useRef(form);
   useEffect(() => {
     formRef.current = form;
   }, [form]);
   const offlineDraftRef = useRef(false);
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (!isNew) return;
-    const f = formRef.current;
-    if (!f.title.trim() && !f.content.trim() && !f.excerpt.trim()) return;
-    offlineDraftRef.current = true;
     if (draftTimer.current) clearTimeout(draftTimer.current);
     draftTimer.current = setTimeout(() => {
+      if (isNew) {
+        const f = formRef.current;
+        if (!f.title.trim() && !f.content.trim() && !f.excerpt.trim()) return;
+        offlineDraftRef.current = true;
+        try {
+          localStorage.setItem(
+            DRAFT_KEY,
+            JSON.stringify({ form: formRef.current, postId: postIdRef.current, savedAt: Date.now() })
+          );
+        } catch {}
+        return;
+      }
+      if (!EDIT_DRAFT_KEY) return;
       try {
+        sessionStorage.setItem(`sl:edit-dirty:${initial!.id}`, "1");
         localStorage.setItem(
-          DRAFT_KEY,
-          JSON.stringify({ form: formRef.current, postId: postIdRef.current, savedAt: Date.now() })
+          EDIT_DRAFT_KEY,
+          JSON.stringify({ form: formRef.current, savedAt: Date.now() })
         );
       } catch {}
     }, 400);
-  }, [form, isNew]);
+  }, [form, isNew, EDIT_DRAFT_KEY, initial]);
 
   function clearDraft() {
     offlineDraftRef.current = false;
@@ -353,6 +367,12 @@ export function PostForm({
     try {
       localStorage.removeItem(DRAFT_KEY);
     } catch {}
+    if (EDIT_DRAFT_KEY && initial) {
+      try {
+        localStorage.removeItem(EDIT_DRAFT_KEY);
+        sessionStorage.removeItem(`sl:edit-dirty:${initial.id}`);
+      } catch {}
+    }
   }
 
   // Server rejects below: title >= 3 chars, slug >= 3, content >= 10.
@@ -378,18 +398,32 @@ export function PostForm({
 
   // Restore a saved draft on load, then sync it if we're back online.
   useEffect(() => {
-    if (!isNew) return;
-    let draft: { form: typeof form; postId: string | null } | null = null;
-    try {
-      const raw = localStorage.getItem(DRAFT_KEY);
-      if (raw) draft = JSON.parse(raw);
-    } catch {}
-    if (!draft || typeof draft.form !== "object") return;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time draft restore on mount, guarded by the localStorage read above
-    setForm((f) => ({ ...f, ...draft!.form }));
-    if (draft.postId) setPostId(draft.postId);
-    offlineDraftRef.current = !!draft.postId; // postId => already on the server
-    void syncDraft();
+    const restore = (key: string, withPostId: boolean) => {
+      let draft: { form: typeof form; postId: string | null } | null = null;
+      try {
+        const raw = localStorage.getItem(key);
+        if (raw) draft = JSON.parse(raw);
+      } catch {}
+      if (!draft || typeof draft.form !== "object") return null;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time draft restore on mount, guarded by the localStorage read above
+      setForm((f) => ({ ...f, ...draft!.form }));
+      if (withPostId && draft.postId) setPostId(draft.postId);
+      return draft;
+    };
+
+    if (isNew) {
+      const draft = restore(DRAFT_KEY, true);
+      offlineDraftRef.current = !!draft?.postId; // postId => already on the server
+      if (draft) void syncDraft();
+    } else if (EDIT_DRAFT_KEY && initial) {
+      let dirty = "0";
+      try {
+        dirty = sessionStorage.getItem(`sl:edit-dirty:${initial.id}`) ?? "0";
+        sessionStorage.removeItem(`sl:edit-dirty:${initial.id}`);
+      } catch {}
+      if (dirty === "1") restore(EDIT_DRAFT_KEY, false);
+    }
+    setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -403,29 +437,37 @@ export function PostForm({
     return () => window.removeEventListener("online", handler);
   }, [isNew, syncDraft]);
 
-  // Leaving the tab -> flush the local draft to the server as a draft.
+  // Leaving the tab -> flush the local draft to the server (new) or at least
+  // to localStorage (existing) so a refresh never loses work.
   useEffect(() => {
-    if (!isNew) return;
     const handler = () => {
-      if (!offlineDraftRef.current || !navigator.onLine) return;
       const f = formRef.current;
-      const title = f.title.trim();
-      const slug = f.slug.trim();
-      if (title.length < 3 || slug.length < 3 || f.content.trim().length < 10) return;
+      if (isNew) {
+        if (!offlineDraftRef.current || !navigator.onLine) return;
+        const title = f.title.trim();
+        const slug = f.slug.trim();
+        if (title.length < 3 || slug.length < 3 || f.content.trim().length < 10) return;
+        try {
+          fetch(postIdRef.current ? `/api/admin/posts?id=${postIdRef.current}` : "/api/admin/posts", {
+            method: postIdRef.current ? "PUT" : "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ...f, published: false }),
+            keepalive: true,
+          }).then((r) => {
+            if (r.ok) clearDraft();
+          });
+        } catch {}
+        return;
+      }
+      if (!EDIT_DRAFT_KEY || !initial) return;
       try {
-        fetch(postIdRef.current ? `/api/admin/posts?id=${postIdRef.current}` : "/api/admin/posts", {
-          method: postIdRef.current ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ...f, published: false }),
-          keepalive: true,
-        }).then((r) => {
-          if (r.ok) clearDraft();
-        });
+        sessionStorage.setItem(`sl:edit-dirty:${initial.id}`, "1");
+        localStorage.setItem(EDIT_DRAFT_KEY, JSON.stringify({ form: f, savedAt: Date.now() }));
       } catch {}
     };
     window.addEventListener("pagehide", handler);
     return () => window.removeEventListener("pagehide", handler);
-  }, [isNew]);
+  }, [isNew, EDIT_DRAFT_KEY, initial]);
 
   // Cmd/Ctrl+S saves
   useEffect(() => {
@@ -482,55 +524,6 @@ export function PostForm({
       className="space-y-6"
       noValidate
     >
-      {/* Sticky action bar */}
-      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-sm lg:sticky lg:top-4 lg:z-30">
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold leading-tight">
-            {form.title || "Untitled post"}
-          </p>
-          <p className="truncate text-xs text-muted-foreground">
-            sagarlad.com/blog/{form.slug || "your-post"}
-          </p>
-        </div>
-        <div className="ml-auto flex items-center gap-3">
-          {saveState === "loading" && (
-            <p className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
-            </p>
-          )}
-          {saveState === "saved" && (
-            <p className="hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium">
-              <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
-            </p>
-          )}
-          {saveState === "error" && (
-            <p className="flex items-center gap-1.5 text-xs text-red-600">
-              <AlertCircle className="w-3.5 h-3.5" /> {message}
-            </p>
-          )}
-          <button
-            type="button"
-            onClick={onPreview}
-            disabled={saveState === "loading"}
-            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted transition-colors disabled:opacity-60"
-          >
-            <Eye className="w-4 h-4" /> Preview
-          </button>
-          <button
-            type="submit"
-            disabled={saveState === "loading"}
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-2 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
-          >
-            {saveState === "loading" ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <Save className="w-4 h-4" />
-            )}
-            {initial ? "Save changes" : "Publish post"}
-          </button>
-        </div>
-      </div>
-
       <div className="flex flex-col items-start gap-6 lg:flex-row">
         {/* ---- Main canvas ---- */}
         <div className="min-w-0 flex-1 space-y-4">
@@ -580,19 +573,25 @@ export function PostForm({
 
           <div>
             <span className="sr-only">Post</span>
-            <TipTapEditor
-              initialContent={form.content}
-              onChange={(html) => {
-                setForm((f) => ({ ...f, content: html }));
-                autosave();
-              }}
-              preview={{
-                url: previewUrl,
-                liveUrl: `${SITE.url}/blog/${form.slug || "your-post"}`,
-                onPreview,
-                error: previewError,
-              }}
-            />
+            {hydrated ? (
+              <TipTapEditor
+                initialContent={form.content}
+                onChange={(html) => {
+                  setForm((f) => ({ ...f, content: html }));
+                  autosave();
+                }}
+                preview={{
+                  url: previewUrl,
+                  liveUrl: `${SITE.url}/blog/${form.slug || "your-post"}`,
+                  onPreview,
+                  error: previewError,
+                }}
+              />
+            ) : (
+              <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-border bg-card">
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -857,6 +856,37 @@ export function PostForm({
           </div>
         </div>
       )}
+    {/* Floating save: stays out of the way while writing long posts */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
+        {saveState === "loading" && (
+          <p className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg">
+            Saving…
+          </p>
+        )}
+        {saveState === "saved" && (
+          <p className="flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 shadow-lg">
+            <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
+          </p>
+        )}
+        {saveState === "error" && (
+          <p className="max-w-[240px] rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600 shadow-lg">
+            {message}
+          </p>
+        )}
+        <button
+          type="submit"
+          disabled={saveState === "loading"}
+          title="Save post (⌘S / Ctrl+S)"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground shadow-xl transition-all hover:opacity-90 disabled:opacity-60"
+        >
+          {saveState === "loading" ? (
+            <Loader2 className="w-4 h-4 animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          {initial ? "Save" : "Publish"}
+        </button>
+      </div>
     </form>
   );
 }

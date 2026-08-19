@@ -684,6 +684,35 @@ li.is-active [data-dot] {
   color: var(--accent-foreground);
 }
 
+/* Login page: slow, gentle drift for the geometric vector layer */
+.login-orb {
+  animation: login-float 14s ease-in-out infinite;
+}
+.login-orb-2 {
+  animation-delay: -7s;
+}
+.login-shape {
+  animation: login-float 10s ease-in-out infinite;
+  animation-delay: -4s;
+}
+.login-ring {
+  animation: login-spin 48s linear infinite;
+}
+@keyframes login-float {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+  }
+  50% {
+    transform: translate(18px, -26px) scale(1.05);
+  }
+}
+@keyframes login-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
