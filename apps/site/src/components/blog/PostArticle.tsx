@@ -25,6 +25,8 @@ export type RelatedPost = {
   title: string;
   slug: string;
   excerpt: string | null;
+  coverImage: string | null;
+  content: string;
   publishedAt: Date;
 };
 
@@ -174,19 +176,30 @@ export function PostArticle({
               <Link
                 key={p.slug}
                 href={`/blog/${p.slug}`}
-                className="group rounded-2xl border border-border bg-card p-5 transition-shadow hover:shadow-sm"
+                className="group overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-sm"
               >
-                <h3 className="font-display text-sm font-bold leading-snug group-hover:text-brand transition-colors line-clamp-3">
-                  {p.title}
-                </h3>
-                {p.excerpt && (
-                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground line-clamp-2">
-                    {p.excerpt}
+                <div className="aspect-video w-full overflow-hidden bg-muted">
+                  {p.coverImage ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={p.coverImage}
+                      alt=""
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center bg-brand/5 font-display text-2xl font-bold text-brand/40">
+                      {p.title.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-display text-sm font-bold leading-snug text-foreground line-clamp-2 group-hover:text-brand transition-colors">
+                    {p.title}
+                  </h3>
+                  <p className="mt-2 text-[11px] text-muted-foreground">
+                    {readingTime(p.content)} min read
                   </p>
-                )}
-                <p className="mt-3 text-[11px] text-muted-foreground">
-                  {formatDate(p.publishedAt)}
-                </p>
+                </div>
               </Link>
             ))}
           </div>

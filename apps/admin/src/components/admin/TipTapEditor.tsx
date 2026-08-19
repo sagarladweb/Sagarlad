@@ -876,7 +876,7 @@ export function TipTapEditor({
     editorProps: {
       attributes: {
         class:
-          "editor-content prose-editor mx-auto max-w-3xl min-h-[60vh] w-full bg-background px-5 sm:px-8 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
+          "editor-content prose-editor mx-auto max-w-3xl min-h-[60vh] w-full bg-background px-6 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items ?? []);

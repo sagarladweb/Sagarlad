@@ -29,6 +29,7 @@ export function PostPreview({
 }) {
   const [device, setDevice] = useState<DeviceId>("desktop");
   const [iframeHeight, setIframeHeight] = useState(1200);
+  const [loaded, setLoaded] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
 
   const activeLabel = DEVICES.find((d) => d.id === device)?.label ?? "Desktop";
@@ -44,6 +45,7 @@ export function PostPreview({
   const addressBarUrl = realUrl;
 
   function handleIframeLoad() {
+    setLoaded(true);
     // Same-origin: the iframe's document is readable, so we can auto-size.
     const doc = iframeRef.current?.contentDocument;
     if (doc?.body) setIframeHeight(Math.max(doc.body.scrollHeight + 8, 400));
@@ -54,6 +56,11 @@ export function PostPreview({
     const t = setTimeout(handleIframeLoad, 60);
     return () => clearTimeout(t);
   }, [device, url]);
+
+  // New URL → new iframe (key change) → back to the loading state.
+  useEffect(() => {
+    setLoaded(false);
+  }, [url]);
 
   return (
     <div className="space-y-3">
@@ -109,6 +116,7 @@ export function PostPreview({
             </span>
           </div>
 
+          <div className="relative">
           <iframe
             ref={iframeRef}
             key={url}
@@ -119,6 +127,15 @@ export function PostPreview({
             className="block w-full bg-background"
             style={{ height: iframeHeight }}
           />
+          {!loaded && (
+            <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-muted/60 backdrop-blur-[1px]">
+              <Loader2 className="h-6 w-6 animate-spin text-accent" />
+              <p className="text-sm font-medium text-muted-foreground">
+                Loading preview…
+              </p>
+            </div>
+          )}
+        </div>
         </div>
       </div>
     </div>

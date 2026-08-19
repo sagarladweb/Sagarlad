@@ -10,10 +10,8 @@ import {
   Lock,
   Clock,
   Type,
-  Upload,
   X,
   ImageIcon,
-  Plus,
   RefreshCw,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
@@ -70,38 +68,7 @@ export function PostForm({
   const [uploadMessage, setUploadMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [newCategory, setNewCategory] = useState("");
-  const [creatingCategory, setCreatingCategory] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState(categories);
-  const [categoryModalOpen, setCategoryModalOpen] = useState(false);
-  const [categoryError, setCategoryError] = useState("");
-
-  async function onCreateCategory() {
-    const name = newCategory.trim();
-    if (!name) return;
-    setCreatingCategory(true);
-    setCategoryError("");
-    try {
-      const res = await fetch("/api/admin/categories", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok && data.category) {
-        setCategoryOptions((prev) => [...prev, data.category]);
-        setForm((f) => ({ ...f, categoryId: data.category.id }));
-        setNewCategory("");
-        setCategoryModalOpen(false);
-      } else {
-        setCategoryError(data.error ?? "Could not create category.");
-      }
-    } catch {
-      setCategoryError("Network error. Please try again.");
-    } finally {
-      setCreatingCategory(false);
-    }
-  }
 
   async function onUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -571,7 +538,7 @@ export function PostForm({
             </div>
           </div>
 
-          <div>
+          <div className="mx-auto w-full max-w-3xl">
             <span className="sr-only">Post</span>
             {hydrated ? (
               <TipTapEditor
@@ -626,19 +593,6 @@ export function PostForm({
                   ...categoryOptions.map((c) => ({ value: c.id, label: c.name })),
                 ]}
               />
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setNewCategory("");
-                    setCategoryError("");
-                    setCategoryModalOpen(true);
-                  }}
-                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
-                >
-                  <Plus className="w-3.5 h-3.5" /> New category
-                </button>
-              </div>
             </div>
             <div>
               <span className={label}>Cover image</span>
@@ -709,19 +663,6 @@ export function PostForm({
                       <X className="w-3.5 h-3.5" /> Remove
                     </button>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    disabled={uploadState === "loading"}
-                    className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors disabled:opacity-60"
-                  >
-                    {uploadState === "loading" ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <Upload className="w-3.5 h-3.5" />
-                    )}
-                    {form.coverImage ? "Replace" : "Upload"}
-                  </button>
                 </div>
               </div>
               <input
@@ -782,80 +723,8 @@ export function PostForm({
             </div>
           </div>
         </aside>
-      </div>
+</div>
 
-      {categoryModalOpen && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="new-category-title"
-        >
-          <div
-            className="absolute inset-0 bg-black/50"
-            onClick={() => setCategoryModalOpen(false)}
-            aria-hidden="true"
-          />
-          <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card p-5 shadow-2xl">
-            <div className="flex items-center justify-between">
-              <h3 id="new-category-title" className="font-display text-base font-bold">
-                New category
-              </h3>
-              <button
-                type="button"
-                onClick={() => setCategoryModalOpen(false)}
-                aria-label="Close"
-                className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <input
-              autoFocus
-              type="text"
-              value={newCategory}
-              onChange={(e) => setNewCategory(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  onCreateCategory();
-                }
-                if (e.key === "Escape") setCategoryModalOpen(false);
-              }}
-              placeholder="Category name…"
-              aria-label="New category name"
-              className="mt-4 w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-            />
-            {categoryError && (
-              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {categoryError}
-              </p>
-            )}
-            <div className="mt-4 flex justify-end gap-2">
-              <button
-                type="button"
-                onClick={() => setCategoryModalOpen(false)}
-                className="rounded-full border border-border px-4 py-2 text-xs font-medium hover:bg-muted transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={onCreateCategory}
-                disabled={creatingCategory || !newCategory.trim()}
-                className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 disabled:opacity-60 transition-opacity"
-              >
-                {creatingCategory ? (
-                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                ) : (
-                  <Plus className="w-3.5 h-3.5" />
-                )}
-                Create
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     {/* Floating save: stays out of the way while writing long posts */}
       <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
         {saveState === "loading" && (

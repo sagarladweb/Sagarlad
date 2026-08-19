@@ -214,6 +214,23 @@ h6 {
   margin-left: auto;
   margin-right: auto;
 }
+/* On small screens embedded cards go full-width and stack — no floats, no
+   half-widths — so the layout stays clean and predictable on every device. */
+@media (max-width: 640px) {
+  .tip-content .tip-embed[data-width="half"],
+  .tip-content .tip-embed[data-align="left"],
+  .tip-content .tip-embed[data-align="right"],
+  .tip-content .tip-embed[style*="width"] {
+    float: none !important;
+    width: 100% !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+  .tip-content .tip-embed--media-row {
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+  }
+}
 .tip-embed-node .tip-embed__media {
   position: relative;
   display: block;
