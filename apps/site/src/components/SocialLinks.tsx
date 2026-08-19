@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { socialIcon, type IconType } from "@/lib/social-icons";
 import { Globe } from "lucide-react";
 
 type Social = {
+  key: string;
   label: string;
   handle: string | null;
   href: string;
@@ -47,17 +48,19 @@ function SocialItem({ s }: { s: Social }) {
   );
 }
 
-export function SocialLinks() {
+export function SocialLinks({ order }: { order?: string[] }) {
   const [socials, setSocials] = useState<Social[]>([]);
+  const trackRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetch("/api/socials")
       .then((r) => r.json())
-      .then((data: { socials?: { label: string; handle: string | null; href: string; icon: string; logoUrl?: string | null; color: string | null }[] }) => {
+      .then((data: { socials?: { key: string; label: string; handle: string | null; href: string; icon: string; logoUrl?: string | null; color: string | null }[] }) => {
         const list: Social[] = [];
         for (const s of data.socials ?? []) {
           const meta = socialIcon(s.icon);
           list.push({
+            key: s.key,
             label: s.label,
             handle: s.handle,
             href: s.href,
@@ -71,14 +74,30 @@ export function SocialLinks() {
       .catch(() => {});
   }, []);
 
+  // Pause/resume via inline style so hover-stop works regardless of CSS load.
+  const setPaused = (paused: boolean) => {
+    const el = trackRef.current;
+    if (el) el.style.animationPlayState = paused ? "paused" : "running";
+  };
+
   if (socials.length === 0) return null;
 
+  // Optional explicit ordering, e.g. for a curated marquee on a specific page.
+  const list = order
+    ? order
+        .map((k) => socials.find((s) => s.key === k))
+        .filter((s): s is Social => !!s)
+    : socials;
+
   // Duplicate the list so the -50% translate loops seamlessly.
-  const loop = [...socials, ...socials];
+  const loop = [...list, ...list];
 
   return (
     <div className="marquee-mask w-full overflow-hidden">
       <div
+        ref={trackRef}
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
         className="flex w-max gap-3 animate-marquee py-2 hover:[animation-play-state:paused]"
         style={{ animationDuration: "45s" }}
       >

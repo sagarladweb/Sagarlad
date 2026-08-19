@@ -168,14 +168,20 @@ model NewsletterSubscriber {
 }
 
 // One broadcast. Admin composes it; the queue drains it within the daily quota.
+// `draft` rows are unsent saves (`contentJson` holds the structured composer
+// state so the admin can pick up where they left off). On send the row becomes
+// a real campaign with rendered `html` + `contentJson` (for duplicating later).
 model NewsletterCampaign {
-  id         String               @id @default(cuid())
-  subject    String
-  html       String
-  createdAt  DateTime             @default(now())
-  deliveries NewsletterDelivery[]
+  id          String               @id @default(cuid())
+  subject     String
+  html        String
+  contentJson Json?
+  draft       Boolean              @default(false)
+  createdAt   DateTime             @default(now())
+  deliveries  NewsletterDelivery[]
 
   @@index([createdAt])
+  @@index([draft])
 }
 
 // Per-subscriber send record. `@@unique([campaignId, subscriberId])` is the

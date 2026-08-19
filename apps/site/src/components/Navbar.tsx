@@ -404,51 +404,42 @@ export function Navbar() {
               </Link>
 
               {hovered === "Blogs" && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-72 z-50">
-                  <div className="rounded-xl border border-border bg-background/95 backdrop-blur-md shadow-lg p-1.5 space-y-0.5">
-                    <FlyoutLink
+                <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-56 z-50">
+                  <div className="rounded-xl border border-border bg-background/95 backdrop-blur-md shadow-lg p-2">
+                    <Link
                       href="/blog"
-                      icon={<FileText className="w-4 h-4" />}
-                      title="Blog"
-                      desc="Articles & insights"
                       onClick={() => setHovered(null)}
-                    />
-                    <FlyoutLink
+                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
+                    >
+                      Blog
+                    </Link>
+                    <Link
                       href="/videos"
-                      icon={<Film className="w-4 h-4" />}
-                      title="Videos"
-                      desc="Video articles & talks"
                       onClick={() => setHovered(null)}
-                    />
-                    <FlyoutLink
+                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
+                    >
+                      Videos
+                    </Link>
+                    <Link
                       href="/quotes"
-                      icon={<MessageSquareQuote className="w-4 h-4" />}
-                      title="Quotes"
-                      desc="Sayings & wisdom"
                       onClick={() => setHovered(null)}
-                    />
+                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
+                    >
+                      Quotes
+                    </Link>
 
-                    <div className="border-t border-border my-1" />
+                    <div className="border-t border-border my-1.5" />
 
-                    <div className="flex items-center justify-between gap-2 px-3 pt-1.5 pb-1">
-                      <span className="text-[11px] font-bold uppercase tracking-wider text-accent-strong">
-                        Explore topics
-                      </span>
-                      <Link
-                        href="/blog"
-                        onClick={() => setHovered(null)}
-                        className="text-[11px] font-semibold text-muted-foreground hover:text-foreground transition-colors"
-                      >
-                        View all →
-                      </Link>
-                    </div>
+                    <p className="px-3 pb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      Topics
+                    </p>
                     {categories.length > 0 ? (
                       categories.slice(0, 6).map((c) => (
                         <Link
                           key={c.id}
                           href={`/content/${c.slug}`}
                           onClick={() => setHovered(null)}
-                          className="block px-3 py-1.5 rounded-lg text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
+                          className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
                         >
                           {c.name}
                         </Link>
@@ -458,6 +449,13 @@ export function Navbar() {
                         Topics coming soon.
                       </p>
                     )}
+                    <Link
+                      href="/blog"
+                      onClick={() => setHovered(null)}
+                      className="mt-0.5 block rounded-lg px-3 py-1.5 text-xs font-semibold text-accent-strong hover:bg-muted/80 transition-colors"
+                    >
+                      View all →
+                    </Link>
                   </div>
                 </div>
               )}
@@ -725,23 +723,6 @@ export function Navbar() {
                       >
                         <FileText className="w-4 h-4 text-brand-light" /> All Blogs
                       </Link>
-                      {categories.length > 0 && (
-                        <>
-                          <p className="px-3 pt-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                            Topics
-                          </p>
-                          {categories.map((c) => (
-                            <Link
-                              key={c.id}
-                              href={`/content/${c.slug}`}
-                              onClick={() => setOpen(false)}
-                              className="block px-3 py-2 text-sm font-medium text-foreground hover:text-accent-strong rounded-lg"
-                            >
-                              {c.name}
-                            </Link>
-                          ))}
-                        </>
-                      )}
                       <Link
                         href="/videos"
                         onClick={() => setOpen(false)}
@@ -755,6 +736,24 @@ export function Navbar() {
                         className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
                       >
                         <MessageSquareQuote className="w-4 h-4 text-brand-light" /> Quotes
+                      </Link>
+                      <div className="border-t border-border/60 my-1" />
+                      {categories.slice(0, 4).map((c) => (
+                        <Link
+                          key={c.id}
+                          href={`/content/${c.slug}`}
+                          onClick={() => setOpen(false)}
+                          className="block px-3 py-1.5 text-sm font-medium text-foreground hover:text-accent-strong rounded-lg"
+                        >
+                          {c.name}
+                        </Link>
+                      ))}
+                      <Link
+                        href="/blog"
+                        onClick={() => setOpen(false)}
+                        className="block px-3 py-1.5 text-xs font-semibold text-accent-strong hover:text-accent-strong rounded-lg"
+                      >
+                        All topics →
                       </Link>
                     </div>
                   )}

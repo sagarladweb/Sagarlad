@@ -6,6 +6,8 @@
 export type TemplateId = "letter" | "editorial" | "minimal";
 
 export type NewsletterContent = {
+  template: TemplateId;
+  preheader: string;
   greeting: string;
   intro: string;
   sections: { heading: string; body: string }[];
@@ -65,7 +67,10 @@ function paras(text: string): string {
     .join("");
 }
 
-const ACCENT = "#ffcb00";
+// Brand tokens — aligned with design.md. Yellow accent is the site's only
+// constant accent; ink/cream match the site's typography surfaces. Keep every
+// email template on these values for brand consistency.
+const ACCENT = "#ffd51d";
 const INK = "#111110";
 const MUTED = "#6b6a66";
 const CREAM = "#faf9f6";
@@ -75,6 +80,16 @@ const FONT = 'font-family:-apple-system,"Segoe UI",Roboto,Arial,Helvetica,sans-s
 const dateLabel = () =>
   new Date().toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
 
+// The preheader is the hidden first line of the email — the snippet most
+// clients show after the subject in the inbox. Left empty, clients fall back
+// to scraping body copy; setting it explicitly keeps the inbox line on-brand.
+function preheaderDiv(preheader: string): string {
+  if (!preheader.trim()) return "";
+  return `<div style="display:none;max-height:0;overflow:hidden;mso-hide:all">${esc(
+    preheader
+  )}</div>`;
+}
+
 // ---------------------------------------------------------------------------
 // Template: The Letter — warm banded header, serif headings, left-rule quotes,
 // pill CTA. The default for this site.
@@ -82,6 +97,7 @@ const dateLabel = () =>
 export function letterBody(c: NewsletterContent): string {
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${FONT}">
+    ${preheaderDiv(c.preheader)}
     <tr><td align="center" style="background:${CREAM};padding:28px 24px 0 24px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #ecebe6;border-radius:14px;overflow:hidden">
         <tr><td style="padding:34px 40px 10px 40px">
@@ -151,6 +167,7 @@ export function letterBody(c: NewsletterContent): string {
 export function editorialBody(c: NewsletterContent): string {
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${FONT}">
+    ${preheaderDiv(c.preheader)}
     <tr><td align="center" style="background:#f3f2ee;padding:28px 24px 0 24px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border:1px solid #e5e3dd;border-radius:6px;overflow:hidden">
         <tr><td style="background:${INK};padding:26px 40px">
@@ -215,6 +232,7 @@ export function editorialBody(c: NewsletterContent): string {
 export function minimalBody(c: NewsletterContent): string {
   return `
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="${FONT}">
+    ${preheaderDiv(c.preheader)}
     <tr><td align="center" style="background:#fbfbfa;padding:34px 20px 0 20px">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:transparent">
         <tr><td style="padding:0 24px 18px 24px">
@@ -281,6 +299,9 @@ export function buildTemplateBody(id: TemplateId, c: NewsletterContent): string 
 }
 
 export const emptyNewsletter: NewsletterContent = {
+  template: "letter",
+  preheader:
+    "A big idea, a practical filter, and one simple thing you can do this week.",
   greeting: "Hi there,",
   intro:
     "A big idea, a practical filter, and one simple thing you can do this week. Read time: under three minutes.",

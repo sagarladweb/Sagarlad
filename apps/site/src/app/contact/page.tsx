@@ -103,19 +103,12 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-5 space-y-6">
-          <div>
-            <h2 className="font-display text-xl font-bold">Direct &amp; Personal</h2>
-            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-              Every message goes straight to Sagar. I read every note and reply within 3–5 days.
-            </p>
-          </div>
-
-          <div className="pt-4 border-t border-border">
-            <h2 className="font-display text-base font-bold mb-3">Connect on socials</h2>
-            <SocialLinks />
-          </div>
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 flex flex-col lg:grid lg:grid-cols-12 gap-12">
+        <div className="lg:col-span-5">
+          <h2 className="font-display text-xl font-bold">Direct &amp; Personal</h2>
+          <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+            Every message goes straight to Sagar. I read every note and reply within 3–5 days.
+          </p>
         </div>
 
         <form
@@ -209,6 +202,11 @@ export default function ContactPage() {
             </p>
           )}
         </form>
+
+        <div className="lg:col-span-5 lg:border-t lg:border-border lg:pt-4">
+          <h2 className="font-display text-base font-bold mb-3">Connect on socials</h2>
+          <SocialLinks />
+        </div>
       </div>
     </>
   );

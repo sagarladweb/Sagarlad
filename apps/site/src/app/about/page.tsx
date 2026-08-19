@@ -169,7 +169,7 @@ export default function AboutPage() {
   return (
     <div ref={root} className="bg-background overflow-x-clip">
       {/* ---------- Visual Hero ---------- */}
-      <section className="relative overflow-hidden border-b border-border py-20 md:py-28">
+      <section className="relative overflow-hidden border-b border-border pt-12 pb-20 md:pt-16 md:pb-28">
         <div className="pointer-events-none absolute -top-40 right-10 h-96 w-96 rounded-full bg-accent/10 blur-[120px]" aria-hidden="true" />
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
@@ -239,7 +239,7 @@ export default function AboutPage() {
         className="sticky top-16 z-40 border-b border-border bg-background/90 backdrop-blur-md"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="no-scrollbar flex items-center justify-center gap-2 overflow-x-auto py-3">
+          <div className="no-scrollbar flex items-center justify-start gap-2 overflow-x-auto px-1 py-3 md:justify-center">
             {pageNav.map(([id, label]) => (
               <a
                 key={id}

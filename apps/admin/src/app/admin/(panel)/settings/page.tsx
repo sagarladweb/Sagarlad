@@ -1,10 +1,12 @@
 import { auth } from "@/lib/auth";
 import { SettingsTabs } from "@/components/admin/SettingsTabs";
+import { assertPhase2 } from "@/lib/phase";
 
 export const metadata = { title: "Settings · Sagar Lad Admin" };
 export const dynamic = "force-dynamic";
 
 export default async function SettingsPage() {
+  assertPhase2();
   const session = await auth();
 
   return (

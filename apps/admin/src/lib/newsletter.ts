@@ -54,6 +54,11 @@ async function sendBrevo({
   }
 }
 
+// Send a single preview email to one address (e.g. the admin's own inbox).
+export async function sendTestEmail(to: string, subject: string, html: string) {
+  await sendBrevo({ to, subject, html, unsubscribeToken: "test" });
+}
+
 // Create a campaign and snapshot every active subscriber into the queue.
 export async function enqueueCampaign(subject: string, html: string) {
   const campaign = await prisma.newsletterCampaign.create({

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { pageMetadata } from "@/lib/site";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
+import { SocialLinks } from "@/components/SocialLinks";
 
 export const metadata: Metadata = pageMetadata({
   title: "Public Speaking & Keynotes",
@@ -256,8 +257,11 @@ export default function SpeakingPage() {
                         {e.title}
                       </h3>
                       <p className="mt-0.5 text-xs text-muted-foreground">{e.role}</p>
+                      <span className="mt-1.5 inline-flex rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:hidden">
+                        {e.place}
+                      </span>
                     </div>
-                    <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    <span className="hidden sm:inline-flex shrink-0 rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       {e.place}
                     </span>
                   </div>
@@ -388,6 +392,16 @@ export default function SpeakingPage() {
               </blockquote>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Social marquee — curated order, all devices */}
+      <section className="border-t border-border bg-card/40 py-12">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="mb-6 text-center text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+            Connect with Sagar
+          </p>
+          <SocialLinks order={["instagram", "youtube", "linkedin", "reddit"]} />
         </div>
       </section>
     </div>

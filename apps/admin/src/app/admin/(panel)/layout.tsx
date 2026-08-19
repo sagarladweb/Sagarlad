@@ -9,6 +9,8 @@ import {
   Share2,
   Mail,
   Layers,
+  BookOpen,
+  Video,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "@/components/admin/SignOutButton";
@@ -21,13 +23,15 @@ import { PHASE_1 } from "@/lib/phase";
 export const dynamic = "force-dynamic";
 
 const nav = [
-  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, phase: 1 },
+  { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, phase: 2 },
   { label: "Posts", href: "/admin/posts", icon: FileText, phase: 1 },
+  { label: "Books", href: "/admin/books", icon: BookOpen, phase: 2 },
+  { label: "Videos", href: "/admin/videos", icon: Video, phase: 2 },
   { label: "Content", href: "/admin/content", icon: Layers, phase: 2 },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail, phase: 2 },
   { label: "Social", href: "/admin/social", icon: Share2, phase: 2 },
   { label: "Community", href: "/admin/moderation", icon: MessagesSquare, phase: 2 },
-  { label: "Settings", href: "/admin/settings", icon: Settings, phase: 1 },
+  { label: "Settings", href: "/admin/settings", icon: Settings, phase: 2 },
 ].filter((item) => !PHASE_1 || item.phase === 1);
 
 export default async function AdminPanelLayout({

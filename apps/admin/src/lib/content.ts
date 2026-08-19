@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/db";
+import { SITE } from "@/lib/site";
 import { isInstagramUrl } from "@/lib/instagram";
 import { sanitizeHtml } from "@/lib/sanitize";
 
@@ -142,4 +143,84 @@ export function getDashboardStats() {
     }),
     prisma.post.aggregate({ _sum: { views: true } }),
   ]);
+}
+
+// Extra dashboard widgets: newsletter health, content inventory and a recent
+// admin-activity feed. Kept separate from getDashboardStats so the KPI page
+// can stay fast — these are optional panels.
+export function getDashboardExtras() {
+  return Promise.all([
+    prisma.newsletterSubscriber.count({ where: { unsubscribed: false } }),
+    prisma.newsletterCampaign.findFirst({
+      where: { draft: false },
+      orderBy: { createdAt: "desc" },
+      select: {
+        subject: true,
+        createdAt: true,
+        _count: { select: { deliveries: true } },
+      },
+    }),
+    prisma.newsletterDelivery.count({ where: { status: "QUEUED" } }),
+    prisma.book.count({ where: { published: true } }),
+    prisma.video.count({ where: { published: true, deletedAt: null } }),
+    prisma.quote.count(),
+    prisma.comment.count({ where: { approved: false } }),
+    prisma.auditLogEntry.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 10,
+      select: { action: true, createdAt: true },
+    }),
+  ]).then(
+    ([
+      activeSubs,
+      lastCampaign,
+      queued,
+      books,
+      videos,
+      quotes,
+      pendingComments,
+      activity,
+    ]) => ({
+      activeSubs,
+      lastCampaign,
+      queued,
+      books,
+      videos,
+      quotes,
+      pendingComments,
+      activity,
+    })
+  );
+}
+
+// Fresh content to offer as one-click inserts in the newsletter composer, so a
+// broadcast stays on-brand and always links current material.
+export function getNewsletterInsertItems() {
+  return Promise.all([
+    prisma.post.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { title: true, slug: true },
+    }),
+    prisma.video.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { title: true, slug: true },
+    }),
+    prisma.book.findMany({
+      where: { published: true },
+      orderBy: { createdAt: "desc" },
+      take: 3,
+      select: { title: true },
+    }),
+  ]).then(([posts, videos, books]) => ({
+    posts: posts.map((p) => ({ title: p.title, url: `${SITE.url}/blog/${p.slug}` })),
+    videos: videos.map((v) => ({
+      title: v.title,
+      url: v.slug ? `${SITE.url}/videos/${v.slug}` : SITE.url,
+    })),
+    books: books.map((b) => ({ title: b.title, url: `${SITE.url}/books` })),
+  }));
 }

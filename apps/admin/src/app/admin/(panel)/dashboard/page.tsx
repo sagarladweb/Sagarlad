@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   Users,
   MousePointerClick,
@@ -13,13 +14,22 @@ import {
   MonitorSmartphone,
   Globe2,
   RefreshCw,
+  BookOpen,
+  Video,
+  Quote,
+  MessagesSquare,
+  ChevronRight,
 } from "lucide-react";
-import { getDashboardStats } from "@/lib/content";
+import { getDashboardStats, getDashboardExtras } from "@/lib/content";
 import { getGaAnalytics } from "@/lib/analytics";
 import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
+import { PHASE_1 } from "@/lib/phase";
 
 export const dynamic = "force-dynamic";
+
+// Phase 1 ships a blog-only admin, so the dashboard routes straight to Posts.
+if (PHASE_1) redirect("/admin/posts");
 
 function Sparkline({ values }: { values: number[] }) {
   const { line, area } = chartGeometry(values, 120, 36);
@@ -99,8 +109,9 @@ function PanelCard({
 }
 
 export default async function DashboardPage() {
-  const [postCount, draftCount, subscriberCount, recentPosts, totalViewsAgg] =
+  const [postCount, draftCount, , recentPosts, totalViewsAgg] =
     await getDashboardStats();
+  const extras = await getDashboardExtras();
   const totalViews = totalViewsAgg._sum.views ?? 0;
 
   const ga = await getGaAnalytics(14);
@@ -153,7 +164,27 @@ export default async function DashboardPage() {
   const siteStats = [
     { label: "Published posts", value: postCount, href: "/admin/posts", icon: FileText },
     { label: "Drafts", value: draftCount, href: "/admin/posts", icon: FileText },
-    { label: "Subscribers", value: subscriberCount, href: "/admin/moderation", icon: Mail },
+    { label: "Subscribers", value: extras.activeSubs, href: "/admin/newsletter", icon: Mail },
+  ];
+
+  const quickActions = [
+    { label: "New post", href: "/admin/posts/new", icon: Plus },
+    { label: "Send newsletter", href: "/admin/newsletter", icon: Mail },
+    { label: "Add book", href: "/admin/books", icon: BookOpen },
+    { label: "Add video", href: "/admin/videos", icon: Video },
+    { label: "View site", href: "https://sagarlad.com", icon: Globe2, external: true },
+  ];
+
+  const contentStats = [
+    { label: "Books", value: extras.books, href: "/admin/books", icon: BookOpen },
+    { label: "Videos", value: extras.videos, href: "/admin/videos", icon: Video },
+    { label: "Quotes", value: extras.quotes, href: "/admin/content", icon: Quote },
+    {
+      label: "Pending comments",
+      value: extras.pendingComments,
+      href: "/admin/moderation",
+      icon: MessagesSquare,
+    },
   ];
 
   return (
@@ -170,6 +201,30 @@ export default async function DashboardPage() {
           <Plus className="w-4 h-4" /> New post
         </Link>
       </header>
+
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        {quickActions.map((a) =>
+          a.external ? (
+            <a
+              key={a.label}
+              href={a.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-3 py-3 text-sm font-semibold hover:-translate-y-0.5 hover:shadow-md transition-all"
+            >
+              <a.icon className="w-4 h-4 text-accent" /> {a.label}
+            </a>
+          ) : (
+            <Link
+              key={a.label}
+              href={a.href}
+              className="inline-flex items-center justify-center gap-2 rounded-2xl border border-border bg-card px-3 py-3 text-sm font-semibold hover:-translate-y-0.5 hover:shadow-md transition-all"
+            >
+              <a.icon className="w-4 h-4 text-accent" /> {a.label}
+            </Link>
+          )
+        )}
+      </div>
 
       {!gaData.configured && (
         <p className="rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
@@ -440,6 +495,120 @@ export default async function DashboardPage() {
           </div>
         )}
       </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <PanelCard title="Newsletter" icon={Mail}>
+          <div className="mt-4 space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Active subscribers</span>
+              <span className="font-semibold tabular-nums">{extras.activeSubs}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Queued to send</span>
+              <span className="font-semibold tabular-nums">{extras.queued}</span>
+            </div>
+            {extras.lastCampaign && (
+              <div className="border-t border-border pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  Last broadcast
+                </p>
+                <p className="mt-1 truncate font-medium">{extras.lastCampaign.subject}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {new Date(extras.lastCampaign.createdAt).toLocaleDateString("en-IN", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                  })}{" "}
+                  · {extras.lastCampaign._count.deliveries} deliveries
+                </p>
+              </div>
+            )}
+          </div>
+          <Link
+            href="/admin/newsletter"
+            className="mt-4 inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline"
+          >
+            Open newsletter <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </PanelCard>
+
+        <PanelCard title="Content" icon={FileText}>
+          <ul className="mt-4 space-y-2">
+            {contentStats.map((s) => (
+              <li key={s.label}>
+                <Link
+                  href={s.href}
+                  className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60 transition-colors"
+                >
+                  <span className="inline-flex items-center gap-2.5 font-medium">
+                    <s.icon className="w-4 h-4 text-accent" /> {s.label}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground">{s.value}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </PanelCard>
+
+        <PanelCard title="Recent activity" icon={RefreshCw}>
+          {extras.activity.length === 0 ? (
+            <p className="mt-4 text-sm text-muted-foreground">No activity yet.</p>
+          ) : (
+            <ul className="mt-4 space-y-2.5">
+              {extras.activity.map((a, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate">{activityLabel(a.action)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">
+                    {timeAgo(a.createdAt)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </PanelCard>
+      </div>
     </div>
   );
+}
+
+const ACTIVITY_LABELS: Record<string, string> = {
+  LOGIN_OK: "Signed in",
+  POST_CREATE: "Created a post",
+  POST_UPDATE: "Updated a post",
+  POST_DELETE: "Deleted a post",
+  BOOK_CREATE: "Added a book",
+  BOOK_UPDATE: "Updated a book",
+  BOOK_DELETE: "Deleted a book",
+  VIDEO_CREATE: "Added a video",
+  VIDEO_UPDATE: "Updated a video",
+  VIDEO_DELETE: "Deleted a video",
+  QUOTE_CREATE: "Added a quote",
+  QUOTE_UPDATE: "Updated a quote",
+  QUOTE_DELETE: "Deleted a quote",
+  CATEGORY_CREATE: "Added a category",
+  CATEGORY_DELETE: "Deleted a category",
+  COMMENT_APPROVE: "Approved a comment",
+  COMMENT_DELETE: "Deleted a comment",
+  SUBSCRIBER_DELETE: "Removed a subscriber",
+  REQUEST_DELETE: "Deleted a request",
+  NEWSLETTER: "Sent a newsletter",
+  EBOOK_DOWNLOAD: "E-book download",
+  UPLOAD: "Uploaded a file",
+  PASSWORD_CHANGE: "Changed password",
+  PROFILE_UPDATE: "Updated profile",
+};
+
+function activityLabel(action: string) {
+  return ACTIVITY_LABELS[action] ?? action.toLowerCase().replace(/_/g, " ");
+}
+
+function timeAgo(date: Date) {
+  const secs = Math.floor((Date.now() - new Date(date).getTime()) / 1000);
+  if (secs < 60) return "just now";
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  return `${days}d ago`;
 }
