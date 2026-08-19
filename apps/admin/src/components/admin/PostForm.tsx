@@ -13,6 +13,8 @@ import {
   X,
   ImageIcon,
   RefreshCw,
+  Maximize2,
+  Minimize2,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -61,6 +63,7 @@ export function PostForm({
   const [message, setMessage] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [previewError, setPreviewError] = useState("");
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   const [uploadState, setUploadState] = useState<"idle" | "loading" | "error">(
     "idle"
@@ -488,13 +491,39 @@ export function PostForm({
         e.preventDefault();
         save(false);
       }}
-      className="space-y-6"
+      className={`space-y-6 transition-all ${
+        isFullscreen
+          ? "fixed inset-0 z-50 overflow-y-auto bg-background p-4 sm:p-8"
+          : "w-full max-w-full"
+      }`}
       noValidate
     >
+      <div className="flex items-center justify-between gap-4 pb-2 border-b border-border">
+        <h2 className="font-display text-lg font-bold">
+          {initial ? "Edit Post" : "Create New Post"}
+        </h2>
+        <button
+          type="button"
+          onClick={() => setIsFullscreen((prev) => !prev)}
+          className="inline-flex items-center gap-2 rounded-xl border border-border px-3.5 py-1.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+          title={isFullscreen ? "Exit Fullscreen" : "Fullscreen Mode"}
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 className="w-4 h-4" /> Exit Fullscreen
+            </>
+          ) : (
+            <>
+              <Maximize2 className="w-4 h-4" /> Fullscreen Mode
+            </>
+          )}
+        </button>
+      </div>
+
       <div className="flex flex-col items-start gap-6 lg:flex-row">
         {/* ---- Main canvas ---- */}
-        <div className="min-w-0 flex-1 space-y-4">
-          <div className="mx-auto w-full max-w-3xl rounded-2xl border border-border bg-card p-6">
+        <div className="min-w-0 flex-1 space-y-4 w-full">
+          <div className="w-full rounded-2xl border border-border bg-card p-6">
             <label htmlFor="title" className={label}>Title *</label>
             <input
               id="title"
@@ -538,7 +567,7 @@ export function PostForm({
             </div>
           </div>
 
-          <div className="mx-auto w-full max-w-3xl">
+          <div className="w-full">
             <span className="sr-only">Post</span>
             {hydrated ? (
               <TipTapEditor

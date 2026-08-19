@@ -542,20 +542,20 @@ const Callout = Node.create({
 });
 
 // List-style variants: bullet lists (disc/circle/square) and ordered lists
-// (decimal/lower-alpha/upper-alpha/lower-roman/upper-roman). The chosen style
-// is stored as an inline `list-style-type` so the site renders it too.
+// (decimal/nested-decimal/lower-alpha/upper-alpha/lower-roman/upper-roman).
 const LIST_STYLES = {
   bullet: [
-    { label: "Disc", value: "disc" },
-    { label: "Circle", value: "circle" },
-    { label: "Square", value: "square" },
+    { label: "Disc Bullet (●)", value: "disc" },
+    { label: "Circle Bullet (○)", value: "circle" },
+    { label: "Square Bullet (■)", value: "square" },
   ],
   ordered: [
-    { label: "Numbers", value: "decimal", preview: "1." },
-    { label: "Lowercase letters", value: "lower-alpha", preview: "a." },
-    { label: "Uppercase letters", value: "upper-alpha", preview: "A." },
+    { label: "Standard Numbers", value: "decimal", preview: "1." },
+    { label: "Nested Numbers (1.1, 1.2)", value: "nested-decimal", preview: "1.1" },
     { label: "Lowercase Roman", value: "lower-roman", preview: "i." },
     { label: "Uppercase Roman", value: "upper-roman", preview: "I." },
+    { label: "Lowercase Letters", value: "lower-alpha", preview: "a." },
+    { label: "Uppercase Letters", value: "upper-alpha", preview: "A." },
   ],
 } as const;
 
@@ -565,12 +565,13 @@ const StyledBulletList = ListBulletList.extend({
       ...this.parent?.(),
       listStyle: {
         default: "disc",
-        parseHTML: (element) => element.style.listStyleType || "disc",
+        parseHTML: (element) =>
+          element.getAttribute("data-list-style") || element.style.listStyleType || "disc",
         renderHTML: (attributes) => {
           const { listStyle, ...rest } = attributes;
           const style =
             listStyle && listStyle !== "disc"
-              ? { style: `list-style-type:${listStyle}` }
+              ? { style: `list-style-type:${listStyle}`, "data-list-style": listStyle }
               : {};
           return ["ul", mergeAttributes(rest, style), 0];
         },
@@ -585,12 +586,26 @@ const StyledOrderedList = ListOrderedList.extend({
       ...this.parent?.(),
       listStyle: {
         default: "decimal",
-        parseHTML: (element) => element.style.listStyleType || "decimal",
+        parseHTML: (element) =>
+          element.getAttribute("data-list-style") ||
+          element.style.listStyleType ||
+          (element.classList.contains("list-nested-decimal") ? "nested-decimal" : "decimal"),
         renderHTML: (attributes) => {
           const { listStyle, ...rest } = attributes;
+          if (listStyle === "nested-decimal") {
+            return [
+              "ol",
+              mergeAttributes(rest, {
+                class: "list-nested-decimal",
+                style: "list-style-type:none;",
+                "data-list-style": "nested-decimal",
+              }),
+              0,
+            ];
+          }
           const style =
             listStyle && listStyle !== "decimal"
-              ? { style: `list-style-type:${listStyle}` }
+              ? { style: `list-style-type:${listStyle}`, "data-list-style": listStyle }
               : {};
           return ["ol", mergeAttributes(rest, style), 0];
         },
@@ -789,6 +804,293 @@ function EditorHelp({ onClose }: { onClose: () => void }) {
   );
 }
 
+function EditorContextMenu({
+  editor,
+  position,
+  onClose,
+}: {
+  editor: Editor;
+  position: { x: number; y: number };
+  onClose: () => void;
+}) {
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Element)) {
+        onClose();
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [onClose]);
+
+  const inBullet = editor.isActive("bulletList");
+  const inOrdered = editor.isActive("orderedList");
+  const inList = inBullet || inOrdered;
+  const currentBulletStyle = inBullet ? (editor.getAttributes("bulletList").listStyle || "disc") : null;
+  const currentOrderedStyle = inOrdered ? (editor.getAttributes("orderedList").listStyle || "decimal") : null;
+
+  const setHeading = (level: 1 | 2 | 3 | 4) => {
+    editor.chain().focus().toggleHeading({ level }).run();
+    onClose();
+  };
+  const setParagraph = () => {
+    editor.chain().focus().setParagraph().run();
+    onClose();
+  };
+  const setCallout = () => {
+    editor.chain().focus().toggleWrap("callout").run();
+    onClose();
+  };
+  const setBlockquote = () => {
+    editor.chain().focus().toggleBlockquote().run();
+    onClose();
+  };
+
+  const applyBulletStyle = (style: string) => {
+    if (inOrdered) {
+      editor.chain().focus().toggleBulletList().updateAttributes("bulletList", { listStyle: style }).run();
+    } else if (inBullet) {
+      editor.chain().focus().updateAttributes("bulletList", { listStyle: style }).run();
+    } else {
+      editor.chain().focus().toggleBulletList().updateAttributes("bulletList", { listStyle: style }).run();
+    }
+    onClose();
+  };
+
+  const applyOrderedStyle = (style: string) => {
+    if (inBullet) {
+      editor.chain().focus().toggleOrderedList().updateAttributes("orderedList", { listStyle: style }).run();
+    } else if (inOrdered) {
+      editor.chain().focus().updateAttributes("orderedList", { listStyle: style }).run();
+    } else {
+      editor.chain().focus().toggleOrderedList().updateAttributes("orderedList", { listStyle: style }).run();
+    }
+    onClose();
+  };
+
+  const indentList = () => {
+    editor.chain().focus().sinkListItem("listItem").run();
+    onClose();
+  };
+
+  const outdentList = () => {
+    editor.chain().focus().liftListItem("listItem").run();
+    onClose();
+  };
+
+  const left = typeof window !== "undefined" ? Math.min(position.x, window.innerWidth - 270) : position.x;
+  const top = typeof window !== "undefined" ? Math.min(position.y, window.innerHeight - 490) : position.y;
+
+  return (
+    <div
+      ref={menuRef}
+      role="menu"
+      aria-label="Editor context menu"
+      className="fixed z-50 w-64 rounded-2xl border border-border bg-card p-2.5 shadow-2xl space-y-2 text-xs"
+      style={{ left: `${Math.max(10, left)}px`, top: `${Math.max(10, top)}px` }}
+    >
+      <div>
+        <p className="px-2 py-0.5 font-semibold uppercase tracking-wider text-[10px] text-muted-foreground">
+          Headings & Tags
+        </p>
+        <div className="grid grid-cols-2 gap-1 mt-1">
+          <button
+            type="button"
+            onClick={() => setHeading(1)}
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors ${
+              editor.isActive("heading", { level: 1 }) ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+            }`}
+          >
+            <span className="font-display font-bold text-xs">H1</span> Heading 1
+          </button>
+          <button
+            type="button"
+            onClick={() => setHeading(2)}
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors ${
+              editor.isActive("heading", { level: 2 }) ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+            }`}
+          >
+            <span className="font-display font-bold text-xs">H2</span> Heading 2
+          </button>
+          <button
+            type="button"
+            onClick={() => setHeading(3)}
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors ${
+              editor.isActive("heading", { level: 3 }) ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+            }`}
+          >
+            <span className="font-display font-bold text-xs">H3</span> Heading 3
+          </button>
+          <button
+            type="button"
+            onClick={() => setHeading(4)}
+            className={`flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors ${
+              editor.isActive("heading", { level: 4 }) ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+            }`}
+          >
+            <span className="font-display font-bold text-xs">H4</span> Heading 4
+          </button>
+          <button
+            type="button"
+            onClick={setParagraph}
+            className={`col-span-2 flex items-center gap-1.5 rounded-lg px-2 py-1.5 font-medium transition-colors ${
+              editor.isActive("paragraph") ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+            }`}
+          >
+            <span>¶</span> Paragraph Text
+          </button>
+        </div>
+      </div>
+
+      <div className="border-t border-border pt-1.5">
+        <p className="px-2 py-0.5 font-semibold uppercase tracking-wider text-[10px] text-muted-foreground">
+          Bullet Points & Lists
+        </p>
+        <div className="space-y-1 mt-1">
+          <div className="px-2 text-[10px] font-semibold text-muted-foreground">Bullet Variants</div>
+          <div className="grid grid-cols-3 gap-1">
+            <button
+              type="button"
+              onClick={() => applyBulletStyle("disc")}
+              className={`flex items-center justify-center gap-1 rounded-lg px-1 py-1 transition-colors ${
+                inBullet && currentBulletStyle === "disc" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+              title="Disc Bullet (●)"
+            >
+              ● Disc
+            </button>
+            <button
+              type="button"
+              onClick={() => applyBulletStyle("circle")}
+              className={`flex items-center justify-center gap-1 rounded-lg px-1 py-1 transition-colors ${
+                inBullet && currentBulletStyle === "circle" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+              title="Circle Bullet (○)"
+            >
+              ○ Circle
+            </button>
+            <button
+              type="button"
+              onClick={() => applyBulletStyle("square")}
+              className={`flex items-center justify-center gap-1 rounded-lg px-1 py-1 transition-colors ${
+                inBullet && currentBulletStyle === "square" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+              title="Square Bullet (■)"
+            >
+              ■ Square
+            </button>
+          </div>
+
+          <div className="px-2 pt-1 text-[10px] font-semibold text-muted-foreground">Numbered / Hierarchical</div>
+          <div className="grid grid-cols-1 gap-1">
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("decimal")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "decimal" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">1.</span> Numbers (1, 2, 3)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("nested-decimal")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "nested-decimal" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">1.1</span> Hierarchical (1.1, 1.2)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("lower-roman")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "lower-roman" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">i.</span> Lower Roman (i, ii)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("upper-roman")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "upper-roman" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">I.</span> Upper Roman (I, II)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("lower-alpha")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "lower-alpha" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">a.</span> Lower Alpha (a, b)
+            </button>
+            <button
+              type="button"
+              onClick={() => applyOrderedStyle("upper-alpha")}
+              className={`flex items-center gap-1.5 rounded-lg px-2 py-1 transition-colors ${
+                inOrdered && currentOrderedStyle === "upper-alpha" ? "bg-accent text-accent-foreground font-bold" : "hover:bg-muted"
+              }`}
+            >
+              <span className="font-mono font-bold w-6">A.</span> Upper Alpha (A, B)
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {inList && (
+        <div className="border-t border-border pt-1.5 flex items-center justify-between gap-1">
+          <button
+            type="button"
+            onClick={indentList}
+            className="flex-1 flex items-center justify-center gap-1 rounded-lg px-2 py-1 hover:bg-muted text-muted-foreground hover:text-foreground font-medium"
+            title="Sub-category level (Tab)"
+          >
+            ↳ Indent Level
+          </button>
+          <button
+            type="button"
+            onClick={outdentList}
+            className="flex-1 flex items-center justify-center gap-1 rounded-lg px-2 py-1 hover:bg-muted text-muted-foreground hover:text-foreground font-medium"
+            title="Outdent level (Shift+Tab)"
+          >
+            ↰ Outdent Level
+          </button>
+        </div>
+      )}
+
+      <div className="border-t border-border pt-1.5 flex items-center justify-between gap-1">
+        <button
+          type="button"
+          onClick={setCallout}
+          className="flex-1 flex items-center justify-center gap-1 rounded-lg px-2 py-1 hover:bg-muted font-medium"
+        >
+          Callout
+        </button>
+        <button
+          type="button"
+          onClick={setBlockquote}
+          className="flex-1 flex items-center justify-center gap-1 rounded-lg px-2 py-1 hover:bg-muted font-medium"
+        >
+          Quote
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function TipTapEditor({
   initialContent,
   onChange,
@@ -845,7 +1147,7 @@ export function TipTapEditor({
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
-        heading: { levels: [2, 3] },
+        heading: { levels: [1, 2, 3, 4] },
         codeBlock: { HTMLAttributes: { spellcheck: "false" } },
         link: false,
         underline: false,
@@ -876,7 +1178,7 @@ export function TipTapEditor({
     editorProps: {
       attributes: {
         class:
-          "editor-content prose-editor mx-auto max-w-3xl min-h-[60vh] w-full bg-background px-6 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
+          "editor-content prose-editor mx-auto max-w-full min-h-[60vh] w-full bg-background px-6 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items ?? []);
@@ -1289,10 +1591,9 @@ export function TipTapEditor({
   ];
 
   const blockGroup = [
-    { label: "Heading 2", shortcut: "Mod Alt 2", icon: <Heading1 className="w-4 h-4" />, active: editor.isActive("heading", { level: 2 }), onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
-    { label: "Heading 3", shortcut: "Mod Alt 3", icon: <Heading2 className="w-4 h-4" />, active: editor.isActive("heading", { level: 3 }), onClick: () => editor.chain().focus().toggleHeading({ level: 3 }).run() },
-    { label: "Bullet list", shortcut: "Mod Shift 8", icon: <List className="w-4 h-4" />, active: editor.isActive("bulletList"), onClick: () => editor.chain().focus().toggleBulletList().run() },
-    { label: "Numbered list", shortcut: "Mod Shift 7", icon: <ListOrdered className="w-4 h-4" />, active: editor.isActive("orderedList"), onClick: () => editor.chain().focus().toggleOrderedList().run() },
+    { label: "Heading 1", shortcut: "Mod Alt 1", icon: <Heading1 className="w-4 h-4" />, active: editor.isActive("heading", { level: 1 }), onClick: () => editor.chain().focus().toggleHeading({ level: 1 }).run() },
+    { label: "Heading 2", shortcut: "Mod Alt 2", icon: <Heading2 className="w-4 h-4" />, active: editor.isActive("heading", { level: 2 }), onClick: () => editor.chain().focus().toggleHeading({ level: 2 }).run() },
+    { label: "Bullet list", shortcut: "Mod Shift 8", icon: <List className="w-4 h-4" />, active: editor.isActive("bulletList") || editor.isActive("orderedList"), onClick: () => editor.chain().focus().toggleBulletList().run() },
     { label: "Quote", shortcut: "Mod Shift b", icon: <QuoteIcon className="w-4 h-4" />, active: editor.isActive("blockquote"), onClick: () => editor.chain().focus().toggleBlockquote().run() },
     { label: "Callout", shortcut: "Mod Alt c", icon: <Wand2 className="w-4 h-4" />, active: editor.isActive("callout"), onClick: () => editor.chain().focus().toggleWrap("callout").run() },
     { label: "Divider", icon: <Minus className="w-4 h-4" />, onClick: () => editor.chain().focus().setHorizontalRule().run() },
@@ -1428,11 +1729,25 @@ export function TipTapEditor({
     </div>
   );
 
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setContextMenuPos({ x: e.clientX, y: e.clientY });
+  };
+
   const body = (
-    <div className="relative">
+    <div className="relative" onContextMenu={handleContextMenu}>
       {mode === "write" ? (
         <>
           <EditorContent editor={editor} />
+          {contextMenuPos && (
+            <EditorContextMenu
+              editor={editor}
+              position={contextMenuPos}
+              onClose={() => setContextMenuPos(null)}
+            />
+          )}
           {floatingToolbar}
           {mediaType && selPos && (
             <div

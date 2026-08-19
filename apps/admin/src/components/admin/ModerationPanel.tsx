@@ -12,9 +12,16 @@ type Subscriber = { id: string; email: string; createdAt: string };
 type Comment = {
   id: string;
   name: string;
+  email: string | null;
+  ip: string | null;
+  userAgent: string | null;
   content: string;
+  approved: boolean;
+  clientToken: string | null;
+  userId: string | null;
+  postId: string;
   createdAt: string;
-  post: { title: string };
+  post: { title: string; slug: string };
 };
 type Enquiry = {
   id: string;
@@ -166,6 +173,25 @@ export function ModerationPanel() {
     ]);
   }
 
+  function exportCommentsCsv() {
+    if (!data) return;
+    download("comments.csv", [
+      ["Name", "Email", "IP", "User Agent", "Post", "Comment", "Approved", "User ID", "Device token", "Received at"],
+      ...data.comments.map((c) => [
+        c.name,
+        c.email ?? "",
+        c.ip ?? "",
+        c.userAgent ?? "",
+        c.post.title,
+        c.content,
+        c.approved ? "Yes" : "No",
+        c.userId ?? "",
+        c.clientToken ?? "",
+        new Date(c.createdAt).toLocaleString(),
+      ]),
+    ]);
+  }
+
   const filteredSubscribers = useMemo(() => {
     if (!data) return [];
     const q = subscriberFilter.trim().toLowerCase();
@@ -255,6 +281,13 @@ export function ModerationPanel() {
                   </div>
                 </>
               )}
+              <button
+                type="button"
+                onClick={exportCommentsCsv}
+                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent transition-colors ml-auto"
+              >
+                <Download className="w-4 h-4" /> Export CSV
+              </button>
             </div>
           )}
           {data.comments.length === 0 ? (
@@ -274,16 +307,59 @@ export function ModerationPanel() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">{c.name}</span>
+                        {c.email && (
+                          <a
+                            href={`mailto:${c.email}`}
+                            className="text-xs text-muted-foreground hover:text-accent"
+                          >
+                            {c.email}
+                          </a>
+                        )}
                         <span className="text-xs text-muted-foreground">
                           on {c.post.title}
                         </span>
                         <time className="text-xs text-muted-foreground" dateTime={c.createdAt}>
-                          {new Date(c.createdAt).toLocaleDateString()}
+                          {new Date(c.createdAt).toLocaleString()}
                         </time>
                       </div>
                       <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
                         {c.content}
                       </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${
+                            c.approved
+                              ? "bg-green-50 text-green-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {c.approved ? "Approved" : "Pending"}
+                        </span>
+                        <a
+                          href={`/blog/${c.post.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-accent font-medium underline"
+                        >
+                          Post: /blog/{c.post.slug}
+                        </a>
+                        {c.ip && (
+                          <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
+                            IP: {c.ip}
+                          </span>
+                        )}
+                        {c.userAgent && (
+                          <span className="rounded bg-muted px-1.5 py-0.5 text-muted-foreground truncate max-w-[240px]" title={c.userAgent}>
+                            UA: {c.userAgent}
+                          </span>
+                        )}
+                        {c.userId && (
+                          <span className="text-muted-foreground">User ID: {c.userId}</span>
+                        )}
+                        {c.clientToken && (
+                          <span className="text-muted-foreground">Token: {c.clientToken}</span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button

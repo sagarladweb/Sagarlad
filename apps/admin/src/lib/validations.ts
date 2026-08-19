@@ -36,7 +36,7 @@ export const contactSchema = z.object({
 
 export const commentSchema = z.object({
   name: z.string().trim().min(2, "Name is required").max(80),
-  email: z.string().trim().email("Please enter a valid email"),
+  email: z.string().trim().email("Please enter a valid email").optional().or(z.literal("")),
   content: z.string().trim().min(3, "Comment is too short").max(1000),
   postSlug: z.string().trim().min(1),
   clientToken: z.string().trim().max(100).optional().or(z.literal("")),

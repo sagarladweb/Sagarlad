@@ -11,7 +11,7 @@ export function CommentForm({
   postSlug: string;
   onPosted?: () => void;
 }) {
-  const [form, setForm] = useState({ name: "", email: "", content: "" });
+  const [form, setForm] = useState({ name: "", content: "" });
   const [state, setState] = useState<"idle" | "loading" | "success" | "error">(
     "idle"
   );
@@ -28,7 +28,7 @@ export function CommentForm({
       });
       if (res.ok) {
         setState("success");
-        setForm({ name: "", email: "", content: "" });
+        setForm({ name: "", content: "" });
         setMessage(
           "Thanks! Your comment is queued for approval. It's visible only to you until an admin approves it."
         );
@@ -47,7 +47,7 @@ export function CommentForm({
   return (
     <form onSubmit={onSubmit} className="mt-8 rounded-2xl border border-border bg-card p-6 space-y-4" noValidate>
       <h3 className="font-display text-lg font-bold">Leave a comment</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div>
         <input
           type="text"
           value={form.name}
@@ -55,16 +55,7 @@ export function CommentForm({
           placeholder="Your name"
           aria-label="Your name"
           required
-          className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-        />
-        <input
-          type="email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          placeholder="Your email"
-          aria-label="Your email"
-          required
-          className="rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
+          className="w-full rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
         />
       </div>
       <textarea

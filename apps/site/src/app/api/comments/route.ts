@@ -58,11 +58,16 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Post not found" }, { status: 404 });
   }
 
+  const clientIp = getClientIp(request);
+  const userAgent = request.headers.get("user-agent") || null;
+
   const comment = await prisma.comment.create({
     data: {
       name: sanitizeHtml(parsed.data.name),
-      email: parsed.data.email,
+      email: parsed.data.email ? sanitizeHtml(parsed.data.email) : null,
       content: sanitizeHtml(parsed.data.content),
+      ip: clientIp || null,
+      userAgent: userAgent || null,
       postId: post.id,
       clientToken: parsed.data.clientToken || null,
       approved: true,
