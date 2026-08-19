@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
-import { CheckCircle2, XCircle, Clock } from "lucide-react";
+import { CheckCircle2, XCircle, Clock, ChevronRight, ChevronDown, Loader2 } from "lucide-react";
 import { NewsletterComposer } from "@/components/admin/NewsletterComposer";
 
 type Subscriber = {
@@ -30,6 +30,16 @@ type ApiData = {
   campaigns: Campaign[];
 };
 
+type Delivery = {
+  id: string;
+  email: string;
+  name: string | null;
+  unsubscribed: boolean;
+  status: string;
+  sentAt: string | null;
+  error: string | null;
+};
+
 export function NewsletterManager() {
   const [data, setData] = useState<ApiData>({
     subscriberCount: 0,
@@ -38,6 +48,9 @@ export function NewsletterManager() {
   });
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [deliveries, setDeliveries] = useState<Record<string, Delivery[]>>({});
+  const [deliveriesLoading, setDeliveriesLoading] = useState<string | null>(null);
   const subscribersRef = useRef<HTMLDivElement>(null);
 
   const rowVirtualizer = useVirtualizer({
@@ -59,6 +72,26 @@ export function NewsletterManager() {
   useEffect(() => {
     load();
   }, []);
+
+  async function toggleDeliveries(campaignId: string) {
+    if (expanded === campaignId) {
+      setExpanded(null);
+      return;
+    }
+    setExpanded(campaignId);
+    if (!deliveries[campaignId]) {
+      setDeliveriesLoading(campaignId);
+      try {
+        const res = await fetch(`/api/admin/newsletter/${campaignId}`);
+        if (res.ok) {
+          const body = await res.json();
+          setDeliveries((d) => ({ ...d, [campaignId]: body.deliveries }));
+        }
+      } finally {
+        setDeliveriesLoading(null);
+      }
+    }
+  }
 
   const percent = (c: Campaign) =>
     c.total === 0 ? 0 : Math.round((c.sent / c.total) * 100);
@@ -116,20 +149,35 @@ export function NewsletterManager() {
                       })}
                     </p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 text-xs text-muted-foreground">
-                    {c.queued > 0 && (
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="w-3.5 h-3.5" /> {c.queued}
+                  <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                      {c.queued > 0 && (
+                        <span className="inline-flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> {c.queued}
+                        </span>
+                      )}
+                      <span className="inline-flex items-center gap-1 text-green-600">
+                        <CheckCircle2 className="w-3.5 h-3.5" /> {c.sent}
                       </span>
-                    )}
-                    <span className="inline-flex items-center gap-1 text-green-600">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> {c.sent}
-                    </span>
-                    {c.failed > 0 && (
-                      <span className="inline-flex items-center gap-1 text-red-600">
-                        <XCircle className="w-3.5 h-3.5" /> {c.failed}
-                      </span>
-                    )}
+                      {c.failed > 0 && (
+                        <span className="inline-flex items-center gap-1 text-red-600">
+                          <XCircle className="w-3.5 h-3.5" /> {c.failed}
+                        </span>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleDeliveries(c.id)}
+                      aria-expanded={expanded === c.id}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-accent"
+                    >
+                      {expanded === c.id ? (
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      ) : (
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      )}
+                      Deliveries
+                    </button>
                   </div>
                 </div>
                 <div className="h-1 rounded-full bg-muted overflow-hidden">
@@ -138,6 +186,48 @@ export function NewsletterManager() {
                     style={{ width: `${percent(c)}%` }}
                   />
                 </div>
+                {expanded === c.id && (
+                  <div className="rounded-xl border border-border bg-background max-h-80 overflow-auto">
+                    {deliveriesLoading === c.id ? (
+                      <p className="flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading deliveries…
+                      </p>
+                    ) : (deliveries[c.id]?.length ?? 0) === 0 ? (
+                      <p className="px-4 py-3 text-xs text-muted-foreground">
+                        No deliveries recorded for this campaign.
+                      </p>
+                    ) : (
+                      <ul className="divide-y divide-border">
+                        {deliveries[c.id].map((d) => (
+                          <li key={d.id} className="px-4 py-2.5 flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm truncate">
+                                {d.name ? `${d.name} · ` : ""}
+                                <span className="text-muted-foreground">{d.email}</span>
+                              </p>
+                              {d.error && (
+                                <p className="mt-0.5 text-[11px] text-red-600 truncate" title={d.error}>
+                                  {d.error}
+                                </p>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-3 shrink-0 text-xs">
+                              {d.sentAt && (
+                                <span className="text-muted-foreground">
+                                  {new Date(d.sentAt).toLocaleTimeString("en-IN", {
+                                    hour: "numeric",
+                                    minute: "2-digit",
+                                  })}
+                                </span>
+                              )}
+                              {statusBadge(d.status, d.unsubscribed)}
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
               </li>
             ))}
           </ul>
@@ -207,5 +297,21 @@ export function NewsletterManager() {
         )}
       </div>
     </div>
+  );
+}
+
+function statusBadge(status: string, unsubscribed: boolean) {
+  const base =
+    "inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
+  if (status === "SENT")
+    return <span className={`${base} bg-green-100 text-green-700`}>Sent</span>;
+  if (status === "FAILED")
+    return <span className={`${base} bg-red-100 text-red-700`}>Failed</span>;
+  if (status === "SENDING")
+    return <span className={`${base} bg-amber-100 text-amber-700`}>Sending</span>;
+  return (
+    <span className={`${base} bg-muted text-muted-foreground`}>
+      {unsubscribed ? "Skipped" : "Queued"}
+    </span>
   );
 }
