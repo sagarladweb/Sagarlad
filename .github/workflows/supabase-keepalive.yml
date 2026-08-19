@@ -1,0 +1,17 @@
+name: Keep Supabase Active
+
+on:
+  schedule:
+    # Runs every 3 days at 00:00 UTC
+    - cron: '0 0 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Keep-Alive Endpoint
+        run: |
+          echo "Pinging production keep-alive endpoint..."
+          curl -s https://sagarlad.com/api/cron/keepalive || true
+          curl -s https://admin.sagarlad.com/api/cron/keepalive || true

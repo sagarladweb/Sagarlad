@@ -28,9 +28,6 @@ import { PHASE_1 } from "@/lib/phase";
 
 export const dynamic = "force-dynamic";
 
-// Phase 1 ships a blog-only admin, so the dashboard routes straight to Posts.
-if (PHASE_1) redirect("/admin/posts");
-
 function Sparkline({ values }: { values: number[] }) {
   const { line, area } = chartGeometry(values, 120, 36);
   if (!line) return <div className="h-9" />;
@@ -109,6 +106,8 @@ function PanelCard({
 }
 
 export default async function DashboardPage() {
+  if (PHASE_1) redirect("/admin/posts");
+
   const [postCount, draftCount, , recentPosts, totalViewsAgg] =
     await getDashboardStats();
   const extras = await getDashboardExtras();
