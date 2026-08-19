@@ -697,21 +697,6 @@ li.is-active [data-dot] {
   animation: shine 2.8s cubic-bezier(0.4, 0, 0.2, 1) 1.4s infinite;
 }
 
-@keyframes pillar-card-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-.pillar-card-enter {
-  animation: pillar-card-in 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
 @keyframes pillar-swap-in {
   from {
     opacity: 0;
@@ -726,7 +711,6 @@ li.is-active [data-dot] {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pillar-card-enter,
   .pillar-swap {
     animation: none;
   }

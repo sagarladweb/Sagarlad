@@ -72,31 +72,6 @@ function sectorPath(startDeg: number, endDeg: number): string {
   ].join(" ");
 }
 
-function PillarIcon({
-  id,
-  color,
-  className,
-}: {
-  id: string;
-  color: string;
-  className?: string;
-}) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className={className}
-      fill="none"
-      stroke={color}
-      strokeWidth={1.7}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      {MARKS[id]}
-    </svg>
-  );
-}
-
 type RingProps = {
   active: string | null;
   activePillar: MindUpPillar | null;
@@ -105,8 +80,8 @@ type RingProps = {
   onSelect: (id: string) => void;
 };
 
-// The six-pillar ring. Icons render on mobile/tablet only (`lg:hidden`) so the
-// desktop ring stays minimal; the centre swaps to the selected pillar.
+// The six-pillar ring. Every segment carries its icon at all breakpoints; the
+// centre swaps to the selected pillar.
 function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingProps) {
   return (
     <div className="mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[480px]">
@@ -186,9 +161,8 @@ function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingPr
                     transition: "filter 0.3s ease",
                   }}
                 />
-                {/* Icon — mobile & tablet only, so the desktop ring stays calm */}
+                {/* Icon — visible at every breakpoint */}
                 <g
-                  className="lg:hidden"
                   transform={`translate(${ix - 15} ${iy - 15}) scale(1.25)`}
                   fill="none"
                   stroke={isActive ? "#111827" : p.color}
@@ -243,57 +217,8 @@ function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingPr
   );
 }
 
-function PillarCard({
-  p,
-  active,
-  onHover,
-  onLeave,
-  onClick,
-}: {
-  p: MindUpPillar;
-  active: boolean;
-  onHover: () => void;
-  onLeave: () => void;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      onMouseEnter={onHover}
-      onMouseLeave={onLeave}
-      aria-pressed={active}
-      aria-label={`${p.short} — ${p.shortDescription}`}
-      className={`group flex items-start gap-3.5 rounded-2xl border bg-white p-4 text-left transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1738B8] motion-safe:hover:-translate-y-0.5 ${
-        active
-          ? "border-black/15 shadow-md motion-safe:hover:shadow-lg"
-          : "border-black/10 shadow-[0_1px_2px_rgba(0,0,0,0.03)] motion-safe:hover:border-black/20 motion-safe:hover:shadow-md"
-      }`}
-      style={active ? { borderColor: p.color } : undefined}
-    >
-      <span
-        aria-hidden="true"
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-full transition-colors duration-300"
-        style={{
-          backgroundColor: active ? p.color : `${p.color}1f`,
-          color: active ? "#ffffff" : p.color,
-        }}
-      >
-        <PillarIcon id={p.id} color={active ? "#ffffff" : p.color} className="h-5 w-5" />
-      </span>
-      <span className="min-w-0">
-        <span className="block text-sm font-bold text-[#111827]">{p.short}</span>
-        <span className="mt-0.5 block text-xs leading-relaxed text-[#666666]">
-          {p.shortDescription}
-        </span>
-      </span>
-    </button>
-  );
-}
-
 export function MindUpPillars() {
   const [active, setActive] = useState<string | null>(null);
-  const [expanded, setExpanded] = useState(false);
 
   const activePillar = active
     ? (MINDUP_PILLARS.find((p) => p.id === active) ?? null)
@@ -309,14 +234,6 @@ export function MindUpPillars() {
     if (hoverDevice()) setActive(null);
   };
   const select = (id: string) => setActive((prev) => (prev === id ? null : id));
-
-  const cardProps = (p: MindUpPillar) => ({
-    p,
-    active: active === p.id,
-    onHover: () => hover(p.id),
-    onLeave: leave,
-    onClick: () => select(p.id),
-  });
 
   return (
     <section
@@ -405,45 +322,6 @@ export function MindUpPillars() {
             onLeave={leave}
             onSelect={select}
           />
-        </div>
-
-        {/* ---------- Pillar cards (desktop — full width, 3 columns) ---------- */}
-        <div className="mt-16 hidden lg:grid grid-cols-3 gap-4">
-          {MINDUP_PILLARS.map((p) => (
-            <PillarCard key={p.id} {...cardProps(p)} />
-          ))}
-        </div>
-
-        {/* ---------- Pillar cards (mobile / tablet) — 3 + expand ---------- */}
-        <div className="mt-12 lg:hidden">
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {MINDUP_PILLARS.slice(0, 3).map((p) => (
-              <PillarCard key={p.id} {...cardProps(p)} />
-            ))}
-          </div>
-
-          <div
-            className={`grid transition-[grid-template-rows] duration-500 ease-out ${
-              expanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
-            }`}
-          >
-            <div className="overflow-hidden">
-              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {MINDUP_PILLARS.slice(3).map((p) => (
-                  <PillarCard key={p.id} {...cardProps(p)} />
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setExpanded((e) => !e)}
-            className="mt-4 w-full rounded-2xl border border-black/10 bg-white px-4 py-3 text-sm font-bold text-[#1738B8] transition-colors duration-300 hover:border-black/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#1738B8]"
-            aria-expanded={expanded}
-          >
-            {expanded ? "Show less ↑" : "See all pillars →"}
-          </button>
         </div>
       </div>
     </section>
