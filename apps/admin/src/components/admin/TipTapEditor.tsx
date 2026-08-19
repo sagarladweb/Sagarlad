@@ -1108,6 +1108,7 @@ export function TipTapEditor({
   footer?: React.ReactNode;
 }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
+  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
   const [toolbarPos, setToolbarPos] = useState<ToolbarPos>(() => {
     if (typeof window === "undefined") return "top";
     const saved = window.localStorage.getItem("admin-toolbar-pos");
@@ -1728,8 +1729,6 @@ export function TipTapEditor({
       {renderGroup(true)}
     </div>
   );
-
-  const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();

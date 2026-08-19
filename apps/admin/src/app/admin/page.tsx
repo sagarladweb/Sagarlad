@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle, Shield, ChevronLeft, CheckCircle2, Sparkles } from "lucide-react";
-import { signIn, useSession } from "next-auth/react";
+import { Loader2, AlertCircle, Shield, ChevronLeft, CheckCircle2, Sparkles, LogOut, ArrowRight } from "lucide-react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { SessionProvider } from "@/components/SessionProvider";
 import { PHASE_1 } from "@/lib/phase";
 
@@ -27,13 +27,6 @@ function AdminLogin() {
 
   // Target panel destination based on active Phase
   const targetRoute = PHASE_1 ? "/admin/posts" : "/admin/dashboard";
-
-  // Already signed in? Send admin straight to panel.
-  useEffect(() => {
-    if (status === "authenticated" && session?.user?.role === "ADMIN") {
-      router.replace(targetRoute);
-    }
-  }, [status, session, router, targetRoute]);
 
   function adminMessage(): string {
     return step === "otp"
@@ -203,7 +196,7 @@ function AdminLogin() {
           </p>
         </aside>
 
-        {/* ---- Right: Login Form & Greeting Overlay ---- */}
+        {/* ---- Right: Login Form & Active Session Handler ---- */}
         <main className="flex items-center justify-center px-4 py-12 sm:px-8 bg-background">
           <div className="w-full max-w-sm">
             {/* Mobile brand header */}
@@ -227,123 +220,157 @@ function AdminLogin() {
                 </span>
               </div>
 
-              {/* Dynamic Header */}
-              <h2 className="mt-5 font-display text-2xl font-bold">
-                {step === "otp" ? "Two-factor verification" : `${timeOfDayGreeting}, Sagar`}
-              </h2>
-              <p className="mt-2 text-sm text-muted-foreground">
-                {step === "otp"
-                  ? "Enter your 6-digit authenticator code to proceed."
-                  : "Sign in with your credentials to manage your platform."}
-              </p>
-
-              {/* Success / Greeting Feedback Overlay */}
-              {greetingState === "success" && (
-                <div className="mt-6 flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-accent animate-fade-in">
-                  <CheckCircle2 className="h-5 w-5 shrink-0 animate-bounce" />
-                  <div>
-                    <p className="text-xs font-bold uppercase tracking-wider">Welcome back</p>
-                    <p className="text-sm font-semibold">Logged in as Sagar Lad</p>
+              {status === "authenticated" && session?.user ? (
+                /* ---- Active Session Card ---- */
+                <div className="mt-6 space-y-5 animate-fade-in">
+                  <div className="rounded-2xl border border-accent/30 bg-accent/10 p-4 text-accent">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 shrink-0" />
+                      <p className="text-xs font-bold uppercase tracking-wider">Active Session Detected</p>
+                    </div>
+                    <p className="mt-2 text-sm font-semibold text-foreground">
+                      Signed in as {session.user.name || "Sagar Lad"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{session.user.email}</p>
                   </div>
+
+                  <button
+                    type="button"
+                    onClick={() => router.push(targetRoute)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all hover:opacity-90 active:scale-[0.99] shadow-md shadow-accent/20"
+                  >
+                    Continue to Admin Suite <ArrowRight className="h-4 w-4" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => signOut({ callbackUrl: "/admin" })}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                  >
+                    <LogOut className="h-3.5 w-3.5" /> Sign out &amp; switch account
+                  </button>
                 </div>
+              ) : (
+                /* ---- Credentials / OTP Form ---- */
+                <>
+                  <h2 className="mt-5 font-display text-2xl font-bold">
+                    {step === "otp" ? "Two-factor verification" : `${timeOfDayGreeting}, Sagar`}
+                  </h2>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {step === "otp"
+                      ? "Enter your 6-digit authenticator code to proceed."
+                      : "Sign in with your credentials to manage your platform."}
+                  </p>
+
+                  {/* Success / Greeting Feedback Overlay */}
+                  {greetingState === "success" && (
+                    <div className="mt-6 flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-accent animate-fade-in">
+                      <CheckCircle2 className="h-5 w-5 shrink-0 animate-bounce" />
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wider">Welcome back</p>
+                        <p className="text-sm font-semibold">Logged in as Sagar Lad</p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-6">
+                    {step === "credentials" ? (
+                      <form onSubmit={onCredentialsSubmit} className="space-y-4" noValidate>
+                        <div>
+                          <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
+                            Email Address
+                          </label>
+                          <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className={input}
+                            placeholder="sagar@sagarlad.com"
+                            autoComplete="username"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
+                            Password
+                          </label>
+                          <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className={input}
+                            placeholder="••••••••••••"
+                            autoComplete="current-password"
+                            required
+                          />
+                        </div>
+
+                        {error && (
+                          <p className="flex items-center gap-1.5 text-sm text-red-600 animate-fade-in" role="alert">
+                            <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+                          </p>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={loading || greetingState === "success"}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 shadow-md shadow-accent/20"
+                        >
+                          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                          {greetingState === "greeting" ? "Greeting Sagar Lad..." : greetingState === "success" ? "Access Granted" : "Sign In"}
+                        </button>
+                      </form>
+                    ) : (
+                      <form onSubmit={onOtpSubmit} className="space-y-4" noValidate>
+                        <div>
+                          <label htmlFor="otp" className="mb-1.5 block text-sm font-medium">
+                            Authentication code
+                          </label>
+                          <input
+                            id="otp"
+                            inputMode="text"
+                            autoComplete="one-time-code"
+                            value={otp}
+                            onChange={(e) => setOtp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                            placeholder="000000"
+                            className={`${input} text-center font-mono text-lg tracking-[0.5em]`}
+                            autoFocus
+                            required
+                          />
+                        </div>
+
+                        {error && (
+                          <p className="flex items-center gap-1.5 text-sm text-red-600 animate-fade-in" role="alert">
+                            <AlertCircle className="h-4 w-4 shrink-0" /> {error}
+                          </p>
+                        )}
+
+                        <button
+                          type="submit"
+                          disabled={loading || greetingState === "success"}
+                          className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 shadow-md shadow-accent/20"
+                        >
+                          {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                          {greetingState === "greeting" ? "Verifying..." : greetingState === "success" ? "Access Granted" : "Verify & Sign In"}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setStep("credentials");
+                            setError("");
+                          }}
+                          className="inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                        >
+                          <ChevronLeft className="h-4 w-4" /> Back to email &amp; password
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                </>
               )}
-
-              <div className="mt-6">
-                {step === "credentials" ? (
-                  <form onSubmit={onCredentialsSubmit} className="space-y-4" noValidate>
-                    <div>
-                      <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                        Email Address
-                      </label>
-                      <input
-                        id="email"
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className={input}
-                        placeholder="sagar@sagarlad.com"
-                        autoComplete="username"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                        Password
-                      </label>
-                      <input
-                        id="password"
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className={input}
-                        placeholder="••••••••••••"
-                        autoComplete="current-password"
-                        required
-                      />
-                    </div>
-
-                    {error && (
-                      <p className="flex items-center gap-1.5 text-sm text-red-600 animate-fade-in" role="alert">
-                        <AlertCircle className="h-4 w-4 shrink-0" /> {error}
-                      </p>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={loading || greetingState === "success"}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 shadow-md shadow-accent/20"
-                    >
-                      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                      {greetingState === "greeting" ? "Greeting Sagar Lad..." : greetingState === "success" ? "Access Granted" : "Sign In"}
-                    </button>
-                  </form>
-                ) : (
-                  <form onSubmit={onOtpSubmit} className="space-y-4" noValidate>
-                    <div>
-                      <label htmlFor="otp" className="mb-1.5 block text-sm font-medium">
-                        Authentication code
-                      </label>
-                      <input
-                        id="otp"
-                        inputMode="text"
-                        autoComplete="one-time-code"
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
-                        placeholder="000000"
-                        className={`${input} text-center font-mono text-lg tracking-[0.5em]`}
-                        autoFocus
-                        required
-                      />
-                    </div>
-
-                    {error && (
-                      <p className="flex items-center gap-1.5 text-sm text-red-600 animate-fade-in" role="alert">
-                        <AlertCircle className="h-4 w-4 shrink-0" /> {error}
-                      </p>
-                    )}
-
-                    <button
-                      type="submit"
-                      disabled={loading || greetingState === "success"}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 shadow-md shadow-accent/20"
-                    >
-                      {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                      {greetingState === "greeting" ? "Verifying..." : greetingState === "success" ? "Access Granted" : "Verify & Sign In"}
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setStep("credentials");
-                        setError("");
-                      }}
-                      className="inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      <ChevronLeft className="h-4 w-4" /> Back to email &amp; password
-                    </button>
-                  </form>
-                )}
-              </div>
             </div>
           </div>
         </main>

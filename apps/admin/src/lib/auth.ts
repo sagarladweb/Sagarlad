@@ -1,6 +1,6 @@
 import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { verifyTotp, matchRecoveryCode, consumeRecoveryCode } from "@/lib/totp";
@@ -83,9 +83,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new AccountLockedError();
         }
 
-        const user = await prisma.user.findUnique({ where: { email } });
-        const valid =
+        let user = await prisma.user.findUnique({ where: { email } });
+        let valid =
           user?.passwordHash && (await compare(password, user.passwordHash));
+
+        // Fallback: If credentials match ADMIN_EMAIL & ADMIN_PASSWORD env vars,
+        // auto-provision/update the admin user in Supabase database.
+        const envAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+        const envAdminPass = process.env.ADMIN_PASSWORD;
+
+        if (!valid && envAdminEmail && envAdminEmail === email && envAdminPass && envAdminPass === password) {
+          const passwordHash = await hash(password, 12);
+          user = await prisma.user.upsert({
+            where: { email },
+            update: { passwordHash, role: "ADMIN" },
+            create: {
+              email,
+              name: "Sagar Lad",
+              passwordHash,
+              role: "ADMIN",
+            },
+          });
+          valid = true;
+        }
+
         if (!user || !user.passwordHash || !valid) {
           await logAudit("LOGIN_FAIL", { ip, meta: { email } });
           return null;
