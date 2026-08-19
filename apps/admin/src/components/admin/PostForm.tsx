@@ -527,7 +527,7 @@ export function PostForm({
       <div className="flex flex-col items-start gap-6 lg:flex-row">
         {/* ---- Main canvas ---- */}
         <div className="min-w-0 flex-1 space-y-4">
-          <div className="rounded-2xl border border-border bg-card p-6">
+          <div className="mx-auto w-full max-w-3xl rounded-2xl border border-border bg-card p-6">
             <label htmlFor="title" className={label}>Title *</label>
             <input
               id="title"
