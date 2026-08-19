@@ -9,8 +9,6 @@ import {
   Share2,
   Mail,
   Layers,
-  BookOpen,
-  Video,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "@/components/admin/SignOutButton";
@@ -25,8 +23,6 @@ export const dynamic = "force-dynamic";
 const nav = [
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, phase: 2 },
   { label: "Posts", href: "/admin/posts", icon: FileText, phase: 1 },
-  { label: "Books", href: "/admin/books", icon: BookOpen, phase: 2 },
-  { label: "Videos", href: "/admin/videos", icon: Video, phase: 2 },
   { label: "Content", href: "/admin/content", icon: Layers, phase: 2 },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail, phase: 2 },
   { label: "Social", href: "/admin/social", icon: Share2, phase: 2 },

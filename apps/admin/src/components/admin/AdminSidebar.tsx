@@ -13,16 +13,12 @@ import {
   LogOut,
   Layers,
   Settings,
-  BookOpen,
-  Video,
   type LucideIcon,
 } from "lucide-react";
 
 const ICONS: Record<string, LucideIcon> = {
   "/admin/dashboard": LayoutDashboard,
   "/admin/posts": FileText,
-  "/admin/books": BookOpen,
-  "/admin/videos": Video,
   "/admin/content": Layers,
   "/admin/newsletter": Mail,
   "/admin/social": Share2,
