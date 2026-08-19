@@ -11,8 +11,13 @@ import {
   type TemplateId,
 } from "@/lib/newsletterTemplates";
 import { SITE } from "@/lib/site";
+import {
+  InsertContentPicker,
+  type InsertItem,
+  type InsertKind,
+} from "@/components/admin/InsertContentPicker";
 
-export type InsertItem = { title: string; url: string };
+export type { InsertItem } from "@/components/admin/InsertContentPicker";
 
 type Props = {
   subscriberCount: number;
@@ -68,7 +73,7 @@ export function NewsletterComposer({
     setContent((c) => ({ ...c, sections: c.sections.filter((_, idx) => idx !== i) }));
   }
 
-  function addInserted(item: InsertItem, kind: string) {
+  function addInserted(item: InsertItem, kind: InsertKind) {
     setContent((c) => ({
       ...c,
       sections: [
@@ -271,44 +276,22 @@ export function NewsletterComposer({
             </div>
           ))}
 
-          <button
-            type="button"
-            onClick={addSection}
-            className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:border-accent hover:text-accent"
-          >
-            <Plus className="w-4 h-4" /> Add section
-          </button>
-
-          {insert &&
-            (insert.posts.length > 0 ||
-              insert.videos.length > 0 ||
-              insert.books.length > 0) && (
-              <div className="rounded-2xl bg-muted/40 p-4">
-                <p className="text-xs font-semibold text-foreground">Insert recent content</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  Adds a section linking current site content.
-                </p>
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {(["posts", "videos", "books"] as const).map((k) =>
-                    insert[k].map((item) => (
-                      <button
-                        key={item.url}
-                        type="button"
-                        onClick={() =>
-                          addInserted(
-                            item,
-                            k === "posts" ? "post" : k === "videos" ? "video" : "book"
-                          )
-                        }
-                        className="rounded-full border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground hover:border-accent hover:text-accent"
-                      >
-                        + {item.title}
-                      </button>
-                    ))
-                  )}
-                </div>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={addSection}
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-border px-3 py-2.5 text-sm font-medium text-muted-foreground hover:border-accent hover:text-accent"
+            >
+              <Plus className="w-4 h-4" /> Add section
+            </button>
+            {insert && (
+              <InsertContentPicker
+                items={insert}
+                label="Insert content"
+                onInsert={addInserted}
+              />
             )}
+          </div>
 
           <div>
             <label className={labelCls}>Sign-off</label>

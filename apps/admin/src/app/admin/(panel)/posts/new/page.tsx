@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/db";
 import { PostForm } from "@/components/admin/PostForm";
+import { getNewsletterInsertItems } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
 export default async function NewPostPage() {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  const [categories, insertItems] = await Promise.all([
+    prisma.category.findMany({ orderBy: { name: "asc" } }),
+    getNewsletterInsertItems(),
+  ]);
 
   return (
     <div className="space-y-6">
@@ -14,7 +18,7 @@ export default async function NewPostPage() {
           Write your post and publish it when you&apos;re ready.
         </p>
       </header>
-      <PostForm categories={categories} />
+      <PostForm categories={categories} insertItems={insertItems} />
     </div>
   );
 }

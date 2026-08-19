@@ -23,6 +23,11 @@ import { PostPreview, PreviewPending } from "@/components/admin/PostPreview";
 import { ContentEmbed, type EmbedData } from "@/components/admin/ContentEmbed";
 import { EmbedPicker } from "@/components/admin/EmbedPicker";
 import {
+  InsertContentPicker,
+  type InsertItem,
+  type InsertKind,
+} from "@/components/admin/InsertContentPicker";
+import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
@@ -504,6 +509,7 @@ export function TipTapEditor({
   onChange,
   preview,
   footer,
+  insertItems,
 }: {
   initialContent?: string;
   onChange: (html: string) => void;
@@ -514,6 +520,7 @@ export function TipTapEditor({
     error?: string;
   };
   footer?: React.ReactNode;
+  insertItems?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
 }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [toolbarPos, setToolbarPos] = useState<ToolbarPos>(() => {
@@ -1073,6 +1080,20 @@ export function TipTapEditor({
     setTemplateOpen(false);
   };
 
+  const insertRecentContent = (item: InsertItem, kind: InsertKind) => {
+    const esc = (s: string) =>
+      s
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
+    editor
+      .chain()
+      .focus()
+      .insertContent(`<p>${esc(kind)}: <a href="${esc(item.url)}">${esc(item.title)}</a></p>`)
+      .run();
+  };
+
   const renderGroup = (vertical: boolean) => {
     const groups = [textGroup, blockGroup, alignGroup, linkImageGroup, historyGroup, insertGroup];
     return groups.map((group, gi) => (
@@ -1382,6 +1403,16 @@ export function TipTapEditor({
               <PanelRight className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {mode === "write" && insertItems && (
+            <InsertContentPicker
+              compact
+              align="right"
+              label="Insert"
+              items={insertItems}
+              onInsert={insertRecentContent}
+            />
+          )}
 
           <button
             type="button"
