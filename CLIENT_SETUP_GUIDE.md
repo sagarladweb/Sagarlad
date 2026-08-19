@@ -77,6 +77,12 @@ To run both applications locally on your machine at the same time:
    npm run db:seed
    ```
 
+#### 💡 Automated Keep-Alive Solution (Never-Pause Free Tier)
+Supabase free tier automatically pauses projects after 7 days of zero database activity. To make sure your client's database stays active 24/7/365 forever without any manual action:
+- **Built-in Vercel Cron**: Both `apps/site` and `apps/admin` include pre-configured `vercel.json` files that automatically trigger `/api/cron/keepalive` every single day at 00:00 UTC.
+- **GitHub Action Backup**: A GitHub Action workflow (`.github/workflows/supabase-keepalive.yml`) runs every 3 days to ping the database automatically.
+- **Result**: Zero maintenance, zero pause risk — set it up once during client deployment, and it runs forever automatically!
+
 ---
 
 ### Step 3: Set Up Brevo Email Service
@@ -109,17 +115,23 @@ To run both applications locally on your machine at the same time:
 
 ### Step 6: Deploy Both Projects on Vercel
 
+Each app is deployed as a separate Vercel project from the single code repository:
+
 #### 6A. Deploy Public Website (`apps/site`)
-1. In Vercel, click **Add New -> Project** and select your `sagarlad-platform` repository.
-2. Set **Root Directory** to: **`apps/site`**.
-3. Add environment variables for `apps/site` (see table below).
-4. Click **Deploy**. (Connect custom domain `sagarlad.com` in Project Settings -> Domains).
+1. In Vercel, click **Add New -> Project** and import your `sagarlad-platform` repository.
+2. Under **Framework Preset**, keep **Next.js**.
+3. Under **Root Directory**, click **Edit** and set it to: **`apps/site`**.
+4. Add environment variables for `apps/site` (see checklist below).
+5. Click **Deploy**. (Vercel automatically detects `vercel.json` and activates the daily Supabase keep-alive cron `/api/cron/keepalive`).
+6. Connect custom domain `sagarlad.com` under **Project Settings -> Domains**.
 
 #### 6B. Deploy Admin Panel (`apps/admin`)
-1. In Vercel, click **Add New -> Project** again and select the **same repository**.
-2. Set **Root Directory** to: **`apps/admin`**.
-3. Add environment variables for `apps/admin` (see table below). Set `ADMIN_PHASE="1"`.
-4. Click **Deploy**. (Connect custom domain `admin.sagarlad.com` in Project Settings -> Domains).
+1. In Vercel, click **Add New -> Project** again and import the **same repository**.
+2. Under **Framework Preset**, keep **Next.js**.
+3. Under **Root Directory**, click **Edit** and set it to: **`apps/admin`**.
+4. Add environment variables for `apps/admin` (see checklist below). Set `ADMIN_PHASE="1"`.
+5. Click **Deploy**. (Vercel automatically handles Prisma client generation and activates Vercel Crons).
+6. Connect custom domain `admin.sagarlad.com` under **Project Settings -> Domains**.
 
 ---
 
