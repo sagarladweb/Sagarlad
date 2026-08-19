@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, Loader2 } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { showToast } from "@/components/admin/Toast";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
 
@@ -21,7 +21,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
   const [posts, setPosts] = useState<PostItem[]>(initialPosts);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const PER_PAGE = 15;
 
   const filteredPosts = posts.filter((p) => {
     const matchesSearch =
@@ -35,6 +38,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
         : !p.published;
     return matchesSearch && matchesFilter;
   });
+
+  const pageCount = Math.max(1, Math.ceil(filteredPosts.length / PER_PAGE));
+  const current = Math.min(page, pageCount);
+  const pagedPosts = filteredPosts.slice((current - 1) * PER_PAGE, current * PER_PAGE);
 
   async function handleDelete(id: string, title: string) {
     const ok = await showConfirm({
@@ -85,7 +92,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
           <input
             type="text"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             placeholder="Search posts..."
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-accent"
           />
@@ -94,7 +104,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
         {/* Status Filter Tabs */}
         <div className="flex items-center gap-1 p-1 rounded-xl border border-border bg-muted/40 self-start sm:self-auto">
           <button
-            onClick={() => setFilter("all")}
+            onClick={() => {
+              setFilter("all");
+              setPage(1);
+            }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "all"
                 ? "bg-background text-foreground shadow-sm"
@@ -104,7 +117,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             All ({posts.length})
           </button>
           <button
-            onClick={() => setFilter("published")}
+            onClick={() => {
+              setFilter("published");
+              setPage(1);
+            }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "published"
                 ? "bg-background text-foreground shadow-sm"
@@ -114,7 +130,10 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             Published ({posts.filter((p) => p.published).length})
           </button>
           <button
-            onClick={() => setFilter("draft")}
+            onClick={() => {
+              setFilter("draft");
+              setPage(1);
+            }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "draft"
                 ? "bg-background text-foreground shadow-sm"
@@ -148,7 +167,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredPosts.map((p) => (
+              {pagedPosts.map((p) => (
                 <tr key={p.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 font-medium max-w-xs truncate text-foreground">
                     {p.title}
@@ -208,6 +227,32 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             </tbody>
           </table>
         </div>
+      )}
+
+      {pageCount > 1 && (
+        <nav aria-label="Pagination" className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={current <= 1}
+            aria-label="Previous page"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ChevronLeft className="w-4 h-4" /> Previous
+          </button>
+          <span className="text-sm text-muted-foreground">
+            Page {current} of {pageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+            disabled={current >= pageCount}
+            aria-label="Next page"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+          >
+            Next <ChevronRight className="w-4 h-4" />
+          </button>
+        </nav>
       )}
     </div>
   );

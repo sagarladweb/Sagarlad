@@ -28,6 +28,15 @@ type DownloadTarget = {
 
 const PER_PAGE = 9;
 
+// Split admin-entered learnings/descriptions into clean bullets. Handles
+// newline lists, • / - / * / · markers, and numbered lists.
+function toBullets(text: string): string[] {
+  return text
+    .split("\n")
+    .map((l) => l.replace(/^\s*(?:[-•*·▪◦►]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean);
+}
+
 export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Variant }) {
   const [page, setPage] = useState(1);
   const [active, setActive] = useState<BookItem | null>(null);
@@ -37,6 +46,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [subscribe, setSubscribe] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,6 +78,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
     setName("");
     setEmail("");
     setAcceptedTerms(false);
+    setSubscribe(false);
     setError(null);
     setSubmitting(false);
   };
@@ -95,7 +106,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
       const res = await fetch(`/api/ebooks/download/${target.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, acceptedTerms }),
+        body: JSON.stringify({ name, email, acceptedTerms, subscribe }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
@@ -167,9 +178,17 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               </button>
 
               {(book.description || book.learning) && (
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                  {variant === "read" ? book.learning : book.description}
-                </p>
+                variant === "read" && book.learning ? (
+                  <ul className="mx-auto mt-2 max-w-sm text-left text-sm leading-relaxed text-muted-foreground line-clamp-2 list-disc pl-4">
+                    {toBullets(book.learning).slice(0, 3).map((bullet) => (
+                      <li key={bullet}>{bullet}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                    {book.description}
+                  </p>
+                )
               )}
 
               {variant === "ebook" ? (
@@ -293,33 +312,21 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
                 {variant === "read" && active.learning && (
                   <div className="space-y-2">
-                    <p className="text-xs font-bold uppercase tracking-wider text-accent">Learnings from this book</p>
-                    {active.learning.includes("•") || active.learning.includes("\n") ? (
-                      <ul className="space-y-1.5 list-disc pl-4 text-xs font-medium text-foreground/90">
-                        {active.learning
-                          .split(/\n|•/)
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((bullet, idx) => (
-                            <li key={idx}>{bullet}</li>
-                          ))}
-                      </ul>
-                    ) : (
-                      <p className="text-xs font-medium text-foreground/90">{active.learning}</p>
-                    )}
+                    <p className="text-xs font-bold uppercase tracking-wider text-brand">Learnings from this book</p>
+                    <ul className="space-y-1.5 list-disc pl-4 text-xs font-medium text-foreground/90">
+                      {toBullets(active.learning).map((bullet, idx) => (
+                        <li key={idx}>{bullet}</li>
+                      ))}
+                    </ul>
                   </div>
                 )}
                 {(variant === "published" || variant === "ebook") && active.description && (
                   <div>
-                    {active.description.includes("•") ? (
+                    {toBullets(active.description).length > 1 ? (
                       <ul className="space-y-1.5 list-disc pl-4 text-xs font-normal">
-                        {active.description
-                          .split(/\n|•/)
-                          .map((l) => l.trim())
-                          .filter(Boolean)
-                          .map((bullet, idx) => (
-                            <li key={idx}>{bullet}</li>
-                          ))}
+                        {toBullets(active.description).map((bullet, idx) => (
+                          <li key={idx}>{bullet}</li>
+                        ))}
                       </ul>
                     ) : (
                       <p>{active.description}</p>
@@ -424,9 +431,21 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               <label className="flex items-start gap-3 cursor-pointer">
                 <input
                   type="checkbox"
+                  checked={subscribe}
+                  onChange={(e) => setSubscribe(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
+                />
+                <span className="text-xs leading-relaxed text-muted-foreground">
+                  Subscribe to my newsletter for money, life and career insights.
+                </span>
+              </label>
+
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
                   checked={acceptedTerms}
                   onChange={(e) => setAcceptedTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--accent)]"
+                  className="mt-0.5 h-4 w-4 shrink-0 accent-[var(--brand)]"
                 />
                 <span className="text-xs leading-relaxed text-muted-foreground">
                   I have read and agree to the{" "}

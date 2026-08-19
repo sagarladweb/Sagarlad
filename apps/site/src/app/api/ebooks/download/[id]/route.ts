@@ -78,12 +78,30 @@ export async function POST(
     );
   }
 
-  const { name, email } = parsed.data;
+  const { name, email, subscribe } = parsed.data;
 
   await logAudit("EBOOK_DOWNLOAD", {
     ip,
-    meta: { kind: "EBOOK_DOWNLOAD", bookId: id, bookTitle: book.title, email, name },
+    meta: { kind: "EBOOK_DOWNLOAD", bookId: id, bookTitle: book.title, email, name, subscribe },
   });
+
+  // Optional newsletter signup on the download gate. Already subscribed → no-op;
+  // previously unsubscribed → flip the flag back; otherwise create a subscriber.
+  if (subscribe) {
+    const existing = await prisma.newsletterSubscriber.findUnique({ where: { email } });
+    if (existing) {
+      if (existing.unsubscribed) {
+        await prisma.newsletterSubscriber.update({
+          where: { id: existing.id },
+          data: { unsubscribed: false, name: existing.name || name, acceptedTerms: true },
+        });
+      }
+    } else {
+      await prisma.newsletterSubscriber.create({
+        data: { email, name, acceptedTerms: true },
+      });
+    }
+  }
 
   // Proxy the file through the server so the real URL never reaches the browser.
   // Primary source is the private bucket; legacy `buyUrl` is the fallback.

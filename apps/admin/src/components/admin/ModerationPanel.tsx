@@ -232,7 +232,7 @@ export function ModerationPanel() {
                     data.comments.every((c) => selected.has(c.id))
                   }
                   onChange={() => toggleAll(data.comments.map((c) => c.id))}
-                  className="accent-black"
+                  className="accent-[var(--accent)]"
                 />
                 Select all
               </label>
@@ -269,7 +269,7 @@ export function ModerationPanel() {
                       checked={selected.has(c.id)}
                       onChange={() => toggle(c.id)}
                       aria-label={`Select comment by ${c.name}`}
-                      className="accent-black mt-1"
+                      className="accent-[var(--accent)] mt-1"
                     />
                     <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">

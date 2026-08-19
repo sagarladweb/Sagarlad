@@ -30,7 +30,11 @@ export default async function BlogPage({
   const vpage = Math.max(1, Number(params.vpage) || 1);
   const q = (params.q ?? "").trim();
 
-  const [categories] = await Promise.all([getCategories()]);
+  const [categories, totalPosts, totalVideos] = await Promise.all([
+    getCategories(),
+    prisma.post.count({ where: { published: true } }),
+    prisma.video.count({ where: { published: true } }),
+  ]);
   const categorySlug = categories.some((c) => c.slug === params.category)
     ? params.category
     : undefined;
@@ -43,19 +47,26 @@ export default async function BlogPage({
     where.OR = [{ title: { contains: q } }, { excerpt: { contains: q } }];
   }
 
-  const [posts, total, totalPosts, videos, totalVideos] = await Promise.all([
-    prisma.post.findMany({
-      where,
-      include: { category: true },
-      orderBy: { publishedAt: "desc" },
-      take: PAGE_SIZE,
-      skip: (page - 1) * PAGE_SIZE,
-    }),
-    prisma.post.count({ where }),
-    prisma.post.count({ where: { published: true } }),
-    getPublishedVideos(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE),
-    prisma.video.count({ where: { published: true } }),
-  ]);
+  // Only fetch the rows for the active tab. Categories and the two stats
+  // counts are always needed; the list+count for the other tab are not.
+  let posts: Awaited<ReturnType<typeof prisma.post.findMany>> = [];
+  let total = 0;
+  let videos: Awaited<ReturnType<typeof getPublishedVideos>> = [];
+
+  if (tab === "posts") {
+    [posts, total] = await Promise.all([
+      prisma.post.findMany({
+        where,
+        include: { category: true },
+        orderBy: { publishedAt: "desc" },
+        take: PAGE_SIZE,
+        skip: (page - 1) * PAGE_SIZE,
+      }),
+      prisma.post.count({ where }),
+    ]);
+  } else {
+    videos = await getPublishedVideos(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE);
+  }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const videoPages = Math.max(1, Math.ceil(totalVideos / PAGE_SIZE));

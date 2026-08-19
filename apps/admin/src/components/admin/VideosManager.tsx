@@ -12,6 +12,8 @@ import {
   Monitor,
   Smartphone,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Wand2,
 } from "lucide-react";
 import { ImageUpload } from "@/components/admin/ImageUpload";
@@ -108,6 +110,7 @@ export function VideosManager() {
   const [ok, setOk] = useState("");
   const [tab, setTab] = useState<VideoPlatform>("youtube");
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [videoPage, setVideoPage] = useState(1);
 
   const isEditingInstagram = () =>
     !!editing && isInstagramUrl(editing.embedUrl);
@@ -327,6 +330,14 @@ export function VideosManager() {
     instagram: videos.filter((v) => platformOf(v) === "instagram").length,
   };
 
+  const VIDEO_PAGE_SIZE = 24;
+  const videoPageCount = Math.max(1, Math.ceil(tabVideos.length / VIDEO_PAGE_SIZE));
+  const safeVideoPage = Math.min(videoPage, videoPageCount);
+  const pagedVideos = tabVideos.slice(
+    (safeVideoPage - 1) * VIDEO_PAGE_SIZE,
+    safeVideoPage * VIDEO_PAGE_SIZE
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center gap-3">
@@ -335,7 +346,10 @@ export function VideosManager() {
             id="video-platform"
             label="Platform"
             value={tab}
-            onChange={(v) => setTab(v as VideoPlatform)}
+            onChange={(v) => {
+              setTab(v as VideoPlatform);
+              setVideoPage(1);
+            }}
             options={[
               { value: "youtube", label: `YouTube (${counts.youtube})` },
               { value: "instagram", label: `Instagram (${counts.instagram})` },
@@ -513,7 +527,7 @@ export function VideosManager() {
                         onChange={(e) =>
                           setEditing({ ...editing, published: e.target.checked })
                         }
-                        className="accent-black"
+                        className="accent-[var(--accent)]"
                       />
                       Published (visible)
                     </label>
@@ -581,7 +595,7 @@ export function VideosManager() {
         </p>
       ) : (
         <ul className="columns-2 gap-4 sm:columns-3 lg:columns-4">
-          {tabVideos.map((v) => (
+          {pagedVideos.map((v) => (
             <li
               key={v.id}
               className="group mb-4 break-inside-avoid rounded-2xl border border-border bg-card overflow-hidden transition-shadow hover:shadow-lg"
@@ -642,6 +656,32 @@ export function VideosManager() {
             </li>
           ))}
         </ul>
+      )}
+
+      {videoPageCount > 1 && (
+        <nav aria-label="Pagination" className="flex items-center justify-center gap-3">
+          <button
+            type="button"
+            onClick={() => setVideoPage((p) => Math.max(1, p - 1))}
+            disabled={safeVideoPage <= 1}
+            aria-label="Previous page"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+          >
+            <ChevronLeft className="w-4 h-4" /> Previous
+          </button>
+          <span className="text-sm text-muted-foreground">
+            Page {safeVideoPage} of {videoPageCount}
+          </span>
+          <button
+            type="button"
+            onClick={() => setVideoPage((p) => Math.min(videoPageCount, p + 1))}
+            disabled={safeVideoPage >= videoPageCount}
+            aria-label="Next page"
+            className="inline-flex items-center gap-1 rounded-full border border-border px-4 py-2 text-sm font-semibold transition-colors hover:bg-muted disabled:pointer-events-none disabled:opacity-40"
+          >
+            Next <ChevronRight className="w-4 h-4" />
+          </button>
+        </nav>
       )}
     </div>
   );

@@ -129,7 +129,7 @@ export function NewsletterCta() {
                       type="checkbox"
                       checked={terms}
                       onChange={(e) => setTerms(e.target.checked)}
-                      className="mt-0.5 h-4 w-4 rounded border-border bg-background accent-accent shrink-0"
+                      className="mt-0.5 h-4 w-4 rounded border-border bg-background accent-brand shrink-0"
                     />
                     <span className="leading-normal">
                       I agree to the{" "}

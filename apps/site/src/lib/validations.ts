@@ -29,6 +29,7 @@ export const ebookDownloadSchema = z.object({
   acceptedTerms: z.boolean().refine((v) => v === true, {
     message: "You must accept the Privacy Policy and Terms",
   }),
+  subscribe: z.boolean().optional(),
 });
 
 export const contactSchema = z.object({

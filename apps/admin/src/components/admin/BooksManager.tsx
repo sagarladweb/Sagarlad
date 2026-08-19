@@ -537,7 +537,7 @@ export function BooksManager() {
                     onChange={(e) =>
                       setEditing({ ...editing, published: e.target.checked })
                     }
-                    className="accent-black"
+                    className="accent-[var(--accent)]"
                   />
                   Published (visible)
                 </label>
@@ -549,7 +549,7 @@ export function BooksManager() {
                       onChange={(e) =>
                         setEditing({ ...editing, free: e.target.checked })
                       }
-                      className="accent-black"
+                      className="accent-[var(--accent)]"
                     />
                     Free
                   </label>
@@ -562,7 +562,7 @@ export function BooksManager() {
                       onChange={(e) =>
                         setEditing({ ...editing, featured: e.target.checked })
                       }
-                      className="accent-black"
+                      className="accent-[var(--accent)]"
                     />
                     Featured
                   </label>

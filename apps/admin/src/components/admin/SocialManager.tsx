@@ -243,7 +243,7 @@ export function SocialManager() {
                   type="checkbox"
                   checked={editing.active}
                   onChange={(e) => setEditing({ ...editing, active: e.target.checked })}
-                  className="accent-black h-4 w-4 rounded"
+                  className="accent-[var(--accent)] h-4 w-4 rounded"
                 />
                 Active (visible on site)
               </label>
