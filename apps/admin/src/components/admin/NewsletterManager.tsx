@@ -61,6 +61,11 @@ type Props = {
   insert?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
 };
 
+const sectionCls =
+  "mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground";
+const pillBtn =
+  "inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-accent";
+
 export function NewsletterManager({ insert }: Props) {
   const [data, setData] = useState<ApiData>({
     subscriberCount: 0,
@@ -122,9 +127,6 @@ export function NewsletterManager({ insert }: Props) {
   const percent = (c: Campaign) =>
     c.total === 0 ? 0 : Math.round((c.sent / c.total) * 100);
 
-  const drafts = data.campaigns.filter((c) => c.draft);
-  const sent = data.campaigns.filter((c) => !c.draft);
-
   function openInComposer(c: Campaign) {
     setComposerSeed({
       subject: c.subject,
@@ -158,8 +160,12 @@ export function NewsletterManager({ insert }: Props) {
     }
   }
 
+  const campaigns = [...data.campaigns].sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-10">
       {message && (
         <p
           role={message.ok ? "status" : "alert"}
@@ -170,9 +176,7 @@ export function NewsletterManager({ insert }: Props) {
       )}
 
       <div id="newsletter-composer">
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Write a newsletter
-        </h2>
+        <h2 className={sectionCls}>Write a newsletter</h2>
         <NewsletterComposer
           key={composerKey}
           seed={composerSeed}
@@ -196,133 +200,114 @@ export function NewsletterManager({ insert }: Props) {
         />
       </div>
 
-      {drafts.length > 0 && (
-        <div>
-          <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Drafts
-          </h2>
-          <ul className="divide-y divide-border border-y border-border">
-            {drafts.map((c) => (
-              <li key={c.id} className="flex items-center justify-between gap-4 py-3.5">
-                <div className="flex min-w-0 items-center gap-3">
-                  <FileText className="w-4 h-4 shrink-0 text-muted-foreground" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">
-                      {c.subject || "Untitled draft"}
-                    </p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {new Date(c.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => openInComposer(c)}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-accent"
-                  >
-                    <FileText className="w-3.5 h-3.5" /> Continue
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => deleteDraft(c.id)}
-                    aria-label="Delete draft"
-                    className="p-1.5 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
-
       <div>
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Past newsletters
-        </h2>
+        <h2 className={sectionCls}>Newsletters</h2>
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
-        ) : sent.length === 0 ? (
+        ) : campaigns.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            No newsletters sent yet. Compose your first one above.
+            No newsletters yet. Compose your first one above.
           </p>
         ) : (
           <ul className="divide-y divide-border border-y border-border">
-            {sent.map((c) => (
+            {campaigns.map((c) => (
               <li key={c.id} className="py-3.5 space-y-2">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{c.subject}</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">
-                      {new Date(c.createdAt).toLocaleDateString("en-IN", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3 shrink-0">
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      {c.queued > 0 && (
-                        <span className="inline-flex items-center gap-1">
-                          <Clock className="w-3.5 h-3.5" /> {c.queued}
-                        </span>
-                      )}
-                      <span className="inline-flex items-center gap-1 text-green-600">
-                        <CheckCircle2 className="w-3.5 h-3.5" /> {c.sent}
-                      </span>
-                      {c.failed > 0 && (
-                        <span className="inline-flex items-center gap-1 text-red-600">
-                          <XCircle className="w-3.5 h-3.5" /> {c.failed}
-                        </span>
-                      )}
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex min-w-0 items-center gap-3">
+                    <FileText className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium">
+                        {c.subject || "Untitled"}
+                      </p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
+                        {new Date(c.createdAt).toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => toggleDeliveries(c.id)}
-                      aria-expanded={expanded === c.id}
-                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-accent"
-                    >
-                      {expanded === c.id ? (
-                        <ChevronDown className="w-3.5 h-3.5" />
-                      ) : (
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      )}
-                      Deliveries
-                    </button>
-                    {c.contentJson && (
+                  </div>
+
+                  {c.draft ? (
+                    <div className="flex shrink-0 items-center gap-2">
+                      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
+                        Draft
+                      </span>
+                      <button type="button" onClick={() => openInComposer(c)} className={pillBtn}>
+                        <FileText className="w-3.5 h-3.5" /> Continue
+                      </button>
                       <button
                         type="button"
-                        onClick={() => openInComposer(c)}
-                        title="Load this newsletter back into the editor"
-                        className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground hover:text-foreground hover:border-accent"
+                        onClick={() => deleteDraft(c.id)}
+                        aria-label="Delete draft"
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-red-600 hover:bg-red-50"
                       >
-                        <Copy className="w-3.5 h-3.5" /> Duplicate
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
-                    )}
+                    </div>
+                  ) : (
+                    <div className="flex shrink-0 items-center gap-3">
+                      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                        {c.queued > 0 && (
+                          <span className="inline-flex items-center gap-1" title="Queued">
+                            <Clock className="w-3.5 h-3.5" /> {c.queued}
+                          </span>
+                        )}
+                        <span className="inline-flex items-center gap-1 text-green-600" title="Sent">
+                          <CheckCircle2 className="w-3.5 h-3.5" /> {c.sent}
+                        </span>
+                        {c.failed > 0 && (
+                          <span className="inline-flex items-center gap-1 text-red-600" title="Failed">
+                            <XCircle className="w-3.5 h-3.5" /> {c.failed}
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => toggleDeliveries(c.id)}
+                        aria-expanded={expanded === c.id}
+                        className={pillBtn}
+                      >
+                        {expanded === c.id ? (
+                          <ChevronDown className="w-3.5 h-3.5" />
+                        ) : (
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        )}
+                        Deliveries
+                      </button>
+                      {c.contentJson && (
+                        <button
+                          type="button"
+                          onClick={() => openInComposer(c)}
+                          title="Load this newsletter back into the editor"
+                          className={pillBtn}
+                        >
+                          <Copy className="w-3.5 h-3.5" /> Duplicate
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {!c.draft && (
+                  <div className="h-1 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className="h-full bg-accent transition-all"
+                      style={{ width: `${percent(c)}%` }}
+                    />
                   </div>
-                </div>
-                <div className="h-1 rounded-full bg-muted overflow-hidden">
-                  <div
-                    className="h-full bg-accent transition-all"
-                    style={{ width: `${percent(c)}%` }}
-                  />
-                </div>
-                {expanded === c.id && (
+                )}
+
+                {!c.draft && expanded === c.id && (
                   <div className="rounded-xl border border-border bg-background max-h-80 overflow-auto">
                     {deliveriesLoading === c.id ? (
                       <p className="flex items-center gap-2 px-4 py-3 text-xs text-muted-foreground">
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading deliveries…
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading…
                       </p>
                     ) : (deliveries[c.id]?.length ?? 0) === 0 ? (
                       <p className="px-4 py-3 text-xs text-muted-foreground">
-                        No deliveries recorded for this campaign.
+                        No deliveries recorded.
                       </p>
                     ) : (
                       <ul className="divide-y divide-border">
@@ -363,9 +348,7 @@ export function NewsletterManager({ insert }: Props) {
       </div>
 
       <div>
-        <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-          Subscribers
-        </h2>
+        <h2 className={sectionCls}>Subscribers</h2>
         {loading ? (
           <p className="text-sm text-muted-foreground">Loading…</p>
         ) : data.subscribers.length === 0 ? (
