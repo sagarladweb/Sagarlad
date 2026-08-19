@@ -95,6 +95,7 @@ export function ColorWheel({
   onChange: (hex: string) => void;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const wheelRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const hsv = hexToHsv(value);
   const size = CSS_SIZE * CANVAS;
@@ -134,14 +135,38 @@ export function ColorWheel({
   }, [size, center, maxR]);
 
   // Map a pointer position (in CSS pixels over the element) to an HS (v fixed).
-  const pickFromEvent = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const dx = e.clientX - (rect.left + rect.width / 2);
-    const dy = e.clientY - (rect.top + rect.height / 2);
+  const pickAt = (clientX: number, clientY: number, el: HTMLDivElement) => {
+    const rect = el.getBoundingClientRect();
+    const dx = clientX - (rect.left + rect.width / 2);
+    const dy = clientY - (rect.top + rect.height / 2);
     const h = ((Math.atan2(dy, dx) * 180) / Math.PI + 360) % 360;
     const s = Math.min(Math.hypot(dx, dy) / (rect.width / 2 - 7), 1);
     onChange(hsvToHex(h, s, hsv.v));
   };
+
+  // Window-level listeners, not React pointer events: React state updates are
+  // async, so gating onPointerMove on `dragging` drops moves until a re-render
+  // lands — which makes drag feel dead. Listening on the window from the moment
+  // dragging starts updates the color on every move, no matter the render state.
+  useEffect(() => {
+    if (!dragging) return;
+    const el = wheelRef.current;
+    if (!el) return;
+    const move = (e: PointerEvent) => {
+      e.preventDefault();
+      pickAt(e.clientX, e.clientY, el);
+    };
+    const stop = () => setDragging(false);
+    window.addEventListener("pointermove", move, { passive: false });
+    window.addEventListener("pointerup", stop);
+    window.addEventListener("pointercancel", stop);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", stop);
+      window.removeEventListener("pointercancel", stop);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dragging, hsv.v]);
 
   const angle = (hsv.h * Math.PI) / 180;
   const handleX = CSS_SIZE / 2 + Math.cos(angle) * hsv.s * (CSS_SIZE / 2 - 6);
@@ -151,19 +176,15 @@ export function ColorWheel({
   return (
     <div className="w-48 space-y-3">
       <div
+        ref={wheelRef}
         className="relative touch-none select-none cursor-crosshair rounded-full ring-1 ring-black/10 shadow-inner"
         style={{ width: CSS_SIZE, height: CSS_SIZE }}
         onPointerDown={(e) => {
           e.preventDefault();
           e.currentTarget.setPointerCapture(e.pointerId);
           setDragging(true);
-          pickFromEvent(e);
+          pickAt(e.clientX, e.clientY, e.currentTarget);
         }}
-        onPointerMove={(e) => {
-          if (dragging) pickFromEvent(e);
-        }}
-        onPointerUp={() => setDragging(false)}
-        onPointerCancel={() => setDragging(false)}
         aria-label="Color wheel"
         role="slider"
         aria-valuemin={0}

@@ -128,6 +128,12 @@ h6 {
 .tip-content li {
   margin: 0.4rem 0;
 }
+.tip-content mark {
+  background: #fef08a;
+  color: inherit;
+  border-radius: 0.25rem;
+  padding: 0 0.15rem;
+}
 .tip-content blockquote {
   margin: 1.75rem 0;
   padding: 1.25rem 1.5rem;

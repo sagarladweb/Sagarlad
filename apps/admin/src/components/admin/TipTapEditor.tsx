@@ -15,6 +15,8 @@ import TextAlign from "@tiptap/extension-text-align";
 import Typography from "@tiptap/extension-typography";
 import Dropcursor from "@tiptap/extension-dropcursor";
 import Gapcursor from "@tiptap/extension-gapcursor";
+import ListBulletList from "@tiptap/extension-bullet-list";
+import ListOrderedList from "@tiptap/extension-ordered-list";
 import { TextStyle } from "@tiptap/extension-text-style";
 import Color from "@tiptap/extension-color";
 import { ColorWheel } from "@/components/admin/ColorWheel";
@@ -59,6 +61,7 @@ import {
   HelpCircle,
   SquarePlus,
   Trash2,
+  ListTree,
 } from "lucide-react";
 
 type Shortcut = string;
@@ -279,6 +282,254 @@ function ColorPicker({
   );
 }
 
+const HIGHLIGHT_COLORS = [
+  { label: "Yellow", value: "#fef08a" },
+  { label: "Green", value: "#bbf7d0" },
+  { label: "Blue", value: "#bfdbfe" },
+  { label: "Pink", value: "#fbcfe8" },
+  { label: "Orange", value: "#fed7aa" },
+  { label: "Purple", value: "#e9d5ff" },
+];
+
+function HighlightPicker({
+  editor,
+  vertical,
+  openSide = "right",
+}: {
+  editor: Editor;
+  vertical?: boolean;
+  openSide?: "left" | "right";
+}) {
+  const [open, setOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Element)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [open]);
+
+  return (
+    <div ref={pickerRef} className="relative">
+      <ToolbarButton
+        label="Highlight color"
+        shortcut="Mod Shift h"
+        icon={<Highlighter className="w-4 h-4" />}
+        active={editor.isActive("highlight")}
+        onClick={() => setOpen((o) => !o)}
+      />
+      {open && (
+        <div
+          role="dialog"
+          aria-label="Highlight color picker"
+          className={`absolute z-40 rounded-2xl border border-border bg-card p-3 shadow-2xl ${
+            vertical
+              ? openSide === "left"
+                ? "right-full top-1/2 mr-2 -translate-y-1/2"
+                : "left-full top-1/2 ml-2 -translate-y-1/2"
+              : "left-0 top-full mt-2"
+          }`}
+        >
+          <div className="mb-2 flex items-center justify-between gap-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Highlight
+            </span>
+            <button
+              type="button"
+              aria-label="Close highlight picker"
+              title="Close (Esc)"
+              onClick={() => setOpen(false)}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            {HIGHLIGHT_COLORS.map((c) => (
+              <button
+                key={c.value}
+                type="button"
+                aria-label={`Highlight ${c.label}`}
+                aria-pressed={editor.getAttributes("highlight").color === c.value}
+                title={c.label}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => editor.chain().focus().setHighlight({ color: c.value }).run()}
+                className="h-6 w-6 rounded-full border border-border/60 transition-transform hover:scale-110"
+                style={{ backgroundColor: c.value }}
+              />
+            ))}
+          </div>
+
+          <div className="mt-3 flex items-center justify-end gap-2 border-t border-border pt-2">
+            <button
+              type="button"
+              onClick={() => editor.chain().focus().unsetHighlight().run()}
+              className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="w-3 h-3" /> Clear
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ListStylePicker({
+  editor,
+  vertical,
+  openSide = "right",
+}: {
+  editor: Editor;
+  vertical?: boolean;
+  openSide?: "left" | "right";
+}) {
+  const [open, setOpen] = useState(false);
+  const pickerRef = useRef<HTMLDivElement>(null);
+  const inBullet = editor.isActive("bulletList");
+  const inOrdered = editor.isActive("orderedList");
+  const current = inBullet
+    ? (editor.getAttributes("bulletList").listStyle as string) || "disc"
+    : inOrdered
+      ? (editor.getAttributes("orderedList").listStyle as string) || "decimal"
+      : null;
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Element)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    document.addEventListener("mousedown", onDown);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("mousedown", onDown);
+    };
+  }, [open]);
+
+  const apply = (listType: "bulletList" | "orderedList", value: string) => {
+    editor.chain().focus().updateAttributes(listType, { listStyle: value }).run();
+  };
+
+  return (
+    <div ref={pickerRef} className="relative">
+      <ToolbarButton
+        label="List style"
+        icon={<ListTree className="w-4 h-4" />}
+        active={open}
+        onClick={() => setOpen((o) => !o)}
+      />
+      {open && (
+        <div
+          role="dialog"
+          aria-label="List style picker"
+          className={`absolute z-40 w-52 rounded-2xl border border-border bg-card p-3 shadow-2xl ${
+            vertical
+              ? openSide === "left"
+                ? "right-full top-1/2 mr-2 -translate-y-1/2"
+                : "left-full top-1/2 ml-2 -translate-y-1/2"
+              : "left-0 top-full mt-2"
+          }`}
+        >
+          <div className="mb-2 flex items-center justify-between gap-4">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              List style
+            </span>
+            <button
+              type="button"
+              aria-label="Close list style picker"
+              title="Close (Esc)"
+              onClick={() => setOpen(false)}
+              className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-3">
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Bullets
+              </p>
+              <div className="grid gap-1">
+                {LIST_STYLES.bullet.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    disabled={!inBullet}
+                    aria-pressed={inBullet && current === o.value}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => apply("bulletList", o.value)}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-muted disabled:opacity-40"
+                  >
+                    <span
+                      className="inline-block h-2.5 w-2.5 shrink-0 border"
+                      style={{
+                        borderRadius:
+                          o.value === "disc" ? "9999px" : o.value === "circle" ? "9999px" : "3px",
+                        backgroundColor:
+                          o.value === "disc" ? "currentColor" : "transparent",
+                      }}
+                    />
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                Numbers
+              </p>
+              <div className="grid gap-1">
+                {LIST_STYLES.ordered.map((o) => (
+                  <button
+                    key={o.value}
+                    type="button"
+                    disabled={!inOrdered}
+                    aria-pressed={inOrdered && current === o.value}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() => apply("orderedList", o.value)}
+                    className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-muted disabled:opacity-40"
+                  >
+                    <span className="w-5 shrink-0 text-right font-mono text-xs tabular-nums">
+                      {o.preview}
+                    </span>
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {!inBullet && !inOrdered && (
+            <p className="mt-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
+              Put the cursor inside a list first, then pick a style.
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const Callout = Node.create({
   name: "callout",
   group: "block",
@@ -287,6 +538,64 @@ const Callout = Node.create({
   parseHTML: () => [{ tag: "div[data-callout]" }],
   renderHTML({ HTMLAttributes }) {
     return ["div", mergeAttributes(HTMLAttributes, { "data-callout": "" }), 0];
+  },
+});
+
+// List-style variants: bullet lists (disc/circle/square) and ordered lists
+// (decimal/lower-alpha/upper-alpha/lower-roman/upper-roman). The chosen style
+// is stored as an inline `list-style-type` so the site renders it too.
+const LIST_STYLES = {
+  bullet: [
+    { label: "Disc", value: "disc" },
+    { label: "Circle", value: "circle" },
+    { label: "Square", value: "square" },
+  ],
+  ordered: [
+    { label: "Numbers", value: "decimal", preview: "1." },
+    { label: "Lowercase letters", value: "lower-alpha", preview: "a." },
+    { label: "Uppercase letters", value: "upper-alpha", preview: "A." },
+    { label: "Lowercase Roman", value: "lower-roman", preview: "i." },
+    { label: "Uppercase Roman", value: "upper-roman", preview: "I." },
+  ],
+} as const;
+
+const StyledBulletList = ListBulletList.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      listStyle: {
+        default: "disc",
+        parseHTML: (element) => element.style.listStyleType || "disc",
+        renderHTML: (attributes) => {
+          const { listStyle, ...rest } = attributes;
+          const style =
+            listStyle && listStyle !== "disc"
+              ? { style: `list-style-type:${listStyle}` }
+              : {};
+          return ["ul", mergeAttributes(rest, style), 0];
+        },
+      },
+    };
+  },
+});
+
+const StyledOrderedList = ListOrderedList.extend({
+  addAttributes() {
+    return {
+      ...this.parent?.(),
+      listStyle: {
+        default: "decimal",
+        parseHTML: (element) => element.style.listStyleType || "decimal",
+        renderHTML: (attributes) => {
+          const { listStyle, ...rest } = attributes;
+          const style =
+            listStyle && listStyle !== "decimal"
+              ? { style: `list-style-type:${listStyle}` }
+              : {};
+          return ["ol", mergeAttributes(rest, style), 0];
+        },
+      },
+    };
   },
 });
 
@@ -457,6 +766,20 @@ function EditorHelp({ onClose }: { onClose: () => void }) {
             video, book, e-book, social link or quote you&apos;ve already created.
           </p>
           <p>
+            •{" "}
+            <span className="font-semibold text-foreground">Inline code</span> ({" "}
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5">{shortcutLabel("Mod e")}</kbd>{" "}
+            or the <Code className="inline h-3 w-3" /> button) is for short commands, keys and
+            file names inside a sentence.
+          </p>
+          <p>
+            •{" "}
+            <span className="font-semibold text-foreground">Callout</span> ({" "}
+            <kbd className="rounded border border-border bg-muted px-1 py-0.5">{shortcutLabel("Mod Alt c")}</kbd>{" "}
+            or the <Wand2 className="inline h-3 w-3" /> button) turns any paragraph into a
+            highlighted note box — great for tips and warnings.
+          </p>
+          <p>
             • Press <kbd className="rounded border border-border bg-muted px-1 py-0.5">{shortcutLabel("Mod s")}</kbd>{" "}
             to save your post.
           </p>
@@ -528,8 +851,12 @@ export function TipTapEditor({
         underline: false,
         dropcursor: false,
         gapcursor: false,
+        bulletList: false,
+        orderedList: false,
       }),
       Underline,
+      StyledBulletList,
+      StyledOrderedList,
       Link.configure({ openOnClick: false, autolink: true }),
       StyledImage.configure({ inline: false, allowBase64: true }),
       Placeholder.configure({ placeholder: "Write your post here…" }),
@@ -549,7 +876,7 @@ export function TipTapEditor({
     editorProps: {
       attributes: {
         class:
-          "editor-content prose-editor min-h-[60vh] w-full bg-background px-5 sm:px-8 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
+          "editor-content prose-editor mx-auto max-w-3xl min-h-[60vh] w-full bg-background px-5 sm:px-8 py-6 text-[0.95rem] leading-relaxed focus:outline-none",
       },
       handlePaste: (view, event) => {
         const items = Array.from(event.clipboardData?.items ?? []);
@@ -959,7 +1286,6 @@ export function TipTapEditor({
     { label: "Underline", shortcut: "Mod u", icon: <UnderlineIcon className="w-4 h-4" />, active: editor.isActive("underline"), onClick: () => editor.chain().focus().toggleUnderline().run() },
     { label: "Strikethrough", shortcut: "Mod Shift s", icon: <Strikethrough className="w-4 h-4" />, active: editor.isActive("strike"), onClick: () => editor.chain().focus().toggleStrike().run() },
     { label: "Inline code", shortcut: "Mod e", icon: <Code className="w-4 h-4" />, active: editor.isActive("code"), onClick: () => editor.chain().focus().toggleCode().run() },
-    { label: "Highlight", shortcut: "Mod Shift h", icon: <Highlighter className="w-4 h-4" />, active: editor.isActive("highlight"), onClick: () => editor.chain().focus().toggleHighlight().run() },
   ];
 
   const blockGroup = [
@@ -1037,15 +1363,29 @@ export function TipTapEditor({
         className={vertical ? "flex flex-col items-center gap-0.5" : "flex items-center gap-1"}
       >
         {gi === 0 && (
-          <ColorPicker
+          <>
+            <ColorPicker
+              editor={editor}
+              vertical
+              openSide={toolbarPos === "right" ? "left" : "right"}
+            />
+            <HighlightPicker
+              editor={editor}
+              vertical
+              openSide={toolbarPos === "right" ? "left" : "right"}
+            />
+          </>
+        )}
+        {group.map((b) => (
+          <ToolbarButton key={b.label} {...b} />
+        ))}
+        {gi === 1 && (
+          <ListStylePicker
             editor={editor}
             vertical
             openSide={toolbarPos === "right" ? "left" : "right"}
           />
         )}
-        {group.map((b) => (
-          <ToolbarButton key={b.label} {...b} />
-        ))}
         {gi < groups.length - 1 && <ToolbarDivider vertical={vertical} />}
       </div>
     ));
@@ -1054,6 +1394,7 @@ export function TipTapEditor({
   const horizontalToolbar = (
     <div className="flex flex-wrap items-center gap-1 p-2">
       <ColorPicker editor={editor} />
+      <HighlightPicker editor={editor} />
       {textGroup.map((b) => (
         <ToolbarButton key={b.label} {...b} />
       ))}
@@ -1061,6 +1402,7 @@ export function TipTapEditor({
       {blockGroup.map((b) => (
         <ToolbarButton key={b.label} {...b} />
       ))}
+      <ListStylePicker editor={editor} />
       <ToolbarDivider />
       {alignGroup.map((b) => (
         <ToolbarButton key={b.label} {...b} />
@@ -1353,34 +1695,29 @@ export function TipTapEditor({
         </div>
       </div>
 
-      {/* Toolbar + body: the editor scrolls internally so the tools never scroll away */}
+      {/* Toolbar + body: the toolbar sticks to the viewport; the page scrolls
+          naturally with the post instead of the editor scrolling internally. */}
       {toolbarPos === "top" ? (
         <>
           <div className="sticky top-0 z-30 shrink-0 border-b border-border bg-muted/60">
             {mode === "write" && horizontalToolbar}
           </div>
-          <div className="relative max-h-[calc(100dvh-15rem)] min-h-[45vh] overflow-y-auto overscroll-contain">
-            {body}
-          </div>
+          <div className="relative min-h-[45vh]">{body}</div>
         </>
       ) : toolbarPos === "left" ? (
         <div className="flex items-stretch">
           {mode === "write" && (
-            <div className="max-h-[calc(100dvh-15rem)] shrink-0 overflow-y-auto rounded-bl-2xl border-r border-border bg-muted/60">
+            <div className="shrink-0 rounded-bl-2xl border-r border-border bg-muted/60">
               {verticalToolbar}
             </div>
           )}
-          <div className="relative max-h-[calc(100dvh-15rem)] min-h-[45vh] flex-1 min-w-0 overflow-y-auto overscroll-contain">
-            {body}
-          </div>
+          <div className="relative min-h-[45vh] flex-1 min-w-0">{body}</div>
         </div>
       ) : (
         <div className="flex items-stretch">
-          <div className="relative max-h-[calc(100dvh-15rem)] min-h-[45vh] flex-1 min-w-0 overflow-y-auto overscroll-contain">
-            {body}
-          </div>
+          <div className="relative min-h-[45vh] flex-1 min-w-0">{body}</div>
           {mode === "write" && (
-            <div className="max-h-[calc(100dvh-15rem)] shrink-0 overflow-y-auto rounded-br-2xl border-l border-border bg-muted/60">
+            <div className="shrink-0 rounded-br-2xl border-l border-border bg-muted/60">
               {verticalToolbar}
             </div>
           )}

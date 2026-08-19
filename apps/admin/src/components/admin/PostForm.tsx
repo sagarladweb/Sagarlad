@@ -15,6 +15,7 @@ import {
   ImageIcon,
   Plus,
   RefreshCw,
+  Eye,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -445,79 +446,31 @@ export function PostForm({
     "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
   const label = "block text-sm font-medium mb-1.5";
 
-  const publishFooter = (
-    <div className="flex flex-wrap items-center justify-between gap-3">
-      <div className="flex flex-wrap items-center gap-4">
-        <button
-          type="button"
-          onClick={() => setForm((f) => ({ ...f, featured: !f.featured }))}
-          aria-pressed={form.featured}
-          className="flex items-center gap-2 text-sm font-medium"
-        >
-          Featured
-          <span
-            className={`inline-flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
-              form.featured ? "bg-accent" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                form.featured ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </span>
-        </button>
-        <button
-          type="button"
-          onClick={() => setForm((f) => ({ ...f, published: !f.published }))}
-          aria-pressed={form.published}
-          className="flex items-center gap-2 text-sm font-medium"
-        >
-          Published
-          <span
-            className={`inline-flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
-              form.published ? "bg-green-600" : "bg-muted"
-            }`}
-          >
-            <span
-              className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
-                form.published ? "translate-x-4" : "translate-x-0"
-              }`}
-            />
-          </span>
-        </button>
-      </div>
-
-      <div className="ml-auto flex items-center gap-3">
-        {saveState === "loading" && (
-          <p className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
-          </p>
-        )}
-        {saveState === "saved" && (
-          <p className="hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
-          </p>
-        )}
-        {saveState === "error" && (
-          <p className="flex items-center gap-1.5 text-xs text-red-600">
-            <AlertCircle className="w-3.5 h-3.5" /> {message}
-          </p>
-        )}
-        <button
-          type="submit"
-          disabled={saveState === "loading"}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
-        >
-          {saveState === "loading" ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
-          ) : (
-            <Save className="w-4 h-4" />
-          )}
-          {initial ? "Save changes" : "Publish post"}
-        </button>
-      </div>
-    </div>
+  const statusToggle = (
+    label: string,
+    value: boolean,
+    onToggle: () => void,
+    onColor = "bg-green-600"
+  ) => (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-pressed={value}
+      className="flex w-full items-center justify-between gap-2 text-sm font-medium"
+    >
+      {label}
+      <span
+        className={`inline-flex h-5 w-9 items-center rounded-full p-0.5 transition-colors ${
+          value ? onColor : "bg-muted"
+        }`}
+      >
+        <span
+          className={`inline-block h-4 w-4 rounded-full bg-white transform transition-transform ${
+            value ? "translate-x-4" : "translate-x-0"
+          }`}
+        />
+      </span>
+    </button>
   );
 
   return (
@@ -529,226 +482,283 @@ export function PostForm({
       className="space-y-6"
       noValidate
     >
-      {/* ---- Write area ---- */}
-      <div className="space-y-5">
-        <div>
-          <label htmlFor="title" className={label}>Title *</label>
-          <input
-            id="title"
-            value={form.title}
-            onChange={(e) => {
-              const t = e.target.value;
-              setForm((f) => ({
-                ...f,
-                title: t,
-                slug: initial && slugTouched ? f.slug : slugify(t),
-              }));
-              autosave();
-            }}
-            placeholder="Give your post a title"
-            className={`${input} text-lg font-semibold`}
-            required
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          <label htmlFor="slug" className="text-sm font-medium">Web address</label>
-          <span className="text-sm text-muted-foreground">
+      {/* Sticky action bar */}
+      <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-border bg-card px-4 py-2.5 shadow-sm lg:sticky lg:top-4 lg:z-30">
+        <div className="min-w-0">
+          <p className="truncate text-sm font-semibold leading-tight">
+            {form.title || "Untitled post"}
+          </p>
+          <p className="truncate text-xs text-muted-foreground">
             sagarlad.com/blog/{form.slug || "your-post"}
-          </span>
+          </p>
+        </div>
+        <div className="ml-auto flex items-center gap-3">
+          {saveState === "loading" && (
+            <p className="hidden sm:flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving…
+            </p>
+          )}
+          {saveState === "saved" && (
+            <p className="hidden sm:flex items-center gap-1.5 text-xs text-green-600 font-medium">
+              <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
+            </p>
+          )}
+          {saveState === "error" && (
+            <p className="flex items-center gap-1.5 text-xs text-red-600">
+              <AlertCircle className="w-3.5 h-3.5" /> {message}
+            </p>
+          )}
           <button
             type="button"
-            onClick={() => {
-              setSlugTouched((prev) => !prev);
-            }}
-            aria-pressed={slugTouched}
-            title={
-              slugTouched
-                ? "The web address is locked — click to make it match your title automatically"
-                : "The web address matches your title — click to change it yourself"
-            }
-            className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
-              slugTouched
-                ? "border-accent text-accent"
-                : "border-border text-muted-foreground hover:bg-muted"
-            }`}
+            onClick={onPreview}
+            disabled={saveState === "loading"}
+            className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-sm font-semibold hover:bg-muted transition-colors disabled:opacity-60"
           >
-            <Lock className="w-3 h-3" />
-            {slugTouched ? "Locked" : "Automatic"}
+            <Eye className="w-4 h-4" /> Preview
           </button>
-        </div>
-
-        <div>
-          <span className={label}>Post *</span>
-          <TipTapEditor
-            initialContent={form.content}
-            onChange={(html) => {
-              setForm((f) => ({ ...f, content: html }));
-              autosave();
-            }}
-            preview={{
-              url: previewUrl,
-              liveUrl: `${SITE.url}/blog/${form.slug || "your-post"}`,
-              onPreview,
-              error: previewError,
-            }}
-            footer={publishFooter}
-          />
+          <button
+            type="submit"
+            disabled={saveState === "loading"}
+            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-2 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+          >
+            {saveState === "loading" ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <Save className="w-4 h-4" />
+            )}
+            {initial ? "Save changes" : "Publish post"}
+          </button>
         </div>
       </div>
 
-      {/* ---- Details grid ---- */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
-          <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
-            Details
-          </h3>
-          <div>
-            <span id="categoryId-label" className={label}>Category</span>
-            <Dropdown
-              id="categoryId"
-              label="Category"
-              value={form.categoryId}
-              onChange={(value) => setForm({ ...form, categoryId: value })}
-              placeholder="— Uncategorized —"
-              options={[
-                { value: "", label: "— Uncategorized —" },
-                ...categoryOptions.map((c) => ({ value: c.id, label: c.name })),
-              ]}
+      <div className="flex flex-col items-start gap-6 lg:flex-row">
+        {/* ---- Main canvas ---- */}
+        <div className="min-w-0 flex-1 space-y-4">
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <label htmlFor="title" className={label}>Title *</label>
+            <input
+              id="title"
+              value={form.title}
+              onChange={(e) => {
+                const t = e.target.value;
+                setForm((f) => ({
+                  ...f,
+                  title: t,
+                  slug: initial && slugTouched ? f.slug : slugify(t),
+                }));
+                autosave();
+              }}
+              placeholder="Give your post a title"
+              className={`${input} text-xl font-semibold`}
+              required
             />
-            <div className="mt-2">
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <label htmlFor="slug" className="text-sm font-medium">Web address</label>
+              <span className="text-sm text-muted-foreground">
+                sagarlad.com/blog/{form.slug || "your-post"}
+              </span>
               <button
                 type="button"
-                onClick={() => {
-                  setNewCategory("");
-                  setCategoryError("");
-                  setCategoryModalOpen(true);
-                }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
+                onClick={() => setSlugTouched((prev) => !prev)}
+                aria-pressed={slugTouched}
+                title={
+                  slugTouched
+                    ? "The web address is locked — click to make it match your title automatically"
+                    : "The web address matches your title — click to change it yourself"
+                }
+                className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                  slugTouched
+                    ? "border-accent text-accent"
+                    : "border-border text-muted-foreground hover:bg-muted"
+                }`}
               >
-                <Plus className="w-3.5 h-3.5" /> New category
+                <Lock className="w-3 h-3" />
+                {slugTouched ? "Locked" : "Automatic"}
               </button>
             </div>
           </div>
+
           <div>
-            <span className={label}>Cover image</span>
-            <div
-              role="button"
-              tabIndex={0}
-              aria-label="Upload or paste a cover image"
-              onPaste={onCoverPaste}
-              onClick={() => fileInputRef.current?.click()}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  fileInputRef.current?.click();
-                }
-              }}
-              className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                form.coverImage ? "border-border" : "border-border hover:border-brand-light/60"
-              } ${
-                uploadState === "loading"
-                  ? "pointer-events-none opacity-70"
-                  : "cursor-pointer"
-              }`}
-            >
-              {form.coverImage ? (
-                <>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={form.coverImage}
-                    alt="Cover preview"
-                    className="w-full aspect-video object-cover"
-                  />
-                  <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/40" />
-                  <span className="pointer-events-none absolute inset-0 hidden items-center justify-center gap-2 text-sm font-semibold text-white group-hover:flex">
-                    <RefreshCw className="w-4 h-4" /> Click to replace
-                  </span>
-                </>
-              ) : (
-                <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-muted/40 px-4 text-center">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand/10 text-brand">
-                    {uploadState === "loading" ? (
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                    ) : (
-                      <ImageIcon className="h-5 w-5" />
-                    )}
-                  </div>
-                  <p className="text-sm font-medium">
-                    {uploadState === "loading"
-                      ? "Uploading…"
-                      : "Click to upload, or paste an image"}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    JPEG · PNG · WebP · GIF · AVIF — max 8MB, saved as WebP
-                  </p>
-                </div>
-              )}
-            </div>
-            <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-              <p className="text-xs text-muted-foreground">
-                Copy an image, then paste it here (⌘V / Ctrl+V)
-              </p>
-              <div className="flex items-center gap-2">
-                {form.coverImage && (
-                  <button
-                    type="button"
-                    onClick={() => setForm((f) => ({ ...f, coverImage: "" }))}
-                    className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors"
-                  >
-                    <X className="w-3.5 h-3.5" /> Remove
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  disabled={uploadState === "loading"}
-                  className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors disabled:opacity-60"
-                >
-                  {uploadState === "loading" ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <Upload className="w-3.5 h-3.5" />
-                  )}
-                  {form.coverImage ? "Replace" : "Upload"}
-                </button>
-              </div>
-            </div>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-              className="hidden"
-              onChange={onUploadFile}
-            />
-            {uploadState === "error" && (
-              <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
-                <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {uploadMessage}
-              </p>
-            )}
-          </div>
-          <div>
-            <label htmlFor="excerpt" className={label}>
-              Short summary
-              <span className="ml-1 text-xs text-muted-foreground">
-                ({form.excerpt.length}/400)
-              </span>
-            </label>
-            <textarea
-              id="excerpt"
-              value={form.excerpt}
-              onChange={(e) => {
-                setForm({ ...form, excerpt: e.target.value.slice(0, 400) });
+            <span className="sr-only">Post</span>
+            <TipTapEditor
+              initialContent={form.content}
+              onChange={(html) => {
+                setForm((f) => ({ ...f, content: html }));
                 autosave();
               }}
-              rows={4}
-              placeholder="A line or two that shows up on the post card."
-              className={`${input} resize-y`}
+              preview={{
+                url: previewUrl,
+                liveUrl: `${SITE.url}/blog/${form.slug || "your-post"}`,
+                onPreview,
+                error: previewError,
+              }}
             />
           </div>
         </div>
 
-        <div className="space-y-6">
+        {/* ---- Settings sidebar ---- */}
+        <aside className="w-full shrink-0 space-y-4 lg:w-80 lg:sticky lg:top-24">
+          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Status
+            </h3>
+            {statusToggle("Featured", form.featured, () =>
+              setForm((f) => ({ ...f, featured: !f.featured }))
+            )}
+            {statusToggle("Published", form.published, () =>
+              setForm((f) => ({ ...f, published: !f.published }))
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+            <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+              Details
+            </h3>
+            <div>
+              <span id="categoryId-label" className={label}>Category</span>
+              <Dropdown
+                id="categoryId"
+                label="Category"
+                value={form.categoryId}
+                onChange={(value) => setForm({ ...form, categoryId: value })}
+                placeholder="— Uncategorized —"
+                options={[
+                  { value: "", label: "— Uncategorized —" },
+                  ...categoryOptions.map((c) => ({ value: c.id, label: c.name })),
+                ]}
+              />
+              <div className="mt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNewCategory("");
+                    setCategoryError("");
+                    setCategoryModalOpen(true);
+                  }}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
+                >
+                  <Plus className="w-3.5 h-3.5" /> New category
+                </button>
+              </div>
+            </div>
+            <div>
+              <span className={label}>Cover image</span>
+              <div
+                role="button"
+                tabIndex={0}
+                aria-label="Upload or paste a cover image"
+                onPaste={onCoverPaste}
+                onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    fileInputRef.current?.click();
+                  }
+                }}
+                className={`group relative overflow-hidden rounded-2xl border-2 border-dashed transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                  form.coverImage ? "border-border" : "border-border hover:border-brand-light/60"
+                } ${
+                  uploadState === "loading"
+                    ? "pointer-events-none opacity-70"
+                    : "cursor-pointer"
+                }`}
+              >
+                {form.coverImage ? (
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={form.coverImage}
+                      alt="Cover preview"
+                      className="w-full aspect-video object-cover"
+                    />
+                    <span className="pointer-events-none absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/40" />
+                    <span className="pointer-events-none absolute inset-0 hidden items-center justify-center gap-2 text-sm font-semibold text-white group-hover:flex">
+                      <RefreshCw className="w-4 h-4" /> Click to replace
+                    </span>
+                  </>
+                ) : (
+                  <div className="flex aspect-video flex-col items-center justify-center gap-2 bg-muted/40 px-4 text-center">
+                    <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand/10 text-brand">
+                      {uploadState === "loading" ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <ImageIcon className="h-5 w-5" />
+                      )}
+                    </div>
+                    <p className="text-sm font-medium">
+                      {uploadState === "loading"
+                        ? "Uploading…"
+                        : "Click to upload, or paste an image"}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      JPEG · PNG · WebP · GIF · AVIF — max 8MB, saved as WebP
+                    </p>
+                  </div>
+                )}
+              </div>
+              <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                <p className="text-xs text-muted-foreground">
+                  Copy an image, then paste it here (⌘V / Ctrl+V)
+                </p>
+                <div className="flex items-center gap-2">
+                  {form.coverImage && (
+                    <button
+                      type="button"
+                      onClick={() => setForm((f) => ({ ...f, coverImage: "" }))}
+                      className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-red-600 transition-colors"
+                    >
+                      <X className="w-3.5 h-3.5" /> Remove
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadState === "loading"}
+                    className="inline-flex items-center gap-2 rounded-full border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors disabled:opacity-60"
+                  >
+                    {uploadState === "loading" ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Upload className="w-3.5 h-3.5" />
+                    )}
+                    {form.coverImage ? "Replace" : "Upload"}
+                  </button>
+                </div>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+                className="hidden"
+                onChange={onUploadFile}
+              />
+              {uploadState === "error" && (
+                <p className="mt-2 flex items-center gap-1.5 text-xs text-red-600">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" /> {uploadMessage}
+                </p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="excerpt" className={label}>
+                Short summary
+                <span className="ml-1 text-xs text-muted-foreground">
+                  ({form.excerpt.length}/400)
+                </span>
+              </label>
+              <textarea
+                id="excerpt"
+                value={form.excerpt}
+                onChange={(e) => {
+                  setForm({ ...form, excerpt: e.target.value.slice(0, 400) });
+                  autosave();
+                }}
+                rows={4}
+                placeholder="A line or two that shows up on the post card."
+                className={`${input} resize-y`}
+              />
+            </div>
+          </div>
+
           <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Live stats
@@ -772,7 +782,7 @@ export function PostForm({
               </div>
             </div>
           </div>
-        </div>
+        </aside>
       </div>
 
       {categoryModalOpen && (

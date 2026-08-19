@@ -145,10 +145,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
       return token;
     },
-    session({ session, token }) {
+    async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as string;
+        // A JWT can outlive its account (e.g. after a DB reset), which used to
+        // surface as a cryptic FK error on save. Resolve the id against the DB
+        // and drop the session if the account no longer exists so the user is
+        // cleanly sent back to sign in instead of failing mid-edit.
+        const user = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { id: true, role: true, name: true, email: true, image: true },
+        });
+        if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
+        session.user.id = user.id;
+        session.user.role = user.role;
+        session.user.name = user.name;
+        session.user.email = user.email;
+        session.user.image = user.image;
       }
       return session;
     },
