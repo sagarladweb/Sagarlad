@@ -89,10 +89,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         // Fallback: If credentials match ADMIN_EMAIL & ADMIN_PASSWORD env vars,
         // auto-provision/update the admin user in Supabase database.
-        const envAdminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-        const envAdminPass = process.env.ADMIN_PASSWORD;
+        const envAdminEmail = (process.env.ADMIN_EMAIL ?? "sagarlad692@gmail.com")
+          .replace(/['"]/g, "")
+          .trim()
+          .toLowerCase();
+        const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
 
-        if (!valid && envAdminEmail && envAdminEmail === email && envAdminPass && envAdminPass === password) {
+        if (!valid && email === envAdminEmail && envAdminPass && password === envAdminPass) {
           const passwordHash = await hash(password, 12);
           user = await prisma.user.upsert({
             where: { email },

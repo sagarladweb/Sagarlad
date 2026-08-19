@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, Shield, ChevronLeft, CheckCircle2, Sparkles, LogOut, ArrowRight } from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
@@ -20,10 +20,16 @@ function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [greetingState, setGreetingState] = useState<"idle" | "greeting" | "success">("idle");
   const [error, setError] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const hour = new Date().getHours();
-  const timeOfDayGreeting =
+  const rawGreeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const timeOfDayGreeting = mounted ? rawGreeting : "Welcome";
 
   // Target panel destination based on active Phase
   const targetRoute = PHASE_1 ? "/admin/posts" : "/admin/dashboard";
