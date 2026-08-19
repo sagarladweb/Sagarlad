@@ -88,7 +88,10 @@ To run both applications locally on your machine at the same time:
 
 ### Step 4: Set Up Google Analytics
 1. Log in to [Google Analytics](https://analytics.google.com).
-2. Create a Property for `sagarlad.com` and copy your **Measurement ID** (`G-XXXXXXXXXX`). This is your `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+2. Create a Property for `sagarlad.com`.
+3. Copy your **Measurement ID** (`G-XXXXXXXXXX`). This is your `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+4. Go to **Admin -> Property -> Property details** and copy the numeric **Property ID**. This is your `GA_PROPERTY_ID`.
+5. For the admin analytics dashboard you also need a **service account JSON key** (see Appendix A5 below).
 
 ---
 
@@ -122,28 +125,37 @@ To run both applications locally on your machine at the same time:
 
 ### Step 7: Environment Variables Checklist
 
-#### Environment Variables for BOTH Projects (Shared Database & Services)
-- `DATABASE_URL`: Supabase Transaction Pooler URL (port 6543)
-- `DIRECT_URL`: Supabase Direct Connection URL (port 5432)
-- `AUTH_SECRET`: Secret random string (same in both apps, e.g. `your-super-secret-key-123456`)
-- `SUPABASE_URL`: Supabase Project URL
-- `SUPABASE_SERVICE_ROLE_KEY`: Supabase `service_role` secret
-- `BREVO_API_KEY`: Brevo Key (`xkeysib-...`)
-- `BREVO_FROM_EMAIL`: `hello@sagarlad.com`
-- `BREVO_FROM_NAME`: `Sagar Lad`
-- `DATABASE_POOL_MAX`: `5`
+Set these in **Vercel -> Project -> Settings -> Environment Variables** (separately for the site and admin projects). All are already present in the repo as `apps/site/.env.example` and `apps/admin/.env.example`.
 
-#### Environment Variables for PUBLIC WEBSITE (`apps/site`)
-- `AUTH_URL`: `https://sagarlad.com`
-- `NEXT_PUBLIC_GA_MEASUREMENT_ID`: `G-XXXXXXXXXX`
-- `DAILY_EMAIL_LIMIT`: `300`
-- `NEWSLETTER_BATCH_SIZE`: `20`
+#### Shared (Both Projects)
+| Variable | What it is / Where to get it |
+| :--- | :--- |
+| `DATABASE_URL` | Supabase Transaction Pooler URL (port 6543) |
+| `AUTH_SECRET` | Random string, same in both apps (generate: `openssl rand -base64 32`) |
+| `SUPABASE_URL` | Supabase Project URL (Settings -> API) |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase `service_role` secret (Settings -> API) |
+| `BREVO_API_KEY` | Brevo key (`xkeysib-...`, SMTP & API -> API Keys) |
+| `BREVO_FROM_EMAIL` | A verified Brevo sender, e.g. `hello@sagarlad.com` |
+| `BREVO_FROM_NAME` | Sender name, e.g. `Sagar Lad` |
+| `CRON_SECRET` | Random string (generate: `openssl rand -hex 32`). Used to protect the newsletter auto-send endpoint |
+| `DATABASE_POOL_MAX` | `5` |
 
-#### Environment Variables for ADMIN PANEL (`apps/admin`)
-- `AUTH_URL`: `https://admin.sagarlad.com`
-- `ADMIN_EMAIL`: `sagarlad692@gmail.com`
-- `ADMIN_PASSWORD`: Your chosen admin password
-- `ADMIN_PHASE`: `"1"` *(for Phase 1)* or `"2"` *(for Phase 2)*
+> `DIRECT_URL` is only needed for running migrations locally, not on Vercel. `SUPABASE_ANON_KEY` and `ADMIN_EMAIL`/`ADMIN_PASSWORD` are only used by the local seed script.
+
+#### Public Website Only (`apps/site`)
+| Variable | What it is |
+| :--- | :--- |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | GA4 Measurement ID (`G-XXXXXXXXXX`) |
+| `DAILY_EMAIL_LIMIT` | `300` (Brevo free daily cap) |
+| `NEWSLETTER_BATCH_SIZE` | `20` (emails per send run) |
+| `NEWSLETTER_CRON` | Schedule for the cron (any value, e.g. `30 4 * * *`) |
+
+#### Admin Panel Only (`apps/admin`)
+| Variable | What it is |
+| :--- | :--- |
+| `GA_PROPERTY_ID` | GA4 numeric Property ID |
+| `GOOGLE_SERVICE_ACCOUNT_JSON` | Full JSON from the Google service account key (see Appendix A5) |
+| `ADMIN_PHASE` | `"1"` (Phase 1) or `"2"` (Phase 2) |
 
 ---
 
@@ -258,3 +270,124 @@ You will add **3 records** inside BigRock DNS Manager:
 - BigRock DNS updates usually take **10 to 30 minutes**.
 - Vercel will automatically generate **free SSL certificates** (`https://`) for both `sagarlad.com` and `admin.sagarlad.com`.
 - Your public website will be live at `https://sagarlad.com` and your admin panel at `https://admin.sagarlad.com`!
+
+---
+
+## Appendix A: Full Credentials List & Step-by-Step How to Get Each
+
+This is the complete list of every credential the platform needs. Use the tables to check what you already have, then follow the numbered steps for anything missing.
+
+### A0. The Complete Checklist
+
+| # | Credential | Where to put it | Needed? | How to get it |
+| :-- | :--- | :--- | :--- | :--- |
+| 1 | `DATABASE_URL` | Vercel (both apps) | Required | Supabase, A2 |
+| 2 | `DIRECT_URL` | Local only (migrations) | Optional | Supabase, A2 |
+| 3 | `AUTH_SECRET` | Vercel (both apps) | Required | Generate, A6 |
+| 4 | `SUPABASE_URL` | Vercel (both apps) | Required | Supabase, A2 |
+| 5 | `SUPABASE_SERVICE_ROLE_KEY` | Vercel (both apps) | Required | Supabase, A2 |
+| 6 | `SUPABASE_ANON_KEY` | Not used at runtime | Optional | Supabase, A2 |
+| 7 | `BREVO_API_KEY` | Vercel (both apps) | Required | Brevo, A4 |
+| 8 | `BREVO_FROM_EMAIL` | Vercel (both apps) | Required | Brevo, A4 |
+| 9 | `BREVO_FROM_NAME` | Vercel (both apps) | Required | Your choice |
+| 10 | `CRON_SECRET` | Vercel (both apps) + GitHub | Required | Generate, A6 |
+| 11 | `DATABASE_POOL_MAX` | Vercel (both apps) | Optional | `5` |
+| 12 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Vercel (site) | Required | GA4, A5 |
+| 13 | `GA_PROPERTY_ID` | Vercel (admin) | Required | GA4, A5 |
+| 14 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Vercel (admin) | Required | Cloud Console, A5 |
+| 15 | `ADMIN_PHASE` | Vercel (admin) | Required | `"1"` or `"2"` |
+| 16 | `ADMIN_EMAIL` / `ADMIN_PASSWORD` | Local seed only | Optional | Your choice, A3 |
+| 17 | `NEWSLETTER_PROCESS_URL` | GitHub repo secret | Required | `https://sagarlad.com/api/newsletter/process` |
+| 18 | `NEWSLETTER_CRON_SECRET` | GitHub repo secret | Required | Same value as `CRON_SECRET` |
+
+---
+
+### A1. GitHub Repo Secrets (for the automatic newsletter sender)
+
+The newsletter queue is drained every 30 minutes by a free GitHub Action. It needs 2 repo secrets. If these are missing the emails simply never go out.
+
+1. Go to your repository on GitHub.
+2. Click **Settings** -> **Secrets and variables** -> **Actions**.
+3. Click **New repository secret** and add:
+   - Name: `NEWSLETTER_PROCESS_URL` — Value: `https://sagarlad.com/api/newsletter/process`
+   - Name: `NEWSLETTER_CRON_SECRET` — Value: the same random string you use for `CRON_SECRET`
+4. (Optional, for the older daily workflow) Name: `CRON_SECRET` — same value again.
+
+> Verify with the Actions tab: the **Newsletter queue drain** workflow should run and succeed.
+
+---
+
+### A2. Supabase (Database + Storage)
+
+1. Log in at [supabase.com](https://supabase.com) and create a project.
+2. Go to **Project Settings -> Database -> Connection string**:
+   - **Transaction Pooler (port 6543)** -> `DATABASE_URL`
+   - **Direct Connection (port 5432)** -> `DIRECT_URL` (local migrations only)
+3. Go to **Project Settings -> API**:
+   - **Project URL** -> `SUPABASE_URL`
+   - **`service_role` secret** (click reveal) -> `SUPABASE_SERVICE_ROLE_KEY`
+   - **`anon` public key** -> `SUPABASE_ANON_KEY` (optional, not required at runtime)
+
+---
+
+### A3. Admin Login (Seeded Admin Account)
+
+1. Choose an email and password (min 8 characters).
+2. They are used only by the local seed script: `npm run db:seed` (sets `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`).
+3. On Vercel you do not need these — the account already exists in the database after seeding.
+
+---
+
+### A4. Brevo (Newsletter Email Sending)
+
+1. Sign up at [brevo.com](https://brevo.com) (free plan: 300 emails/day).
+2. **SMTP & API -> API Keys -> Generate a new API key**. Copy it (starts with `xkeysib-`). This is `BREVO_API_KEY`.
+3. **Senders & IP -> Domains -> Add a domain** and add `sagarlad.com`. Then add the 3 DNS records Brevo shows you in **BigRock DNS Management** (CNAME + 2 TXT records) and click **Verify**. This must succeed or your emails land in spam or get rejected.
+4. **Senders & IP -> Senders -> Add a sender** with the email you want to send from (e.g. `hello@sagarlad.com`). This is `BREVO_FROM_EMAIL`. `BREVO_FROM_NAME` is the display name (`Sagar Lad`).
+
+---
+
+### A5. Google Analytics (Site Tracking + Admin Dashboard)
+
+You need 3 values: `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `GA_PROPERTY_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`.
+
+1. Log in at [analytics.google.com](https://analytics.google.com), create a property, add a web data stream for `sagarlad.com`.
+2. Copy the **Measurement ID** (`G-XXXXXXXXXX`) -> `NEXT_PUBLIC_GA_MEASUREMENT_ID`.
+3. **Admin -> Property -> Property details** -> copy the numeric **Property ID** -> `GA_PROPERTY_ID`.
+4. Get the service account JSON:
+   1. Go to [console.cloud.google.com](https://console.cloud.google.com) and open the project for your GA account.
+   2. **APIs & Services -> Enable APIs -> search "Google Analytics Data API" -> Enable**.
+   3. **APIs & Services -> Credentials -> Create Credentials -> Service Account**.
+   4. Give it a name, then click the created service account -> **Keys -> Add Key -> Create new key -> JSON** -> download the file.
+   5. Open the downloaded JSON file, copy its **entire content**, and paste it as `GOOGLE_SERVICE_ACCOUNT_JSON` (it is one long JSON object with quotes — paste exactly).
+5. Add the service account email to your GA4 property as a viewer:
+   - In GA4 **Admin -> Property access management -> Add users** -> paste the service account email (ends in `@...iam.gserviceaccount.com`) -> role **Viewer**.
+
+---
+
+### A6. Generated Secrets (No Account Needed)
+
+Generate these once on your computer (macOS/Linux terminal) and reuse the same value across apps:
+
+```bash
+# For AUTH_SECRET
+openssl rand -base64 32
+
+# For CRON_SECRET
+openssl rand -hex 32
+```
+
+`CRON_SECRET` must be the **same value** in 3 places: site Vercel env, admin Vercel env, and the GitHub secret `NEWSLETTER_CRON_SECRET`.
+
+---
+
+### A7. Where Everything Lives
+
+| Where | What goes there |
+| :--- | :--- |
+| Vercel project `apps/site` | All shared vars + `NEXT_PUBLIC_GA_MEASUREMENT_ID`, `DAILY_EMAIL_LIMIT`, `NEWSLETTER_BATCH_SIZE`, `NEWSLETTER_CRON`, `CRON_SECRET` |
+| Vercel project `apps/admin` | All shared vars + `GA_PROPERTY_ID`, `GOOGLE_SERVICE_ACCOUNT_JSON`, `ADMIN_PHASE`, `CRON_SECRET` |
+| GitHub repo secrets | `NEWSLETTER_PROCESS_URL`, `NEWSLETTER_CRON_SECRET`, `CRON_SECRET` |
+| Local `.env` files only | `DIRECT_URL`, `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SUPABASE_ANON_KEY` |
+
+> Missing any credential? Run the checklist against the A0 table — every credential maps to one of the steps above (A1-A6).
