@@ -58,7 +58,13 @@ type Delivery = {
 };
 
 type Props = {
-  insert?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
+  insert?: {
+    posts: InsertItem[];
+    videos: InsertItem[];
+    books: InsertItem[];
+    read: InsertItem[];
+    quotes: InsertItem[];
+  };
 };
 
 const sectionCls =

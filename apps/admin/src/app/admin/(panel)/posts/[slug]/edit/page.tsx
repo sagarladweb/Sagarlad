@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PostForm } from "@/components/admin/PostForm";
-import { getNewsletterInsertItems } from "@/lib/content";
 
 export const dynamic = "force-dynamic";
 
@@ -13,10 +12,9 @@ export default async function EditPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [post, categories, insertItems] = await Promise.all([
+  const [post, categories] = await Promise.all([
     prisma.post.findUnique({ where: { slug } }),
     prisma.category.findMany({ orderBy: { name: "asc" } }),
-    getNewsletterInsertItems(),
   ]);
 
   if (!post) notFound();
@@ -38,7 +36,6 @@ export default async function EditPostPage({
       </header>
       <PostForm
         categories={categories}
-        insertItems={insertItems}
         initial={{
           id: post.id,
           title: post.title,

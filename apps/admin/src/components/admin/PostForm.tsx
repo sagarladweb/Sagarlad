@@ -21,7 +21,6 @@ import { Dropdown } from "@/components/ui/Dropdown";
 import { showToast } from "@/components/admin/Toast";
 import { slugify, stripHtml, SITE } from "@/lib/site";
 import { enqueue } from "@/lib/offline-queue";
-import type { InsertItem } from "@/components/admin/InsertContentPicker";
 
 type Category = { id: string; name: string };
 type SaveState = "idle" | "loading" | "saved" | "error";
@@ -29,7 +28,6 @@ type SaveState = "idle" | "loading" | "saved" | "error";
 export function PostForm({
   categories,
   initial,
-  insertItems,
 }: {
   categories: Category[];
   initial?: {
@@ -43,7 +41,6 @@ export function PostForm({
     featured: boolean;
     published: boolean;
   };
-  insertItems?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
 }) {
   const router = useRouter();
   const [slugTouched, setSlugTouched] = useState(false);
@@ -585,7 +582,6 @@ export function PostForm({
           <span className={label}>Post *</span>
           <TipTapEditor
             initialContent={form.content}
-            insertItems={insertItems}
             onChange={(html) => {
               setForm((f) => ({ ...f, content: html }));
               autosave();

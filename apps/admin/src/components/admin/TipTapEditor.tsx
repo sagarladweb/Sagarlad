@@ -23,11 +23,6 @@ import { PostPreview, PreviewPending } from "@/components/admin/PostPreview";
 import { ContentEmbed, type EmbedData } from "@/components/admin/ContentEmbed";
 import { EmbedPicker } from "@/components/admin/EmbedPicker";
 import {
-  InsertContentPicker,
-  type InsertItem,
-  type InsertKind,
-} from "@/components/admin/InsertContentPicker";
-import {
   Bold,
   Italic,
   Underline as UnderlineIcon,
@@ -63,7 +58,6 @@ import {
   AlertCircle,
   HelpCircle,
   SquarePlus,
-  LayoutTemplate,
   Trash2,
 } from "lucide-react";
 
@@ -346,38 +340,6 @@ const HELP_ROWS: [string, string][] = [
   ["Add link", "Mod k"],
 ];
 
-type TemplateId = "book" | "video" | "idea" | "quote";
-
-const TEMPLATES: { id: TemplateId; title: string; desc: string; blocks: string }[] = [
-  {
-    id: "book",
-    title: "Book highlight",
-    desc: "A book's key idea + top takeaways",
-    blocks:
-      '<h2>What this book taught me</h2><p>[Note the core idea in your own words]</p><p>In <em>Insert book name</em>, the idea that stayed with me is simple:</p><div data-callout><p>[Write the one-line takeaway]</p></div><h3>Why it matters</h3><p>[Explain the real-life change it makes]</p><h3>Three things to try this week</h3><ul><li>[Action 1]</li><li>[Action 2]</li><li>[Action 3]</li></ul><p>If you read one thing this year, make it this book.</p><p>[TBD: embed the book]</p>',
-  },
-  {
-    id: "video",
-    title: "Video breakdown",
-    desc: "Summarize a video worth watching",
-    blocks:
-      '<h2>Why this video matters</h2><p>[Set up the context in one or two lines]</p><p>If you have 10 minutes, watch this. Here is what<em> I</em> took away:</p><h3>The big idea</h3><p>[The main point]</p><div data-callout><p>[The one thing you should remember]</p></div><h3>What I disagree with</h3><p>[Optional counterpoint]</p><p>Worth your time if [who this is for].</p><p>[TBD: embed the video]</p>',
-  },
-  {
-    id: "idea",
-    title: "Idea essay",
-    desc: "Turn a thought or habit into a post",
-    blocks:
-      '<h2>[Your idea as a headline]</h2><p>[Start with the moment you realized this]</p><div data-callout><p>[Your main argument in one sentence]</p></div><h3>What most people miss</h3><p>[The part you had to learn the hard way]</p><h3>What to do about it</h3><p>[One concrete step]</p><h3>A final thought</h3><p>[Close the loop]</p>',
-  },
-  {
-    id: "quote",
-    title: "Quote reflection",
-    desc: "A quote + why it hit you",
-    blocks: `<p>Some things you read once and they stay with you forever.</p><div data-callout><p>[Paste the quote you can't stop thinking about]</p></div><p>Here is why it hit me: [your reaction]</p><p>It changed how I think about [topic].</p><h3>If you only take one thing</h3><p>[The actionable lesson]</p>`,
-  },
-];
-
 function ModalOverlay({
   label,
   onClose,
@@ -509,7 +471,6 @@ export function TipTapEditor({
   onChange,
   preview,
   footer,
-  insertItems,
 }: {
   initialContent?: string;
   onChange: (html: string) => void;
@@ -520,7 +481,6 @@ export function TipTapEditor({
     error?: string;
   };
   footer?: React.ReactNode;
-  insertItems?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
 }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [toolbarPos, setToolbarPos] = useState<ToolbarPos>(() => {
@@ -537,7 +497,6 @@ export function TipTapEditor({
   const [uploadError, setUploadError] = useState("");
   const [helpOpen, setHelpOpen] = useState(false);
   const [embedPickerOpen, setEmbedPickerOpen] = useState(false);
-  const [templateOpen, setTemplateOpen] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
   const [selectedImage, setSelectedImage] = useState<{
@@ -1051,11 +1010,6 @@ export function TipTapEditor({
 
   const insertGroup = [
     {
-      label: "Starter template (book, video, idea…)",
-      icon: <LayoutTemplate className="w-4 h-4" />,
-      onClick: () => setTemplateOpen(true),
-    },
-    {
       label: "Insert content (video, book, social, quote…)",
       icon: <SquarePlus className="w-4 h-4" />,
       onClick: () => setEmbedPickerOpen(true),
@@ -1073,25 +1027,6 @@ export function TipTapEditor({
         .run();
     }
     setEmbedPickerOpen(false);
-  };
-
-  const insertTemplate = (blocks: string) => {
-    editor.chain().focus().insertContent(blocks).run();
-    setTemplateOpen(false);
-  };
-
-  const insertRecentContent = (item: InsertItem, kind: InsertKind) => {
-    const esc = (s: string) =>
-      s
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
-    editor
-      .chain()
-      .focus()
-      .insertContent(`<p>${esc(kind)}: <a href="${esc(item.url)}">${esc(item.title)}</a></p>`)
-      .run();
   };
 
   const renderGroup = (vertical: boolean) => {
@@ -1404,25 +1339,17 @@ export function TipTapEditor({
             </button>
           </div>
 
-          {mode === "write" && insertItems && (
-            <InsertContentPicker
-              compact
-              align="right"
-              label="Insert"
-              items={insertItems}
-              onInsert={insertRecentContent}
-            />
+          {mode === "write" && (
+            <button
+              type="button"
+              onClick={() => setHelpOpen(true)}
+              aria-label="Editor tools help"
+              title="How to use the editor tools"
+              className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
+            >
+              <HelpCircle className="w-3.5 h-3.5" /> Help
+            </button>
           )}
-
-          <button
-            type="button"
-            onClick={() => setHelpOpen(true)}
-            aria-label="Editor tools help"
-            title="How to use the editor tools"
-            className="inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted"
-          >
-            <HelpCircle className="w-3.5 h-3.5" /> Help
-          </button>
         </div>
       </div>
 
@@ -1482,33 +1409,6 @@ export function TipTapEditor({
 
       {embedPickerOpen && (
         <EmbedPicker onPick={insertEmbed} onClose={() => setEmbedPickerOpen(false)} />
-      )}
-
-      {templateOpen && (
-        <ModalOverlay label="Start from a template" onClose={() => setTemplateOpen(false)}>
-          <div className="space-y-2">
-            <p className="text-xs text-muted-foreground">
-              Pick a starter layout — headings, callouts and placeholders appear in your post. Replace
-              the [placeholders] with your own words.
-            </p>
-            {TEMPLATES.map((t) => (
-              <button
-                key={t.id}
-                type="button"
-                onClick={() => insertTemplate(t.blocks)}
-                className="flex w-full items-center gap-3 rounded-xl border border-border p-3 text-left transition-colors hover:border-accent hover:bg-muted"
-              >
-                <span className="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-accent/10 text-accent">
-                  <LayoutTemplate className="h-4 w-4" />
-                </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-semibold text-foreground">{t.title}</span>
-                  <span className="block text-xs text-muted-foreground">{t.desc}</span>
-                </span>
-              </button>
-            ))}
-          </div>
-        </ModalOverlay>
       )}
 
       {helpOpen && <EditorHelp onClose={() => setHelpOpen(false)} />}

@@ -7,6 +7,7 @@ export type TemplateId = "letter" | "editorial" | "minimal";
 
 export type NewsletterContent = {
   template: TemplateId;
+  accent: string;
   preheader: string;
   greeting: string;
   intro: string;
@@ -16,6 +17,13 @@ export type NewsletterContent = {
   signoff: string;
   socials: { label: string; href: string }[];
 };
+
+// Accent choices offered in the composer. Yellow is the site default; blue is
+// the deep-brand option for a more formal letter.
+export const BRAND_ACCENTS = [
+  { name: "Yellow", value: "#ffd51d" },
+  { name: "Blue", value: "#0d21a1" },
+];
 
 // Follow row appended before the sign-off. Email-safe table, always inline.
 export function socialRow(socials: { label: string; href: string }[]): string {
@@ -68,9 +76,8 @@ function paras(text: string): string {
 }
 
 // Brand tokens — aligned with design.md. Yellow accent is the site's only
-// constant accent; ink/cream match the site's typography surfaces. Keep every
-// email template on these values for brand consistency.
-const ACCENT = "#ffd51d";
+// constant accent; ink/cream match the site's typography surfaces. The accent
+// comes from the composer (BRAND_ACCENTS) so a letter can switch to blue.
 const INK = "#111110";
 const MUTED = "#6b6a66";
 const CREAM = "#faf9f6";
@@ -103,14 +110,14 @@ export function letterBody(c: NewsletterContent): string {
         <tr><td style="padding:34px 40px 10px 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td width="12" style="height:12;background:${ACCENT};border-radius:3px"></td>
+              <td width="12" style="height:12;background:${c.accent};border-radius:3px"></td>
               <td style="font-size:13px;font-weight:700;letter-spacing:2px;color:${INK};text-transform:uppercase;padding:0 0 0 10px">Sagar Lad</td>
               <td align="right" style="font-size:12px;color:${MUTED};padding:0">${dateLabel()}</td>
             </tr>
           </table>
         </td></tr>
-        <tr><td style="height:1px;background:${ACCENT};padding:0 40px">
-          <div style="height:2px;background:${ACCENT}"></div>
+        <tr><td style="height:1px;background:${c.accent};padding:0 40px">
+          <div style="height:2px;background:${c.accent}"></div>
         </td></tr>
         <tr><td style="padding:30px 40px 6px 40px;font-size:15px;color:${INK};${FONT}min-height:40px">
           <p style="margin:0 0 6px 0;font-weight:700">${esc(c.greeting)}</p>
@@ -121,7 +128,7 @@ export function letterBody(c: NewsletterContent): string {
             (s, i) => `
         <tr><td style="padding:${i === 0 ? "14px" : "6px"} 40px 0 40px">
           <p style="margin:0 0 10px 0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:${INK}">${esc(s.heading)}</p>
-          <div style="margin:0 0 14px 0;height:3px;width:42px;background:${ACCENT}"></div>
+          <div style="margin:0 0 14px 0;height:3px;width:42px;background:${c.accent}"></div>
           <div style="font-size:15px;color:#2a2926">${paras(s.body)}</div>
         </td></tr>`
           )
@@ -131,7 +138,7 @@ export function letterBody(c: NewsletterContent): string {
             ? `
         <tr><td style="padding:18px 40px 0 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td width="4" style="background:${ACCENT};border-radius:2px"></td>
+            <td width="4" style="background:${c.accent};border-radius:2px"></td>
             <td style="padding:6px 22px;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#3c3a35">${esc(c.quote.text)}
               ${
                 c.quote.author
@@ -147,7 +154,7 @@ export function letterBody(c: NewsletterContent): string {
           c.cta
             ? `
         <tr><td align="center" style="padding:26px 40px 0 40px">
-          <a href="${esc(c.cta.url)}" style="background:${ACCENT};color:${INK};text-decoration:none;font-weight:700;font-size:15px;padding:13px 34px;border-radius:999px;display:inline-block">${esc(c.cta.label)}</a>
+          <a href="${esc(c.cta.url)}" style="background:${c.accent};color:${INK};text-decoration:none;font-weight:700;font-size:15px;padding:13px 34px;border-radius:999px;display:inline-block">${esc(c.cta.label)}</a>
         </td></tr>`
             : ""
         }
@@ -173,7 +180,7 @@ export function editorialBody(c: NewsletterContent): string {
         <tr><td style="background:${INK};padding:26px 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td><span style="background:${ACCENT};color:${INK};font-weight:800;letter-spacing:1px;font-size:13px;padding:5px 10px;border-radius:3px">SAGAR LAD</span></td>
+              <td><span style="background:${c.accent};color:${INK};font-weight:800;letter-spacing:1px;font-size:13px;padding:5px 10px;border-radius:3px">SAGAR LAD</span></td>
               <td align="right" style="color:rgba(255,255,255,0.55);font-size:12px">${dateLabel()}</td>
             </tr>
           </table>
@@ -196,7 +203,7 @@ export function editorialBody(c: NewsletterContent): string {
             ? `
         <tr><td style="padding:20px 40px 0 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
-            <td style="background:${ACCENT};border-radius:4px;padding:18px 24px">
+            <td style="background:${c.accent};border-radius:4px;padding:18px 24px">
               <p style="margin:0;font-size:16px;font-style:italic;font-family:Georgia,'Times New Roman',serif;color:${INK}">${esc(c.quote.text)}</p>
               ${
                 c.quote.author
@@ -275,7 +282,7 @@ export function minimalBody(c: NewsletterContent): string {
           c.cta
             ? `
         <tr><td style="padding:24px 24px 0 24px">
-          <a href="${esc(c.cta.url)}" style="color:${INK};text-decoration:underline;text-underline-offset:3px;font-weight:600;font-size:15px">${esc(c.cta.label)} <span style="color:${ACCENT}">→</span></a>
+          <a href="${esc(c.cta.url)}" style="color:${INK};text-decoration:underline;text-underline-offset:3px;font-weight:600;font-size:15px">${esc(c.cta.label)} <span style="color:${c.accent}">→</span></a>
         </td></tr>`
             : ""
         }
@@ -300,6 +307,7 @@ export function buildTemplateBody(id: TemplateId, c: NewsletterContent): string 
 
 export const emptyNewsletter: NewsletterContent = {
   template: "letter",
+  accent: "#ffd51d",
   preheader:
     "A big idea, a practical filter, and one simple thing you can do this week.",
   greeting: "Hi there,",

@@ -4,16 +4,24 @@ import { useEffect, useRef, useState } from "react";
 import { Plus, ChevronDown } from "lucide-react";
 
 export type InsertItem = { title: string; url: string };
-export type InsertKind = "post" | "video" | "book";
+export type InsertKind = "post" | "video" | "book" | "read" | "quote";
 
 const KIND_LABEL: Record<InsertKind, string> = {
-  post: "Post",
+  post: "Blog",
   video: "Video",
   book: "Book",
+  read: "Read",
+  quote: "Quote",
 };
 
 type Props = {
-  items: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
+  items: {
+    posts: InsertItem[];
+    videos: InsertItem[];
+    books: InsertItem[];
+    read: InsertItem[];
+    quotes: InsertItem[];
+  };
   onInsert: (item: InsertItem, kind: InsertKind) => void;
   label?: string;
   align?: "left" | "right";
@@ -47,9 +55,11 @@ export function InsertContentPicker({
   }, [open]);
 
   const allGroups: { kind: InsertKind; label: string; rows: InsertItem[] }[] = [
-    { kind: "post", label: "Posts", rows: items.posts },
+    { kind: "post", label: "Blogs", rows: items.posts },
     { kind: "video", label: "Videos", rows: items.videos },
-    { kind: "book", label: "Books", rows: items.books },
+    { kind: "book", label: "Books I publish", rows: items.books },
+    { kind: "read", label: "Books I read", rows: items.read },
+    { kind: "quote", label: "Quotes", rows: items.quotes },
   ];
   const groups = allGroups.filter((g) => g.rows.length > 0);
 
@@ -86,7 +96,7 @@ export function InsertContentPicker({
           <div className="border-b border-border px-4 py-2.5">
             <p className="text-sm font-semibold">Recent content</p>
             <p className="text-xs text-muted-foreground">
-              Link a post, video or book you&apos;ve published.
+              Link a blog, video, book or quote.
             </p>
           </div>
           <div className="max-h-72 overflow-y-auto p-2">

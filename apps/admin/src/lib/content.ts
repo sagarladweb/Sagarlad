@@ -200,27 +200,40 @@ export function getNewsletterInsertItems() {
     prisma.post.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: 5,
       select: { title: true, slug: true },
     }),
     prisma.video.findMany({
       where: { published: true },
       orderBy: { createdAt: "desc" },
-      take: 3,
+      take: 5,
       select: { title: true, slug: true },
     }),
     prisma.book.findMany({
-      where: { published: true },
+      where: { published: true, type: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
-      take: 3,
-      select: { title: true },
+      take: 5,
+      select: { title: true, buyUrl: true },
     }),
-  ]).then(([posts, videos, books]) => ({
+    prisma.book.findMany({
+      where: { published: true, type: "READ" },
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { title: true, buyUrl: true },
+    }),
+    prisma.quote.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 5,
+      select: { text: true, tag: true },
+    }),
+  ]).then(([posts, videos, published, read, quotes]) => ({
     posts: posts.map((p) => ({ title: p.title, url: `${SITE.url}/blog/${p.slug}` })),
     videos: videos.map((v) => ({
       title: v.title,
       url: v.slug ? `${SITE.url}/videos/${v.slug}` : SITE.url,
     })),
-    books: books.map((b) => ({ title: b.title, url: `${SITE.url}/books` })),
+    books: published.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
+    read: read.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
+    quotes: quotes.map((q) => ({ title: q.text, url: `${SITE.url}/quotes` })),
   }));
 }

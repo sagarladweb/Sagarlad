@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Send, Loader2, Trash2, Plus, Save, MailCheck } from "lucide-react";
 import {
+  BRAND_ACCENTS,
   buildTemplateBody,
   emailShell,
   emptyNewsletter,
@@ -25,7 +26,13 @@ type Props = {
   onError: (text: string) => void;
   onStatus?: (text: string) => void;
   seed?: { subject: string; content: NewsletterContent } | null;
-  insert?: { posts: InsertItem[]; videos: InsertItem[]; books: InsertItem[] };
+  insert?: {
+    posts: InsertItem[];
+    videos: InsertItem[];
+    books: InsertItem[];
+    read: InsertItem[];
+    quotes: InsertItem[];
+  };
 };
 
 const labelCls = "block text-xs font-semibold text-foreground";
@@ -74,16 +81,16 @@ export function NewsletterComposer({
   }
 
   function addInserted(item: InsertItem, kind: InsertKind) {
-    setContent((c) => ({
-      ...c,
-      sections: [
-        ...c.sections,
-        {
-          heading: item.title,
-          body: `Read the ${kind}: ${item.title} — ${item.url}`,
-        },
-      ],
-    }));
+    const section =
+      kind === "quote"
+        ? { heading: "Quote", body: `"${item.title}"\n\nBrowse all quotes: ${item.url}` }
+        : {
+            heading: item.title,
+            body: `${
+              { post: "Read the blog", video: "Watch the video", book: "Get the book", read: "I read this" }[kind]
+            }: ${item.title} — ${item.url}`,
+          };
+    setContent((c) => ({ ...c, sections: [...c.sections, section] }));
   }
 
   const bodyHtml = useMemo(
@@ -221,6 +228,29 @@ export function NewsletterComposer({
                   }`}
                 >
                   {t.name}
+                </button>
+              ))}
+            </div>
+            <span className={`${labelCls} ml-1`}>Brand colour</span>
+            <div className="flex items-center gap-1.5 rounded-full border border-border bg-muted/40 p-1">
+              {BRAND_ACCENTS.map((a) => (
+                <button
+                  key={a.value}
+                  type="button"
+                  onClick={() => update({ accent: a.value })}
+                  aria-pressed={content.accent === a.value}
+                  title={a.name}
+                  className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
+                    content.accent === a.value
+                      ? "bg-background shadow-sm"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  <span
+                    className="inline-block h-3 w-3 rounded-full border border-black/10"
+                    style={{ background: a.value }}
+                  />
+                  {a.name}
                 </button>
               ))}
             </div>
