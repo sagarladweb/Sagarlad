@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ShoppingBag, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
@@ -30,6 +30,8 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
 
   const [index, setIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [fullyVisible, setFullyVisible] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
 
   const total = sortedBooks.length;
   const book = sortedBooks[index] ?? sortedBooks[0];
@@ -37,19 +39,31 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
   const prev = () => setIndex((i) => (i - 1 + total) % total);
   const next = () => setIndex((i) => (i + 1) % total);
 
-  // Auto-scroll every 5 seconds when visible and not hovered
+  // Auto-scroll every 8 seconds, but only once the whole section is on screen
+  // (and not hovered).
   useEffect(() => {
-    if (total <= 1 || isPaused) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setFullyVisible(entry.isIntersecting), {
+      threshold: 1,
+    });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (total <= 1 || isPaused || !fullyVisible) return;
     const timer = setInterval(() => {
       setIndex((i) => (i + 1) % total);
-    }, 5000);
+    }, 8000);
     return () => clearInterval(timer);
-  }, [total, isPaused]);
+  }, [total, isPaused, fullyVisible]);
 
   if (!sortedBooks.length) return null;
 
   return (
     <div
+      ref={rootRef}
       onMouseEnter={() => setIsPaused(true)}
       onMouseLeave={() => setIsPaused(false)}
       className="group/carousel"

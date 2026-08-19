@@ -4,13 +4,11 @@ import Image from "next/image";
 import {
   ArrowRight,
   Mic,
-  Presentation,
   Globe,
   Award,
   Calendar,
   CheckCircle2,
   Quote,
-  PlayCircle,
   Cloud,
   GraduationCap,
   BadgeCheck,
@@ -180,8 +178,8 @@ export default function SpeakingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-5">
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-strong">
-                <PlayCircle className="w-3.5 h-3.5" /> Watch him speak
+              <span className="inline-flex items-center rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-strong">
+                Watch him speak
               </span>
               <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold leading-tight">
                 The AI talk he gives on every stage
@@ -230,7 +228,7 @@ export default function SpeakingPage() {
       {/* Stages & Credentials — visually rich unified grid section */}
       <section className="border-b border-border bg-background py-20 md:py-24" aria-label="Stages and Credentials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">
-          {/* Events Hosted */}
+          {/* Events Hosted — divided list */}
           <div>
             <div className="max-w-2xl mb-10">
               <span className="text-xs font-bold uppercase tracking-widest text-accent">Events &amp; Summits</span>
@@ -239,37 +237,36 @@ export default function SpeakingPage() {
                 Keynotes delivered across regional tech groups, academic institutions, and international summits.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {eventsHosted.map((e) => {
+            <div className="rounded-3xl border border-border divide-y divide-border overflow-hidden bg-card">
+              {eventsHosted.map((e, i) => {
                 const Icon = e.icon;
                 return (
                   <div
                     key={e.title}
-                    className="group relative flex flex-col justify-between rounded-3xl border border-border bg-card p-6 shadow-sm hover:border-accent/60 hover:shadow-md transition-all"
+                    className="group flex items-center gap-4 sm:gap-6 px-6 sm:px-8 py-5 transition-colors hover:bg-muted/40"
                   >
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-accent">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <span className="rounded-full bg-muted px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-                          {e.role}
-                        </span>
-                      </div>
-                      <h3 className="mt-5 font-display text-base font-bold leading-snug group-hover:text-accent transition-colors">
+                    <span className="w-8 shrink-0 font-display text-lg sm:text-xl font-extrabold text-muted-foreground/35 tabular-nums">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-light/10 text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+                      <Icon className="w-4 h-4" />
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-display text-base sm:text-lg font-bold leading-snug group-hover:text-accent-strong transition-colors">
                         {e.title}
                       </h3>
+                      <p className="mt-0.5 text-xs text-muted-foreground">{e.role}</p>
                     </div>
-                    <p className="mt-4 pt-3 border-t border-border/60 text-xs font-semibold text-muted-foreground">
-                      📍 {e.place}
-                    </p>
+                    <span className="shrink-0 rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {e.place}
+                    </span>
                   </div>
                 );
               })}
             </div>
           </div>
 
-          {/* Memberships & Certifications */}
+          {/* Memberships & Certifications — 2-col hairline grid */}
           <div>
             <div className="max-w-2xl mb-10">
               <span className="text-xs font-bold uppercase tracking-widest text-accent">Recognitions &amp; Credentials</span>
@@ -278,28 +275,25 @@ export default function SpeakingPage() {
                 Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-3xl border border-border bg-border">
               {memberships.map((m) => {
                 const Icon = m.icon;
                 return (
                   <div
                     key={m.title}
-                    className="group relative flex flex-col justify-between rounded-3xl border border-border bg-card p-6 shadow-sm hover:border-accent/60 hover:shadow-md transition-all"
+                    className="group bg-card p-6 sm:p-7 flex flex-col justify-between min-h-[150px] transition-colors hover:bg-muted/40"
                   >
-                    <div>
-                      <div className="grid h-11 w-11 place-items-center rounded-2xl bg-accent/15 text-accent">
-                        <Icon className="w-5 h-5" />
-                      </div>
-                      <h3 className="mt-5 font-display text-base font-bold leading-snug group-hover:text-accent transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <Icon className="w-5 h-5 text-brand-light" />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-light/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand">
+                        <CheckCircle2 className="w-3 h-3" /> Verified
+                      </span>
+                    </div>
+                    <div className="mt-8">
+                      <h3 className="font-display text-base font-bold leading-snug group-hover:text-accent-strong transition-colors">
                         {m.title}
                       </h3>
-                      <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                        {m.desc}
-                      </p>
-                    </div>
-                    <div className="mt-4 pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-semibold text-accent">
-                      <span>Verified Badge</span>
-                      <span>✓</span>
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{m.desc}</p>
                     </div>
                   </div>
                 );

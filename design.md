@@ -45,6 +45,9 @@ yellow. Applied on the admin layout root and the login page root.
 2. **One CTA colour site-wide**: every primary CTA pill is yellow
    (`bg-accent text-accent-foreground`). No `bg-brand` CTA buttons — brand
    blue never appears as a button fill.
+3. **Pagination is always yellow.** Every pagination control (Prev / Next /
+   page-number pills) uses `bg-accent text-accent-foreground`; the only
+   variation is the disabled state (`opacity-40`, no border).
 3. **Don't overuse blue.** A busy section stays mostly neutral (`background`,
    `card`, `muted`) with blue and yellow as accents. Reserve solid `bg-brand`
    for small elements (icon tiles, the footer, the active nav pill).

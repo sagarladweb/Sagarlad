@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowUpRight, BookOpen } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -160,8 +160,8 @@ export function AboutMe() {
           {/* Content */}
           <div className="lg:col-span-7 order-2 space-y-8">
             <div data-story-head>
-              <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-accent-strong">
-                <BookOpen className="w-3.5 h-3.5" /> About Sagar
+              <span className="inline-flex items-center rounded-full bg-accent/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-accent-strong">
+                About Sagar
               </span>
               <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
                 A story of almost nothing, and everything.

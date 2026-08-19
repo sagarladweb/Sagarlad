@@ -273,8 +273,8 @@ export default async function BlogPage({
                   page: String(Math.max(1, page - 1)),
                 })}`}
                 aria-disabled={page <= 1}
-                className={`rounded-full border border-border px-4 py-2 text-sm ${
-                  page <= 1 ? "pointer-events-none opacity-40" : "hover:bg-muted"
+                className={`rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold transition-opacity ${
+                  page <= 1 ? "pointer-events-none opacity-40" : "hover:opacity-90"
                 }`}
               >
                 Previous
@@ -289,10 +289,10 @@ export default async function BlogPage({
                   page: String(Math.min(totalPages, page + 1)),
                 })}`}
                 aria-disabled={page >= totalPages}
-                className={`rounded-full border border-border px-4 py-2 text-sm ${
+                className={`rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold transition-opacity ${
                   page >= totalPages
                     ? "pointer-events-none opacity-40"
-                    : "hover:bg-muted"
+                    : "hover:opacity-90"
                 }`}
               >
                 Next
@@ -317,8 +317,8 @@ export default async function BlogPage({
                   vpage: String(Math.max(1, vpage - 1)),
                 })}`}
                 aria-disabled={vpage <= 1}
-                className={`rounded-full border border-border px-4 py-2 text-sm ${
-                  vpage <= 1 ? "pointer-events-none opacity-40" : "hover:bg-muted"
+                className={`rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold transition-opacity ${
+                  vpage <= 1 ? "pointer-events-none opacity-40" : "hover:opacity-90"
                 }`}
               >
                 Previous
@@ -332,10 +332,10 @@ export default async function BlogPage({
                   vpage: String(Math.min(videoPages, vpage + 1)),
                 })}`}
                 aria-disabled={vpage >= videoPages}
-                className={`rounded-full border border-border px-4 py-2 text-sm ${
+                className={`rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold transition-opacity ${
                   vpage >= videoPages
                     ? "pointer-events-none opacity-40"
-                    : "hover:bg-muted"
+                    : "hover:opacity-90"
                 }`}
               >
                 Next

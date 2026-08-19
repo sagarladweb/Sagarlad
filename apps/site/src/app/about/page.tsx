@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { ArrowRight, Compass, Trophy, Medal, Footprints } from "lucide-react";
+import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SocialLinks } from "@/components/SocialLinks";
 import { SiteLogo } from "@/components/SiteLogo";
 
@@ -177,9 +177,9 @@ export default function AboutPage() {
             <div className="lg:col-span-7 space-y-6">
               <span
                 data-reveal
-                className="inline-flex items-center gap-2 rounded-full bg-brand-light/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand"
+                className="inline-flex items-center rounded-full bg-brand-light/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand"
               >
-                <Compass className="w-3.5 h-3.5" /> Full Story &amp; Biography
+                Full Story &amp; Biography
               </span>
               <h1
                 data-reveal

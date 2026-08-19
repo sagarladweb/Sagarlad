@@ -88,14 +88,14 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* Clean minimal header */}
-      <section className="border-b border-border bg-card/40 py-16 sm:py-24">
+      {/* Clean minimal header — white, blue accent eyebrow + highlight */}
+      <section className="border-b border-border bg-background py-16 sm:py-24">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-4">
-          <span className="text-xs font-bold uppercase tracking-widest text-accent">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand">
             Get In Touch
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
-            Let&apos;s connect.
+            Let&apos;s <span className="text-brand">connect.</span>
           </h1>
           <p className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl mx-auto">
             Have a question, feedback on a book, or a thought to share? Send a message directly to Sagar.

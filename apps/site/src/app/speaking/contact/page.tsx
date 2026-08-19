@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
 import { validateContact, sanitizeText, digitsOnly } from "@/lib/client-validators";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Calendar } from "@/components/ui/Calendar";
@@ -103,12 +102,12 @@ export default function SpeakingContactPage() {
 
   return (
     <>
-      {/* Event Booking Hero */}
+      {/* Event Booking Hero — white, light-blue gradient behind the portrait, blue accents */}
       <header className="overflow-hidden border-b border-border bg-background text-foreground py-16 sm:py-24">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-10">
           <div className="lg:col-span-5">
             <div className="relative mx-auto w-full max-w-[380px]">
-              <div aria-hidden="true" className="absolute left-1/2 top-1/2 aspect-square w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/20 blur-2xl" />
+              <div aria-hidden="true" className="absolute left-1/2 top-1/2 aspect-square w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-light/45 via-brand-light/20 to-transparent blur-2xl" />
               <Image
                 src="/images/Sagar's.png"
                 alt="Sagar Lad"
@@ -121,11 +120,11 @@ export default function SpeakingContactPage() {
           </div>
 
           <div className="lg:col-span-7 lg:pl-6">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-accent">
+            <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand">
               Speaking &amp; Keynotes
             </span>
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl tracking-tight">
-              Book Sagar for your next <span className="text-accent">event</span>
+              Book Sagar for your next <span className="text-brand">event</span>
             </h1>
             <p className="mt-4 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed">
               Story-driven keynotes, interactive workshops, and executive panels on AI leadership, financial freedom, and career momentum.
@@ -136,8 +135,8 @@ export default function SpeakingContactPage() {
                 "Customized content mapped to your event theme",
                 "High audience engagement with Q&A and takeaway guides",
               ].map((item) => (
-                <li key={item} className="flex items-start gap-3 text-sm font-semibold">
-                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden="true" />
+                <li key={item} className="flex items-start gap-3 text-sm font-semibold text-foreground">
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-brand" aria-hidden="true" />
                   {item}
                 </li>
               ))}
