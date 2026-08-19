@@ -108,13 +108,59 @@ function PanelCard({
 export default async function DashboardPage() {
   if (PHASE_1) redirect("/admin/posts");
 
-  const [postCount, draftCount, , recentPosts, totalViewsAgg] =
-    await getDashboardStats();
-  const extras = await getDashboardExtras();
-  const totalViews = totalViewsAgg._sum.views ?? 0;
+  let postCount = 0;
+  let draftCount = 0;
+  let recentPosts: { title: string; slug: string; published: boolean; views: number }[] = [];
+  let totalViews = 0;
+  let extras: {
+    activeSubs: number;
+    lastCampaign: { subject: string; createdAt: Date; _count: { deliveries: number } } | null;
+    queued: number;
+    books: number;
+    videos: number;
+    quotes: number;
+    pendingComments: number;
+    activity: { action: string; createdAt: Date }[];
+  } = {
+    activeSubs: 0,
+    lastCampaign: null,
+    queued: 0,
+    books: 0,
+    videos: 0,
+    quotes: 0,
+    pendingComments: 0,
+    activity: [],
+  };
 
-  const ga = await getGaAnalytics(14);
+  try {
+    const [posts, drafts, , recent, totalViewsAgg] = await getDashboardStats();
+    postCount = posts;
+    draftCount = drafts;
+    recentPosts = recent;
+    totalViews = totalViewsAgg._sum.views ?? 0;
+    extras = await getDashboardExtras();
+  } catch (e) {
+    console.error("Failed to load dashboard stats:", e);
+  }
+
+  const fallbackGa = {
+    ok: true as const,
+    data: {
+      days: 14,
+      configured: false,
+      totals: { users: 0, newUsers: 0, sessions: 0, pageviews: 0, events: 0, avgEngagement: 0, engagementRate: 0, bounceRate: 0 },
+      daily: [],
+      topPages: [],
+      topSources: [],
+      topDevices: [],
+      topCountries: [],
+      newVsReturning: [],
+    },
+  };
+
+  const ga = await getGaAnalytics(14).catch(() => fallbackGa);
   const gaData = ga.data;
+
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const today = new Date().toLocaleDateString("en-IN", {
