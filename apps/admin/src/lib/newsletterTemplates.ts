@@ -82,6 +82,18 @@ const INK = "#111110";
 const MUTED = "#6b6a66";
 const CREAM = "#faf9f6";
 
+// Pick the readable foreground for text sitting on the accent fill. Yellow
+// (light) keeps ink; deep blue (dark) switches to white — mirrors the admin
+// panel rule in design.md (--accent-foreground: #ffffff on the blue accent).
+function accentForeground(accent: string): string {
+  const hex = accent.replace("#", "");
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.5 ? INK : "#ffffff";
+}
+
 const FONT = 'font-family:-apple-system,"Segoe UI",Roboto,Arial,Helvetica,sans-serif;';
 
 const dateLabel = () =>
@@ -154,7 +166,7 @@ export function letterBody(c: NewsletterContent): string {
           c.cta
             ? `
         <tr><td align="center" style="padding:26px 40px 0 40px">
-          <a href="${esc(c.cta.url)}" style="background:${c.accent};color:${INK};text-decoration:none;font-weight:700;font-size:15px;padding:13px 34px;border-radius:999px;display:inline-block">${esc(c.cta.label)}</a>
+          <a href="${esc(c.cta.url)}" style="background:${c.accent};color:${accentForeground(c.accent)};text-decoration:none;font-weight:700;font-size:15px;padding:13px 34px;border-radius:999px;display:inline-block">${esc(c.cta.label)}</a>
         </td></tr>`
             : ""
         }
@@ -180,7 +192,7 @@ export function editorialBody(c: NewsletterContent): string {
         <tr><td style="background:${INK};padding:26px 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
             <tr>
-              <td><span style="background:${c.accent};color:${INK};font-weight:800;letter-spacing:1px;font-size:13px;padding:5px 10px;border-radius:3px">SAGAR LAD</span></td>
+              <td><span style="background:${c.accent};color:${accentForeground(c.accent)};font-weight:800;letter-spacing:1px;font-size:13px;padding:5px 10px;border-radius:3px">SAGAR LAD</span></td>
               <td align="right" style="color:rgba(255,255,255,0.55);font-size:12px">${dateLabel()}</td>
             </tr>
           </table>
@@ -204,10 +216,10 @@ export function editorialBody(c: NewsletterContent): string {
         <tr><td style="padding:20px 40px 0 40px">
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
             <td style="background:${c.accent};border-radius:4px;padding:18px 24px">
-              <p style="margin:0;font-size:16px;font-style:italic;font-family:Georgia,'Times New Roman',serif;color:${INK}">${esc(c.quote.text)}</p>
+              <p style="margin:0;font-size:16px;font-style:italic;font-family:Georgia,'Times New Roman',serif;color:${accentForeground(c.accent)}">${esc(c.quote.text)}</p>
               ${
                 c.quote.author
-                  ? `<p style="margin:8px 0 0 0;font-size:12px;font-weight:700;color:${INK};letter-spacing:1px;text-transform:uppercase">${esc(c.quote.author)}</p>`
+                  ? `<p style="margin:8px 0 0 0;font-size:12px;font-weight:700;color:${accentForeground(c.accent)};letter-spacing:1px;text-transform:uppercase">${esc(c.quote.author)}</p>`
                   : ""
               }
             </td>
