@@ -83,31 +83,38 @@ export async function loginThrottleStatus(
   retryAfter: number;
   remaining: number;
 }> {
-  const since = new Date(Date.now() - LOGIN_WINDOW_MS);
-  const emailKey = email.toLowerCase();
-  const [accountFails, ipFails] = await Promise.all([
-    prisma.auditLogEntry.count({
-      where: {
-        action: { in: FAIL_ACTIONS },
-        createdAt: { gte: since },
-        meta: { path: ["email"], equals: emailKey },
-      },
-    }),
-    prisma.auditLogEntry.count({
-      where: {
-        action: { in: FAIL_ACTIONS },
-        createdAt: { gte: since },
-        ip: ip === "unknown" ? undefined : ip,
-      },
-    }),
-  ]);
-  const total = accountFails + ipFails;
-  if (total >= LOGIN_MAX) {
-    return {
-      locked: true,
-      retryAfter: Math.ceil(LOGIN_WINDOW_MS / 1000),
-      remaining: 0,
-    };
+  try {
+    const since = new Date(Date.now() - LOGIN_WINDOW_MS);
+    const emailKey = email.toLowerCase();
+    const [accountFails, ipFails] = await Promise.all([
+      prisma.auditLogEntry.count({
+        where: {
+          action: { in: FAIL_ACTIONS },
+          createdAt: { gte: since },
+          meta: { path: ["email"], equals: emailKey },
+        },
+      }),
+      prisma.auditLogEntry.count({
+        where: {
+          action: { in: FAIL_ACTIONS },
+          createdAt: { gte: since },
+          ip: ip === "unknown" ? undefined : ip,
+        },
+      }),
+    ]);
+    const total = accountFails + ipFails;
+    if (total >= LOGIN_MAX) {
+      return {
+        locked: true,
+        retryAfter: Math.ceil(LOGIN_WINDOW_MS / 1000),
+        remaining: 0,
+      };
+    }
+    return { locked: false, retryAfter: 0, remaining: LOGIN_MAX - total };
+  } catch (err) {
+    // If the audit DB is unreachable, don't block login on the throttle check
+    // — fail open so the user isn't locked out by a transient DB issue.
+    console.warn("[rate-limit] loginThrottleStatus failed, allowing attempt:", (err as Error).message);
+    return { locked: false, retryAfter: 0, remaining: LOGIN_MAX };
   }
-  return { locked: false, retryAfter: 0, remaining: LOGIN_MAX - total };
 }

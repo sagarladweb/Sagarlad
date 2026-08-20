@@ -49,11 +49,17 @@ function createClient() {
 // Vercel, so an eager module-scope throw made every admin deploy fail with
 // "DATABASE_URL is not set". Queries still fail loudly if the env is genuinely
 // missing, and dbSafe() turns that into a fallback instead of a crash.
+//
+// The client is cached on globalThis in ALL environments (including
+// production): `globalThis` persists per serverless instance, so a warm lambda
+// reuses one PrismaClient + one pg.Pool instead of opening a fresh pool (up to
+// 5 connections) per query, which exhausted the Supabase free-tier connection
+// cap and made login/other queries fail intermittently on Vercel.
 function getClient(): PrismaClient {
   const existing = globalForPrisma.prisma;
   if (existing) return existing;
   const client = createClient();
-  if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = client;
+  globalForPrisma.prisma = client;
   return client;
 }
 

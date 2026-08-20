@@ -70,6 +70,14 @@ function AdminLogin() {
             message: "Too many failed attempts. Account locked for 30 minutes.",
           };
         }
+        if (errStr === "DB_UNAVAILABLE" || errStr.includes("DB_UNAVAILABLE")) {
+          return {
+            needOtp: false,
+            ok: false,
+            message:
+              "Database is unavailable right now. Check the Supabase connection (DATABASE_URL) and try again.",
+          };
+        }
         return { needOtp: false, ok: false, message: adminMessage() };
       }
 
@@ -91,6 +99,14 @@ function AdminLogin() {
           needOtp: false,
           ok: false,
           message: "Too many failed attempts. Account locked for 30 minutes.",
+        };
+      }
+      if (errMsg.includes("DB_UNAVAILABLE")) {
+        return {
+          needOtp: false,
+          ok: false,
+          message:
+            "Database is unavailable right now. Check the Supabase connection (DATABASE_URL) and try again.",
         };
       }
       return { needOtp: false, ok: false, message: adminMessage() };

@@ -24,6 +24,10 @@ export class AccountLockedError extends CredentialsSignin {
   code = "ACCOUNT_LOCKED";
 }
 
+export class DatabaseUnavailableError extends CredentialsSignin {
+  code = "DB_UNAVAILABLE";
+}
+
 function getIp(authRequest: { headers?: Headers } | undefined) {
   const xff = authRequest?.headers?.get("x-forwarded-for");
   const ip = xff ? xff.split(",")[0].trim() : "unknown";
@@ -83,31 +87,53 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           throw new AccountLockedError();
         }
 
-        let user = await prisma.user.findUnique({ where: { email } });
-        let valid =
-          user?.passwordHash && (await compare(password, user.passwordHash));
+        let user: {
+          id: string;
+          name: string | null;
+          email: string;
+          image: string | null;
+          role: string;
+          passwordHash: string | null;
+          twoFactorEnabled: boolean;
+          twoFactorSecret: string | null;
+          twoFactorRecovery: string | null;
+        } | null = null;
+        let valid = false;
 
-        // Fallback: If credentials match ADMIN_EMAIL & ADMIN_PASSWORD env vars,
-        // auto-provision/update the admin user in Supabase database.
-        const envAdminEmail = (process.env.ADMIN_EMAIL ?? "sagarlad692@gmail.com")
-          .replace(/['"]/g, "")
-          .trim()
-          .toLowerCase();
-        const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
+        try {
+          user = await prisma.user.findUnique({ where: { email } });
+          valid =
+            Boolean(user?.passwordHash) &&
+            (await compare(password, user?.passwordHash ?? ""));
 
-        if (!valid && email === envAdminEmail && envAdminPass && password === envAdminPass) {
-          const passwordHash = await hash(password, 12);
-          user = await prisma.user.upsert({
-            where: { email },
-            update: { passwordHash, role: "ADMIN" },
-            create: {
-              email,
-              name: "Sagar Lad",
-              passwordHash,
-              role: "ADMIN",
-            },
-          });
-          valid = true;
+          // Fallback: If credentials match ADMIN_EMAIL & ADMIN_PASSWORD env vars,
+          // auto-provision/update the admin user in Supabase database. This runs
+          // only while the DB user has no passwordHash yet (first bootstrap);
+          // once a password is set (e.g. via the admin panel Profile page) the
+          // DB is authoritative and env vars do NOT override it.
+          const envAdminEmail = (process.env.ADMIN_EMAIL ?? "sagarlad692@gmail.com")
+            .replace(/['"]/g, "")
+            .trim()
+            .toLowerCase();
+          const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
+
+          if (!user?.passwordHash && email === envAdminEmail && envAdminPass && password === envAdminPass) {
+            const passwordHash = await hash(password, 12);
+            user = await prisma.user.upsert({
+              where: { email },
+              update: { passwordHash, role: "ADMIN" },
+              create: {
+                email,
+                name: "Sagar Lad",
+                passwordHash,
+                role: "ADMIN",
+              },
+            });
+            valid = true;
+          }
+        } catch (err) {
+          console.error("[auth] DB lookup failed during login:", err);
+          throw new DatabaseUnavailableError();
         }
 
         if (!user || !user.passwordHash || !valid) {
@@ -174,17 +200,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // A JWT can outlive its account (e.g. after a DB reset), which used to
         // surface as a cryptic FK error on save. Resolve the id against the DB
         // and drop the session if the account no longer exists so the user is
-        // cleanly sent back to sign in instead of failing mid-edit.
-        const user = await prisma.user.findUnique({
-          where: { id: token.id as string },
-          select: { id: true, role: true, name: true, email: true, image: true },
-        });
-        if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
-        session.user.id = user.id;
-        session.user.role = user.role;
-        session.user.name = user.name;
-        session.user.email = user.email;
-        session.user.image = user.image;
+        // cleanly sent back to sign in instead of failing mid-edit. If the DB
+        // is transiently unreachable, keep the existing session rather than
+        // logging the user out.
+        try {
+          const user = await prisma.user.findUnique({
+            where: { id: token.id as string },
+            select: { id: true, role: true, name: true, email: true, image: true },
+          });
+          if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
+          session.user.id = user.id;
+          session.user.role = user.role;
+          session.user.name = user.name;
+          session.user.email = user.email;
+          session.user.image = user.image;
+        } catch (err) {
+          console.warn("[auth] session DB lookup failed, keeping existing session:", (err as Error).message);
+        }
       }
       return session;
     },

@@ -345,8 +345,15 @@ The newsletter queue is drained every 30 minutes by a free GitHub Action. It nee
 ### A3. Admin Login (Seeded Admin Account)
 
 1. Choose an email and password (min 8 characters).
-2. They are used only by the local seed script: `npm run db:seed` (sets `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env`).
-3. On Vercel you do not need these — the account already exists in the database after seeding.
+2. They are set as `ADMIN_EMAIL` / `ADMIN_PASSWORD` in `.env` and used by:
+   - the local seed script (`npm run db:seed`), and
+   - a **bootstrap fallback** in the admin login: on the very first login, if the
+     admin account has no password set in the database yet, the panel
+     auto-creates it from these env vars.
+3. On Vercel you do **not** need `ADMIN_EMAIL` / `ADMIN_PASSWORD` — the account
+   already exists in the database after seeding. Once a password exists in the
+   database, the database is authoritative: changing the password in the admin
+   panel (Profile page) **sticks** and env vars no longer override it.
 
 ---
 
