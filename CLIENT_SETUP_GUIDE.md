@@ -206,9 +206,9 @@ When you are ready to unlock Phase 2 (Full Admin Panel):
 
 ### What happens in each Phase:
 - **When set to `1` (Phase 1 - Initial Launch)**:
-  - When Sagar logs into `https://admin.sagarlad.com`, the sidebar shows **only Blog Writing, Editing, Drafting, and Live Previewing**.
+  - When Sagar logs into `https://admin.sagarlad.com`, the sidebar shows **Blog Writing, Editing, Drafting, and Live Previewing**, plus **Settings** (profile name, password and sign-in email always work in every phase).
   - All other admin sections (Books, Videos, Newsletter, Dashboard Analytics) are cleanly hidden.
-- **When changed to `2` (Phase 2 - Full Unlock)**:
+ - **When changed to `2` (Phase 2 - Full Unlock)**:
   - All admin sections automatically unlock: Dashboard Analytics, Books Manager, Videos Manager, Social Links 3x4 Grid, Newsletter Composer & Queue, and Comment Moderation.
   - **Zero data is lost.** All your blogs, photos, and settings remain 100% intact.
 

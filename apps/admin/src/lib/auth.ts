@@ -106,30 +106,31 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             Boolean(user?.passwordHash) &&
             (await compare(password, user?.passwordHash ?? ""));
 
-          // Fallback: If credentials match ADMIN_EMAIL & ADMIN_PASSWORD env vars,
-          // auto-provision/update the admin user in Supabase database. This runs
-          // only while the DB user has no passwordHash yet (first bootstrap);
-          // once a password is set (e.g. via the admin panel Profile page) the
-          // DB is authoritative and env vars do NOT override it.
+          // Bootstrap: if no admin account exists in the database yet (fresh
+          // deploy before seeding), create one from ADMIN_EMAIL/ADMIN_PASSWORD.
+          // This runs only once — as soon as ANY admin exists (seeded or
+          // self-provisioned), the database is the single source of truth and
+          // env vars are ignored, so panel changes (name/password/email) stick.
           const envAdminEmail = (process.env.ADMIN_EMAIL ?? "sagarlad692@gmail.com")
             .replace(/['"]/g, "")
             .trim()
             .toLowerCase();
           const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
 
-          if (!user?.passwordHash && email === envAdminEmail && envAdminPass && password === envAdminPass) {
-            const passwordHash = await hash(password, 12);
-            user = await prisma.user.upsert({
-              where: { email },
-              update: { passwordHash, role: "ADMIN" },
-              create: {
-                email,
-                name: "Sagar Lad",
-                passwordHash,
-                role: "ADMIN",
-              },
-            });
-            valid = true;
+          if (!user && envAdminPass && password === envAdminPass) {
+            const existingAdmin = await prisma.user.count({ where: { role: "ADMIN" } });
+            if (existingAdmin === 0 && email === envAdminEmail) {
+              const passwordHash = await hash(password, 12);
+              user = await prisma.user.create({
+                data: {
+                  email,
+                  name: "Sagar Lad",
+                  passwordHash,
+                  role: "ADMIN",
+                },
+              });
+              valid = true;
+            }
           }
         } catch (err) {
           console.error("[auth] DB lookup failed during login:", err);
