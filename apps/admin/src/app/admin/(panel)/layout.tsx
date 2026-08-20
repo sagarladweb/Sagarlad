@@ -54,7 +54,19 @@ export default async function AdminPanelLayout({
 
       {/* Mobile top bar */}
       <div className="md:hidden fixed top-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-b border-border flex items-center justify-between px-4 h-14 shadow-sm">
-        <span className="font-display font-bold text-base">Sagar Lad Admin</span>
+        <span className="flex items-center gap-2.5 min-w-0">
+          <span className="relative h-8 w-8 shrink-0 overflow-hidden rounded-full ring-2 ring-border bg-muted grid place-items-center">
+            {session.user.image ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={session.user.image} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="font-display font-bold text-sm text-muted-foreground">
+                {(session.user.name || "A").charAt(0).toUpperCase()}
+              </span>
+            )}
+          </span>
+          <span className="font-display font-bold text-base truncate">Sagar Lad Admin</span>
+        </span>
         <div className="flex items-center gap-2">
           <Link href="/" className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="View site">
             <ExternalLink className="w-4 h-4" />

@@ -29,7 +29,7 @@ const ICONS: Record<string, LucideIcon> = {
 type NavItem = { label: string; href: string };
 
 const labelCls =
-  "whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200";
+  "whitespace-nowrap overflow-hidden max-w-0 opacity-0 translate-x-1 group-hover:max-w-56 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200";
 
 function Avatar({
   src,
@@ -45,7 +45,7 @@ function Avatar({
       ? "w-9 h-9"
       : "w-8 h-8";
   return (
-    <span className={`${cls} shrink-0 overflow-hidden rounded-full ring-2 ring-border bg-muted grid place-items-center`}>
+    <span className={`${cls} shrink-0 aspect-square overflow-hidden rounded-full ring-2 ring-border bg-muted grid place-items-center`}>
       {src ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" className="w-full h-full object-cover" />
@@ -80,7 +80,7 @@ export function AdminSidebar({
       <div className="px-3.5 py-4 border-b border-border flex items-center gap-3.5">
         <Link
           href="/admin/dashboard"
-          className="flex items-center gap-3.5"
+          className="flex items-center gap-3.5 min-w-0"
           title="Sagar Lad Admin"
         >
           <Avatar src={user.image} name={user.name} size="md" />
@@ -117,14 +117,6 @@ export function AdminSidebar({
       </nav>
 
       <div className="p-2.5 border-t border-border space-y-1">
-        <div className="flex items-center gap-3.5 rounded-xl px-3 py-2 min-w-0">
-          <Avatar src={user.image} name={user.name} size="sm" />
-          <div className={`${labelCls} min-w-0`}>
-            <p className="text-sm font-semibold truncate">{user.name || "Admin"}</p>
-            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
-          </div>
-        </div>
-
         <Link
           href="/"
           target="_blank"
@@ -147,7 +139,7 @@ export function AdminSidebar({
         >
           <LogOut className="w-5 h-5 shrink-0" />
           <span className={`${labelCls} truncate text-left`}>
-            Sign out ({user.name || "Admin"})
+            Sign out
           </span>
         </button>
       </div>

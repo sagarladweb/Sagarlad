@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Loader2,
   User,
@@ -111,6 +112,7 @@ function initials(name?: string | null): string {
 }
 
 export function ProfileForm({ initial, onOpenSecurity }: Props) {
+  const router = useRouter();
   const [name, setName] = useState(initial.name ?? "");
   const [image, setImage] = useState<string | null>(initial.image ?? null);
   const [saving, setSaving] = useState(false);
@@ -200,6 +202,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       const data = await res.json().catch(() => null);
       if (!res.ok) throw new Error(data?.error ?? "Could not save profile");
       showToast("Profile updated");
+      router.refresh();
     } catch (err) {
       showToast("Profile update failed", err instanceof Error ? err.message : undefined, "error");
     } finally {

@@ -48,16 +48,16 @@ export function ToastContainer() {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-[200] flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed bottom-5 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-2 w-[calc(100vw-2rem)] max-w-sm pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
-          className={`pointer-events-auto flex items-start gap-3 p-4 rounded-2xl border shadow-xl backdrop-blur-md transition-all duration-300 animate-in slide-in-from-bottom-2 ${
+          className={`pointer-events-auto flex items-start gap-3 p-4 w-full rounded-2xl border bg-card text-foreground shadow-xl transition-all duration-300 animate-in slide-in-from-bottom-2 ${
             t.type === "success"
-              ? "bg-card/95 border-emerald-500/40 text-foreground"
+              ? "border-emerald-500/40"
               : t.type === "error"
-              ? "bg-card/95 border-red-500/40 text-foreground"
-              : "bg-card/95 border-accent/40 text-foreground"
+              ? "border-red-500/40"
+              : "border-accent/40"
           }`}
           role="status"
         >
