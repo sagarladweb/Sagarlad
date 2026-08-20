@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { User, ShieldCheck, LogOut, Clock } from "lucide-react";
+import { User, ShieldCheck, LogOut, Clock, Activity } from "lucide-react";
 import { ProfileForm } from "@/components/admin/ProfileForm";
 import { SecuritySettings } from "@/components/admin/SecuritySettings";
 import { SignOutButton } from "@/components/admin/SignOutButton";
+import { SystemHealthWidget } from "@/components/admin/SystemHealthWidget";
 
 type SessionUser = {
   name?: string | null;
@@ -20,7 +21,7 @@ const tabBtn = (active: boolean) =>
   }`;
 
 export function SettingsTabs({ session }: { session: SessionUser | null }) {
-  const [tab, setTab] = useState<"profile" | "security">("profile");
+  const [tab, setTab] = useState<"profile" | "security" | "health">("profile");
 
   return (
     <div className="space-y-6">
@@ -43,6 +44,15 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           className={tabBtn(tab === "security")}
         >
           <ShieldCheck className="h-4 w-4" /> Security
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "health"}
+          onClick={() => setTab("health")}
+          className={tabBtn(tab === "health")}
+        >
+          <Activity className="h-4 w-4" /> System Health
         </button>
       </div>
 
@@ -69,7 +79,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
             <SignOutButton />
           </div>
         </>
-      ) : (
+      ) : tab === "security" ? (
         <div className="space-y-6">
           <div className="flex items-center gap-2 rounded-2xl border border-border bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
             <LogOut className="h-4 w-4 shrink-0 text-brand" />
@@ -78,6 +88,8 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           </div>
           <SecuritySettings />
         </div>
+      ) : (
+        <SystemHealthWidget />
       )}
     </div>
   );
