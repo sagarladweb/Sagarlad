@@ -15,13 +15,17 @@ export async function revalidatePublic(): Promise<boolean> {
   revalidateTag("socials", "max");
   revalidateTag("content", "max");
 
-  const siteUrl = (process.env.SITE_URL ?? "https://sagarlad.com").replace(/\/$/, "");
+  let rawUrl = (process.env.SITE_URL ?? "https://sagarlad.com").trim().replace(/\/$/, "");
+  if (!/^https?:\/\//i.test(rawUrl)) {
+    rawUrl = `https://${rawUrl}`;
+  }
+
   try {
-    await fetch(`${siteUrl}/api/revalidate`, {
+    await fetch(`${rawUrl}/api/revalidate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ secret: process.env.CRON_SECRET }),
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(3000),
     });
     return true;
   } catch (err) {
