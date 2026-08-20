@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { showToast } from "@/components/admin/Toast";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
+import { SITE } from "@/lib/site";
 
 type PostItem = {
   id: string;
@@ -201,7 +202,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
                         <Pencil className="w-3 h-3" /> Edit
                       </Link>
                       <Link
-                        href={`/blog/${p.slug}`}
+                        href={`${SITE.url}/blog/${p.slug}`}
                         target="_blank"
                         className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
                         title="Preview post"

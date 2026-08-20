@@ -10,8 +10,8 @@ export const runtime = "nodejs";
 const bodySchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("profile"),
-    name: z.string().trim().max(120).optional().or(z.literal("")),
-    image: z.string().trim().max(5000).optional().or(z.literal("")),
+    name: z.string().trim().max(120).nullable().optional().or(z.literal("")),
+    image: z.string().trim().max(5000).nullable().optional().or(z.literal("")),
   }),
   z.object({
     action: z.literal("password"),

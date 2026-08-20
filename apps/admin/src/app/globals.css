@@ -90,6 +90,37 @@ h6 {
   letter-spacing: -0.02em;
 }
 
+/* ---------- Premium skeleton loading ---------- */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+  border-radius: calc(var(--radius, 0.5rem) * 0.75);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--foreground) 6%, transparent),
+    transparent
+  );
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton::after {
+    animation: none;
+  }
+}
+@keyframes skeleton-sweep {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
 /* ---------- Reusable prose styles for sanitized TipTap/HTML content ---------- */
 .tip-content {
   font-size: 1.0625rem;

@@ -1156,6 +1156,7 @@ export function TipTapEditor({
   onChange,
   preview,
   footer,
+  stickyToolbarOffset = "top-14",
 }: {
   initialContent?: string;
   onChange: (html: string) => void;
@@ -1166,6 +1167,7 @@ export function TipTapEditor({
     error?: string;
   };
   footer?: React.ReactNode;
+  stickyToolbarOffset?: string;
 }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
@@ -1964,7 +1966,7 @@ export function TipTapEditor({
 
   return (
     <div className="relative rounded-2xl border border-border bg-card">
-      {/* Mode + toolbar position + help bar */}
+      {/* Mode + toolbar position + help bar — scrolls away, not sticky */}
       <div className="flex flex-wrap items-center justify-between gap-2 rounded-t-2xl bg-card border-b border-border px-3 py-1.5">
         <div className="flex items-center gap-1" role="tablist" aria-label="Editor view">
           <button
@@ -2069,28 +2071,29 @@ export function TipTapEditor({
         </div>
       </div>
 
-      {/* Toolbar + body: the toolbar sticks to the viewport with a solid background */}
-      {toolbarPos === "top" ? (
-        <>
-          <div className="sticky top-0 z-30 shrink-0 border-b border-border bg-card shadow-sm">
+        {/* Only the toolbar is sticky — sticks flush at the top, no gap */}
+        {toolbarPos === "top" ? (
+          <div className={`sticky ${stickyToolbarOffset} z-30 shrink-0 border-b border-border bg-card shadow-sm`}>
             {mode === "write" && horizontalToolbar}
           </div>
-          <div className="relative min-h-[45vh]">{body}</div>
-        </>
+        ) : null}
+
+      {toolbarPos === "top" ? (
+        <div className="relative min-h-[45vh]">{body}</div>
       ) : toolbarPos === "left" ? (
-        <div className="flex items-stretch">
+        <div className="flex items-start">
           {mode === "write" && (
-            <div className="shrink-0 rounded-bl-2xl border-r border-border bg-card shadow-sm">
+            <div className={`sticky ${stickyToolbarOffset} z-30 max-h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto rounded-bl-2xl border-r border-border bg-card shadow-sm`}>
               {verticalToolbar}
             </div>
           )}
           <div className="relative min-h-[45vh] flex-1 min-w-0">{body}</div>
         </div>
       ) : (
-        <div className="flex items-stretch">
+        <div className="flex items-start">
           <div className="relative min-h-[45vh] flex-1 min-w-0">{body}</div>
           {mode === "write" && (
-            <div className="shrink-0 rounded-br-2xl border-l border-border bg-card shadow-sm">
+            <div className={`sticky ${stickyToolbarOffset} z-30 max-h-[calc(100vh-3.5rem)] shrink-0 overflow-y-auto rounded-br-2xl border-l border-border bg-card shadow-sm`}>
               {verticalToolbar}
             </div>
           )}

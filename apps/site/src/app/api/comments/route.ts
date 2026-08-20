@@ -20,7 +20,7 @@ export async function GET(request: Request) {
   }
 
   const comments = await prisma.comment.findMany({
-    where: { postId: post.id },
+    where: { postId: post.id, approved: true },
     orderBy: { createdAt: "asc" },
     select: {
       id: true,

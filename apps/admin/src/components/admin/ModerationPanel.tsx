@@ -7,6 +7,7 @@ import {
   Search,
 } from "lucide-react";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { SITE } from "@/lib/site";
 
 type Subscriber = { id: string; email: string; createdAt: string };
 type Comment = {
@@ -336,12 +337,12 @@ export function ModerationPanel() {
                           {c.approved ? "Approved" : "Pending"}
                         </span>
                         <a
-                          href={`/blog/${c.post.slug}`}
+                          href={`${SITE.url}/blog/${c.post.slug}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-muted-foreground hover:text-accent font-medium underline"
                         >
-                          Post: /blog/{c.post.slug}
+                          Post: {c.post.slug}
                         </a>
                         {c.ip && (
                           <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-muted-foreground">
