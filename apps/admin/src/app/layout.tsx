@@ -13,7 +13,6 @@ const beVietnamPro = localFont({
     { path: "./fonts/bvp-700.woff2", weight: "700", style: "normal" },
   ],
   display: "swap",
-  preload: false,
 });
 
 const rethinkSans = localFont({
@@ -26,7 +25,6 @@ const rethinkSans = localFont({
     { path: "./fonts/rethink-800.woff2", weight: "800", style: "normal" },
   ],
   display: "swap",
-  preload: false,
 });
 
 const greatVibes = localFont({
@@ -35,7 +33,6 @@ const greatVibes = localFont({
     { path: "./fonts/greatvibes-400.woff2", weight: "400", style: "normal" },
   ],
   display: "swap",
-  preload: false,
 });
 
 export const metadata: Metadata = {

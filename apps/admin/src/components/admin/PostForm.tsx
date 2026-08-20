@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Maximize2,
   Minimize2,
+  ChevronLeft,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -451,6 +452,37 @@ export function PostForm({
     return () => document.removeEventListener("keydown", handler);
   }, []);
 
+  const [showExitModal, setShowExitModal] = useState(false);
+
+  const isDirty =
+    form.title !== (initial?.title ?? "") ||
+    form.slug !== (initial?.slug ?? "") ||
+    form.excerpt !== (initial?.excerpt ?? "") ||
+    form.content !== (initial?.content ?? "") ||
+    form.coverImage !== (initial?.coverImage ?? "") ||
+    form.categoryId !== (initial?.categoryId ?? "") ||
+    form.featured !== (initial?.featured ?? false) ||
+    form.published !== (initial?.published ?? true);
+
+  // Intercept browser back/tab closure when changes are unsaved
+  useEffect(() => {
+    if (!isDirty || saveState === "saved") return;
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [isDirty, saveState]);
+
+  const handleBackClick = () => {
+    if (isDirty && saveState !== "saved") {
+      setShowExitModal(true);
+    } else {
+      router.push("/admin/posts");
+    }
+  };
+
   const words = stripHtml(form.content).split(/\s+/).filter(Boolean).length;
   const readTime = Math.max(1, Math.round(words / 200));
 
@@ -498,9 +530,17 @@ export function PostForm({
       }`}
       noValidate
     >
-      {/* Sticky header controls: Save & Fullscreen grouped together */}
+      {/* Sticky header controls: Back, Title, Save & Fullscreen grouped together */}
       <div className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card/95 p-4 backdrop-blur shadow-sm rounded-2xl">
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={handleBackClick}
+            className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            title="Back to posts list"
+          >
+            <ChevronLeft className="w-4 h-4" /> Back
+          </button>
           <h2 className="font-display text-lg font-bold">
             {initial ? "Edit Post" : "Create New Post"}
           </h2>
@@ -821,6 +861,53 @@ export function PostForm({
           {initial ? "Save" : "Publish"}
         </button>
       </div>
+
+      {/* Unsaved Changes Confirmation Modal */}
+      {showExitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-amber-600">
+              <AlertCircle className="w-6 h-6 shrink-0" />
+              <h3 className="font-display text-lg font-bold text-foreground">
+                Unsaved Changes
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              You have unsaved changes in your blog post. Would you like to save your draft before exiting?
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => setShowExitModal(false)}
+                className="w-full sm:w-auto rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowExitModal(false);
+                  router.push("/admin/posts");
+                }}
+                className="w-full sm:w-auto rounded-xl border border-red-200 bg-red-50 text-red-600 px-4 py-2 text-xs font-semibold hover:bg-red-100"
+              >
+                Discard & Exit
+              </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await save(false);
+                  setShowExitModal(false);
+                  router.push("/admin/posts");
+                }}
+                className="w-full sm:w-auto rounded-xl bg-accent text-accent-foreground px-4 py-2 text-xs font-bold shadow hover:opacity-90"
+              >
+                Save Draft & Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   );
 }
