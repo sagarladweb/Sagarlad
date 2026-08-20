@@ -59,7 +59,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
   const labelEvery = Math.max(1, Math.ceil(data?.daily.length ? data.daily.length / 6 : 6));
 
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border bg-card card-grad p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-bold">Traffic</h2>

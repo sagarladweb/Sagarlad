@@ -16,6 +16,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { ToastContainer } from "@/components/admin/Toast";
 import { ConfirmContainer } from "@/components/admin/ConfirmDialog";
 import { OfflineSync } from "@/components/admin/OfflineSync";
+import { ThemeToggle } from "@/components/admin/ThemeToggle";
 import { PHASE_1 } from "@/lib/phase";
 
 export const dynamic = "force-dynamic";
@@ -45,6 +46,7 @@ export default async function AdminPanelLayout({
       <ToastContainer />
       <ConfirmContainer />
       <OfflineSync />
+      <ThemeToggle />
       <AdminSidebar
         nav={nav.map(({ label, href }) => ({ label, href }))}
         user={{ name: session.user.name, email: session.user.email, image: session.user.image }}

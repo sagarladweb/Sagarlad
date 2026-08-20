@@ -104,7 +104,7 @@ export function SecuritySettings() {
   }
 
   const card =
-    "rounded-2xl border border-border bg-card p-6";
+    "rounded-2xl border border-border bg-card card-grad p-6";
 
   if (loading) {
     return (

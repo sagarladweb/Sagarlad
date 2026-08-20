@@ -265,7 +265,7 @@ export function SocialManager() {
             return (
               <li
                 key={s.id}
-                className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-lg"
+                className="group relative flex flex-col gap-3 rounded-2xl border border-border bg-card card-grad p-4 transition-shadow hover:shadow-lg"
               >
                 <div className="flex items-start justify-between">
                   <span

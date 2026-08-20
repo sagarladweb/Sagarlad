@@ -156,7 +156,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
           )}
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-sm">
+        <div className="overflow-x-auto rounded-2xl border border-border bg-card card-grad shadow-sm">
           <table className="w-full text-sm">
             <thead className="bg-muted/60 text-left text-xs uppercase tracking-wider text-muted-foreground border-b border-border">
               <tr>

@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
-import { pageMetadata, formatDate, postCover } from "@/lib/site";
+import { pageMetadata, formatDate, postCover, SITE } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
 
@@ -159,11 +159,11 @@ export default async function BlogPage({
             </p>
             <div className="mt-1.5 flex items-center gap-4 text-sm">
               <Link
-                href="https://sagarlad.com"
+                href={SITE.url}
                 target="_blank"
                 className="font-medium text-accent-strong underline decoration-accent-strong underline-offset-4 hover:opacity-80 transition-opacity"
               >
-                sagarlad.com
+                {SITE.url.replace(/^https?:\/\//, "")}
               </Link>
               <Link
                 href="https://www.youtube.com/@Sagarlad692"

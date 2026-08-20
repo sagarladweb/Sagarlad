@@ -198,7 +198,7 @@ export function QuotesManager() {
           {quotes.map((q) => (
             <li
               key={q.id}
-              className="flex items-center gap-4 rounded-2xl border border-border bg-card p-4"
+              className="flex items-center gap-4 rounded-2xl border border-border bg-card card-grad p-4"
             >
               <div className="min-w-0 flex-1">
                 <p className="font-medium">“{q.text}”</p>

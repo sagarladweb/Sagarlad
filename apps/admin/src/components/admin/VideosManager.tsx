@@ -598,7 +598,7 @@ export function VideosManager() {
           {pagedVideos.map((v) => (
             <li
               key={v.id}
-              className="group mb-4 break-inside-avoid rounded-2xl border border-border bg-card overflow-hidden transition-shadow hover:shadow-lg"
+              className="group mb-4 break-inside-avoid rounded-2xl border border-border bg-card card-grad overflow-hidden transition-shadow hover:shadow-lg"
             >
               <div
                 className={`relative w-full overflow-hidden bg-muted ${

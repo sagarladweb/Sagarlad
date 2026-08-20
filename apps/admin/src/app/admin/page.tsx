@@ -337,7 +337,7 @@ function AdminLogin() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-border bg-card p-8 shadow-xl shadow-muted/50 transition-all duration-300 sm:p-10">
+            <div className="rounded-3xl border border-border bg-card card-grad p-8 shadow-xl shadow-muted/50 transition-all duration-300 sm:p-10">
               <div className="flex items-center justify-between">
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
                   <Shield className="h-6 w-6" />

@@ -430,7 +430,7 @@ function statusBadge(status: string, unsubscribed: boolean) {
   const base =
     "inline-block rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide";
   if (status === "SENT")
-    return <span className={`${base} bg-green-100 text-green-700`}>Sent</span>;
+    return <span className={`${base} bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400`}>Sent</span>;
   if (status === "FAILED")
     return <span className={`${base} bg-red-100 text-red-700`}>Failed</span>;
   if (status === "SENDING")

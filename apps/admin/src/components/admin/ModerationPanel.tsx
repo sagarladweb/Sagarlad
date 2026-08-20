@@ -330,8 +330,8 @@ export function ModerationPanel() {
                         <span
                           className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${
                             c.approved
-                              ? "bg-green-50 text-green-700"
-                              : "bg-amber-50 text-amber-700"
+                              ? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400"
+                              : "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
                           }`}
                         >
                           {c.approved ? "Approved" : "Pending"}

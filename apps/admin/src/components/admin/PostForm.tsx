@@ -548,7 +548,7 @@ export function PostForm({
       <div className="flex flex-col items-start gap-4 lg:flex-row">
         {/* ---- Main canvas ---- */}
         <div className="min-w-0 flex-1 space-y-4 w-full">
-          <div className="w-full rounded-2xl border border-border bg-card p-6">
+          <div className="w-full rounded-2xl border border-border bg-card card-grad p-6">
             <label htmlFor="title" className={label}>Title *</label>
             <input
               id="title"
@@ -569,7 +569,7 @@ export function PostForm({
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <label htmlFor="slug" className="text-sm font-medium">Web address</label>
               <span className="text-sm text-muted-foreground">
-                sagarlad.com/blog/{form.slug || "your-post"}
+                {SITE.url.replace(/^https?:\/\//, "")}/blog/{form.slug || "your-post"}
               </span>
               <button
                 type="button"
@@ -619,7 +619,7 @@ export function PostForm({
 
         {/* ---- Settings sidebar ---- */}
         <aside className="w-full shrink-0 space-y-4 lg:w-80 lg:sticky lg:top-0 lg:max-h-[calc(100vh-0rem)] lg:overflow-y-auto pr-1">
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Publish
             </h3>
@@ -671,7 +671,7 @@ export function PostForm({
             </button>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Status
             </h3>
@@ -683,7 +683,7 @@ export function PostForm({
             )}
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Details
             </h3>
@@ -806,7 +806,7 @@ export function PostForm({
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-3">
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Live stats
             </h3>

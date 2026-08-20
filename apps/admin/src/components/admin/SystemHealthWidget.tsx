@@ -65,7 +65,7 @@ export function SystemHealthWidget() {
   };
 
   return (
-    <div className="space-y-4 rounded-3xl border border-border bg-card p-6 sm:p-8">
+    <div className="space-y-4 rounded-3xl border border-border bg-card card-grad p-6 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border pb-4">
         <div>
           <div className="flex items-center gap-2">

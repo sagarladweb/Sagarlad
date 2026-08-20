@@ -190,7 +190,7 @@ export function ContentManager() {
                 type="button"
                 onClick={() => router.push(`/admin/content/topics/${c.slug}`)}
                 aria-label={`View content in ${c.name}`}
-                className="flex h-full w-full flex-col gap-3 rounded-2xl border border-border bg-card p-4 text-left transition-shadow hover:shadow-lg"
+                className="flex h-full w-full flex-col gap-3 rounded-2xl border border-border bg-card card-grad p-4 text-left transition-shadow hover:shadow-lg"
               >
                 <div className="flex items-start justify-between">
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent font-display font-bold text-lg">

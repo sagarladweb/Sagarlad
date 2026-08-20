@@ -25,6 +25,7 @@ import { getGaAnalytics } from "@/lib/analytics";
 import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
 import { PHASE_1 } from "@/lib/phase";
+import { SITE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -65,7 +66,7 @@ function KpiCard({
   values: number[];
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5 flex flex-col">
+    <div className="rounded-2xl border border-border bg-card card-grad p-5 flex flex-col">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}
@@ -95,7 +96,7 @@ function PanelCard({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
+    <div className="rounded-2xl border border-border bg-card card-grad p-5">
       <div className="flex items-center justify-between">
         <h2 className="font-display text-lg font-bold">{title}</h2>
         <Icon className="w-4 h-4 text-accent" />
@@ -217,7 +218,7 @@ export default async function DashboardPage() {
     { label: "Send newsletter", href: "/admin/newsletter", icon: Mail },
     { label: "Add book", href: "/admin/books", icon: BookOpen },
     { label: "Add video", href: "/admin/videos", icon: Video },
-    { label: "View site", href: "https://sagarlad.com", icon: Globe2, external: true },
+    { label: "View site", href: SITE.url, icon: Globe2, external: true },
   ];
 
   const contentStats = [
@@ -292,7 +293,7 @@ export default async function DashboardPage() {
           <TrafficChart initial={ga} />
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-5">
+        <div className="rounded-2xl border border-border bg-card card-grad p-5">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-lg font-bold">Top sources</h2>
             <Radio className="w-4 h-4 text-accent" />
@@ -418,7 +419,7 @@ export default async function DashboardPage() {
         </PanelCard>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card">
+      <div className="rounded-2xl border border-border bg-card card-grad">
         <div className="flex items-center justify-between border-b border-border p-5">
           <h2 className="font-display text-lg font-bold">Top pages</h2>
           <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
@@ -455,7 +456,7 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5 flex items-center gap-3">
+      <div className="rounded-2xl border border-border bg-card card-grad p-5 flex items-center gap-3">
         <TrendingUp className="w-5 h-5 text-accent" />
         <div>
           <p className="font-display font-bold">
@@ -517,7 +518,7 @@ export default async function DashboardPage() {
                       <span
                         className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           p.published
-                            ? "bg-green-100 text-green-700"
+                            ? "bg-green-100 text-green-700 dark:bg-green-500/15 dark:text-green-400"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >

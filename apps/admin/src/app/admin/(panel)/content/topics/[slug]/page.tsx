@@ -50,7 +50,7 @@ export default async function TopicDetailPage({
       </header>
 
       {empty ? (
-        <p className="rounded-2xl border border-border bg-card p-6 text-sm text-muted-foreground">
+        <p className="rounded-2xl border border-border bg-card card-grad p-6 text-sm text-muted-foreground">
           Nothing is assigned to this topic yet. Assign posts or videos from the{" "}
           <Link href="/admin/posts" className="font-semibold text-accent hover:underline">
             Posts
@@ -69,7 +69,7 @@ export default async function TopicDetailPage({
               Posts · {category.posts.length}
             </h2>
             {category.posts.length === 0 ? (
-              <p className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
+              <p className="rounded-2xl border border-border bg-card card-grad p-5 text-sm text-muted-foreground">
                 No posts in this topic yet.
               </p>
             ) : (
@@ -77,7 +77,7 @@ export default async function TopicDetailPage({
                 {category.posts.map((p) => (
                   <li
                     key={p.id}
-                    className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-lg"
+                    className="group flex items-center gap-3 rounded-2xl border border-border bg-card card-grad p-4 transition-shadow hover:shadow-lg"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{p.title}</p>
@@ -109,7 +109,7 @@ export default async function TopicDetailPage({
               Videos · {category.videos.length}
             </h2>
             {category.videos.length === 0 ? (
-              <p className="rounded-2xl border border-border bg-card p-5 text-sm text-muted-foreground">
+              <p className="rounded-2xl border border-border bg-card card-grad p-5 text-sm text-muted-foreground">
                 No videos in this topic yet.
               </p>
             ) : (
@@ -117,7 +117,7 @@ export default async function TopicDetailPage({
                 {category.videos.map((v) => (
                   <li
                     key={v.id}
-                    className="group flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-lg"
+                    className="group flex items-center gap-3 rounded-2xl border border-border bg-card card-grad p-4 transition-shadow hover:shadow-lg"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="truncate font-medium">{v.title}</p>

@@ -333,7 +333,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       </section>
 
       {/* Security pointer */}
-      <section className="flex flex-col rounded-2xl border border-border bg-card p-6 md:col-span-4">
+      <section className="flex flex-col rounded-2xl border border-border bg-card card-grad p-6 md:col-span-4">
         <TileHeader
           icon={ShieldCheck}
           title="Security"
@@ -349,7 +349,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       </section>
 
       {/* Change password */}
-      <section className="rounded-2xl border border-border bg-card p-6 md:col-span-6">
+      <section className="rounded-2xl border border-border bg-card card-grad p-6 md:col-span-6">
         <TileHeader
           icon={KeyRound}
           title="Change password"
@@ -388,7 +388,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       </section>
 
       {/* Sign-in email */}
-      <section className="rounded-2xl border border-border bg-card p-6 md:col-span-6">
+      <section className="rounded-2xl border border-border bg-card card-grad p-6 md:col-span-6">
         <TileHeader
           icon={Mail}
           title="Sign-in email"

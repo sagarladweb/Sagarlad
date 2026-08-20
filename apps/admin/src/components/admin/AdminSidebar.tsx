@@ -31,6 +31,33 @@ type NavItem = { label: string; href: string };
 const labelCls =
   "whitespace-nowrap opacity-0 group-hover:opacity-100 translate-x-1 group-hover:translate-x-0 transition-all duration-200";
 
+function Avatar({
+  src,
+  name,
+  size = "md",
+}: {
+  src?: string | null;
+  name?: string | null;
+  size?: "sm" | "md";
+}) {
+  const cls =
+    size === "md"
+      ? "w-9 h-9"
+      : "w-8 h-8";
+  return (
+    <span className={`${cls} shrink-0 overflow-hidden rounded-full ring-2 ring-border bg-muted grid place-items-center`}>
+      {src ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" className="w-full h-full object-cover" />
+      ) : (
+        <span className="font-display font-bold text-sm text-muted-foreground">
+          {(name || "A").charAt(0).toUpperCase()}
+        </span>
+      )}
+    </span>
+  );
+}
+
 export function AdminSidebar({
   nav,
   user,
@@ -56,9 +83,7 @@ export function AdminSidebar({
           className="flex items-center gap-3.5"
           title="Sagar Lad Admin"
         >
-          <span className="w-9 h-9 shrink-0 rounded-full bg-accent text-accent-foreground grid place-items-center font-display font-bold text-sm shadow-sm">
-            S
-          </span>
+          <Avatar src={user.image} name={user.name} size="md" />
           <span className={`${labelCls} font-display font-bold text-base`}>
             Sagar Lad Admin
           </span>
@@ -92,19 +117,8 @@ export function AdminSidebar({
       </nav>
 
       <div className="p-2.5 border-t border-border space-y-1">
-        <div className="flex items-center gap-3.5 rounded-xl px-3 py-2">
-          {user.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={user.image}
-              alt=""
-              className="w-8 h-8 shrink-0 rounded-full object-cover ring-2 ring-border"
-            />
-          ) : (
-            <span className="w-8 h-8 shrink-0 rounded-full bg-muted text-muted-foreground grid place-items-center font-semibold text-sm">
-              {(user.name || "A").charAt(0).toUpperCase()}
-            </span>
-          )}
+        <div className="flex items-center gap-3.5 rounded-xl px-3 py-2 min-w-0">
+          <Avatar src={user.image} name={user.name} size="sm" />
           <div className={`${labelCls} min-w-0`}>
             <p className="text-sm font-semibold truncate">{user.name || "Admin"}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>

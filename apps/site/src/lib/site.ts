@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 export const SITE = {
   name: "Sagar Lad",
-  url: "https://sagarlad.com",
+  url: (process.env.NEXT_PUBLIC_SITE_URL ?? process.env.SITE_URL ?? "https://sagarlad.com").trim().replace(/\/$/, ""),
   title: "Sagar Lad Official Website",
   description:
     "Practical frameworks on money, career, life and awareness — from author, investor and public speaker Sagar Lad. Blog, books and more.",

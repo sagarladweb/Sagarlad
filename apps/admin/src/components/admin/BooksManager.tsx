@@ -584,7 +584,7 @@ export function BooksManager() {
           {visible.map((b) => (
             <li
               key={b.id}
-              className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden transition-shadow hover:shadow-lg"
+              className="group flex flex-col rounded-2xl border border-border bg-card card-grad overflow-hidden transition-shadow hover:shadow-lg"
             >
               <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
                 {b.imageUrl ? (

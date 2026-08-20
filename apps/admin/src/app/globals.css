@@ -52,9 +52,15 @@
   --border: #26262c;
 }
 
-/* Admin panel uses the deep blue brand as its accent instead of yellow. */
+/* Admin panel uses the deep blue brand as its accent instead of yellow. In
+   dark mode that deep blue is unreadable on dark surfaces — design.md swaps it
+   to the light blue. */
 .admin-panel {
   --accent: #0d21a1;
+  --accent-foreground: #ffffff;
+}
+.dark .admin-panel {
+  --accent: #3f88c5;
   --accent-foreground: #ffffff;
 }
 
@@ -65,6 +71,25 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+}
+
+/* Very light brand-tinted sheen for content cards, matching the Profile card.
+   Use sparingly — content panels only, not popovers/modals. */
+.card-grad {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card) 92%, var(--brand-light) 8%),
+    var(--card) 45%
+  );
+}
+/* Dark cards are near-black, so the same 8% tint reads as invisible —
+   lift it a touch so the sheen is still perceptible. */
+.dark .card-grad {
+  background-image: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--card) 88%, var(--brand-light) 12%),
+    var(--card) 55%
+  );
 }
 
 html {

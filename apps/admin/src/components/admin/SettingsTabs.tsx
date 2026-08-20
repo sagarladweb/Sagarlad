@@ -68,7 +68,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           />
 
           {/* Session strip */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card card-grad px-5 py-4">
             <p className="flex items-center gap-2 text-sm text-muted-foreground">
               <Clock className="h-4 w-4 shrink-0 text-accent" />
               Signed in as{" "}
