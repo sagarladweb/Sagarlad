@@ -20,7 +20,7 @@ export default async function HomePage() {
     dbSafe(
       () =>
         prisma.post.findMany({
-          where: { published: true },
+          where: { published: true, deletedAt: null },
           include: { category: true },
           orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
           take: 3,

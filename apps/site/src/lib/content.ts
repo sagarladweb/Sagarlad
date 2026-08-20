@@ -11,7 +11,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 // per-request double fetch (generateMetadata + render).
 export const getPostBySlug = cache((slug: string) =>
   prisma.post.findUnique({
-    where: { slug },
+    where: { slug, deletedAt: null },
     include: { category: true, author: true },
   })
 );
@@ -44,7 +44,7 @@ export const getCategories = unstable_cache(
 export const getPublishedVideos = unstable_cache(
   async (take?: number, platform?: "youtube" | "instagram", skip?: number) =>
     prisma.video.findMany({
-      where: { published: true },
+      where: { published: true, deletedAt: null },
       orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       ...(take ? { take } : {}),
       ...(skip ? { skip } : {}),
@@ -74,7 +74,7 @@ export const getPublishedVideos = unstable_cache(
 export const getPublishedVideoBySlug = unstable_cache(
   (slug: string) =>
     prisma.video.findFirst({
-      where: { slug, published: true },
+      where: { slug, published: true, deletedAt: null },
       select: {
         id: true,
         title: true,
@@ -104,7 +104,7 @@ export const getQuotes = unstable_cache(
 export const getPublishedBooks = unstable_cache(
   async (type?: "PUBLISHED" | "READ" | "EBOOK") =>
     prisma.book.findMany({
-      where: { published: true, ...(type ? { type } : {}) },
+      where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: {
         id: true,

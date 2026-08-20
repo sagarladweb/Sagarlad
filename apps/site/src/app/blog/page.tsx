@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
 import { pageMetadata, formatDate, postCover } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
@@ -32,14 +32,14 @@ export default async function BlogPage({
 
   const [categories, totalPosts, totalVideos] = await Promise.all([
     getCategories(),
-    prisma.post.count({ where: { published: true } }),
-    prisma.video.count({ where: { published: true } }),
+    dbSafe(() => prisma.post.count({ where: { published: true, deletedAt: null } }), 0),
+    dbSafe(() => prisma.video.count({ where: { published: true, deletedAt: null } }), 0),
   ]);
   const categorySlug = categories.some((c) => c.slug === params.category)
     ? params.category
     : undefined;
 
-  const where: Record<string, unknown> = { published: true };
+  const where: Record<string, unknown> = { published: true, deletedAt: null };
   if (categorySlug) {
     where.category = { slug: categorySlug };
   }
@@ -49,20 +49,30 @@ export default async function BlogPage({
 
   // Only fetch the rows for the active tab. Categories and the two stats
   // counts are always needed; the list+count for the other tab are not.
-  let posts: Awaited<ReturnType<typeof prisma.post.findMany>> = [];
+  let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date }[] = [];
   let total = 0;
   let videos: Awaited<ReturnType<typeof getPublishedVideos>> = [];
 
   if (tab === "posts") {
     [posts, total] = await Promise.all([
-      prisma.post.findMany({
-        where,
-        include: { category: true },
-        orderBy: { publishedAt: "desc" },
-        take: PAGE_SIZE,
-        skip: (page - 1) * PAGE_SIZE,
-      }),
-      prisma.post.count({ where }),
+      dbSafe(
+        () =>
+          prisma.post.findMany({
+            where,
+            select: {
+              id: true,
+              slug: true,
+              title: true,
+              coverImage: true,
+              publishedAt: true,
+            },
+            orderBy: { publishedAt: "desc" },
+            take: PAGE_SIZE,
+            skip: (page - 1) * PAGE_SIZE,
+          }),
+        []
+      ),
+      dbSafe(() => prisma.post.count({ where }), 0),
     ]);
   } else {
     videos = await getPublishedVideos(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE);

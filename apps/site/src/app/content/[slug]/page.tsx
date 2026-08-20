@@ -18,12 +18,12 @@ export default async function ContentCategoryPage({
     where: { slug },
     include: {
       posts: {
-        where: { published: true },
+        where: { published: true, deletedAt: null },
         orderBy: { publishedAt: "desc" },
         take: 12,
       },
       videos: {
-        where: { published: true },
+        where: { published: true, deletedAt: null },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
       },
     },

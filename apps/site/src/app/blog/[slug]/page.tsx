@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { getPostBySlug } from "@/lib/content";
 import { SITE, stripHtml } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
@@ -15,16 +15,20 @@ type Props = { params: Promise<{ slug: string }> };
 // from the CDN cache — no DB query per visitor. New/edited posts update via
 // `revalidatePublic()` on admin writes, plus the weekly ISR fallback.
 export async function generateStaticParams() {
-  const posts = await prisma.post.findMany({
-    where: { published: true },
-    select: { slug: true },
-  });
+  const posts = await dbSafe(
+    () =>
+      prisma.post.findMany({
+        where: { published: true, deletedAt: null },
+        select: { slug: true },
+      }),
+    []
+  );
   return posts.map((p) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await dbSafe(() => getPostBySlug(slug), null);
   if (!post) return {};
   const description = post.excerpt ?? stripHtml(post.content ?? "");
   const url = `${SITE.url}/blog/${slug}`;
@@ -52,34 +56,43 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await getPostBySlug(slug);
+  const post = await dbSafe(() => getPostBySlug(slug), null);
 
   if (!post || !post.published) notFound();
 
   // Same-category reads first, newest published fallback when the category is
   // thin. Excludes the current post.
-  const related = await prisma.post.findMany({
-    where: {
-      published: true,
-      NOT: { id: post.id },
-      ...(post.categoryId
-        ? { categoryId: post.categoryId }
-        : { categoryId: null }),
-    },
-    select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
-    orderBy: { publishedAt: "desc" },
-    take: 3,
-  });
+  const related = await dbSafe(
+    () =>
+      prisma.post.findMany({
+        where: {
+          published: true,
+          deletedAt: null,
+          NOT: { id: post.id },
+          ...(post.categoryId
+            ? { categoryId: post.categoryId }
+            : { categoryId: null }),
+        },
+        select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+      }),
+    []
+  );
   const relatedPosts =
     related.length >= 3
       ? related
       : (
-          await prisma.post.findMany({
-            where: { published: true, NOT: { id: post.id } },
-            select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
-            orderBy: { publishedAt: "desc" },
-            take: 3,
-          })
+          await dbSafe(
+            () =>
+              prisma.post.findMany({
+                where: { published: true, deletedAt: null, NOT: { id: post.id } },
+                select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
+                orderBy: { publishedAt: "desc" },
+                take: 3,
+              }),
+            []
+          )
         ).slice(0, 3);
 
   return (

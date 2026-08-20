@@ -22,7 +22,7 @@ export async function GET(request: Request) {
 
   // Platform is derived from the embed URL, so filter in JS — the set is small.
   const all = await prisma.video.findMany({
-    where: { published: true },
+    where: { published: true, deletedAt: null },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     select: {
       id: true,
