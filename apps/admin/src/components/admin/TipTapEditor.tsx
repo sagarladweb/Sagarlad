@@ -301,7 +301,10 @@ function HighlightPicker({
   openSide?: "left" | "right";
 }) {
   const [open, setOpen] = useState(false);
+  const [activeHighlightColor, setActiveHighlightColor] = useState("#fef08a");
   const pickerRef = useRef<HTMLDivElement>(null);
+  const isHighlighted = editor.isActive("highlight");
+  const currentColor = (editor.getAttributes("highlight").color as string) || activeHighlightColor;
 
   useEffect(() => {
     if (!open) return;
@@ -321,15 +324,52 @@ function HighlightPicker({
     };
   }, [open]);
 
+  // Quick 1-click apply of the last selected highlight color
+  const quickApplyHighlight = () => {
+    if (isHighlighted) {
+      editor.chain().focus().unsetHighlight().run();
+    } else {
+      editor.chain().focus().toggleHighlight({ color: activeHighlightColor }).run();
+    }
+  };
+
+  const applyColor = (colorHex: string) => {
+    setActiveHighlightColor(colorHex);
+    editor.chain().focus().setHighlight({ color: colorHex }).run();
+    setOpen(false);
+  };
+
   return (
-    <div ref={pickerRef} className="relative">
-      <ToolbarButton
-        label="Highlight color"
-        shortcut="Mod Shift h"
-        icon={<Highlighter className="w-4 h-4" />}
-        active={editor.isActive("highlight")}
+    <div ref={pickerRef} className="relative flex items-center">
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={quickApplyHighlight}
+        aria-label={`Apply ${activeHighlightColor} highlight`}
+        title={`Apply highlight color (${shortcutLabel("Mod Shift h")})`}
+        className={`inline-flex items-center gap-1 rounded-l-lg p-1.5 text-xs font-semibold transition-colors hover:bg-muted ${
+          isHighlighted ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+        }`}
+      >
+        <Highlighter className="w-4 h-4" />
+        <span
+          className="h-2 w-3.5 rounded-sm border border-black/20"
+          style={{ backgroundColor: currentColor }}
+        />
+      </button>
+      <button
+        type="button"
+        onMouseDown={(e) => e.preventDefault()}
         onClick={() => setOpen((o) => !o)}
-      />
+        aria-label="Pick highlight color"
+        title="Choose highlight color"
+        className={`rounded-r-lg border-l border-border/60 p-1 text-xs text-muted-foreground hover:bg-muted ${
+          open ? "bg-muted" : ""
+        }`}
+      >
+        ▼
+      </button>
+
       {open && (
         <div
           role="dialog"
@@ -344,16 +384,16 @@ function HighlightPicker({
         >
           <div className="mb-2 flex items-center justify-between gap-4">
             <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              Highlight
+              Highlight Color
             </span>
             <button
               type="button"
               aria-label="Close highlight picker"
               title="Close (Esc)"
               onClick={() => setOpen(false)}
-              className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
@@ -363,11 +403,13 @@ function HighlightPicker({
                 key={c.value}
                 type="button"
                 aria-label={`Highlight ${c.label}`}
-                aria-pressed={editor.getAttributes("highlight").color === c.value}
+                aria-pressed={currentColor === c.value}
                 title={c.label}
                 onMouseDown={(e) => e.preventDefault()}
-                onClick={() => editor.chain().focus().setHighlight({ color: c.value }).run()}
-                className="h-6 w-6 rounded-full border border-border/60 transition-transform hover:scale-110"
+                onClick={() => applyColor(c.value)}
+                className={`h-6 w-6 rounded-full border border-border/60 transition-transform hover:scale-110 ${
+                  activeHighlightColor === c.value ? "ring-2 ring-accent" : ""
+                }`}
                 style={{ backgroundColor: c.value }}
               />
             ))}
@@ -376,10 +418,14 @@ function HighlightPicker({
           <div className="mt-3 flex items-center justify-end gap-2 border-t border-border pt-2">
             <button
               type="button"
-              onClick={() => editor.chain().focus().unsetHighlight().run()}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => {
+                editor.chain().focus().unsetHighlight().run();
+                setOpen(false);
+              }}
               className="inline-flex items-center gap-1 rounded-lg border border-border px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <X className="w-3 h-3" /> Clear
+              <X className="w-3 h-3" /> Clear highlight
             </button>
           </div>
         </div>
@@ -426,7 +472,20 @@ function ListStylePicker({
   }, [open]);
 
   const apply = (listType: "bulletList" | "orderedList", value: string) => {
-    editor.chain().focus().updateAttributes(listType, { listStyle: value }).run();
+    if (listType === "bulletList") {
+      if (!editor.isActive("bulletList")) {
+        editor.chain().focus().toggleBulletList().updateAttributes("bulletList", { listStyle: value }).run();
+      } else {
+        editor.chain().focus().updateAttributes("bulletList", { listStyle: value }).run();
+      }
+    } else if (listType === "orderedList") {
+      if (!editor.isActive("orderedList")) {
+        editor.chain().focus().toggleOrderedList().updateAttributes("orderedList", { listStyle: value }).run();
+      } else {
+        editor.chain().focus().updateAttributes("orderedList", { listStyle: value }).run();
+      }
+    }
+    setOpen(false);
   };
 
   return (
@@ -434,14 +493,14 @@ function ListStylePicker({
       <ToolbarButton
         label="List style"
         icon={<ListTree className="w-4 h-4" />}
-        active={open}
+        active={open || inBullet || inOrdered}
         onClick={() => setOpen((o) => !o)}
       />
       {open && (
         <div
           role="dialog"
           aria-label="List style picker"
-          className={`absolute z-40 w-52 rounded-2xl border border-border bg-card p-3 shadow-2xl ${
+          className={`absolute z-40 w-60 rounded-2xl border border-border bg-card p-3.5 shadow-2xl ${
             vertical
               ? openSide === "left"
                 ? "right-full top-1/2 mr-2 -translate-y-1/2"
@@ -449,81 +508,82 @@ function ListStylePicker({
               : "left-0 top-full mt-2"
           }`}
         >
-          <div className="mb-2 flex items-center justify-between gap-4">
-            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              List style
+          <div className="mb-2.5 flex items-center justify-between gap-4 border-b border-border pb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Bullet & List Styles
             </span>
             <button
               type="button"
               aria-label="Close list style picker"
               title="Close (Esc)"
               onClick={() => setOpen(false)}
-              className="rounded-md p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground"
+              className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             >
-              <X className="w-4 h-4" />
+              <X className="w-3.5 h-3.5" />
             </button>
           </div>
 
           <div className="space-y-3">
             <div>
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Bullets
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Bullet Styles
               </p>
               <div className="grid gap-1">
                 {LIST_STYLES.bullet.map((o) => (
                   <button
                     key={o.value}
                     type="button"
-                    disabled={!inBullet}
                     aria-pressed={inBullet && current === o.value}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => apply("bulletList", o.value)}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-muted disabled:opacity-40"
+                    className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      inBullet && current === o.value
+                        ? "bg-accent text-accent-foreground font-semibold"
+                        : "hover:bg-muted text-foreground"
+                    }`}
                   >
                     <span
-                      className="inline-block h-2.5 w-2.5 shrink-0 border"
+                      className="inline-block h-3 w-3 shrink-0 border border-current"
                       style={{
                         borderRadius:
-                          o.value === "disc" ? "9999px" : o.value === "circle" ? "9999px" : "3px",
+                          o.value === "disc" || o.value === "circle" ? "9999px" : "2px",
                         backgroundColor:
                           o.value === "disc" ? "currentColor" : "transparent",
                       }}
                     />
-                    {o.label}
+                    <span>{o.label}</span>
                   </button>
                 ))}
               </div>
             </div>
+
             <div>
-              <p className="mb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                Numbers
+              <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                Numbered & Roman Styles
               </p>
               <div className="grid gap-1">
                 {LIST_STYLES.ordered.map((o) => (
                   <button
                     key={o.value}
                     type="button"
-                    disabled={!inOrdered}
                     aria-pressed={inOrdered && current === o.value}
                     onMouseDown={(e) => e.preventDefault()}
                     onClick={() => apply("orderedList", o.value)}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1 text-sm hover:bg-muted disabled:opacity-40"
+                    className={`flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors ${
+                      inOrdered && current === o.value
+                        ? "bg-accent text-accent-foreground font-semibold"
+                        : "hover:bg-muted text-foreground"
+                    }`}
                   >
-                    <span className="w-5 shrink-0 text-right font-mono text-xs tabular-nums">
+                    <span className="w-6 shrink-0 text-right font-mono text-xs font-bold text-accent">
                       {o.preview}
                     </span>
-                    {o.label}
+                    <span>{o.label}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
-
-          {!inBullet && !inOrdered && (
-            <p className="mt-2 border-t border-border pt-2 text-[11px] text-muted-foreground">
-              Put the cursor inside a list first, then pick a style.
-            </p>
-          )}
         </div>
       )}
     </div>
@@ -2009,11 +2069,10 @@ export function TipTapEditor({
         </div>
       </div>
 
-      {/* Toolbar + body: the toolbar sticks to the viewport; the page scrolls
-          naturally with the post instead of the editor scrolling internally. */}
+      {/* Toolbar + body: the toolbar sticks to the viewport with a solid background */}
       {toolbarPos === "top" ? (
         <>
-          <div className="sticky top-0 z-30 shrink-0 border-b border-border bg-muted/60">
+          <div className="sticky top-0 z-30 shrink-0 border-b border-border bg-card shadow-sm">
             {mode === "write" && horizontalToolbar}
           </div>
           <div className="relative min-h-[45vh]">{body}</div>
@@ -2021,7 +2080,7 @@ export function TipTapEditor({
       ) : toolbarPos === "left" ? (
         <div className="flex items-stretch">
           {mode === "write" && (
-            <div className="shrink-0 rounded-bl-2xl border-r border-border bg-muted/60">
+            <div className="shrink-0 rounded-bl-2xl border-r border-border bg-card shadow-sm">
               {verticalToolbar}
             </div>
           )}
@@ -2031,7 +2090,7 @@ export function TipTapEditor({
         <div className="flex items-stretch">
           <div className="relative min-h-[45vh] flex-1 min-w-0">{body}</div>
           {mode === "write" && (
-            <div className="shrink-0 rounded-br-2xl border-l border-border bg-muted/60">
+            <div className="shrink-0 rounded-br-2xl border-l border-border bg-card shadow-sm">
               {verticalToolbar}
             </div>
           )}

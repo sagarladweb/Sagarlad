@@ -8,7 +8,7 @@ import {
   Shield,
   ChevronLeft,
   CheckCircle2,
-  Sparkles,
+
   LogOut,
   ArrowRight,
   Mail,
@@ -295,14 +295,13 @@ function AdminLogin() {
             </span>
             <div>
               <p className="font-display text-lg font-bold leading-tight tracking-wide">Sagar Lad</p>
-              <p className="text-xs text-white/60">Official Admin Suite</p>
+              <p className="text-xs text-white/60">Admin Suite</p>
             </div>
           </div>
 
           {/* Main Hero Banner & Personalized Quote */}
           <div className="relative max-w-lg space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md">
-              <Sparkles className="h-3.5 w-3.5 text-accent" />
               <span>{timeOfDayGreeting}, Sagar Lad</span>
             </div>
 
