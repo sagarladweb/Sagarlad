@@ -12,7 +12,6 @@ const STATIC_PATHS = [
   "/books-read",
   "/videos",
   "/ebooks",
-  "/podcast",
   "/newsletter",
   "/contact",
   "/privacy",

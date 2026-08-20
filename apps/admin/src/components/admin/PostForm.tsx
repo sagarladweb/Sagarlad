@@ -530,8 +530,8 @@ export function PostForm({
       }`}
       noValidate
     >
-      {/* Sticky header controls: Back, Title, Save & Fullscreen grouped together */}
-      <div className="sticky top-0 z-40 flex flex-wrap items-center justify-between gap-4 border-b border-border bg-card/95 p-4 backdrop-blur shadow-sm rounded-2xl">
+      {/* Clean top header bar */}
+      <div className="sticky top-0 z-40 flex items-center justify-between gap-4 border-b border-border bg-card/95 p-4 backdrop-blur shadow-sm rounded-2xl">
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -559,40 +559,6 @@ export function PostForm({
               <AlertCircle className="w-3.5 h-3.5" /> {message || "Error saving"}
             </span>
           )}
-        </div>
-
-        {/* Action group: Save + Fullscreen side by side */}
-        <div className="flex items-center gap-2.5">
-          <button
-            type="submit"
-            disabled={saveState === "loading"}
-            title="Save post (⌘S / Ctrl+S)"
-            className="inline-flex items-center gap-2 rounded-xl bg-accent px-4 py-2 text-xs font-bold text-accent-foreground shadow-md transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
-          >
-            {saveState === "loading" ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Save className="w-3.5 h-3.5" />
-            )}
-            {initial ? "Save Changes" : "Publish Post"}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsFullscreen((prev) => !prev)}
-            className="inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3.5 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm"
-            title={isFullscreen ? "Exit Fullscreen Mode" : "Enter Fullscreen Mode"}
-          >
-            {isFullscreen ? (
-              <>
-                <Minimize2 className="w-3.5 h-3.5" /> Exit Fullscreen
-              </>
-            ) : (
-              <>
-                <Maximize2 className="w-3.5 h-3.5" /> Fullscreen
-              </>
-            )}
-          </button>
         </div>
       </div>
 
@@ -831,34 +797,42 @@ export function PostForm({
 </div>
 
     {/* Floating save: stays out of the way while writing long posts */}
-      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-2">
-        {saveState === "loading" && (
-          <p className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-lg">
-            Saving…
-          </p>
-        )}
-        {saveState === "saved" && (
-          <p className="flex items-center gap-1 rounded-full border border-green-200 bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 shadow-lg">
-            <CheckCircle2 className="w-3.5 h-3.5" /> All changes saved
-          </p>
-        )}
+      {/* Bottom Right Action Bar: Fullscreen & Save grouped together */}
+      <div className="fixed bottom-6 right-6 z-40 flex items-center gap-3 rounded-full border border-border bg-card/95 p-2 shadow-2xl backdrop-blur">
         {saveState === "error" && (
-          <p className="max-w-[240px] rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-600 shadow-lg">
+          <p className="max-w-[200px] truncate rounded-full bg-red-50 px-3 py-1 text-xs font-medium text-red-600">
             {message}
           </p>
         )}
         <button
+          type="button"
+          onClick={() => setIsFullscreen((prev) => !prev)}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shadow-sm"
+          title={isFullscreen ? "Exit Fullscreen Mode" : "Enter Fullscreen Mode"}
+        >
+          {isFullscreen ? (
+            <>
+              <Minimize2 className="w-3.5 h-3.5" /> Exit Fullscreen
+            </>
+          ) : (
+            <>
+              <Maximize2 className="w-3.5 h-3.5" /> Fullscreen
+            </>
+          )}
+        </button>
+
+        <button
           type="submit"
           disabled={saveState === "loading"}
           title="Save post (⌘S / Ctrl+S)"
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-3 text-sm font-semibold text-accent-foreground shadow-xl transition-all hover:opacity-90 disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-xs font-bold text-accent-foreground shadow-lg transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
         >
           {saveState === "loading" ? (
-            <Loader2 className="w-4 h-4 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />
           ) : (
-            <Save className="w-4 h-4" />
+            <Save className="w-3.5 h-3.5" />
           )}
-          {initial ? "Save" : "Publish"}
+          {initial ? "Save Changes" : "Publish Post"}
         </button>
       </div>
 
