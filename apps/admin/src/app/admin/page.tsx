@@ -2,13 +2,119 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle, Shield, ChevronLeft, CheckCircle2, Sparkles, LogOut, ArrowRight } from "lucide-react";
+import {
+  Loader2,
+  AlertCircle,
+  Shield,
+  ChevronLeft,
+  CheckCircle2,
+  Sparkles,
+  LogOut,
+  ArrowRight,
+  Mail,
+  Lock,
+  Eye,
+  EyeOff,
+  KeyRound,
+} from "lucide-react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { SessionProvider } from "@/components/SessionProvider";
 import { PHASE_1 } from "@/lib/phase";
 
-const input =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full transition-all duration-200 focus:border-accent";
+const inputBase =
+  "w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-all duration-200 focus:border-accent focus:ring-2 focus:ring-accent";
+
+function TextField({
+  id,
+  label,
+  type,
+  value,
+  onChange,
+  placeholder,
+  autoComplete,
+  icon: Icon,
+}: {
+  id: string;
+  label: string;
+  type: string;
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+  autoComplete?: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <Icon className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+        <input
+          id={id}
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          autoComplete={autoComplete}
+          className={`${inputBase} pl-10`}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PasswordField({
+  id,
+  label,
+  value,
+  onChange,
+  autoComplete,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+  autoComplete?: string;
+}) {
+  const [visible, setVisible] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
+
+  return (
+    <div>
+      <label htmlFor={id} className="mb-1.5 block text-sm font-medium">
+        {label}
+      </label>
+      <div className="relative">
+        <Lock className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+        <input
+          id={id}
+          type={visible ? "text" : "password"}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => setCapsLock(e.getModifierState("CapsLock"))}
+          placeholder="••••••••••••"
+          autoComplete={autoComplete}
+          className={`${inputBase} px-10`}
+        />
+        <button
+          type="button"
+          onClick={() => setVisible((v) => !v)}
+          aria-label={visible ? "Hide password" : "Show password"}
+          aria-pressed={visible}
+          className="absolute right-2 top-1/2 grid h-8 w-8 -translate-y-1/2 place-items-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {visible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+        </button>
+      </div>
+      {capsLock && (
+        <span className="mt-1.5 block text-xs text-amber-600">
+          Caps Lock is on
+        </span>
+      )}
+    </div>
+  );
+}
 
 function AdminLogin() {
   const router = useRouter();
@@ -129,7 +235,7 @@ function AdminLogin() {
     } else if (r.ok) {
       setTimeout(() => {
         router.push(targetRoute);
-      }, 700);
+      }, 1100);
     } else if (r.message) {
       setError(r.message);
     }
@@ -145,7 +251,7 @@ function AdminLogin() {
     if (r.ok) {
       setTimeout(() => {
         router.push(targetRoute);
-      }, 700);
+      }, 1100);
     } else if (r.message) {
       setError(r.message);
     }
@@ -161,7 +267,7 @@ function AdminLogin() {
             {/* Soft glowing ambient orbs */}
             <div className="login-orb absolute -left-20 -top-20 h-[30rem] w-[30rem] rounded-full bg-accent/20 blur-3xl" />
             <div className="login-orb login-orb-2 absolute -bottom-24 -right-20 h-[34rem] w-[34rem] rounded-full bg-brand-light/30 blur-3xl" />
-            
+
             {/* Concentric rotating vector rings */}
             <svg className="login-ring absolute -right-32 top-1/4 h-[32rem] w-[32rem] text-white/10" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2 2" />
@@ -220,7 +326,7 @@ function AdminLogin() {
 
         {/* ---- Right: Login Form & Active Session Handler ---- */}
         <main className="flex items-center justify-center px-4 py-12 sm:px-8 bg-background">
-          <div className="w-full max-w-sm">
+          <div className="w-full max-w-md">
             {/* Mobile brand header */}
             <div className="mb-8 flex items-center gap-3 lg:hidden">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent font-display text-lg font-bold text-accent-foreground">
@@ -232,7 +338,7 @@ function AdminLogin() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-border bg-card p-8 shadow-xl shadow-muted/50 transition-all duration-300">
+            <div className="rounded-3xl border border-border bg-card p-8 shadow-xl shadow-muted/50 transition-all duration-300 sm:p-10">
               <div className="flex items-center justify-between">
                 <span className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent/10 text-accent">
                   <Shield className="h-6 w-6" />
@@ -276,12 +382,12 @@ function AdminLogin() {
                 /* ---- Credentials / OTP Form ---- */
                 <>
                   <h2 className="mt-5 font-display text-2xl font-bold">
-                    {step === "otp" ? "Two-factor verification" : `${timeOfDayGreeting}, Sagar`}
+                    {step === "otp" ? "Two-factor verification" : "Admin Sign In"}
                   </h2>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {step === "otp"
                       ? "Enter your 6-digit authenticator code to proceed."
-                      : "Sign in with your credentials to manage your platform."}
+                      : "Welcome back — sign in to continue to your admin suite."}
                   </p>
 
                   {/* Success / Greeting Feedback Overlay */}
@@ -290,7 +396,7 @@ function AdminLogin() {
                       <CheckCircle2 className="h-5 w-5 shrink-0 animate-bounce" />
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wider">Welcome back</p>
-                        <p className="text-sm font-semibold">Logged in as Sagar Lad</p>
+                        <p className="text-sm font-semibold">Admin Sagar Lad</p>
                       </div>
                     </div>
                   )}
@@ -298,36 +404,23 @@ function AdminLogin() {
                   <div className="mt-6">
                     {step === "credentials" ? (
                       <form onSubmit={onCredentialsSubmit} className="space-y-4" noValidate>
-                        <div>
-                          <label htmlFor="email" className="mb-1.5 block text-sm font-medium">
-                            Email Address
-                          </label>
-                          <input
-                            id="email"
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className={input}
-                            placeholder="sagar@sagarlad.com"
-                            autoComplete="username"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="password" className="mb-1.5 block text-sm font-medium">
-                            Password
-                          </label>
-                          <input
-                            id="password"
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className={input}
-                            placeholder="••••••••••••"
-                            autoComplete="current-password"
-                            required
-                          />
-                        </div>
+                        <TextField
+                          id="email"
+                          label="Email Address"
+                          type="email"
+                          value={email}
+                          onChange={setEmail}
+                          placeholder="sagar@sagarlad.com"
+                          autoComplete="username"
+                          icon={Mail}
+                        />
+                        <PasswordField
+                          id="password"
+                          label="Password"
+                          value={password}
+                          onChange={setPassword}
+                          autoComplete="current-password"
+                        />
 
                         {error && (
                           <p className="flex items-center gap-1.5 text-sm text-red-600 animate-fade-in" role="alert">
@@ -341,8 +434,16 @@ function AdminLogin() {
                           className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-60 shadow-md shadow-accent/20"
                         >
                           {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-                          {greetingState === "greeting" ? "Greeting Sagar Lad..." : greetingState === "success" ? "Access Granted" : "Sign In"}
+                          {greetingState === "greeting"
+                            ? "Signing in..."
+                            : greetingState === "success"
+                              ? "Access Granted"
+                              : "Sign In"}
                         </button>
+
+                        <p className="pt-1 text-center text-xs text-muted-foreground">
+                          Protected by encrypted credentials · Admin access only
+                        </p>
                       </form>
                     ) : (
                       <form onSubmit={onOtpSubmit} className="space-y-4" noValidate>
@@ -350,17 +451,20 @@ function AdminLogin() {
                           <label htmlFor="otp" className="mb-1.5 block text-sm font-medium">
                             Authentication code
                           </label>
-                          <input
-                            id="otp"
-                            inputMode="text"
-                            autoComplete="one-time-code"
-                            value={otp}
-                            onChange={(e) => setOtp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
-                            placeholder="000000"
-                            className={`${input} text-center font-mono text-lg tracking-[0.5em]`}
-                            autoFocus
-                            required
-                          />
+                          <div className="relative">
+                            <KeyRound className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/70" />
+                            <input
+                              id="otp"
+                              inputMode="text"
+                              autoComplete="one-time-code"
+                              value={otp}
+                              onChange={(e) => setOtp(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 10))}
+                              placeholder="000000"
+                              className={`${inputBase} pl-10 text-center font-mono text-lg tracking-[0.5em]`}
+                              autoFocus
+                              required
+                            />
+                          </div>
                         </div>
 
                         {error && (
