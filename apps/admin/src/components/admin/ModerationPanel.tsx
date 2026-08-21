@@ -39,7 +39,7 @@ type Enquiry = {
 
 type Data = { subscribers: Subscriber[]; comments: Comment[]; enquiries: Enquiry[] };
 
-const TABS = ["Comments", "Subscribers", "Enquiries"] as const;
+const TABS = ["Comments", "Subscribers", "Contact", "Speaking"] as const;
 type Tab = (typeof TABS)[number];
 
 function tabFromUrl(): Tab {
@@ -157,23 +157,6 @@ export function ModerationPanel() {
     ]);
   }
 
-  function exportEnquiriesCsv() {
-    if (!data) return;
-    download("enquiries.csv", [
-      ["Name", "Email", "Phone", "Organization", "Type", "Event date", "Message", "Received at"],
-      ...data.enquiries.map((e) => [
-        `${e.firstName} ${e.lastName ?? ""}`.trim(),
-        e.email,
-        e.phone ?? "",
-        e.organization,
-        e.type,
-        e.eventDate ?? "",
-        e.message ?? "",
-        new Date(e.createdAt).toLocaleString(),
-      ]),
-    ]);
-  }
-
   function exportCommentsCsv() {
     if (!data) return;
     download("comments.csv", [
@@ -200,10 +183,20 @@ export function ModerationPanel() {
     return data.subscribers.filter((s) => s.email.toLowerCase().includes(q));
   }, [data, subscriberFilter]);
 
+  const contactEnquiries = useMemo(
+    () => data?.enquiries.filter((e) => e.type !== "PUBLIC_SPEAKING") ?? [],
+    [data]
+  );
+  const speakingEnquiries = useMemo(
+    () => data?.enquiries.filter((e) => e.type === "PUBLIC_SPEAKING") ?? [],
+    [data]
+  );
+
   const counts = {
     Comments: data?.comments.length ?? 0,
     Subscribers: data?.subscribers.length ?? 0,
-    Enquiries: data?.enquiries.length ?? 0,
+    Contact: contactEnquiries.length,
+    Speaking: speakingEnquiries.length,
   };
 
   return (
@@ -211,7 +204,7 @@ export function ModerationPanel() {
       <header>
         <h1 className="font-display text-2xl font-bold">Community</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Review blog comments, newsletter subscribers, and contact form enquiries.
+          Review blog comments, newsletter subscribers, contact form and speaking inquiries.
         </p>
       </header>
 
@@ -423,23 +416,107 @@ export function ModerationPanel() {
             </ul>
           )}
         </div>
-      ) : (
+      ) : tab === "Contact" ? (
         <div>
           <div className="mb-4 flex justify-end">
             <button
               type="button"
-              onClick={exportEnquiriesCsv}
-              disabled={data.enquiries.length === 0}
+              onClick={() => {
+                if (!data) return;
+                download("contact-enquiries.csv", [
+                  ["Name", "Email", "Phone", "Organization", "Type", "Event date", "Message", "Received at"],
+                  ...contactEnquiries.map((e) => [
+                    `${e.firstName} ${e.lastName ?? ""}`.trim(),
+                    e.email,
+                    e.phone ?? "",
+                    e.organization,
+                    e.type,
+                    e.eventDate ?? "",
+                    e.message ?? "",
+                    new Date(e.createdAt).toLocaleString(),
+                  ]),
+                ]);
+              }}
+              disabled={contactEnquiries.length === 0}
               className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent disabled:opacity-50 transition-colors"
             >
               <Download className="w-4 h-4" /> Export CSV
             </button>
           </div>
-          {data.enquiries.length === 0 ? (
-            <EmptyState text="No enquiries yet. Contact form submissions will appear here." />
+          {contactEnquiries.length === 0 ? (
+            <EmptyState text="No contact form submissions yet." />
           ) : (
             <ul className="divide-y divide-border border-y border-border">
-              {data.enquiries.map((e) => (
+              {contactEnquiries.map((e) => (
+                <li key={e.id} className="py-4 flex items-start justify-between gap-4">
+                  <div className="min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold text-sm">
+                        {`${e.firstName} ${e.lastName ?? ""}`.trim()}
+                      </span>
+                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                        {e.type}
+                      </span>
+                      <time className="text-xs text-muted-foreground" dateTime={e.createdAt}>
+                        {new Date(e.createdAt).toLocaleString()}
+                      </time>
+                    </div>
+                    <p className="text-sm">
+                      <a href={`mailto:${e.email}`} className="text-accent hover:underline">
+                        {e.email}
+                      </a>
+                      {e.phone && <span className="text-muted-foreground"> · {e.phone}</span>}
+                    </p>
+                    <p className="text-sm text-muted-foreground">{e.organization}</p>
+                    {e.message && (
+                      <p className="text-sm text-muted-foreground leading-relaxed">{e.message}</p>
+                    )}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => act("enquiry", [e.id])}
+                    aria-label="Delete enquiry"
+                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      ) : (
+        <div>
+          <div className="mb-4 flex justify-end">
+            <button
+              type="button"
+              onClick={() => {
+                if (!data) return;
+                download("speaking-enquiries.csv", [
+                  ["Name", "Email", "Phone", "Organization", "Type", "Event date", "Message", "Received at"],
+                  ...speakingEnquiries.map((e) => [
+                    `${e.firstName} ${e.lastName ?? ""}`.trim(),
+                    e.email,
+                    e.phone ?? "",
+                    e.organization,
+                    e.type,
+                    e.eventDate ?? "",
+                    e.message ?? "",
+                    new Date(e.createdAt).toLocaleString(),
+                  ]),
+                ]);
+              }}
+              disabled={speakingEnquiries.length === 0}
+              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent disabled:opacity-50 transition-colors"
+            >
+              <Download className="w-4 h-4" /> Export CSV
+            </button>
+          </div>
+          {speakingEnquiries.length === 0 ? (
+            <EmptyState text="No public speaking inquiries yet." />
+          ) : (
+            <ul className="divide-y divide-border border-y border-border">
+              {speakingEnquiries.map((e) => (
                 <li key={e.id} className="py-4 flex items-start justify-between gap-4">
                   <div className="min-w-0 space-y-1.5">
                     <div className="flex items-center gap-2 flex-wrap">

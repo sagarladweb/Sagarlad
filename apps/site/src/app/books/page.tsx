@@ -31,10 +31,10 @@ export default async function BooksPage() {
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-12 lg:gap-10 lg:py-32">
           {/* Portrait — layered over the blue disc */}
           <div className="lg:col-span-5">
-            <div className="relative mx-auto w-full max-w-[420px]">
+            <div className="relative mx-auto w-full max-w-[420px] isolate">
               <svg
                 aria-hidden="true"
-                className="absolute -left-12 -top-14 h-44 w-44 text-[#3F88C5] opacity-40"
+                className="absolute -left-12 -top-14 h-44 w-44 text-[#3F88C5] opacity-40 z-0"
               >
                 <defs>
                   <pattern id="mindup-dots" width="18" height="18" patternUnits="userSpaceOnUse">
@@ -46,13 +46,13 @@ export default async function BooksPage() {
 
               <div
                 aria-hidden="true"
-                className="absolute left-1/2 top-1/2 aspect-square w-[66%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0D21A1]"
+                className="absolute left-1/2 top-1/2 aspect-square w-[66%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#0D21A1] z-0"
               />
 
               <svg
                 aria-hidden="true"
                 viewBox="0 0 100 100"
-                className="absolute left-1/2 top-1/2 aspect-square w-[84%] -translate-x-1/2 -translate-y-[54%] text-[#FFD51D]"
+                className="absolute left-1/2 top-1/2 aspect-square w-[84%] -translate-x-1/2 -translate-y-[54%] text-[#FFD51D] z-0"
               >
                 <circle
                   cx="50"
