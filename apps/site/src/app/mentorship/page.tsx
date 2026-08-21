@@ -195,13 +195,16 @@ export default function MentorshipPage() {
               </span>
             </div>
 
-            {/* Iframe */}
+            {/* Iframe — hue-rotate shifts Topmate red → brand blue (#0D21A1) */}
             <div className="relative" style={{ height: "720px" }}>
               <iframe
                 src="https://topmate.io/embed/profile/sagar_lad"
                 title="Book a mentorship session with Sagar Lad"
                 className="absolute inset-0 w-full h-full border-0"
-                style={{ clipPath: "inset(0 0 60px 0)" }}
+                style={{
+                  clipPath: "inset(0 0 60px 0)",
+                  filter: "hue-rotate(230deg) saturate(0.85)",
+                }}
                 loading="lazy"
                 allowFullScreen
               />
