@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
-import { ThemeToggle } from "@/components/ThemeToggle";
 import { SITE } from "@/lib/site";
 
 // Self-hosted fonts — never depend on Google Fonts being reachable at build
@@ -84,10 +83,8 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${beVietnamPro.variable} ${rethinkSans.variable} ${greatVibes.variable} h-full antialiased`}
-      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <ThemeToggle />
         <SiteFrame>{children}</SiteFrame>
       </body>
     </html>
