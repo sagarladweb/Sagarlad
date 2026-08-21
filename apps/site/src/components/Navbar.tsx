@@ -632,10 +632,9 @@ export function Navbar() {
             {/* Mentorship */}
             <div className="relative">
               <NavLink
-                href="https://topmate.io/sagar_lad"
+                href="/mentorship"
                 label="Mentorship"
-                external
-                active={false}
+                active={isActive("/mentorship")}
                 light={heroLight}
               />
             </div>
@@ -843,16 +842,7 @@ export function Navbar() {
 
                 <MobileLink href="/contact" icon={<Mail className="w-4 h-4 text-brand-light" />} label="Contact" onClick={() => setOpen(false)} />
 
-                <Link
-                  href="https://topmate.io/sagar_lad"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground hover:text-accent-strong rounded-xl hover:bg-muted transition-colors"
-                >
-                  <Compass className="w-4 h-4 text-brand-light" /> Mentorship
-                  <span aria-hidden="true" className="ml-auto text-[0.65em] leading-none -translate-y-px">↗</span>
-                </Link>
+                <MobileLink href="/mentorship" icon={<Compass className="w-4 h-4 text-brand-light" />} label="Mentorship" onClick={() => setOpen(false)} />
               </div>
             </div>
           </div>,

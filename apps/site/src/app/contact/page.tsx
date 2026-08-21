@@ -237,10 +237,9 @@ export default function ContactPage() {
             </div>
           </div>
 
-          {/* 3 social links — static */}
+          {/* 3 social icons — centered */}
           <div className="rounded-2xl border border-border bg-card p-5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Follow</p>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center justify-center gap-4">
               {socials.map((s) => {
                 const Icon = s.icon;
                 return (
@@ -250,10 +249,9 @@ export default function ContactPage() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={s.label}
-                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-xs font-medium text-foreground hover:border-brand-light/60 hover:bg-muted/50 transition-all"
+                    className="w-10 h-10 rounded-xl border border-border bg-background grid place-items-center text-muted-foreground hover:border-brand-light/60 hover:bg-muted/50 transition-all"
                   >
-                    <Icon className="w-4 h-4 text-muted-foreground" />
-                    <span className="hidden sm:inline">{s.label}</span>
+                    <Icon className="w-4 h-4" />
                   </a>
                 );
               })}
