@@ -84,7 +84,7 @@ export async function POST(request: Request) {
             userAgent: userAgent || null,
             postId: post.id,
             clientToken: parsed.data.clientToken || null,
-            approved: true,
+            approved: false,
           },
         }),
       null

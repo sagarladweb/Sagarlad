@@ -29,30 +29,23 @@ export async function GET() {
     };
   }
 
-  // 2. Environment Variables Audit
-  const envVars = {
-    DATABASE_URL: Boolean(process.env.DATABASE_URL),
-    AUTH_SECRET: Boolean(process.env.AUTH_SECRET),
-    ADMIN_EMAIL: Boolean(process.env.ADMIN_EMAIL),
-    ADMIN_PASSWORD: Boolean(process.env.ADMIN_PASSWORD),
-    CRON_SECRET: Boolean(process.env.CRON_SECRET),
-    SITE_URL: Boolean(process.env.SITE_URL),
-  };
-  const missingEnv = Object.entries(envVars)
-    .filter(([, ok]) => !ok)
-    .map(([key]) => key);
+  // 2. Environment Variables Audit (no secrets or names exposed)
+  const envVars = [
+    process.env.DATABASE_URL,
+    process.env.AUTH_SECRET,
+    process.env.ADMIN_EMAIL,
+    process.env.ADMIN_PASSWORD,
+    process.env.CRON_SECRET,
+    process.env.SITE_URL,
+  ];
+  const envOk = envVars.every(Boolean);
 
-  if (missingEnv.length === 0) {
-    checks.environment = {
-      ok: true,
-      message: "All required production environment variables are configured.",
-    };
-  } else {
-    checks.environment = {
-      ok: false,
-      message: `Missing env variables: ${missingEnv.join(", ")}`,
-    };
-  }
+  checks.environment = {
+    ok: envOk,
+    message: envOk
+      ? "All required production environment variables are configured."
+      : "One or more required environment variables are missing.",
+  };
 
   // 3. Site Connectivity & ISR Revalidation Ping
   const siteUrl = (process.env.SITE_URL ?? "https://sagarlad.com").trim().replace(/\/$/, "");
