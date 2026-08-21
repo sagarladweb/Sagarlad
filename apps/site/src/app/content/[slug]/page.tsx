@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { pageMetadata, formatDate, postCover } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 
@@ -14,20 +14,24 @@ export default async function ContentCategoryPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      posts: {
-        where: { published: true, deletedAt: null },
-        orderBy: { publishedAt: "desc" },
-        take: 12,
-      },
-      videos: {
-        where: { published: true, deletedAt: null },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-      },
-    },
-  });
+  const category = await dbSafe(
+    () =>
+      prisma.category.findUnique({
+        where: { slug },
+        include: {
+          posts: {
+            where: { published: true, deletedAt: null },
+            orderBy: { publishedAt: "desc" },
+            take: 12,
+          },
+          videos: {
+            where: { published: true, deletedAt: null },
+            orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+          },
+        },
+      }),
+    null
+  );
   if (!category) notFound();
 
   return (
@@ -110,7 +114,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const category = await prisma.category.findUnique({ where: { slug } });
+  const category = await dbSafe(
+    () => prisma.category.findUnique({ where: { slug } }),
+    null
+  );
   if (!category) return {};
   return pageMetadata({
     title: `${category.name} — Content`,
