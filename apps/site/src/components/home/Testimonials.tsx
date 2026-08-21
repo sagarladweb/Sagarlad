@@ -109,7 +109,7 @@ export function Testimonials() {
 
         <div
           data-animate="zoom"
-          className="mt-12 relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
+          className="mt-12 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
           onPointerDown={onPointerDown}
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}

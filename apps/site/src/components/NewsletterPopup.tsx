@@ -89,7 +89,7 @@ export function NewsletterPopup() {
       onMouseDownCapture={onInteract}
       onTouchStartCapture={onInteract}
     >
-      <div className="rounded-3xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/15 overflow-hidden animate-slide-in-up">
+      <div className="rounded-2xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/15 overflow-hidden animate-slide-in-up">
         {/* Shining header bar — light-blue base with light-blue + light-yellow
             shimmer sweeps (light yellow is the brand accent's lighter shade). */}
         <div className="relative h-1.5 w-full overflow-hidden bg-gradient-to-r from-brand-light via-brand-light/40 to-brand-light">

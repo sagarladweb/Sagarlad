@@ -123,7 +123,7 @@ export function BlogVideoGrid({
       <article
         key={v.id}
         onClick={() => setPlaying(v)}
-        className="group flex flex-col rounded-3xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer"
+        className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer"
       >
         {/* Image Container with precise aspect ratio. Reels are capped so
             a 9:16 portrait never towers over the feed. */}
@@ -197,7 +197,7 @@ export function BlogVideoGrid({
             </div>
           </div>
           <div
-            className={`mt-4 overflow-hidden rounded-3xl bg-black shadow-2xl border border-white/10 ${
+            className={`mt-4 overflow-hidden rounded-2xl bg-black shadow-2xl border border-white/10 ${
               isInstagramUrl(playing.embedUrl)
                 ? "aspect-[9/16] sm:aspect-[9/16] max-h-[75vh] sm:max-h-[70vh] mx-auto w-full max-w-[420px]"
                 : "aspect-video"

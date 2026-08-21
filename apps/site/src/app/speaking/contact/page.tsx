@@ -179,7 +179,7 @@ export default function SpeakingContactPage() {
 
         <form
           onSubmit={onSubmit}
-          className="lg:col-span-3 rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-4"
+          className="lg:col-span-3 rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-4"
           noValidate
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -120,7 +120,7 @@ export function PostArticle({
 
       <div id="post-content">
         {post.coverImage && post.showCover && (
-          <div className="mb-10 overflow-hidden rounded-3xl border border-border shadow-sm">
+          <div className="mb-10 overflow-hidden rounded-2xl border border-border shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={post.coverImage}
@@ -146,7 +146,7 @@ export function PostArticle({
       )}
 
       {post.showAuthorBox && (
-        <div className="mt-8 flex items-center gap-5 rounded-3xl border border-border bg-card p-6 sm:p-8">
+        <div className="mt-8 flex items-center gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8">
           <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-brand font-display text-xl font-bold text-white">
             {initials(authorName)}
           </span>

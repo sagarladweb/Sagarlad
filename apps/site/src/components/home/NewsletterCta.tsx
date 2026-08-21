@@ -61,7 +61,7 @@ export function NewsletterCta() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
-          className="mx-auto max-w-2xl overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-brand-light/30 via-brand-light/15 to-brand-light/5 shadow-lg shadow-brand-light/20"
+          className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-brand-light/30 via-brand-light/15 to-brand-light/5 shadow-lg shadow-brand-light/20"
           data-animate
         >
           <div className="flex flex-col items-center gap-10 px-6 pt-10 pb-12 sm:px-12 sm:pt-14 sm:pb-16">

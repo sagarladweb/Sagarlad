@@ -34,7 +34,7 @@ export default async function VideosPage() {
           <VideoFeed initial={videos} masonry />
         </section>
 
-        <div className="rounded-3xl bg-foreground text-background p-8 sm:p-12 text-center">
+        <div className="rounded-2xl bg-foreground text-background p-8 sm:p-12 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-bold">
             Subscribe for the full library
           </h2>

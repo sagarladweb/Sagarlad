@@ -49,7 +49,7 @@ export function VideoPlayer({
     <div className={square ? "mx-auto max-w-[440px]" : ""}>
       <div
         ref={boxRef}
-        className={`${aspectClass(platform)} overflow-hidden rounded-3xl bg-black shadow-lg relative`}
+        className={`${aspectClass(platform)} overflow-hidden rounded-2xl bg-black shadow-lg relative`}
       >
         {playing ? (
           <iframe

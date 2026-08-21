@@ -232,7 +232,7 @@ export default function SpeakingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4">
             {/* Large feature — left, spans 2 rows on desktop */}
             {/* Large feature — left, spans 2 rows on desktop */}
-            <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-3xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
+            <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-2xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
               <Image
                 src="/images/heroes/speaking.webp"
                 alt=""
@@ -244,7 +244,7 @@ export default function SpeakingPage() {
             </div>
 
             {/* Top right */}
-            <div className="sm:col-span-1 lg:col-span-5 rounded-3xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
+            <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
                 src="/images/heroes/tedx.webp"
                 alt=""
@@ -256,7 +256,7 @@ export default function SpeakingPage() {
             </div>
 
             {/* Bottom right */}
-            <div className="sm:col-span-1 lg:col-span-5 rounded-3xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
+            <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
                 src="/images/sagar-author.png"
                 alt=""
@@ -272,7 +272,7 @@ export default function SpeakingPage() {
               {[1, 2, 3].map((n) => (
                 <div
                   key={n}
-                  className="rounded-3xl overflow-hidden relative group aspect-[4/3] min-h-[160px]"
+                  className="rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[160px]"
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-brand-light/20 to-brand-light/5" />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
@@ -295,7 +295,7 @@ export default function SpeakingPage() {
                 Keynotes delivered across regional tech groups, academic institutions, and international summits.
               </p>
             </div>
-            <div className="rounded-3xl border border-border divide-y divide-border overflow-hidden bg-card">
+            <div className="rounded-2xl border border-border divide-y divide-border overflow-hidden bg-card">
               {eventsHosted.map((e, i) => {
                 const Icon = e.icon;
                 return (
@@ -336,7 +336,7 @@ export default function SpeakingPage() {
                 Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-3xl border border-border bg-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border">
               {memberships.map((m) => {
                 const Icon = m.icon;
                 return (
@@ -379,7 +379,7 @@ export default function SpeakingPage() {
             {processSteps.map((step, i) => (
               <div
                 key={step.n}
-                className={`group rounded-3xl border border-border bg-card p-7 sm:p-8 transition-colors hover:border-brand-light/60 ${
+                className={`group rounded-2xl border border-border bg-card p-7 sm:p-8 transition-colors hover:border-brand-light/60 ${
                   i === 0 ? "lg:col-span-7" : "lg:col-span-5"
                 }`}
               >
@@ -402,7 +402,7 @@ export default function SpeakingPage() {
             ))}
 
             {/* Booking card fills the grid */}
-            <div className="lg:col-span-7 relative overflow-hidden rounded-3xl border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8">
+            <div className="lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8">
               <span aria-hidden="true" className="pointer-events-none absolute -top-24 -left-10 h-48 w-72 rounded-full bg-accent/15 blur-3xl" />
               <div className="relative shrink-0 mx-auto md:mx-0">
                 <div className="w-16 h-16 rounded-2xl bg-brand grid place-items-center text-white">
@@ -437,7 +437,7 @@ export default function SpeakingPage() {
             {testimonials.map((t, i) => (
               <blockquote
                 key={t.quote}
-                className={`rounded-3xl border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-colors hover:border-brand-light/60 ${
+                className={`rounded-2xl border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-colors hover:border-brand-light/60 ${
                   i === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-6"
                 }`}
               >

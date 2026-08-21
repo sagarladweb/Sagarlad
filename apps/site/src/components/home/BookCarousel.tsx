@@ -103,7 +103,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
                     className="object-contain drop-shadow-lg"
                   />
                 ) : (
-                  <div className="w-full h-full grid place-items-center rounded-3xl bg-muted p-6">
+                  <div className="w-full h-full grid place-items-center rounded-2xl bg-muted p-6">
                     <span className="font-display text-xl font-bold text-foreground text-center">
                       {book.title}
                     </span>

@@ -118,7 +118,7 @@ export default function ContactPage() {
 
           <form
             onSubmit={onSubmit}
-            className="mt-8 rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-5 shadow-sm"
+            className="mt-8 rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-5 shadow-sm"
             noValidate
           >
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

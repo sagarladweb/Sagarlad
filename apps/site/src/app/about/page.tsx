@@ -370,7 +370,7 @@ export default function AboutPage() {
           </div>
 
           <div data-reveal className="relative">
-            <div className="relative overflow-hidden rounded-3xl aspect-[4/5] max-w-md mx-auto border border-border shadow-2xl">
+            <div className="relative overflow-hidden rounded-2xl aspect-[4/5] max-w-md mx-auto border border-border shadow-2xl">
               <Image
                 src="/images/heroes/hero.webp"
                 alt="Sagar Lad"
@@ -473,7 +473,7 @@ export default function AboutPage() {
                     <div
                       key={r.race}
                       data-reveal
-                      className="rounded-3xl border border-border bg-background p-6 text-center hover:border-brand-light/60 hover:shadow-xl transition-all duration-300"
+                      className="rounded-2xl border border-border bg-background p-6 text-center hover:border-brand-light/60 hover:shadow-xl transition-all duration-300"
                     >
                       <div className="mx-auto w-12 h-12 rounded-xl bg-brand-light/15 grid place-items-center text-brand">
                         <Icon className="w-6 h-6" />

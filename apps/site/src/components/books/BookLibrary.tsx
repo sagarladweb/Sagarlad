@@ -156,7 +156,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                     className="object-contain drop-shadow-xl transition-transform duration-500 group-hover:-translate-y-1.5"
                   />
                 ) : (
-                  <div className="grid h-full w-full place-items-center rounded-3xl bg-muted p-6">
+                  <div className="grid h-full w-full place-items-center rounded-2xl bg-muted p-6">
                     <span className="font-display font-bold text-muted-foreground">{book.title}</span>
                   </div>
                 )}
@@ -270,7 +270,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
             role="dialog"
             aria-modal="true"
             aria-label={active.title}
-            className="relative grid w-full max-w-3xl max-h-[85vh] grid-cols-1 overflow-y-auto rounded-3xl border border-border bg-background shadow-2xl sm:grid-cols-2"
+            className="relative grid w-full max-w-3xl max-h-[85vh] grid-cols-1 overflow-y-auto rounded-2xl border border-border bg-background shadow-2xl sm:grid-cols-2"
           >
             <button
               type="button"
@@ -293,7 +293,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   />
                 </div>
               ) : (
-                <div className="grid aspect-[3/4] w-full max-w-[280px] place-items-center rounded-3xl bg-muted p-6">
+                <div className="grid aspect-[3/4] w-full max-w-[280px] place-items-center rounded-2xl bg-muted p-6">
                   <span className="font-display font-bold text-muted-foreground">{active.title}</span>
                 </div>
               )}
@@ -375,7 +375,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
             role="dialog"
             aria-modal="true"
             aria-label="Download eBook"
-            className="relative w-full max-w-md rounded-3xl border border-border bg-background p-8 shadow-2xl"
+            className="relative w-full max-w-md rounded-2xl border border-border bg-background p-8 shadow-2xl"
           >
             <button
               type="button"

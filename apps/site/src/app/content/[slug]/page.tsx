@@ -73,7 +73,7 @@ export default async function ContentCategoryPage({
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group relative aspect-square overflow-hidden rounded-3xl border border-border bg-muted"
+                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
