@@ -68,7 +68,7 @@ export default async function AdminPanelLayout({
           <span className="font-display font-bold text-base truncate">Sagar Lad Admin</span>
         </span>
         <div className="flex items-center gap-2">
-          <Link href="/" className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="View site">
+          <Link href="https://www.sagarlad.com" target="_blank" className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="View site">
             <ExternalLink className="w-4 h-4" />
           </Link>
           <SignOutButton />
