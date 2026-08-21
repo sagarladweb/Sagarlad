@@ -76,7 +76,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               aria-pressed={days === r.days}
               className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
                 days === r.days
-                  ? "bg-accent text-accent-foreground shadow-sm"
+                  ? "bg-foreground text-background shadow-sm"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

@@ -111,7 +111,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "all"
-                ? "bg-accent text-accent-foreground shadow-sm"
+                ? "bg-foreground text-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -124,7 +124,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "published"
-                ? "bg-accent text-accent-foreground shadow-sm"
+                ? "bg-foreground text-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -137,7 +137,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
             }}
             className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
               filter === "draft"
-                ? "bg-accent text-accent-foreground shadow-sm"
+                ? "bg-foreground text-background shadow-sm"
                 : "text-muted-foreground hover:text-foreground"
             }`}
           >
