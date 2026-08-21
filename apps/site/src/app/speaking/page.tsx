@@ -226,6 +226,106 @@ export default function SpeakingPage() {
         </div>
       </section>
 
+      {/* On Stage — masonry gallery of Sagar on stage */}
+      <section className="border-b border-border bg-muted/30 py-20 md:py-24 overflow-hidden" aria-label="Sagar on stage">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="max-w-2xl mb-10">
+            <span className="text-xs font-bold uppercase tracking-widest text-accent">Gallery</span>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold">On stage, in the moment.</h2>
+            <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
+              Keynotes, workshops, and conversations across summits, universities, and community events.
+            </p>
+          </div>
+
+          {/* Masonry grid — CSS columns for natural layout */}
+          <div className="columns-1 sm:columns-2 lg:columns-3 gap-4 space-y-4">
+            {/* Large featured image — spans full height on larger screens */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-[4/5] bg-muted relative">
+                <Image
+                  src="/images/heroes/speaking.webp"
+                  alt="Sagar Lad delivering a keynote on stage"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <span className="absolute bottom-4 left-4 text-[11px] font-semibold uppercase tracking-widest text-white/90">Scottish Summit</span>
+              </div>
+            </div>
+
+            {/* Medium image */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-square bg-muted relative">
+                <Image
+                  src="/images/heroes/tedx.webp"
+                  alt="Sagar Lad at TEDx"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <span className="absolute bottom-4 left-4 text-[11px] font-semibold uppercase tracking-widest text-white/90">TEDx Talk</span>
+              </div>
+            </div>
+
+            {/* Small image */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-[3/4] bg-muted relative">
+                <Image
+                  src="/images/sagar-author.png"
+                  alt="Sagar Lad portrait"
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                <span className="absolute bottom-4 left-4 text-[11px] font-semibold uppercase tracking-widest text-white/90">Azure Summit</span>
+              </div>
+            </div>
+
+            {/* Placeholder — add real stage photos here */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-[4/3] bg-gradient-to-br from-brand-light/20 to-brand-light/5 border border-border flex items-center justify-center">
+                <div className="text-center space-y-2 p-6">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light/15 text-brand mx-auto grid place-items-center">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v13.5A1.5 1.5 0 003.75 21z" /></svg>
+                  </div>
+                  <p className="text-xs font-semibold text-muted-foreground">Add stage photo</p>
+                  <p className="text-[10px] text-muted-foreground/60">Replace with real image</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Another placeholder */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-square bg-gradient-to-br from-brand-light/20 to-brand-light/5 border border-border flex items-center justify-center">
+                <div className="text-center space-y-2 p-6">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light/15 text-brand mx-auto grid place-items-center">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v13.5A1.5 1.5 0 003.75 21z" /></svg>
+                  </div>
+                  <p className="text-xs font-semibold text-muted-foreground">Add workshop photo</p>
+                  <p className="text-[10px] text-muted-foreground/60">Replace with real image</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Another placeholder */}
+            <div className="break-inside-avoid rounded-3xl overflow-hidden relative group">
+              <div className="aspect-[3/4] bg-gradient-to-br from-brand-light/20 to-brand-light/5 border border-border flex items-center justify-center">
+                <div className="text-center space-y-2 p-6">
+                  <div className="w-10 h-10 rounded-xl bg-brand-light/15 text-brand mx-auto grid place-items-center">
+                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3.75 21h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v13.5A1.5 1.5 0 003.75 21z" /></svg>
+                  </div>
+                  <p className="text-xs font-semibold text-muted-foreground">Add campus photo</p>
+                  <p className="text-[10px] text-muted-foreground/60">Replace with real image</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Stages & Credentials — visually rich unified grid section */}
       <section className="border-b border-border bg-background py-20 md:py-24" aria-label="Stages and Credentials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">

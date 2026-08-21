@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, TrendingUp, Users, Eye } from "lucide-react";
 import { getPublishedBooks } from "@/lib/content";
 import { pageMetadata } from "@/lib/site";
+import { METRICS } from "@/lib/metrics";
 import { BookLibrary } from "@/components/books/BookLibrary";
 
 export const metadata: Metadata = pageMetadata({
@@ -106,6 +107,23 @@ export default async function BooksPage() {
               <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-[#3F88C5]">
                 Author · Investor · Public Speaker
               </p>
+            </div>
+
+            {/* Metric stats */}
+            <div className="mt-10 grid grid-cols-3 gap-3 rounded-2xl border border-border bg-background/80 backdrop-blur p-4 sm:p-6 divide-x divide-border">
+              {[
+                { icon: TrendingUp, value: METRICS.booksSold, label: "Books sold" },
+                { icon: Users, value: METRICS.bookReaders, label: "Readers worldwide" },
+                { icon: Eye, value: METRICS.communityReached, label: "Community reached" },
+              ].map((s) => (
+                <div key={s.label} className="flex flex-col items-center text-center px-2 sm:px-4">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-[#3F88C5]/15 text-[#3F88C5] flex items-center justify-center mb-2">
+                    <s.icon className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                  </div>
+                  <p className="font-display text-lg sm:text-2xl font-extrabold tracking-tight tabular-nums">{s.value}</p>
+                  <p className="mt-1 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">{s.label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>

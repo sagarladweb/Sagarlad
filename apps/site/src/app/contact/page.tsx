@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, CheckCircle2, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, AlertCircle, Mail, MapPin } from "lucide-react";
 import { validateContact, sanitizeText } from "@/lib/client-validators";
 import { SocialLinks } from "@/components/SocialLinks";
 
@@ -88,9 +88,8 @@ export default function ContactPage() {
 
   return (
     <>
-      {/* Clean minimal header — white, blue accent eyebrow + highlight */}
-      <section className="border-b border-border bg-background py-16 sm:py-24">
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-4">
+      <section className="border-b border-border bg-background py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-widest text-brand">
             Get In Touch
           </span>
@@ -103,110 +102,150 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-4xl px-4 sm:px-6 py-16 flex flex-col lg:grid lg:grid-cols-12 gap-12">
-        <div className="lg:col-span-5">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 md:py-16 grid md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] gap-10 lg:gap-14">
+        {/* Left — form */}
+        <div>
           <h2 className="font-display text-xl font-bold">Direct &amp; Personal</h2>
           <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
             Every message goes straight to Sagar. I read every note and reply within 3–5 days.
           </p>
-        </div>
 
-        <form
-          onSubmit={onSubmit}
-          className="lg:col-span-7 rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-5 shadow-sm"
-          noValidate
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <form
+            onSubmit={onSubmit}
+            className="mt-8 rounded-3xl border border-border bg-card p-6 sm:p-8 space-y-5 shadow-sm"
+            noValidate
+          >
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label htmlFor="firstName" className="block text-sm font-medium mb-1.5">
+                  First name *
+                </label>
+                <input
+                  id="firstName"
+                  value={form.firstName}
+                  onChange={(e) => update("firstName", e.target.value)}
+                  maxLength={80}
+                  autoComplete="given-name"
+                  className={input(!!errors.firstName)}
+                  required
+                />
+                {fieldError("firstName")}
+              </div>
+              <div>
+                <label htmlFor="lastName" className="block text-sm font-medium mb-1.5">
+                  Last name
+                </label>
+                <input
+                  id="lastName"
+                  value={form.lastName}
+                  onChange={(e) => update("lastName", e.target.value)}
+                  maxLength={80}
+                  autoComplete="family-name"
+                  className={input(!!errors.lastName)}
+                />
+                {fieldError("lastName")}
+              </div>
+            </div>
+
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium mb-1.5">
-                First name *
+              <label htmlFor="email" className="block text-sm font-medium mb-1.5">
+                Email address *
               </label>
               <input
-                id="firstName"
-                value={form.firstName}
-                onChange={(e) => update("firstName", e.target.value)}
-                maxLength={80}
-                autoComplete="given-name"
-                className={input(!!errors.firstName)}
+                id="email"
+                type="email"
+                value={form.email}
+                onChange={(e) => update("email", e.target.value)}
+                maxLength={100}
+                autoComplete="email"
+                className={input(!!errors.email)}
                 required
               />
-              {fieldError("firstName")}
+              {fieldError("email")}
             </div>
+
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium mb-1.5">
-                Last name
+              <label htmlFor="message" className="block text-sm font-medium mb-1.5">
+                Your message *
               </label>
-              <input
-                id="lastName"
-                value={form.lastName}
-                onChange={(e) => update("lastName", e.target.value)}
-                maxLength={80}
-                autoComplete="family-name"
-                className={input(!!errors.lastName)}
+              <textarea
+                id="message"
+                value={form.message}
+                onChange={(e) => update("message", e.target.value)}
+                maxLength={2000}
+                className={`${input(!!errors.message)} resize-y`}
+                rows={5}
+                placeholder="What's on your mind?"
+                required
               />
-              {fieldError("lastName")}
+              {fieldError("message")}
+            </div>
+
+            <button
+              type="submit"
+              disabled={state === "loading"}
+              className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity shadow-md"
+            >
+              {state === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
+              Send Message
+            </button>
+
+            {state === "success" && (
+              <p className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+                <CheckCircle2 className="w-4 h-4 shrink-0" /> {message}
+              </p>
+            )}
+            {state === "error" && (
+              <p className="flex items-center gap-1.5 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 shrink-0" /> {message}
+              </p>
+            )}
+          </form>
+        </div>
+
+        {/* Right — info sidebar */}
+        <aside className="flex flex-col gap-5">
+          <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#3F88C5]/15 text-[#3F88C5] grid place-items-center shrink-0">
+                <Mail className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Email</p>
+                <a href="mailto:contact@sagarlad.com" className="text-sm font-medium text-foreground hover:text-[#3F88C5] transition-colors">
+                  contact@sagarlad.com
+                </a>
+              </div>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            <div className="flex items-start gap-3">
+              <div className="w-9 h-9 rounded-xl bg-[#3F88C5]/15 text-[#3F88C5] grid place-items-center shrink-0">
+                <MapPin className="w-4 h-4" />
+              </div>
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Based in</p>
+                <p className="text-sm font-medium text-foreground">Mumbai, India</p>
+              </div>
             </div>
           </div>
 
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium mb-1.5">
-              Email address *
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={form.email}
-              onChange={(e) => update("email", e.target.value)}
-              maxLength={100}
-              autoComplete="email"
-              className={input(!!errors.email)}
-              required
-            />
-            {fieldError("email")}
+          <div className="rounded-2xl border border-border bg-card p-6">
+            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Connect</h3>
+            <SocialLinks order={["instagram", "linkedin", "youtube"]} />
           </div>
 
-          <div>
-            <label htmlFor="message" className="block text-sm font-medium mb-1.5">
-              Your message *
-            </label>
-            <textarea
-              id="message"
-              value={form.message}
-              onChange={(e) => update("message", e.target.value)}
-              maxLength={2000}
-              className={`${input(!!errors.message)} resize-y`}
-              rows={5}
-              placeholder="What's on your mind?"
-              required
-            />
-            {fieldError("message")}
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <h3 className="font-semibold text-foreground text-sm mb-1">Response time</h3>
+            <p className="text-sm text-muted-foreground">I typically reply within 24–48 hours.</p>
           </div>
 
-          <button
-            type="submit"
-            disabled={state === "loading"}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity shadow-md"
-          >
-            {state === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
-            Send Message
-          </button>
-
-          {state === "success" && (
-            <p className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
-              <CheckCircle2 className="w-4 h-4 shrink-0" /> {message}
-            </p>
-          )}
-          {state === "error" && (
-            <p className="flex items-center gap-1.5 text-sm text-red-600">
-              <AlertCircle className="w-4 h-4 shrink-0" /> {message}
-            </p>
-          )}
-        </form>
-
-        <div className="lg:col-span-5 lg:border-t lg:border-border lg:pt-4">
-          <h2 className="font-display text-base font-bold mb-3">Connect on socials</h2>
-          <SocialLinks />
-        </div>
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <h3 className="font-semibold text-foreground text-sm mb-1">Availability</h3>
+            <p className="text-sm text-muted-foreground">Open to speaking, consulting and collaboration conversations.</p>
+          </div>
+        </aside>
       </div>
     </>
   );
