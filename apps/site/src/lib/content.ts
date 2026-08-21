@@ -2,7 +2,6 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { isInstagramUrl } from "@/lib/instagram";
-import { sanitizeHtml } from "@/lib/sanitize";
 
 // Blog posts are deliberately NOT wrapped in unstable_cache here: they carry
 // Date fields that unstable_cache would stringify, and the post pages already
@@ -71,7 +70,7 @@ export const getPublishedVideos = unstable_cache(
       return rows
         .map((v) => ({
           ...v,
-          content: v.content ? sanitizeHtml(v.content) : null,
+          content: v.content,
         }))
         .filter((v) =>
           platform

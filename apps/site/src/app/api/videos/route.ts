@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, dbSafe } from "@/lib/db";
 import { isInstagramUrl } from "@/lib/instagram";
-import { sanitizeHtml } from "@/lib/sanitize";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -36,15 +35,10 @@ export async function GET(request: Request) {
       []
     );
 
-    const normalized = all.map((v) => ({
-      ...v,
-      content: v.content ? sanitizeHtml(v.content) : null,
-    }));
-
     const filtered =
       platform === "youtube" || platform === "instagram"
-        ? normalized.filter((v) => (platform === "instagram" ? isInstagramUrl(v.embedUrl) : !isInstagramUrl(v.embedUrl)))
-        : normalized;
+        ? all.filter((v) => (platform === "instagram" ? isInstagramUrl(v.embedUrl) : !isInstagramUrl(v.embedUrl)))
+        : all;
 
     const start = cursor ? filtered.findIndex((v) => v.id === cursor) + 1 : 0;
     const page = filtered.slice(start, start + limit);

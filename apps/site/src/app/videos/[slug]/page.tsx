@@ -6,7 +6,6 @@ import { getPublishedVideoBySlug } from "@/lib/content";
 import { pageMetadata, formatDate } from "@/lib/site";
 import { youtubeThumb } from "@/lib/youtube";
 import { normalizeVideoUrl, platformFromUrl, type VideoPlatform } from "@/lib/video";
-import { sanitizeHtml } from "@/lib/sanitize";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 
 export const revalidate = 604800;
@@ -28,7 +27,7 @@ export default async function VideoArticlePage({
   const platform: VideoPlatform = norm?.platform ?? platformFromUrl(embedId);
   const thumb = video.thumbnail ?? youtubeThumb(embedId);
   const hasText = (video.content ?? "").trim().length > 0;
-  const content = video.content ? sanitizeHtml(video.content) : "";
+  const content = video.content ?? "";
   const layout = (video.layout as "video-first" | "text-first" | "split") ?? "video-first";
 
   const videoPlayer = (

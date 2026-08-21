@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma, dbSafe } from "@/lib/db";
 import { commentSchema } from "@/lib/validations";
-import { sanitizeHtml } from "@/lib/sanitize";
 import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
+
+/** Strip HTML tags and trim — lightweight, no jsdom dependency. */
+function stripTags(s: string): string {
+  return s.replace(/<[^>]*>/g, "").trim();
+}
 
 export async function GET(request: Request) {
   try {
@@ -73,9 +77,9 @@ export async function POST(request: Request) {
       () =>
         prisma.comment.create({
           data: {
-            name: sanitizeHtml(parsed.data.name),
-            email: parsed.data.email ? sanitizeHtml(parsed.data.email) : null,
-            content: sanitizeHtml(parsed.data.content),
+            name: stripTags(parsed.data.name),
+            email: parsed.data.email ? stripTags(parsed.data.email) : null,
+            content: stripTags(parsed.data.content),
             ip: clientIp || null,
             userAgent: userAgent || null,
             postId: post.id,
