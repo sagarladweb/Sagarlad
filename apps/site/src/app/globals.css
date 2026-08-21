@@ -17,6 +17,14 @@
   --font-display: var(--font-rethink-sans);
   --font-serif: var(--font-rethink-sans);
   --font-signature: var(--font-great-vibes);
+  /* Radius scale — proportional: small elements = small radius, large = larger */
+  --radius-xs: 0.125rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
 }
 
 :root {
@@ -217,7 +225,7 @@ h6 {
 .tip-content .tip-embed {
   margin: 1.75rem 0;
   border: 1px solid var(--border);
-  border-radius: 0.85rem;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   background: var(--card);
 }
@@ -521,7 +529,7 @@ h6 {
 .prose-editor.ProseMirror code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   background: var(--muted);
-  border-radius: 0.35rem;
+  border-radius: var(--radius-md);
   padding: 0.1rem 0.35rem;
   font-size: 0.85em;
 }

@@ -271,10 +271,10 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
                 <img
                   src={image}
                   alt="Your profile photo"
-                  className="h-24 w-24 rounded-3xl border border-border object-cover"
+                  className="h-24 w-24 rounded-xl border border-border object-cover"
                 />
               ) : (
-                <div className="flex h-24 w-24 items-center justify-center rounded-3xl bg-brand/10 font-display text-3xl font-bold text-brand">
+                <div className="flex h-24 w-24 items-center justify-center rounded-xl bg-brand/10 font-display text-3xl font-bold text-brand">
                   {initials(name || initial.name)}
                 </div>
               )}
