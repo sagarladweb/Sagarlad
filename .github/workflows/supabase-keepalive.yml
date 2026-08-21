@@ -13,5 +13,7 @@ jobs:
       - name: Ping Keep-Alive Endpoint
         run: |
           echo "Pinging production keep-alive endpoint..."
-          curl -sf https://sagarlad-platform-site.vercel.app/api/cron/keepalive || true
-          curl -sf https://sagarlad-platform-admin.vercel.app/api/cron/keepalive || true
+          curl -sf -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://sagarlad-platform-site.vercel.app/api/cron/keepalive" || true
+          curl -sf -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://sagarlad-platform-admin.vercel.app/api/cron/keepalive" || true
