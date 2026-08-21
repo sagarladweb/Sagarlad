@@ -2,8 +2,8 @@ name: Keep Supabase Active
 
 on:
   schedule:
-    # Runs every 3 days at 00:00 UTC
-    - cron: '0 0 */3 * *'
+    # Runs every 2 days at 00:00 UTC — Supabase free-tier pauses after ~7 days
+    - cron: '0 0 */2 * *'
   workflow_dispatch:
 
 jobs:
@@ -13,5 +13,5 @@ jobs:
       - name: Ping Keep-Alive Endpoint
         run: |
           echo "Pinging production keep-alive endpoint..."
-          curl -s https://sagarlad.com/api/cron/keepalive || true
-          curl -s https://admin.sagarlad.com/api/cron/keepalive || true
+          curl -sf https://sagarlad-platform-site.vercel.app/api/cron/keepalive || true
+          curl -sf https://sagarlad-platform-admin.vercel.app/api/cron/keepalive || true

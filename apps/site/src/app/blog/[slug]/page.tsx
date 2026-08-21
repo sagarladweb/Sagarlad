@@ -73,7 +73,7 @@ export default async function PostPage({ params }: Props) {
             ? { categoryId: post.categoryId }
             : { categoryId: null }),
         },
-        select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
+        select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
         orderBy: { publishedAt: "desc" },
         take: 3,
       }),
@@ -87,7 +87,7 @@ export default async function PostPage({ params }: Props) {
             () =>
               prisma.post.findMany({
                 where: { published: true, deletedAt: null, NOT: { id: post.id } },
-                select: { title: true, slug: true, excerpt: true, coverImage: true, content: true, publishedAt: true },
+                select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
                 orderBy: { publishedAt: "desc" },
                 take: 3,
               }),

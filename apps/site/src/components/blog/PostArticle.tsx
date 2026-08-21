@@ -26,7 +26,6 @@ export type RelatedPost = {
   slug: string;
   excerpt: string | null;
   coverImage: string | null;
-  content: string;
   publishedAt: Date;
 };
 
@@ -196,9 +195,11 @@ export function PostArticle({
                   <h3 className="font-display text-sm font-bold leading-snug text-foreground line-clamp-2 group-hover:text-brand transition-colors">
                     {p.title}
                   </h3>
-                  <p className="mt-2 text-[11px] text-muted-foreground">
-                    {readingTime(p.content)} min read
-                  </p>
+                  {p.excerpt && (
+                    <p className="mt-2 text-[11px] text-muted-foreground line-clamp-2">
+                      {p.excerpt}
+                    </p>
+                  )}
                 </div>
               </Link>
             ))}

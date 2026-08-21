@@ -12,7 +12,7 @@ import { sanitizeHtml } from "@/lib/sanitize";
 export const getPostBySlug = cache((slug: string) =>
   prisma.post.findUnique({
     where: { slug, deletedAt: null },
-    include: { category: true, author: true },
+    include: { category: { select: { id: true, name: true, slug: true } }, author: { select: { name: true } } },
   })
 );
 
