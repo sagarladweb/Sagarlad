@@ -504,7 +504,7 @@ export default function AboutPage() {
             I&apos;m active on YouTube, LinkedIn, and C# Corner. Reach out for
             speaking, book discussions, or tech advice.
           </p>
-          <div data-reveal className="flex justify-center gap-4 flex-wrap pt-2">
+          <div data-reveal className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
             <Link
               href="/contact"
               className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 transition-opacity shadow-lg"
