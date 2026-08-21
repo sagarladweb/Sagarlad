@@ -58,7 +58,7 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-center py-32">
-        <div className="max-w-3xl space-y-6">
+        <div className="max-w-3xl space-y-6 text-center mx-auto sm:text-left sm:mx-0">
           <p
             data-hero-sub
             className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-accent"
@@ -84,7 +84,7 @@ export function Hero() {
             Strengthen your mind, rise beyond your limits, succeed with
             purpose, and lift others.
           </p>
-          <div data-hero-cta className="flex flex-wrap items-center gap-3">
+          <div data-hero-cta className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
             <Link
               href="/books"
               className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold hover:opacity-90 transition-opacity"

@@ -198,7 +198,7 @@ export function AboutMe() {
             </div>
 
             {/* Footer Action */}
-            <div className="pt-2">
+            <div className="pt-2 text-center sm:text-left">
               <Link
                 href="/about"
                 className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3.5 text-sm font-semibold hover:opacity-95 transition-opacity shadow-lg"

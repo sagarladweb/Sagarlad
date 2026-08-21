@@ -112,7 +112,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
               </div>
             </div>
 
-            <div className="w-full md:flex-1 text-left">
+            <div className="w-full md:flex-1 text-center md:text-left">
               <p className="text-[10px] font-semibold uppercase tracking-wider text-accent-strong">
                 {book.tagline ?? "The flagship book"}
               </p>
@@ -126,7 +126,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
               <div className="mt-7 inline-block">
                 <SiteLogo className="h-9 w-auto" />
               </div>
-              <div className="mt-4 flex flex-wrap items-center gap-4">
+              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 md:justify-start">
                 <a
                   href={book.buyUrl ?? "/books"}
                   target="_blank"
