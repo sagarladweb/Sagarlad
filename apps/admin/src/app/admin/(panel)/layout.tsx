@@ -14,7 +14,7 @@ import {
 import { auth } from "@/lib/auth";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
-import { MobileNavItem } from "@/components/admin/MobileNavItem";
+import { MobileNav } from "@/components/admin/MobileNav";
 import { ToastContainer } from "@/components/admin/Toast";
 import { ConfirmContainer } from "@/components/admin/ConfirmDialog";
 import { OfflineSync } from "@/components/admin/OfflineSync";
@@ -82,14 +82,7 @@ export default async function AdminPanelLayout({
       </main>
 
       {/* Mobile bottom nav */}
-      <nav
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border flex items-center gap-1 px-3 py-2 overflow-x-auto no-scrollbar scroll-smooth shadow-lg"
-        aria-label="Admin mobile navigation"
-      >
-        {nav.map((item) => (
-          <MobileNavItem key={item.href} href={item.href} label={item.label} icon={item.icon} />
-        ))}
-      </nav>
+      <MobileNav items={nav.map(({ label, href }) => ({ label, href }))} />
     </div>
   );
 }
