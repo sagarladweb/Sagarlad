@@ -151,16 +151,17 @@ export default function MentorshipPage() {
           <TestimonialCarousel items={TESTIMONIALS} />
         </section>
 
-        {/* ── Booking widget — raw iframe ── */}
+        {/* ── Booking widget ── */}
         <section id="book">
           <h2 className="font-display text-2xl font-bold mb-6">Book a session</h2>
-          <div className="rounded-2xl border border-border bg-card overflow-hidden">
+          <div className="rounded-2xl border border-border bg-card">
             <iframe
               src="https://topmate.io/embed/profile/sagar_lad"
               title="Book a mentorship session with Sagar Lad"
               className="w-full border-0"
-              style={{ height: "700px" }}
+              style={{ height: "min(700px, 80vh)" }}
               loading="lazy"
+              scrolling="yes"
             />
           </div>
         </section>
