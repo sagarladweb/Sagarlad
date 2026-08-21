@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight, MapPin, ChevronDown } from "lucide-react";
 import { pageMetadata } from "@/lib/site";
+import TestimonialCarousel from "@/components/TestimonialCarousel";
 
 export const metadata: Metadata = pageMetadata({
   title: "Mentorship",
@@ -80,11 +81,10 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export default function MentorshipPage() {
   return (
     <div className="bg-background">
-      {/* ── Hero — profile card style ── */}
+      {/* ── Hero ── */}
       <section className="border-b border-border bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
           <div className="flex flex-col items-center text-center">
-            {/* Portrait */}
             <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden ring-4 ring-border mb-6">
               <Image
                 src="/images/sagar-author.png"
@@ -95,7 +95,6 @@ export default function MentorshipPage() {
                 priority
               />
             </div>
-            {/* Name + meta */}
             <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
               Sagar Lad
             </h1>
@@ -146,45 +145,27 @@ export default function MentorshipPage() {
           </div>
         </section>
 
-        {/* ── Testimonials ── */}
+        {/* ── Testimonials — auto-scroll carousel ── */}
         <section>
           <h2 className="font-display text-2xl font-bold mb-8">What people say</h2>
-          <div className="space-y-4">
-            {TESTIMONIALS.map((t) => (
-              <blockquote
-                key={t.name}
-                className="rounded-2xl border border-border bg-card p-5 sm:p-6"
-              >
-                <p className="text-sm leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
-                <footer className="mt-3 text-xs text-muted-foreground">
-                  <strong className="text-foreground font-medium">{t.name}</strong> · {t.role}
-                </footer>
-              </blockquote>
-            ))}
-          </div>
+          <TestimonialCarousel items={TESTIMONIALS} />
         </section>
 
-        {/* ── Booking widget — minimal ── */}
+        {/* ── Booking widget — raw iframe ── */}
         <section id="book">
           <h2 className="font-display text-2xl font-bold mb-6">Book a session</h2>
           <div className="rounded-2xl border border-border bg-card overflow-hidden">
-            <div className="relative" style={{ height: "680px" }}>
-              <iframe
-                src="https://topmate.io/embed/profile/sagar_lad"
-                title="Book a mentorship session with Sagar Lad"
-                className="absolute inset-0 w-full h-full border-0"
-                style={{
-                  clipPath: "inset(0 0 60px 0)",
-                  filter: "hue-rotate(230deg) saturate(0.85)",
-                }}
-                loading="lazy"
-                allowFullScreen
-              />
-            </div>
+            <iframe
+              src="https://topmate.io/embed/profile/sagar_lad"
+              title="Book a mentorship session with Sagar Lad"
+              className="w-full border-0"
+              style={{ height: "700px" }}
+              loading="lazy"
+            />
           </div>
         </section>
 
-        {/* ── FAQ — collapsible ── */}
+        {/* ── FAQ ── */}
         <section>
           <h2 className="font-display text-2xl font-bold mb-6">FAQ</h2>
           <div className="space-y-3">
