@@ -8,8 +8,6 @@ import {
   Shield,
   ChevronLeft,
   CheckCircle2,
-
-  LogOut,
   ArrowRight,
   Mail,
   Lock,
@@ -17,7 +15,7 @@ import {
   EyeOff,
   KeyRound,
 } from "lucide-react";
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { SessionProvider } from "@/components/SessionProvider";
 import { PHASE_1 } from "@/lib/phase";
 
@@ -128,17 +126,24 @@ function AdminLogin() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
 
+  // Target panel destination based on active Phase
+  const targetRoute = PHASE_1 ? "/admin/posts" : "/admin/dashboard";
+
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Already logged in — go straight to the admin panel, no intermediate card.
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push(targetRoute);
+    }
+  }, [status, router, targetRoute]);
 
   const hour = new Date().getHours();
   const rawGreeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const timeOfDayGreeting = mounted ? rawGreeting : "Welcome";
-
-  // Target panel destination based on active Phase
-  const targetRoute = PHASE_1 ? "/admin/posts" : "/admin/dashboard";
 
   function adminMessage(): string {
     return step === "otp"
@@ -347,35 +352,16 @@ function AdminLogin() {
                 </span>
               </div>
 
-              {status === "authenticated" && session?.user ? (
-                /* ---- Active Session Card ---- */
+              {status === "authenticated" ? (
+                /* ---- Already logged in: redirect in progress ---- */
                 <div className="mt-6 space-y-5 animate-fade-in">
-                  <div className="rounded-2xl border border-accent/30 bg-accent/10 p-4 text-accent">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle2 className="h-5 w-5 shrink-0" />
-                      <p className="text-xs font-bold uppercase tracking-wider">Active Session Detected</p>
+                  <div className="flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4">
+                    <Loader2 className="h-5 w-5 shrink-0 animate-spin text-accent" />
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wider text-accent">Signed in as {session?.user?.name || "Sagar Lad"}</p>
+                      <p className="text-xs text-muted-foreground">Redirecting to admin panel…</p>
                     </div>
-                    <p className="mt-2 text-sm font-semibold text-foreground">
-                      Signed in as {session.user.name || "Sagar Lad"}
-                    </p>
-                    <p className="text-xs text-muted-foreground">{session.user.email}</p>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() => router.push(targetRoute)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all hover:opacity-90 active:scale-[0.99] shadow-md shadow-accent/20"
-                  >
-                    Continue to Admin Suite <ArrowRight className="h-4 w-4" />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => signOut({ callbackUrl: "/admin" })}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-border px-6 py-2.5 text-xs font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-                  >
-                    <LogOut className="h-3.5 w-3.5" /> Sign out &amp; switch account
-                  </button>
                 </div>
               ) : (
                 /* ---- Credentials / OTP Form ---- */
