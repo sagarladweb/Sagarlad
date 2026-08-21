@@ -242,7 +242,7 @@ export function NewsletterComposer({
                   title={a.name}
                   className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold transition-colors ${
                     content.accent === a.value
-                      ? "bg-background shadow-sm"
+                      ? "bg-accent text-accent-foreground shadow-sm"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
