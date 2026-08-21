@@ -15,6 +15,7 @@ import {
   Settings,
   type LucideIcon,
 } from "lucide-react";
+import { CommunityBadge } from "./CommunityBadge";
 
 const ICONS: Record<string, LucideIcon> = {
   "/admin/dashboard": LayoutDashboard,
@@ -110,6 +111,7 @@ export function AdminSidebar({
               aria-current={active ? "page" : undefined}
             >
               <Icon className="w-5 h-5 shrink-0" />
+              {item.href === "/admin/moderation" && <CommunityBadge />}
               <span className={labelCls}>{item.label}</span>
             </Link>
           );

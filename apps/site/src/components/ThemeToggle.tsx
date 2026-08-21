@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-const STORAGE_KEY = "admin-theme";
+const STORAGE_KEY = "site-theme";
 
 function isNightTime(): boolean {
   const hour = new Date().getHours();
@@ -20,7 +20,6 @@ function apply(theme: "dark" | "light") {
 
 export function ThemeToggle() {
   useEffect(() => {
-    // Determine initial theme: saved preference > time-based auto
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved === "dark" || saved === "light") {
@@ -32,7 +31,6 @@ export function ThemeToggle() {
       apply(isNightTime() ? "dark" : "light");
     }
 
-    // Check every 5 minutes and auto-switch if user hasn't manually set a preference
     const interval = setInterval(() => {
       try {
         const saved = localStorage.getItem(STORAGE_KEY);
