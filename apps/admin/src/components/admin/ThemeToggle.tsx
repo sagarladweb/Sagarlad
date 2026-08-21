@@ -45,7 +45,7 @@ export function ThemeToggle() {
     }, 5 * 60 * 1000);
 
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key.toLowerCase() !== "t" || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!e.key || e.key.toLowerCase() !== "t" || e.ctrlKey || e.metaKey || e.altKey) return;
       const el = e.target as HTMLElement | null;
       if (!el) return;
       const tag = el.tagName;
