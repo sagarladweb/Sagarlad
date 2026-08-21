@@ -83,7 +83,7 @@ export default function MentorshipPage() {
     <div className="bg-background overflow-x-clip">
       {/* ── Hero ── */}
       <section className="border-b border-border bg-background">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
+        <div className="max-w-3xl mx-auto px-5 sm:px-6 py-14 sm:py-20 md:py-24">
           <div className="flex flex-col items-center text-center">
             <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden ring-4 ring-border mb-6">
               <Image
@@ -98,10 +98,10 @@ export default function MentorshipPage() {
             <h1 className="font-display text-3xl sm:text-4xl font-bold tracking-tight">
               Sagar Lad
             </h1>
-            <p className="mt-2 text-muted-foreground text-sm sm:text-base max-w-md">
+            <p className="mt-3 text-muted-foreground text-sm sm:text-base max-w-md leading-relaxed">
               Author, keynote speaker and mentor. I help professionals make better career, money and life decisions.
             </p>
-            <div className="flex items-center gap-2 mt-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
               <MapPin className="w-3.5 h-3.5" />
               Mumbai, India
             </div>
@@ -117,8 +117,8 @@ export default function MentorshipPage() {
 
       {/* ── Social proof ── */}
       <section className="border-b border-border bg-muted/30">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 py-5">
-          <div className="flex items-center justify-center gap-6 sm:gap-10 text-center text-xs text-muted-foreground">
+        <div className="max-w-3xl mx-auto px-5 sm:px-6 py-5">
+          <div className="flex items-center justify-center gap-5 sm:gap-10 text-center text-xs text-muted-foreground">
             <span><strong className="text-foreground font-semibold">50+</strong> mentees</span>
             <span className="h-1 w-1 rounded-full bg-border" />
             <span><strong className="text-foreground font-semibold">100%</strong> satisfaction</span>
@@ -128,10 +128,10 @@ export default function MentorshipPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 space-y-16">
+      <div className="mx-auto max-w-3xl px-5 sm:px-6 py-14 sm:py-20 space-y-14 sm:space-y-20">
         {/* ── How it works ── */}
         <section>
-          <h2 className="font-display text-2xl font-bold mb-8">How it works</h2>
+          <h2 className="font-display text-2xl font-bold mb-6 sm:mb-8">How it works</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {STEPS.map((s) => (
               <div key={s.n} className="rounded-2xl border border-border bg-card p-5">
@@ -147,14 +147,14 @@ export default function MentorshipPage() {
 
         {/* ── Testimonials — auto-scroll carousel ── */}
         <section>
-          <h2 className="font-display text-2xl font-bold mb-8">What people say</h2>
+          <h2 className="font-display text-2xl font-bold mb-6 sm:mb-8">What people say</h2>
           <TestimonialCarousel items={TESTIMONIALS} />
         </section>
 
         {/* ── Booking widget ── */}
         <section id="book">
-          <h2 className="font-display text-2xl font-bold mb-6">Book a session</h2>
-          <div className="rounded-2xl border border-border bg-card">
+          <h2 className="font-display text-2xl font-bold mb-5 sm:mb-6">Book a session</h2>
+          <div className="rounded-2xl border border-border bg-card overflow-hidden">
             <iframe
               src="https://topmate.io/embed/profile/sagar_lad"
               title="Book a mentorship session with Sagar Lad"
@@ -168,7 +168,7 @@ export default function MentorshipPage() {
 
         {/* ── FAQ ── */}
         <section>
-          <h2 className="font-display text-2xl font-bold mb-6">FAQ</h2>
+          <h2 className="font-display text-2xl font-bold mb-5 sm:mb-6">FAQ</h2>
           <div className="space-y-3">
             {FAQ.map((f) => (
               <FaqItem key={f.q} q={f.q} a={f.a} />
@@ -177,7 +177,7 @@ export default function MentorshipPage() {
         </section>
 
         {/* ── Final CTA ── */}
-        <section className="text-center py-6">
+        <section className="text-center py-4 sm:py-6">
           <p className="text-muted-foreground text-sm">
             Thirty minutes. One conversation. A clear path ahead.
           </p>

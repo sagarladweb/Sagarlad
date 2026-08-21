@@ -174,7 +174,7 @@ export default function AboutPage() {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="lg:col-span-7 space-y-6">
+            <div className="order-2 lg:order-none lg:col-span-7 space-y-6">
               <span
                 data-reveal
                 className="inline-flex items-center rounded-full bg-brand-light/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand"
@@ -209,7 +209,7 @@ export default function AboutPage() {
             </div>
 
             {/* Visual Portrait */}
-            <div data-reveal className="lg:col-span-5 relative">
+            <div data-reveal className="order-1 lg:order-none lg:col-span-5 relative">
               <div className="relative max-w-md mx-auto">
                 <div aria-hidden="true" className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/20 to-brand-light/10 blur-2xl opacity-75" />
                 <figure className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-border shadow-2xl bg-card">

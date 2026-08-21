@@ -140,7 +140,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
       ) : (
         <div className="grid grid-cols-2 gap-x-6 gap-y-12 lg:grid-cols-3">
           {paged.map((book) => (
-            <article key={book.id} className="group flex flex-col text-center">
+            <article key={book.id} className="group flex h-full flex-col text-center">
               <button
                 type="button"
                 onClick={() => setActive(book)}
@@ -191,28 +191,30 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                 )
               )}
 
-              {variant === "ebook" ? (
-                <button
-                  type="button"
-                  onClick={() => openDownload(book)}
-                  className="mt-5 inline-flex items-center justify-center gap-2 self-center rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
-                >
-                  <Download className="h-4 w-4" />
-                  Download
-                </button>
-              ) : variant === "read" ? null : (
-                <a
-                  href={book.buyUrl ?? "#"}
-                  data-no-modal
-                  onClick={(e) => !book.buyUrl && e.preventDefault()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-5 inline-flex items-center justify-center gap-2 self-center rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
-                >
-                  <ShoppingBag className="h-4 w-4" />
-                  {ctaLabel()}
-                </a>
-              )}
+              <div className="mt-auto pt-4">
+                {variant === "ebook" ? (
+                  <button
+                    type="button"
+                    onClick={() => openDownload(book)}
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </button>
+                ) : variant === "read" ? null : (
+                  <a
+                    href={book.buyUrl ?? "#"}
+                    data-no-modal
+                    onClick={(e) => !book.buyUrl && e.preventDefault()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+                  >
+                    <ShoppingBag className="h-4 w-4" />
+                    {ctaLabel()}
+                  </a>
+                )}
+              </div>
             </article>
           ))}
         </div>
