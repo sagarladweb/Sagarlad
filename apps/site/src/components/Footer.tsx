@@ -27,6 +27,7 @@ const footerCols: { title: string; links: { label: string; href: string; externa
       { label: "Mentorship", href: "/mentorship" },
       { label: "Newsletter", href: "/newsletter" },
       { label: "Speaking", href: "/speaking" },
+      { label: "Socials", href: "/socials" },
       { label: "Privacy", href: "/privacy" },
       { label: "Terms", href: "/terms" },
     ],

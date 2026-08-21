@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { Loader2, CheckCircle2, AlertCircle, Mail, MapPin } from "lucide-react";
+import { FaInstagram, FaYoutube, FaLinkedinIn } from "react-icons/fa6";
 import { validateContact, sanitizeText } from "@/lib/client-validators";
-import { SocialLinks } from "@/components/SocialLinks";
 
 const initial = {
   firstName: "",
@@ -18,6 +18,12 @@ type Errors = {
   email?: string;
   message?: string;
 };
+
+const socials = [
+  { label: "Instagram", href: "https://instagram.com/sagarlad", icon: FaInstagram },
+  { label: "YouTube", href: "https://youtube.com/@sagarlad", icon: FaYoutube },
+  { label: "LinkedIn", href: "https://linkedin.com/in/sagarlad", icon: FaLinkedinIn },
+];
 
 export default function ContactPage() {
   const [form, setForm] = useState(initial);
@@ -102,7 +108,7 @@ export default function ContactPage() {
         </div>
       </section>
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-12 md:py-16 grid md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] gap-10 lg:gap-14">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 md:py-16 grid md:grid-cols-[1fr_320px] gap-10 lg:gap-14 items-start">
         {/* Left — form */}
         <div>
           <h2 className="font-display text-xl font-bold">Direct &amp; Personal</h2>
@@ -204,15 +210,15 @@ export default function ContactPage() {
         </div>
 
         {/* Right — info sidebar */}
-        <aside className="flex flex-col gap-5">
+        <aside className="flex flex-col gap-4">
           <div className="rounded-2xl border border-border bg-card p-6 space-y-4">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#3F88C5]/15 text-[#3F88C5] grid place-items-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-brand-light/15 text-brand grid place-items-center shrink-0">
                 <Mail className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-0.5">Email</p>
-                <a href="mailto:contact@sagarlad.com" className="text-sm font-medium text-foreground hover:text-[#3F88C5] transition-colors">
+                <a href="mailto:contact@sagarlad.com" className="text-sm font-medium text-foreground hover:text-brand transition-colors">
                   contact@sagarlad.com
                 </a>
               </div>
@@ -221,7 +227,7 @@ export default function ContactPage() {
             <div className="h-px bg-border" />
 
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-[#3F88C5]/15 text-[#3F88C5] grid place-items-center shrink-0">
+              <div className="w-9 h-9 rounded-xl bg-brand-light/15 text-brand grid place-items-center shrink-0">
                 <MapPin className="w-4 h-4" />
               </div>
               <div>
@@ -231,9 +237,27 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6">
-            <h3 className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-2">Connect</h3>
-            <SocialLinks order={["instagram", "linkedin", "youtube"]} />
+          {/* 3 social links — static */}
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground mb-3">Follow</p>
+            <div className="flex items-center gap-2">
+              {socials.map((s) => {
+                const Icon = s.icon;
+                return (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={s.label}
+                    className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-2.5 text-xs font-medium text-foreground hover:border-brand-light/60 hover:bg-muted/50 transition-all"
+                  >
+                    <Icon className="w-4 h-4 text-muted-foreground" />
+                    <span className="hidden sm:inline">{s.label}</span>
+                  </a>
+                );
+              })}
+            </div>
           </div>
 
           <div className="rounded-2xl border border-border bg-card p-5">
