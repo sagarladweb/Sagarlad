@@ -15,7 +15,7 @@ export default function NotFound() {
           <span className="text-brand">0</span>
           <span aria-hidden="true">4</span>
         </p>
-        <p className="mt-2 font-signature text-3xl text-brand">
+        <p className="mt-2 font-signature text-3xl text-foreground">
           You&apos;re off the map
         </p>
         <h1 className="sr-only">Page not found</h1>

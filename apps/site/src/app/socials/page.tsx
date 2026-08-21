@@ -13,7 +13,7 @@ export default async function SocialsPage() {
   const socials = await getSiteSocials();
 
   return (
-    <>
+    <div className="overflow-x-clip">
       <section className="border-b border-border bg-background py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-widest text-brand">
@@ -31,6 +31,6 @@ export default async function SocialsPage() {
       <section className="mx-auto max-w-3xl px-4 sm:px-6 py-12 md:py-16">
         <SocialsGrid socials={socials} />
       </section>
-    </>
+    </div>
   );
 }

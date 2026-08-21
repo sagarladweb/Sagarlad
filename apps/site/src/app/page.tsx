@@ -23,7 +23,7 @@ export default async function HomePage() {
           where: { published: true, deletedAt: null },
           include: { category: true },
           orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-          take: 3,
+          take: 4,
         }),
       []
     ),

@@ -40,8 +40,8 @@ export function FeaturedOn() {
           Featured on
         </p>
 
-        {/* Mobile — seamless marquee, always scrolls left (forward) */}
-        <div className="mt-8 sm:hidden marquee-mask overflow-hidden">
+        {/* Mobile + Tablet — seamless marquee */}
+        <div className="mt-8 lg:hidden marquee-mask overflow-hidden">
           <div
             className="flex w-max gap-6 animate-marquee py-2 hover:[animation-play-state:paused]"
             style={{ animationDuration: "30s" }}
@@ -53,7 +53,7 @@ export function FeaturedOn() {
         </div>
 
         {/* Desktop — static wrap grid */}
-        <div className="mt-8 hidden sm:flex flex-wrap items-center justify-center gap-x-6 gap-y-6 sm:gap-x-8">
+        <div className="mt-8 hidden lg:flex flex-wrap items-center justify-center gap-x-6 gap-y-6 sm:gap-x-8">
           {PRESS.map((logo) => (
             <Logo key={logo.name} name={logo.name} src={logo.src} />
           ))}

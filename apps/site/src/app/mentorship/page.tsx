@@ -80,7 +80,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 
 export default function MentorshipPage() {
   return (
-    <div className="bg-background">
+    <div className="bg-background overflow-x-clip">
       {/* ── Hero ── */}
       <section className="border-b border-border bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 py-16 sm:py-20">

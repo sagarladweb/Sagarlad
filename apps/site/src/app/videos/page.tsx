@@ -20,7 +20,7 @@ export default async function VideosPage() {
   const videos = await getPublishedVideos(PAGE_SIZE);
 
   return (
-    <>
+    <div className="overflow-x-clip">
       <PageHeader
         eyebrow="Videos"
         title="Learn by watching"
@@ -61,6 +61,6 @@ export default async function VideosPage() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

@@ -20,9 +20,9 @@
 }
 
 :root {
-  --background: #ffffff;
+  --background: #FAFAF8;
   --foreground: #000000;
-  --card: #ffffff;
+  --card: #FAFAF8;
   --card-foreground: #000000;
   --muted: #f4f4f2;
   --muted-foreground: #6b6a63;

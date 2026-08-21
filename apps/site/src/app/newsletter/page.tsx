@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMetadata({
 
 export default function NewsletterPage() {
   return (
-    <>
+    <div className="overflow-x-clip">
       <PageHeader
         eyebrow="Newsletter"
         title="The Sagar Lad Letter"
@@ -63,6 +63,6 @@ export default function NewsletterPage() {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }

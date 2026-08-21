@@ -25,9 +25,9 @@ export default async function BooksPage() {
   const total = books.length;
 
   return (
-    <>
+    <div className="overflow-x-clip">
       {/* -------- MIND UP editorial hero -------- */}
-      <header className="overflow-hidden border-b border-border bg-white text-black">
+      <header className="overflow-hidden border-b border-border bg-background text-black">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-12 lg:gap-10 lg:py-32">
           {/* Portrait — layered over the blue disc */}
           <div className="lg:col-span-5">
@@ -173,6 +173,6 @@ export default async function BooksPage() {
           </a>
         </div>
       </section>
-    </>
+    </div>
   );
 }

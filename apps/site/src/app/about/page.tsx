@@ -385,7 +385,7 @@ export default function AboutPage() {
 
       {/* ---------- Milestones / Chapters ---------- */}
       <section className="py-20 md:py-28 border-b border-border bg-card/30">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="max-w-2xl">
             <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Milestones</span>
             <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
