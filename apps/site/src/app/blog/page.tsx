@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
-import { pageMetadata, formatDate, postCover, SITE } from "@/lib/site";
+import { pageMetadata, formatDate, postCover } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
 
@@ -159,11 +159,16 @@ export default async function BlogPage({
             </p>
             <div className="mt-1.5 flex items-center gap-4 text-sm">
               <Link
-                href={SITE.url}
+                href="https://www.linkedin.com/in/ladsagar"
                 target="_blank"
-                className="font-medium text-accent-strong underline decoration-accent-strong underline-offset-4 hover:opacity-80 transition-opacity"
+                className="inline-flex items-center gap-1 font-medium text-accent-strong underline decoration-accent-strong underline-offset-4 hover:opacity-80 transition-opacity"
               >
-                {SITE.url.replace(/^https?:\/\//, "")}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+                  <rect x="2" y="9" width="4" height="12" />
+                  <circle cx="4" cy="4" r="2" />
+                </svg>
+                LinkedIn
               </Link>
               <Link
                 href="https://www.youtube.com/@Sagarlad692"
