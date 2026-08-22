@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
@@ -84,6 +85,16 @@ export default function RootLayout({
       lang="en"
       className={`${beVietnamPro.variable} ${rethinkSans.variable} ${greatVibes.variable} h-full antialiased`}
     >
+      <Script
+        async
+        src="https://www.googletagmanager.com/gtag/js?id=G-E4FSLTC6RJ"
+      />
+      <Script id="google-analytics">
+        {`window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-E4FSLTC6RJ');`}
+      </Script>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SiteFrame>{children}</SiteFrame>
       </body>
