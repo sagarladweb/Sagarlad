@@ -16,9 +16,11 @@ import {
   Maximize2,
   Minimize2,
   ChevronLeft,
+  CalendarClock,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { SchedulePicker } from "@/components/ui/SchedulePicker";
 import { showToast } from "@/components/admin/Toast";
 import { slugify, stripHtml, SITE } from "@/lib/site";
 import { enqueue } from "@/lib/offline-queue";
@@ -41,6 +43,7 @@ export function PostForm({
     categoryId: string | null;
     featured: boolean;
     published: boolean;
+    scheduledAt: string | null;
   };
 }) {
   const router = useRouter();
@@ -60,6 +63,7 @@ export function PostForm({
     categoryId: initial?.categoryId ?? "",
     featured: initial?.featured ?? false,
     published: initial?.published ?? true,
+    scheduledAt: initial?.scheduledAt ?? "",
   });
   const [message, setMessage] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
@@ -462,7 +466,8 @@ export function PostForm({
     form.coverImage !== (initial?.coverImage ?? "") ||
     form.categoryId !== (initial?.categoryId ?? "") ||
     form.featured !== (initial?.featured ?? false) ||
-    form.published !== (initial?.published ?? true);
+    form.published !== (initial?.published ?? true) ||
+    form.scheduledAt !== (initial?.scheduledAt ?? "");
 
   // Intercept browser back/tab closure when changes are unsaved
   useEffect(() => {
@@ -679,7 +684,41 @@ export function PostForm({
               setForm((f) => ({ ...f, featured: !f.featured }))
             )}
             {statusToggle("Published", form.published, () =>
-              setForm((f) => ({ ...f, published: !f.published }))
+              setForm((f) => {
+                const next = !f.published;
+                return {
+                  ...f,
+                  published: next,
+                  scheduledAt: next ? "" : f.scheduledAt,
+                };
+              })
+            )}
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <CalendarClock className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Schedule
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Pick a future date and time to auto-publish later.
+            </p>
+            <SchedulePicker
+              value={form.scheduledAt}
+              onChange={(iso) =>
+                setForm((f) => ({
+                  ...f,
+                  scheduledAt: iso,
+                  published: iso ? false : true,
+                }))
+              }
+            />
+            {form.scheduledAt && (
+              <p className="text-[11px] text-muted-foreground">
+                Post will auto-publish at this time.
+              </p>
             )}
           </div>
 

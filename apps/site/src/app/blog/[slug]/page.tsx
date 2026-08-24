@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getPostBySlug } from "@/lib/content";
-import { SITE, stripHtml } from "@/lib/site";
+import { SITE, VISIBLE_POST_WHERE, stripHtml } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
 import { PostArticle } from "@/components/blog/PostArticle";
@@ -18,7 +18,7 @@ export async function generateStaticParams() {
   const posts = await dbSafe(
     () =>
       prisma.post.findMany({
-        where: { published: true, deletedAt: null },
+        where: VISIBLE_POST_WHERE,
         select: { slug: true },
       }),
     []
@@ -66,8 +66,7 @@ export default async function PostPage({ params }: Props) {
     () =>
       prisma.post.findMany({
         where: {
-          published: true,
-          deletedAt: null,
+          ...VISIBLE_POST_WHERE,
           NOT: { id: post.id },
           ...(post.categoryId
             ? { categoryId: post.categoryId }
@@ -86,7 +85,7 @@ export default async function PostPage({ params }: Props) {
           await dbSafe(
             () =>
               prisma.post.findMany({
-                where: { published: true, deletedAt: null, NOT: { id: post.id } },
+                where: { ...VISIBLE_POST_WHERE, NOT: { id: post.id } },
                 select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
                 orderBy: { publishedAt: "desc" },
                 take: 3,

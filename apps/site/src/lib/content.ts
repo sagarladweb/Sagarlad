@@ -2,6 +2,7 @@ import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { isInstagramUrl } from "@/lib/instagram";
+import { VISIBLE_POST_WHERE } from "@/lib/site";
 
 // Blog posts are deliberately NOT wrapped in unstable_cache here: they carry
 // Date fields that unstable_cache would stringify, and the post pages already
@@ -9,8 +10,8 @@ import { isInstagramUrl } from "@/lib/instagram";
 // hit when a cached page actually revalidates. React `cache` dedupes the
 // per-request double fetch (generateMetadata + render).
 export const getPostBySlug = cache((slug: string) =>
-  prisma.post.findUnique({
-    where: { slug, deletedAt: null },
+  prisma.post.findFirst({
+    where: { slug, ...VISIBLE_POST_WHERE },
     include: { category: { select: { id: true, name: true, slug: true } }, author: { select: { name: true } } },
   })
 );

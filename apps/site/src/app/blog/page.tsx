@@ -2,7 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
-import { SITE, pageMetadata, formatDate, postCover } from "@/lib/site";
+import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
 import { JsonLd } from "@/components/JsonLd";
@@ -33,19 +33,27 @@ export default async function BlogPage({
 
   const [categories, totalPosts, totalVideos] = await Promise.all([
     getCategories(),
-    dbSafe(() => prisma.post.count({ where: { published: true, deletedAt: null } }), 0),
+    dbSafe(() => prisma.post.count({ where: VISIBLE_POST_WHERE }), 0),
     dbSafe(() => prisma.video.count({ where: { published: true, deletedAt: null } }), 0),
   ]);
   const categorySlug = categories.some((c) => c.slug === params.category)
     ? params.category
     : undefined;
 
-  const where: Record<string, unknown> = { published: true, deletedAt: null };
+  const where: Record<string, unknown> = {
+    published: true,
+    deletedAt: null,
+  };
   if (categorySlug) {
     where.category = { slug: categorySlug };
   }
   if (q) {
-    where.OR = [{ title: { contains: q } }, { excerpt: { contains: q } }];
+    where.AND = [
+      { OR: [{ scheduledAt: null }, { scheduledAt: { lte: new Date() } }] },
+      { OR: [{ title: { contains: q } }, { excerpt: { contains: q } }] },
+    ];
+  } else {
+    where.OR = [{ scheduledAt: null }, { scheduledAt: { lte: new Date() } }];
   }
 
   // Only fetch the rows for the active tab. Categories and the two stats

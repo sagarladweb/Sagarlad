@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { prisma, dbSafe } from "@/lib/db";
-import { SITE, pageMetadata, formatDate, postCover } from "@/lib/site";
+import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 
@@ -21,7 +21,7 @@ export default async function ContentCategoryPage({
         where: { slug },
         include: {
           posts: {
-            where: { published: true, deletedAt: null },
+            where: VISIBLE_POST_WHERE,
             orderBy: { publishedAt: "desc" },
             take: 12,
           },
@@ -30,7 +30,14 @@ export default async function ContentCategoryPage({
             orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
           },
         },
-      }),
+      }) as Promise<{
+        id: string;
+        name: string;
+        slug: string;
+        createdAt: Date;
+        posts: { id: string; title: string; slug: string; excerpt: string | null; coverImage: string | null; publishedAt: Date }[];
+        videos: { id: string; title: string; slug: string | null; embedUrl: string; thumbnail: string | null }[];
+      } | null>,
     null
   );
   if (!category) notFound();

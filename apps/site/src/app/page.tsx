@@ -1,9 +1,10 @@
 import { prisma, dbSafe } from "@/lib/db";
-import { SITE } from "@/lib/site";
+import { SITE, VISIBLE_POST_WHERE } from "@/lib/site";
 import { getSiteSocials } from "@/lib/social-links";
 import { getCategories } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 import dynamic from "next/dynamic";
+import type { Post, Category } from "@sagarlad/db";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";
@@ -25,11 +26,11 @@ export default async function HomePage() {
     dbSafe(
       () =>
         prisma.post.findMany({
-          where: { published: true, deletedAt: null },
+          where: VISIBLE_POST_WHERE,
           include: { category: true },
           orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
           take: 4,
-        }),
+        }) as Promise<(Post & { category: Category | null })[]>,
       []
     ),
     getSiteSocials(),

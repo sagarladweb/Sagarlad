@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
 import { showToast } from "@/components/admin/Toast";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -15,6 +15,7 @@ type PostItem = {
   slug: string;
   title: string;
   published: boolean;
+  scheduledAt: Date | string | null;
   views: number;
   category: { name: string } | null;
 };
@@ -25,14 +26,15 @@ function FilterTabs({
   setPage,
   counts,
 }: {
-  filter: "all" | "published" | "draft";
-  setFilter: (f: "all" | "published" | "draft") => void;
+  filter: "all" | "published" | "draft" | "scheduled";
+  setFilter: (f: "all" | "published" | "draft" | "scheduled") => void;
   setPage: (p: number) => void;
-  counts: { all: number; published: number; draft: number };
+  counts: { all: number; published: number; draft: number; scheduled: number };
 }) {
   const tabs = [
     { value: "all" as const, label: "All", count: counts.all },
     { value: "published" as const, label: "Published", count: counts.published },
+    { value: "scheduled" as const, label: "Scheduled", count: counts.scheduled },
     { value: "draft" as const, label: "Drafts", count: counts.draft },
   ];
 
@@ -59,18 +61,27 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
   const router = useRouter();
   const [posts, setPosts] = useState<PostItem[]>(initialPosts);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+  const [filter, setFilter] = useState<"all" | "published" | "draft" | "scheduled">("all");
   const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const PER_PAGE = 15;
+
+  const isScheduled = (p: PostItem) =>
+    !p.published && !!p.scheduledAt && new Date(p.scheduledAt) > new Date();
 
   const filteredPosts = posts.filter((p) => {
     const matchesSearch =
       p.title.toLowerCase().includes(search.toLowerCase()) ||
       p.slug.toLowerCase().includes(search.toLowerCase());
     const matchesFilter =
-      filter === "all" ? true : filter === "published" ? p.published : !p.published;
+      filter === "all"
+        ? true
+        : filter === "published"
+          ? p.published
+          : filter === "scheduled"
+            ? isScheduled(p)
+            : !p.published && !isScheduled(p);
     return matchesSearch && matchesFilter;
   });
 
@@ -134,7 +145,8 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
           counts={{
             all: posts.length,
             published: posts.filter((p) => p.published).length,
-            draft: posts.filter((p) => !p.published).length,
+            scheduled: posts.filter((p) => isScheduled(p)).length,
+            draft: posts.filter((p) => !p.published && !isScheduled(p)).length,
           }}
         />
       </div>
@@ -165,7 +177,19 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
                 <tr key={p.id} className="hover:bg-muted/40 transition-colors">
                   <td className="px-4 py-3 font-medium max-w-xs truncate text-foreground">{p.title}</td>
                   <td className="px-4 py-3 text-muted-foreground">{p.category?.name ?? "—"}</td>
-                  <td className="px-4 py-3"><PublishedBadge published={p.published} /></td>
+                  <td className="px-4 py-3">
+                    {isScheduled(p) ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                        <CalendarClock className="w-3 h-3" />
+                        {new Date(p.scheduledAt!).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </span>
+                    ) : (
+                      <PublishedBadge published={p.published} />
+                    )}
+                  </td>
                   <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
                     <span className="inline-flex items-center gap-1">
                       <Eye className="w-3 h-3" />

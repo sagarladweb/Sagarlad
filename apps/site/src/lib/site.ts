@@ -89,3 +89,11 @@ export function postCover(slug: string): string {
   const idx = Math.abs(hash) % BLOG_COVERS.length;
   return BLOG_COVERS[idx];
 }
+
+// Posts are visible on the public site only when published, not deleted,
+// and not scheduled for a future date. Use this in every public query.
+export const VISIBLE_POST_WHERE = {
+  published: true,
+  deletedAt: null,
+  OR: [{ scheduledAt: null }, { scheduledAt: { lte: new Date() } }],
+};

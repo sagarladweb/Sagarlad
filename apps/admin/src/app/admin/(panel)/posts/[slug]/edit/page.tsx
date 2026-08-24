@@ -46,6 +46,7 @@ export default async function EditPostPage({
           categoryId: post.categoryId,
           featured: post.featured,
           published: post.published,
+          scheduledAt: post.scheduledAt?.toISOString() ?? null,
         }}
       />
     </div>

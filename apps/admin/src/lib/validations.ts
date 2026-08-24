@@ -57,6 +57,7 @@ export const adminPostSchema = z.object({
   featured: z.boolean().optional(),
   published: z.boolean().optional(),
   publishedAt: z.string().optional().or(z.literal("")),
+  scheduledAt: z.string().optional().or(z.literal("")),
   kicker: z.string().trim().max(80).optional().or(z.literal("")),
   showCover: z.boolean().optional(),
   showAuthorBox: z.boolean().optional(),

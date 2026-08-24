@@ -16,6 +16,7 @@ const LIST_SELECT = {
   featured: true,
   published: true,
   publishedAt: true,
+  scheduledAt: true,
   updatedAt: true,
   views: true,
   category: { select: { id: true, name: true, slug: true } },
@@ -59,6 +60,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "A post with this slug already exists." }, { status: 409 });
     }
 
+    const scheduledDate = parsed.data.scheduledAt ? new Date(parsed.data.scheduledAt) : null;
+    const isScheduled = scheduledDate && scheduledDate > new Date();
+
     const post = await prisma.post.create({
       data: {
         title: parsed.data.title,
@@ -67,10 +71,9 @@ export async function POST(request: Request) {
         content: sanitizeHtml(parsed.data.content),
         coverImage: parsed.data.coverImage || null,
         featured: parsed.data.featured ?? false,
-        published: parsed.data.published ?? true,
-        publishedAt: parsed.data.publishedAt
-          ? new Date(parsed.data.publishedAt)
-          : new Date(),
+        published: isScheduled ? false : (parsed.data.published ?? true),
+        publishedAt: isScheduled ? scheduledDate! : new Date(),
+        scheduledAt: isScheduled ? scheduledDate : null,
         authorId: session.user.id,
         categoryId: parsed.data.categoryId || null,
         kicker: parsed.data.kicker || null,
@@ -116,6 +119,9 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: "A post with this slug already exists." }, { status: 409 });
     }
 
+    const scheduledDate = parsed.data.scheduledAt ? new Date(parsed.data.scheduledAt) : null;
+    const isScheduled = scheduledDate && scheduledDate > new Date();
+
     const post = await prisma.post.update({
       where: { id },
       data: {
@@ -125,8 +131,9 @@ export async function PUT(request: Request) {
         content: sanitizeHtml(parsed.data.content),
         coverImage: parsed.data.coverImage || null,
         featured: parsed.data.featured ?? false,
-        published: parsed.data.published ?? true,
-        publishedAt: parsed.data.publishedAt ? new Date(parsed.data.publishedAt) : undefined,
+        published: isScheduled ? false : (parsed.data.published ?? true),
+        publishedAt: isScheduled ? scheduledDate! : new Date(),
+        scheduledAt: isScheduled ? scheduledDate : null,
         categoryId: parsed.data.categoryId || null,
         kicker: parsed.data.kicker || null,
         showCover: parsed.data.showCover ?? true,

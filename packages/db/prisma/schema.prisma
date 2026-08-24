@@ -102,6 +102,7 @@ model Post {
   featured    Boolean    @default(false)
   published   Boolean    @default(true)
   publishedAt DateTime   @default(now())
+  scheduledAt DateTime?
   kicker      String?
   showCover   Boolean    @default(true)
   showAuthorBox Boolean  @default(true)

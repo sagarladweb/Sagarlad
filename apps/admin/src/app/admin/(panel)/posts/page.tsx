@@ -11,6 +11,7 @@ export default async function PostsPage() {
       slug: true,
       title: true,
       published: true,
+      scheduledAt: true,
       views: true,
       category: { select: { name: true } },
     },
