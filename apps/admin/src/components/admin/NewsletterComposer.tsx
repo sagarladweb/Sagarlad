@@ -44,7 +44,6 @@ const SECTION_EMPTY = { heading: "", body: "" };
 export function NewsletterComposer({
   subscriberCount,
   onSent,
-  onError,
   onStatus,
   seed,
   insert,

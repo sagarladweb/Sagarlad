@@ -1,16 +1,30 @@
 "use client";
 
 import { useEffect } from "react";
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollTopButton } from "@/components/ui/ScrollTopButton";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
-import { NewsletterPopup } from "@/components/NewsletterPopup";
+
+const ScrollAnimations = dynamic(
+  () => import("@/components/home/ScrollAnimations").then((m) => m.ScrollAnimations),
+  { ssr: false }
+);
+
+const NewsletterPopup = dynamic(
+  () => import("@/components/NewsletterPopup").then((m) => m.NewsletterPopup),
+  { ssr: false }
+);
 
 export function SiteFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   useEffect(() => {
     // Deter saving media: block right-click "Save image as..." and dragging
@@ -33,7 +47,10 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
     <>
       {!isAdmin && <GoogleAnalytics />}
       {!isAdmin && <Navbar />}
-      <main className="flex-1">{children}</main>
+      <main className="flex-1">
+        {children}
+        {!isAdmin && <ScrollAnimations />}
+      </main>
       {!isAdmin && <ScrollTopButton />}
       {!isAdmin && <Footer />}
       {!isAdmin && pathname === "/" && <NewsletterPopup />}

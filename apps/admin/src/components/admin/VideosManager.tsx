@@ -6,8 +6,6 @@ import {
   Trash2,
   Loader2,
   Pencil,
-  AlertCircle,
-  CheckCircle2,
   Link2,
   Monitor,
   Smartphone,
@@ -22,8 +20,10 @@ import { isInstagramUrl } from "@/lib/instagram";
 import { normalizeVideoUrl, type VideoPlatform } from "@/lib/video";
 import { FaYoutube, FaInstagram } from "react-icons/fa6";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
+import { showToast } from "@/components/admin/Toast";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Modal } from "@/components/ui/Modal";
+import { inputCls } from "@/components/ui/Input";
 
 type Video = {
   id: string;
@@ -67,9 +67,6 @@ const empty: VideoForm = {
   categoryId: "",
 };
 
-const inputCls =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
-
 const LAYOUTS: { value: VideoForm["layout"]; label: string }[] = [
   { value: "video-first", label: "Video first" },
   { value: "text-first", label: "Text first" },
@@ -106,8 +103,6 @@ export function VideosManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [fetching, setFetching] = useState(false);
-  const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
   const [tab, setTab] = useState<VideoPlatform>("youtube");
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [videoPage, setVideoPage] = useState(1);
@@ -117,12 +112,10 @@ export function VideosManager() {
 
   async function fetchFromUrl() {
     if (!editing || !editing.embedUrl.trim()) {
-      setError("Paste a YouTube or Instagram link first.");
+      showToast("Paste a YouTube or Instagram link first.", undefined, "error");
       return;
     }
     setFetching(true);
-    setError("");
-    setOk("");
     try {
       const res = await fetch(
         `/api/admin/videos/import?url=${encodeURIComponent(editing.embedUrl.trim())}`
@@ -130,7 +123,7 @@ export function VideosManager() {
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         if (data.platform === "instagram") {
-          setOk("Instagram link detected. Add a title — thumbnail is optional.");
+          showToast("Instagram link detected. Add a title — thumbnail is optional.");
           if (!editing.title.trim()) {
             setEditing({ ...editing, title: "Instagram Reel" });
           }
@@ -140,15 +133,15 @@ export function VideosManager() {
             title: editing.title.trim() || data.title || editing.title,
             thumbnail: editing.thumbnail ?? data.thumbnailUrl ?? null,
           });
-          setOk(
-            `Auto-filled${data.title ? ` “${data.title}”` : ""} and thumbnail from YouTube.`
+          showToast(
+            `Auto-filled${data.title ? ` "${data.title}"` : ""} and thumbnail from YouTube.`
           );
         }
       } else {
-        setError(data.error ?? "Could not fetch that video.");
+        showToast(data.error ?? "Could not fetch that video.", undefined, "error");
       }
     } catch {
-      setError("Could not reach YouTube.");
+      showToast("Could not reach YouTube.", undefined, "error");
     } finally {
       setFetching(false);
     }
@@ -156,8 +149,6 @@ export function VideosManager() {
 
   async function handlePastedImage(dataUrl: string) {
     if (!editing) return;
-    setError("");
-    setOk("");
     try {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
@@ -167,12 +158,12 @@ export function VideosManager() {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
         setEditing({ ...editing, thumbnail: data.url });
-        setOk("Pasted image uploaded.");
+        showToast("Pasted image uploaded.");
       } else {
-        setError(data.error ?? "Could not upload that image.");
+        showToast(data.error ?? "Could not upload that image.", undefined, "error");
       }
     } catch {
-      setError("Could not upload the pasted image.");
+      showToast("Could not upload the pasted image.", undefined, "error");
     }
   }
 
@@ -218,8 +209,6 @@ export function VideosManager() {
   function startNew() {
     setEditing({ ...empty });
     setEditingId(null);
-    setError("");
-    setOk("");
   }
 
   function startEdit(v: Video) {
@@ -236,14 +225,11 @@ export function VideosManager() {
     });
     setTab(platformOf(v));
     setEditingId(v.id);
-    setError("");
-    setOk("");
   }
 
   function cancelEdit() {
     setEditing(null);
     setEditingId(null);
-    setError("");
     setShowAdvanced(false);
   }
 
@@ -267,17 +253,15 @@ export function VideosManager() {
 
   async function save() {
     if (!editing || !editing.title.trim()) {
-      setError("Title is required.");
+      showToast("Title is required.", undefined, "error");
       return;
     }
     const normalized = normalizeVideoUrl(editing.embedUrl);
     if (!normalized) {
-      setError("That doesn't look like a YouTube or Instagram link.");
+      showToast("That doesn't look like a YouTube or Instagram link.", undefined, "error");
       return;
     }
     setBusy(true);
-    setError("");
-    setOk("");
     const payload = {
       ...(editingId ? { id: editingId } : {}),
       title: editing.title.trim(),
@@ -298,12 +282,12 @@ export function VideosManager() {
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Something went wrong.");
+      showToast(data.error ?? "Something went wrong.", undefined, "error");
       return;
     }
     setEditing(null);
     setEditingId(null);
-    setOk(editingId ? "Video updated." : "Video added.");
+    showToast(editingId ? "Video updated." : "Video added.");
     await load();
   }
 
@@ -368,17 +352,6 @@ export function VideosManager() {
           </button>
         )}
       </div>
-
-      {error && (
-        <p className="flex items-center gap-1.5 text-sm text-red-600" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
-      )}
-      {ok && (
-        <p className="flex items-center gap-1.5 text-sm text-emerald-600" role="status">
-          <CheckCircle2 className="w-4 h-4 shrink-0" /> {ok}
-        </p>
-      )}
 
       {editing && (
         <Modal

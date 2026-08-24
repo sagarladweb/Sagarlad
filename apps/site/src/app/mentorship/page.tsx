@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowRight, MapPin, ChevronDown } from "lucide-react";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Mentorship",
@@ -81,13 +82,23 @@ function FaqItem({ q, a }: { q: string; a: string }) {
 export default function MentorshipPage() {
   return (
     <div className="bg-background overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Mentorship", item: `${SITE.url}/mentorship` },
+          ],
+        }}
+      />
       {/* ── Hero ── */}
       <section className="border-b border-border bg-background">
         <div className="max-w-3xl mx-auto px-5 sm:px-6 py-14 sm:py-20 md:py-24">
           <div className="flex flex-col items-center text-center">
             <div className="relative h-28 w-28 sm:h-32 sm:w-32 rounded-full overflow-hidden ring-4 ring-border mb-6">
               <Image
-                src="/images/sagar-author.png"
+                src="/images/sagar-author.webp"
                 alt="Sagar Lad"
                 fill
                 className="object-cover"
@@ -103,7 +114,7 @@ export default function MentorshipPage() {
             </p>
             <div className="flex items-center gap-2 mt-4 text-xs text-muted-foreground">
               <MapPin className="w-3.5 h-3.5" />
-              Mumbai, India
+              Gujrat, India
             </div>
             <a
               href="#book"

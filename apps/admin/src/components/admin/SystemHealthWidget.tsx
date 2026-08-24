@@ -46,6 +46,7 @@ export function SystemHealthWidget() {
   };
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async health check
     fetchHealth();
   }, []);
 

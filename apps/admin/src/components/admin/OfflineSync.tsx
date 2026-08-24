@@ -29,6 +29,7 @@ export function OfflineSync() {
   }, [syncing, refresh]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration gate
     setMounted(true);
     if (typeof navigator !== "undefined") {
       setOnline(navigator.onLine);

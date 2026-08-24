@@ -1,6 +1,6 @@
 # Sagar Lad Platform - Complete Setup Guide
 
-Honest, step-by-step guide to deploy the website and admin panel. No sugarcoating - includes every weakness, limitation, and what to do when things break.
+Step-by-step guide to deploy the website and admin panel, including every credential source and database migration instructions.
 
 ---
 
@@ -15,11 +15,12 @@ Honest, step-by-step guide to deploy the website and admin panel. No sugarcoatin
 7. [Brevo Email Sending Setup](#7-brevo-email-sending-setup)
 8. [Google Analytics Setup](#8-google-analytics-setup)
 9. [Vercel Deployment](#9-vercel-deployment)
-10. [Environment Variables](#10-environment-variables)
-11. [Post-Deployment Checklist](#11-post-deployment-checklist)
-12. [Strengths, Weaknesses and Failure Modes](#12-strengths-weaknesses-and-failure-modes)
-13. [Long-Term Viability](#13-long-term-viability)
-14. [Troubleshooting](#14-troubleshooting)
+10. [Environment Variables - Complete Credential Guide](#10-environment-variables---complete-credential-guide)
+11. [Database Migration to Supabase](#11-database-migration-to-supabase)
+12. [Post-Deployment Checklist](#12-post-deployment-checklist)
+13. [Strengths, Weaknesses and Failure Modes](#13-strengths-weaknesses-and-failure-modes)
+14. [Long-Term Viability](#14-long-term-viability)
+15. [Troubleshooting](#15-troubleshooting)
 
 ---
 
@@ -327,26 +328,71 @@ Brevo sends your newsletter emails (free: 300/day).
 ### Step 8.3: Get Property ID (for Admin Dashboard)
 
 1. Go to **Admin -> Property -> Property details**
-2. Copy the numeric **Property ID** -> this is `GA_PROPERTY_ID`
+2. Copy the numeric **Property ID** -> this is `GA4_PROPERTY_ID`
 
-### Step 8.4: Create Service Account (for Admin Dashboard)
+### Step 8.4: Google Cloud Console Setup (for Admin Dashboard Analytics)
 
-1. Go to console.cloud.google.com
-2. Create a new project (or use existing)
-3. Go to **APIs & Services -> Library** -> search "Google Analytics Data API" -> click **Enable**
-4. Go to **APIs & Services -> Credentials -> Create Credentials -> Service Account**
-5. Name: `analytics-reader`
+This connects your admin panel to Google Analytics so you can see traffic data directly in the dashboard. One-time setup, no maintenance needed.
+
+**Which API you need:**
+
+| API | Purpose | You need? |
+|-----|---------|-----------|
+| **Google Analytics Data API v1** | Query GA4 reports (users, pageviews, sessions) | **Yes** |
+| Google Analytics Admin API | Manage property settings | No |
+| Google Analytics Reporting API v4 | Legacy Universal Analytics | No (deprecated) |
+
+**Free tier:** GA4 is completely free. Data API has generous quotas (50k requests/day for service accounts). You will never hit it for a personal site.
+
+#### Step 8.4.1: Create a Google Cloud Project
+
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Click the project dropdown (top-left) -> **New Project**
+3. Name: `sagarlad-analytics` -> Click **Create**
+4. Select the new project from the dropdown
+
+#### Step 8.4.2: Enable the Data API
+
+1. Go to [console.cloud.google.com/apis/library/analyticsdata.googleapis.com](https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com)
+2. Click **Enable**
+
+#### Step 8.4.3: Create a Service Account
+
+1. Go to **APIs & Services** -> **Credentials**
+2. Click **Create Credentials** -> **Service Account**
+3. Name: `ga4-reader`
+4. Click **Create and Continue**
+5. Role: **Skip** (not needed)
 6. Click **Done**
-7. Click the created service account -> **Keys -> Add Key -> Create new key -> JSON**
-8. Download the JSON file
-9. Open it, copy the **entire content** -> this is `GOOGLE_SERVICE_ACCOUNT_JSON`
 
-### Step 8.5: Grant Access
+#### Step 8.4.4: Generate a Key
 
-1. In Google Analytics -> **Admin -> Property access management -> Add users**
-2. Paste the service account email (from the JSON file, ends in `@...iam.gserviceaccount.com`)
-3. Role: **Viewer**
-4. Click **Add**
+1. In the service account list, click on `ga4-reader`
+2. Go to **Keys** tab -> **Add Key** -> **Create new key**
+3. Select **JSON** -> **Create**
+4. A `.json` file downloads -> **save it as `google-analytics-key.json`** in your project root
+
+#### Step 8.4.5: Grant Access in Google Analytics
+
+1. Open the downloaded JSON file, find the `client_email` (looks like `ga4-reader@sagarlad-analytics.iam.gserviceaccount.com`)
+2. Go to [analytics.google.com](https://analytics.google.com)
+3. **Admin** (bottom-left) -> **Property Access Management**
+4. Click **+** -> **Add users**
+5. Paste the service account email
+6. Role: **Viewer**
+7. Click **Add**
+
+#### Step 8.4.6: Add Environment Variables
+
+- `GA4_PROPERTY_ID`: Numeric Property ID from Step 8.3
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: Paste the entire JSON content from the downloaded key file (single line, no newlines)
+
+**How it works long-term:**
+- Service account keys do not expire
+- No OAuth flow or user login required
+- Server-to-server authentication, fully automatic
+- If key is compromised, regenerate in Google Cloud Console and update the env var
+- Quota: 50k requests/day (free). You will use ~50/day at most
 
 ---
 
@@ -384,47 +430,546 @@ The newsletter queue drains via GitHub Actions (since Vercel free tier does not 
 
 ---
 
-## 10. Environment Variables
+## 10. Environment Variables - Complete Credential Guide
 
-### Vercel - Public Website (`apps/site`)
+This section lists every credential, what it does, and exactly how to get it.
 
-| Variable | Value |
-|---|---|
-| `DATABASE_URL` | Supabase Transaction Pooler URL (port 6543) |
-| `AUTH_SECRET` | Generated value from Step 4.3 |
-| `SUPABASE_URL` | Supabase Project URL |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key |
-| `BREVO_API_KEY` | `xkeysib-...` |
-| `BREVO_FROM_EMAIL` | `hello@sagarlad.com` |
-| `BREVO_FROM_NAME` | `Sagar Lad` |
-| `CRON_SECRET` | Generated value from Step 4.3 |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | `G-XXXXXXXXXX` |
-| `NEXT_PUBLIC_SITE_URL` | `https://sagarlad.com` |
-| `SITE_URL` | `https://sagarlad.com` |
-| `DAILY_EMAIL_LIMIT` | `300` |
-| `NEWSLETTER_BATCH_SIZE` | `20` |
+### Credential Reference Table
 
-### Vercel - Admin Panel (`apps/admin`)
+| # | Variable | Where Used | Source | Difficulty |
+|---|----------|------------|--------|------------|
+| 1 | `DATABASE_URL` | Both apps | Supabase | Easy |
+| 2 | `DIRECT_URL` | Both apps | Supabase | Easy |
+| 3 | `AUTH_SECRET` | Both apps | Terminal command | Easy |
+| 4 | `ADMIN_EMAIL` | Both apps | Your email | Easy |
+| 5 | `ADMIN_PASSWORD` | Both apps | You create it | Easy |
+| 6 | `SUPABASE_URL` | Both apps | Supabase | Easy |
+| 7 | `SUPABASE_ANON_KEY` | Both apps | Supabase | Easy |
+| 8 | `SUPABASE_SERVICE_ROLE_KEY` | Both apps | Supabase | Easy |
+| 9 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Both apps | Google Analytics | Easy |
+| 10 | `BREVO_API_KEY` | Both apps | Brevo | Easy |
+| 11 | `BREVO_FROM_EMAIL` | Both apps | Brevo | Easy |
+| 12 | `BREVO_FROM_NAME` | Both apps | Brevo | Easy |
+| 13 | `CRON_SECRET` | Both apps | Terminal command | Easy |
+| 14 | `DAILY_EMAIL_LIMIT` | Both apps | Fixed value: `300` | Trivial |
+| 15 | `NEWSLETTER_BATCH_SIZE` | Both apps | Fixed value: `20` | Trivial |
+| 16 | `NEXT_PUBLIC_SITE_URL` | Both apps | Fixed value: `https://sagarlad.com` | Trivial |
+| 17 | `SITE_URL` | Both apps | Fixed value: `https://sagarlad.com` | Trivial |
+| 18 | `NEWSLETTER_CRON` | Both apps | Fixed value: `0` | Trivial |
+| 19 | `GA_PROPERTY_ID` | Admin only | Google Analytics | Easy |
+| 20 | `GOOGLE_SERVICE_ACCOUNT_JSON` | Admin only | Google Cloud Console | Medium |
+| 21 | `ADMIN_PHASE` | Admin only | Fixed value: `"2"` | Trivial |
 
-| Variable | Value |
-|---|---|
-| `DATABASE_URL` | Same as site |
-| `AUTH_SECRET` | Same as site |
-| `SUPABASE_URL` | Same as site |
-| `SUPABASE_SERVICE_ROLE_KEY` | Same as site |
-| `BREVO_API_KEY` | Same as site |
-| `BREVO_FROM_EMAIL` | Same as site |
-| `BREVO_FROM_NAME` | Same as site |
-| `CRON_SECRET` | Same as site |
-| `NEXT_PUBLIC_SITE_URL` | `https://sagarlad.com` |
-| `SITE_URL` | `https://sagarlad.com` |
-| `GA_PROPERTY_ID` | Numeric Property ID from GA4 |
-| `GOOGLE_SERVICE_ACCOUNT_JSON` | Full JSON from Step 8.4 |
-| `ADMIN_PHASE` | `"2"` |
+### Credential #1: DATABASE_URL
+
+**What it does:** Connects your app to the Supabase PostgreSQL database via the connection pooler (recommended for serverless).
+
+**How to get it:**
+1. Log in to [supabase.com](https://supabase.com)
+2. Select your project (`sagarlad-prod`)
+3. Go to **Project Settings** (gear icon, bottom-left)
+4. Click **Database** in the left sidebar
+5. Under **Connection string**, click **URI** tab
+6. Copy the **Transaction pooler** URL (port `6543`)
+7. It looks like: `postgresql://postgres.xxxxxxxxxxxxx:Sagarlad@2026@aws-0-ap-northeast-2.pooler.supabase.com:6543/postgres`
+
+**Important:** Use port 6543 (Transaction pooler), NOT port 5432 (Direct connection). Port 6543 works with Vercel's serverless functions.
+
+**Format:** `postgresql://postgres.[PROJECT_REF]:[YOUR_PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres`
 
 ---
 
-## 11. Post-Deployment Checklist
+### Credential #2: DIRECT_URL
+
+**What it does:** Used by Prisma for migrations and deploy commands (requires a direct connection, not pooled).
+
+**How to get it:**
+1. Same Supabase project -> **Project Settings -> Database**
+2. Under **Connection string**, copy the **Direct connection** URL (port `5432`)
+3. It looks like: `postgresql://postgres:Sagarlad@2026@db.vvawladyffozwclpqdhu.supabase.co:5432/postgres`
+
+**Important:** This is only used locally for `prisma migrate` and `prisma db push`. Do NOT use this in Vercel (it will exhaust your connection limit).
+
+**Format:** `postgresql://postgres:[YOUR_PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres`
+
+---
+
+### Credential #3: AUTH_SECRET
+
+**What it does:** Used by NextAuth.js to encrypt sessions and JWT tokens. Without it, login will not work.
+
+**How to get it:**
+```bash
+openssl rand -base64 32
+```
+
+This outputs something like: `8/AGlmM5ktb4sFRSReSFM7+CQeBl9BOtuWJ5A34FZwc=`
+
+**Important:** Generate once, use the same value for both site and admin apps. Never commit this to git.
+
+---
+
+### Credential #4: ADMIN_EMAIL
+
+**What it does:** The email address for the admin login account.
+
+**How to get it:** Use your own email address, e.g., `sagarlad692@gmail.com`
+
+---
+
+### Credential #5: ADMIN_PASSWORD
+
+**What it does:** The password for the admin login account.
+
+**How to get it:** Create a strong password yourself, e.g., `Sagu@123`
+
+**Important:** This is seeded into the database on first run. After that, it is stored as a bcrypt hash. Change it after first login.
+
+---
+
+### Credential #6: SUPABASE_URL
+
+**What it does:** The public API URL for your Supabase project. Used for file storage (images, uploads).
+
+**How to get it:**
+1. Supabase dashboard -> **Project Settings -> API**
+2. Copy **Project URL**
+3. It looks like: `https://vvawladyffozwclpqdhu.supabase.co`
+
+**Format:** `https://[PROJECT_REF].supabase.co`
+
+---
+
+### Credential #7: SUPABASE_ANON_KEY
+
+**What it does:** The anonymous (public) API key for Supabase. Used for client-side operations with Row Level Security.
+
+**How to get it:**
+1. Supabase dashboard -> **Project Settings -> API**
+2. Under **Project API keys**, copy the `anon` `public` key
+3. It looks like: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+
+---
+
+### Credential #8: SUPABASE_SERVICE_ROLE_KEY
+
+**What it does:** The admin API key for Supabase. Bypasses Row Level Security. Used for server-side operations (file uploads, admin queries).
+
+**How to get it:**
+1. Supabase dashboard -> **Project Settings -> API**
+2. Under **Project API keys**, click **Reveal** on the `service_role` key
+3. Copy the key
+
+**Important:** This key bypasses ALL security rules. Never expose it to the client side. Never commit it to git.
+
+---
+
+### Credential #9: NEXT_PUBLIC_GA_MEASUREMENT_ID
+
+**What it does:** Google Analytics tracking ID. Visible to users (hence `NEXT_PUBLIC_` prefix).
+
+**How to get it:**
+1. Go to [analytics.google.com](https://analytics.google.com)
+2. **Admin** (bottom-left) -> **Data Streams**
+3. Click your web stream
+4. Copy the **Measurement ID** (format: `G-XXXXXXXXXX`)
+
+---
+
+### Credential #10: BREVO_API_KEY
+
+**What it does:** Authenticates your app with Brevo's email API for sending newsletters.
+
+**How to get it:**
+1. Log in to [brevo.com](https://brevo.com)
+2. Go to **SMTP & API** (left sidebar) -> **API Keys**
+3. Click **Generate a new API key**
+4. Name it `sagarlad-production`
+5. Copy the key (starts with `xkeysib-`)
+
+**Important:** The key is only shown once. Copy it immediately.
+
+---
+
+### Credential #11: BREVO_FROM_EMAIL
+
+**What it does:** The "from" email address shown on newsletter emails.
+
+**How to get it:** Use the sender email you verified in Brevo (Step 7.3), e.g., `no-reply@sagarlad.com` or `hello@sagarlad.com`
+
+---
+
+### Credential #12: BREVO_FROM_NAME
+
+**What it does:** The sender name shown on newsletter emails.
+
+**How to get it:** Any name you want, e.g., `Sagar Lad`
+
+---
+
+### Credential #13: CRON_SECRET
+
+**What it does:** Protects the `/api/newsletter/process` endpoint from public access. GitHub Actions uses this to authenticate.
+
+**How to get it:**
+```bash
+openssl rand -hex 32
+```
+
+This outputs something like: `497d740fe138a7b84a591665ced342eff4add2f2bdfdc8214ade23ab02ae4818`
+
+**Important:** Generate once, use the same value for both Vercel apps AND GitHub Actions secrets.
+
+---
+
+### Credential #14-15: DAILY_EMAIL_LIMIT, NEWSLETTER_BATCH_SIZE
+
+**What they do:** Control newsletter sending rate (stays within Brevo's 300/day free tier).
+
+**Values:**
+- `DAILY_EMAIL_LIMIT=300`
+- `NEWSLETTER_BATCH_SIZE=20`
+
+---
+
+### Credential #16-17: NEXT_PUBLIC_SITE_URL, SITE_URL
+
+**What they do:** The public website URL used for redirects, canonical links, and revalidation.
+
+**Values:**
+- `NEXT_PUBLIC_SITE_URL=https://sagarlad.com`
+- `SITE_URL=https://sagarlad.com`
+
+For local development, use `http://localhost:3000`.
+
+---
+
+### Credential #18: NEWSLETTER_CRON
+
+**What it does:** Set to `0` on Vercel (GitHub Actions handles cron). Set to `1` only on self-hosted servers.
+
+**Value:** `0`
+
+---
+
+### Credential #19: GA_PROPERTY_ID
+
+**What it does:** Numeric Google Analytics property ID. Used by the admin dashboard to query analytics data.
+
+**How to get it:**
+1. Go to [analytics.google.com](https://analytics.google.com)
+2. **Admin** -> **Property settings**
+3. Copy the **Property ID** (numeric, e.g., `123456789`)
+
+---
+
+### Credential #20: GOOGLE_SERVICE_ACCOUNT_JSON
+
+**What it does:** A JSON key file that lets the admin panel query Google Analytics data server-side.
+
+**How to get it:**
+1. Go to [console.cloud.google.com](https://console.cloud.google.com)
+2. Create project `sagarlad-analytics` (or use existing)
+3. Enable **Google Analytics Data API v1**: [console.cloud.google.com/apis/library/analyticsdata.googleapis.com](https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com)
+4. Go to **APIs & Services -> Credentials**
+5. Click **Create Credentials -> Service Account**
+6. Name: `ga4-reader`, click **Create and Continue**, skip role, click **Done**
+7. Click on `ga4-reader` -> **Keys** tab -> **Add Key -> Create new key -> JSON**
+8. A `.json` file downloads
+9. Open the JSON file, copy the ENTIRE content as a single line
+10. Paste it as the value of `GOOGLE_SERVICE_ACCOUNT_JSON`
+
+Then grant the service account access to your GA4 property:
+1. In the JSON file, find `client_email` (e.g., `ga4-reader@sagarlad-analytics.iam.gserviceaccount.com`)
+2. Go to [analytics.google.com](https://analytics.google.com) -> **Admin -> Property Access Management**
+3. Click **+ -> Add users**
+4. Paste the service account email, set role to **Viewer**, click **Add**
+
+**Important:** Paste the JSON as a single line (remove all newlines). The entire value should start with `{` and end with `}`.
+
+---
+
+### Credential #21: ADMIN_PHASE
+
+**What it does:** Controls which admin features are available. Set to `"2"` for full features.
+
+**Value:** `"2"`
+
+---
+
+### Complete .env Files
+
+#### apps/site/.env (for local development)
+
+```env
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+AUTH_SECRET="[generated value]"
+
+ADMIN_EMAIL="your-email@gmail.com"
+ADMIN_PASSWORD="your-strong-password"
+
+SUPABASE_URL="https://[PROJECT_REF].supabase.co"
+SUPABASE_ANON_KEY="[anon key from Supabase]"
+SUPABASE_SERVICE_ROLE_KEY="[service_role key from Supabase]"
+
+NEXT_PUBLIC_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+BREVO_API_KEY="xkeysib-..."
+BREVO_FROM_EMAIL="no-reply@sagarlad.com"
+BREVO_FROM_NAME="Sagar Lad"
+
+DAILY_EMAIL_LIMIT=300
+NEWSLETTER_BATCH_SIZE=20
+CRON_SECRET="[generated value]"
+NEWSLETTER_CRON=0
+
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+SITE_URL=http://localhost:3000
+```
+
+#### apps/admin/.env (for local development)
+
+```env
+DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres"
+DIRECT_URL="postgresql://postgres:[PASSWORD]@db.[PROJECT_REF].supabase.co:5432/postgres"
+AUTH_SECRET="[generated value]"
+
+ADMIN_EMAIL="your-email@gmail.com"
+ADMIN_PASSWORD="your-strong-password"
+
+SUPABASE_URL="https://[PROJECT_REF].supabase.co"
+SUPABASE_ANON_KEY="[anon key from Supabase]"
+SUPABASE_SERVICE_ROLE_KEY="[service_role key from Supabase]"
+
+NEXT_PUBLIC_GA_MEASUREMENT_ID="G-XXXXXXXXXX"
+GA_PROPERTY_ID="[numeric property ID]"
+GOOGLE_SERVICE_ACCOUNT_JSON='{"type":"service_account",...}'
+
+BREVO_API_KEY="xkeysib-..."
+BREVO_FROM_EMAIL="no-reply@sagarlad.com"
+BREVO_FROM_NAME="Sagar Lad"
+
+DAILY_EMAIL_LIMIT=300
+NEWSLETTER_BATCH_SIZE=20
+CRON_SECRET="[generated value]"
+NEWSLETTER_CRON=0
+
+SITE_URL=http://localhost:3000
+ADMIN_PHASE="2"
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+---
+
+## 11. Database Migration to Supabase
+
+This section covers migrating from your current database to a new Supabase instance.
+
+### 11.1: Understanding the Schema
+
+The platform uses Prisma ORM with PostgreSQL. The database has 14 tables:
+
+| Table | Purpose |
+|-------|---------|
+| `User` | Admin accounts with 2FA support |
+| `Account` | OAuth provider accounts |
+| `Session` | Active login sessions |
+| `VerificationToken` | Email verification tokens |
+| `AuditLogEntry` | Security/admin audit trail |
+| `Post` | Blog posts |
+| `Category` | Post/video categories |
+| `Comment` | Post comments |
+| `NewsletterSubscriber` | Newsletter subscribers |
+| `NewsletterCampaign` | Newsletter campaigns |
+| `NewsletterDelivery` | Per-subscriber send records |
+| `ContactRequest` | Contact form submissions |
+| `Book` | Published books, reads, ebooks |
+| `Video` | Video articles |
+| `SocialLink` | Social media links |
+| `Quote` | Quote library |
+| `RateLimitEntry` | API rate limiting |
+
+### 11.2: Option A - Fresh Start (No Data to Migrate)
+
+If you have no data to migrate (new deployment):
+
+```bash
+# 1. Install dependencies
+npm install
+
+# 2. Set up your new Supabase project (see Section 4.2)
+
+# 3. Update .env files with new Supabase credentials
+# Edit apps/site/.env and apps/admin/.env
+
+# 4. Run migrations
+npm run db:migrate
+
+# 5. Seed initial data (admin user, categories, etc.)
+npm run db:seed
+
+# 6. Verify
+npm run db:generate
+```
+
+### 11.3: Option B - Migrate Existing Data
+
+If you have data in another PostgreSQL database (e.g., local dev, old Supabase, Neon):
+
+#### Step 1: Dump the Old Database
+
+```bash
+# Using pg_dump (replace with your actual credentials)
+pg_dump -h [OLD_HOST] -U [OLD_USER] -d [OLD_DB] \
+  --no-owner --no-acl \
+  -f old_database_dump.sql
+
+# Or for Supabase specifically:
+pg_dump "postgresql://postgres.[OLD_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres" \
+  --no-owner --no-acl \
+  -f old_database_dump.sql
+```
+
+#### Step 2: Clean Up the Dump
+
+Open `old_database_dump.sql` and remove:
+- Schema creation lines (Prisma manages the schema)
+- `SET` statements at the top
+- Ownership commands
+
+Keep only:
+- `INSERT INTO` statements
+- `COPY` commands (data only)
+
+#### Step 3: Set Up the New Supabase Project
+
+1. Create new Supabase project (see Section 4.2)
+2. Run Prisma migrations first (creates the schema):
+
+```bash
+# Update .env with new Supabase credentials, then:
+npm install
+npm run db:migrate
+npm run db:generate
+```
+
+#### Step 4: Import Data
+
+**Method 1: Using Supabase SQL Editor (recommended)**
+
+1. Go to Supabase dashboard -> **SQL Editor**
+2. Open your `old_database_dump.sql`
+3. Paste the INSERT statements
+4. Click **Run**
+
+**Method 2: Using psql directly**
+
+```bash
+psql "postgresql://postgres.[NEW_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres" \
+  -f old_database_dump.sql
+```
+
+**Method 3: Table-by-table export/import**
+
+```bash
+# Export each table from old database
+pg_dump -h [OLD_HOST] -U [OLD_USER] -d [OLD_DB] \
+  -t "User" -t "Post" -t "Category" \
+  --data-only \
+  -f data_only.sql
+
+# Import into new database
+psql "postgresql://postgres.[NEW_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres" \
+  -f data_only.sql
+```
+
+#### Step 5: Handle ID Conflicts
+
+If migrating between Prisma databases, watch out for:
+- `cuid()` IDs may collide
+- Unique constraints on `email`, `slug`, etc.
+
+**Solution:** Clear existing data first, or use `ON CONFLICT DO NOTHING`:
+
+```sql
+-- Example: skip duplicates
+INSERT INTO "Post" (...) VALUES (...) ON CONFLICT DO NOTHING;
+```
+
+#### Step 6: Verify Migration
+
+```bash
+# Count rows in each table
+psql "postgresql://postgres.[NEW_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres" \
+  -c "SELECT schemaname, relname, n_live_tup 
+      FROM pg_stat_user_tables 
+      ORDER BY n_live_tup DESC;"
+
+# Check referential integrity
+psql "postgresql://postgres.[NEW_REF]:[PASSWORD]@aws-0-[REGION].pooler.supabase.com:6543/postgres" \
+  -c "SELECT conname, conrelid::regclass, confrelid::regclass 
+      FROM pg_constraint 
+      WHERE contype = 'f';"
+```
+
+### 11.4: Option C - Migrate Storage Buckets
+
+If you have files in Supabase Storage:
+
+```bash
+# List buckets
+supabase storage list
+
+# Download all files from a bucket
+supabase storage download media ./media-backup/
+
+# Upload to new project
+supabase storage create media --project [NEW_PROJECT_REF]
+supabase storage upload media ./media-backup/ --project [NEW_PROJECT_REF]
+```
+
+Or use the Supabase dashboard:
+1. Old project -> **Storage** -> select bucket -> **Download** all files
+2. New project -> **Storage** -> create same bucket -> **Upload** all files
+
+### 11.5: Update Connection Strings
+
+After migration, update your `.env` files:
+
+```env
+# Old
+DATABASE_URL="postgresql://postgres.oldref:password@aws-0-old-region.pooler.supabase.com:6543/postgres"
+
+# New
+DATABASE_URL="postgresql://postgres.newref:password@aws-0-new-region.pooler.supabase.com:6543/postgres"
+```
+
+Then update Vercel environment variables:
+1. Go to Vercel -> **Settings -> Environment Variables**
+2. Update `DATABASE_URL`, `DIRECT_URL`, `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+3. Redeploy both apps
+
+### 11.6: Migration Checklist
+
+- [ ] New Supabase project created
+- [ ] `npm run db:migrate` succeeds
+- [ ] `npm run db:seed` succeeds (if fresh start)
+- [ ] All data imported (if migrating data)
+- [ ] Row counts match old database
+- [ ] Storage buckets recreated
+- [ ] Files uploaded to storage
+- [ ] `.env` files updated with new credentials
+- [ ] Vercel env vars updated
+- [ ] Both apps redeployed
+- [ ] Admin login works
+- [ ] Blog posts display correctly
+- [ ] Images load from storage
+- [ ] Newsletter subscribers intact
+- [ ] Contact form submissions present
+
+---
+
+## 12. Post-Deployment Checklist
 
 After deployment, verify everything works:
 
@@ -442,7 +987,7 @@ After deployment, verify everything works:
 
 ---
 
-## 12. Strengths, Weaknesses and Failure Modes
+## 13. Strengths, Weaknesses and Failure Modes
 
 ### Strengths
 
@@ -490,7 +1035,7 @@ After deployment, verify everything works:
 
 ---
 
-## 13. Long-Term Viability
+## 14. Long-Term Viability
 
 ### Will This Stack Work for 1-3 Years?
 
@@ -536,7 +1081,7 @@ All of these support Next.js and would require minimal changes to deploy.
 
 ---
 
-## 14. Troubleshooting
+## 15. Troubleshooting
 
 ### "Site is not loading"
 1. Check dnschecker.org - is DNS propagating?
@@ -580,6 +1125,12 @@ All of these support Next.js and would require minimal changes to deploy.
 1. Check if project is paused (Supabase dashboard)
 2. Check DATABASE_URL includes port 6543 (pooler, not direct)
 3. Check connection pool limit (default 5 is usually fine)
+
+### "Migration failed"
+1. Check if DIRECT_URL is used (not DATABASE_URL) for `prisma migrate`
+2. Check if the old database dump has conflicting data
+3. Try `prisma db push` instead of `prisma migrate deploy` for quick sync
+4. Check Supabase logs for constraint violations
 
 ---
 

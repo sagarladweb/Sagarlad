@@ -1,11 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Quote as QuoteIcon,
-} from "lucide-react";
+import { Quote as QuoteIcon } from "lucide-react";
+import { DotPagination } from "@/components/ui/CarouselNav";
 
 const testimonials = [
   {
@@ -96,7 +93,7 @@ export function Testimonials() {
   const t = testimonials[index];
 
   return (
-    <section className="py-20 md:py-24 border-b border-border bg-card/40" aria-label="Testimonials">
+    <section className="py-20 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center" data-animate-group>
           <p data-animate-item className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
@@ -107,58 +104,55 @@ export function Testimonials() {
           </h2>
         </div>
 
-        <div
-          data-animate="zoom"
-          className="mt-12 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          <QuoteIcon className="w-10 h-10 mx-auto text-brand-light" aria-hidden="true" />
-          <blockquote className="mt-6 font-display text-xl sm:text-2xl md:text-3xl font-bold leading-snug min-h-[120px] sm:min-h-[140px] flex items-center justify-center">
-            &ldquo;{t.quote}&rdquo;
-          </blockquote>
-          <p className="mt-6 font-semibold">{t.name}</p>
-          <p className="mt-1 text-sm text-muted-foreground">{t.role}</p>
-        </div>
+        <div className="mt-12" data-animate="zoom">
+          <div className="flex items-center gap-3">
+            {/* Prev arrow */}
+            <button
+              type="button"
+              onClick={prev}
+              aria-label="Previous testimonial"
+              className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
+            </button>
 
-        <div className="mt-8 flex items-center justify-center gap-6">
-          <button
-            type="button"
-            onClick={prev}
-            aria-label="Previous testimonial"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border hover:bg-brand-light/10 hover:text-brand hover:border-brand-light/40 transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
+            {/* Card */}
+            <div
+              className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
+              onPointerDown={onPointerDown}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerLeave={onPointerUp}
+              onMouseEnter={() => setPaused(true)}
+              onMouseLeave={() => setPaused(false)}
+            >
+              <QuoteIcon className="w-10 h-10 mx-auto text-brand-light" aria-hidden="true" />
+              <blockquote className="mt-6 font-display text-xl sm:text-2xl md:text-3xl font-bold leading-snug min-h-[120px] sm:min-h-[140px] flex items-center justify-center">
+                &ldquo;{t.quote}&rdquo;
+              </blockquote>
+              <p className="mt-6 font-semibold">{t.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{t.role}</p>
+            </div>
 
-          <div className="flex items-center gap-2">
-            {testimonials.map((_, i) => (
-              <button
-                key={i}
-                type="button"
-                onClick={() => go(i)}
-                aria-label={`Go to testimonial ${i + 1}`}
-                aria-current={i === index}
-                className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-6 bg-accent" : "w-2 bg-muted-foreground/30"
-                }`}
-              />
-            ))}
+            {/* Next arrow */}
+            <button
+              type="button"
+              onClick={next}
+              aria-label="Next testimonial"
+              className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
+            </button>
           </div>
-
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next testimonial"
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-border hover:bg-brand-light/10 hover:text-brand hover:border-brand-light/40 transition-colors"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
         </div>
+
+        <DotPagination
+          total={total}
+          current={index}
+          onChange={go}
+          label="testimonial"
+          className="mt-8"
+        />
       </div>
     </section>
   );

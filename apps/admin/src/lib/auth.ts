@@ -37,7 +37,7 @@ function getIp(authRequest: { headers?: Headers } | undefined) {
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: {
     strategy: "jwt",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: 60 * 60 * 24, // 24 hours
     updateAge: 60 * 60, // refresh every hour
   },
   trustHost: true,
@@ -106,17 +106,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             Boolean(user?.passwordHash) &&
             (await compare(password, user?.passwordHash ?? ""));
 
-          // Environment fallback / bootstrap:
-          // If the user inputs credentials matching ADMIN_EMAIL and ADMIN_PASSWORD env vars,
-          // automatically sync/upsert the admin user and bcrypt hash in the database.
-          const envAdminEmail = (process.env.ADMIN_EMAIL ?? "sagarlad692@gmail.com")
+          // Environment bootstrap:
+          // If DB auth fails and user doesn't exist, create from env credentials.
+          // No plaintext comparison — password is hashed via bcrypt before storage.
+          const envAdminEmail = (process.env.ADMIN_EMAIL ?? "")
             .replace(/['"]/g, "")
             .trim()
             .toLowerCase();
           const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
 
-          if (!valid && envAdminPass && email === envAdminEmail && password === envAdminPass) {
-            const passwordHash = await hash(password, 12);
+          if (!valid && envAdminPass && email === envAdminEmail && !user) {
+            const passwordHash = await hash(envAdminPass, 12);
             user = await prisma.user.upsert({
               where: { email },
               update: { passwordHash, role: "ADMIN" },
@@ -127,7 +127,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
                 role: "ADMIN",
               },
             });
-            valid = true;
+            valid = await compare(password, user.passwordHash!);
           }
         } catch (err) {
           console.error("[auth] DB lookup failed during login:", err);
@@ -195,6 +195,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     async session({ session, token }) {
       if (session.user) {
+        // Always populate from the JWT first so the session is usable even if
+        // the DB is transiently unreachable (Supabase free-tier pauses, etc.).
+        // The DB lookup below enriches with fresh data but is not required for
+        // the session to carry the correct role.
+        session.user.id = token.id as string;
+        session.user.role = token.role as string;
+
         // A JWT can outlive its account (e.g. after a DB reset), which used to
         // surface as a cryptic FK error on save. Resolve the id against the DB
         // and drop the session if the account no longer exists so the user is
@@ -207,6 +214,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             select: { id: true, role: true, name: true, email: true, image: true },
           });
           if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
+          // Enrich with fresh DB data (role could have changed since JWT was issued).
           session.user.id = user.id;
           session.user.role = user.role;
           session.user.name = user.name;

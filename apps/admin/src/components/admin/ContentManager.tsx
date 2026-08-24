@@ -5,14 +5,14 @@ import { useRouter } from "next/navigation";
 import {
   Plus,
   Trash2,
-  Loader2,
   Pencil,
-  AlertCircle,
-  CheckCircle2,
   ArrowUpRight,
 } from "lucide-react";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
+import { showToast } from "@/components/admin/Toast";
 import { Modal } from "@/components/ui/Modal";
+import { Button, IconButton } from "@/components/ui/Button";
+import { inputCls } from "@/components/ui/Input";
 
 type CategoryItem = { id: string; title: string };
 
@@ -25,15 +25,10 @@ type Category = {
   videos: CategoryItem[];
 };
 
-const inputCls =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
-
 export function ContentManager() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
   const [busy, setBusy] = useState(false);
   const [modal, setModal] = useState<{ id: string | null; name: string } | null>(
     null
@@ -61,8 +56,6 @@ export function ContentManager() {
     const name = modal.name.trim();
     if (!name) return;
     setBusy(true);
-    setError("");
-    setOk("");
     const res = await fetch("/api/admin/categories", {
       method: modal.id ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
@@ -72,10 +65,10 @@ export function ContentManager() {
     setBusy(false);
     if (res.ok) {
       setModal(null);
-      setOk(modal.id ? "Topic renamed." : "Topic added. It now shows in the header Content menu.");
+      showToast(modal.id ? "Topic renamed." : "Topic added. It now shows in the header Content menu.");
       await load();
     } else {
-      setError(data.error ?? "Could not save topic.");
+      showToast(data.error ?? "Could not save topic.", undefined, "error");
     }
   }
 
@@ -94,17 +87,15 @@ export function ContentManager() {
       method: "DELETE",
     });
     if (res.ok) {
-      setOk(`Topic "${c.name}" deleted.`);
+      showToast(`Topic "${c.name}" deleted.`);
       await load();
     } else {
-      setError("Could not delete topic.");
+      showToast("Could not delete topic.", undefined, "error");
     }
   }
 
   const openModal = (c: { id: string | null; name: string }) => {
     setModal(c);
-    setError("");
-    setOk("");
   };
 
   return (
@@ -114,24 +105,10 @@ export function ContentManager() {
           {categories.length} topic{categories.length === 1 ? "" : "s"} in the
           Content menu
         </p>
-        <button
-          onClick={() => openModal({ id: null, name: "" })}
-          className="inline-flex shrink-0 items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
-        >
+        <Button onClick={() => openModal({ id: null, name: "" })} className="shrink-0">
           <Plus className="w-4 h-4" /> Add topic
-        </button>
+        </Button>
       </div>
-
-      {error && (
-        <p className="flex items-center gap-1.5 text-sm text-red-600" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
-      )}
-      {ok && (
-        <p className="flex items-center gap-1.5 text-sm text-emerald-600" role="status">
-          <CheckCircle2 className="w-4 h-4 shrink-0" /> {ok}
-        </p>
-      )}
 
       {modal && (
         <Modal
@@ -140,22 +117,12 @@ export function ContentManager() {
           onClose={() => setModal(null)}
           footer={
             <>
-              <button
-                type="submit"
-                form="topic-form"
-                disabled={busy || !modal.name.trim()}
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
-              >
-                {busy && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" form="topic-form" disabled={busy || !modal.name.trim()} loading={busy}>
                 {modal.id ? "Save" : "Add topic"}
-              </button>
-              <button
-                type="button"
-                onClick={() => setModal(null)}
-                className="flex-1 sm:flex-none rounded-full border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
+              </Button>
+              <Button type="button" variant="secondary" onClick={() => setModal(null)} className="flex-1 sm:flex-none">
                 Cancel
-              </button>
+              </Button>
             </>
           }
         >
@@ -211,20 +178,22 @@ export function ContentManager() {
                 </div>
               </button>
               <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                <button
+                <IconButton
+                  variant="secondary"
                   onClick={() => openModal({ id: c.id, name: c.name })}
-                  aria-label={`Rename topic ${c.name}`}
-                  className="rounded-lg border border-border bg-background p-1.5 text-muted-foreground shadow-sm hover:text-foreground transition-colors"
+                  title={`Rename topic ${c.name}`}
+                  className="border border-border bg-background shadow-sm"
                 >
                   <Pencil className="w-4 h-4" />
-                </button>
-                <button
+                </IconButton>
+                <IconButton
+                  variant="danger"
                   onClick={() => remove(c)}
-                  aria-label={`Delete topic ${c.name}`}
-                  className="rounded-lg border border-border bg-background p-1.5 text-muted-foreground shadow-sm hover:text-red-600 transition-colors"
+                  title={`Delete topic ${c.name}`}
+                  className="border border-border bg-background shadow-sm"
                 >
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </IconButton>
               </div>
             </li>
           ))}

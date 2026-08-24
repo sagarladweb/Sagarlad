@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import DOMPurify from "dompurify";
 import { X, Play } from "lucide-react";
 import { FaYoutube, FaInstagram } from "react-icons/fa6";
 import { youtubeId, youtubeEmbedUrl, youtubeWatchUrl, youtubeThumb } from "@/lib/youtube";
@@ -219,7 +220,7 @@ export function BlogVideoGrid({
           {playing.content && (
             <div
               className="mt-4 rounded-2xl bg-white p-5 text-sm text-neutral-800 leading-relaxed max-h-[40vh] overflow-y-auto prose prose-sm prose-neutral max-w-none [&_p]:my-3 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
-              dangerouslySetInnerHTML={{ __html: playing.content }}
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(playing.content) }}
             />
           )}
         </div>

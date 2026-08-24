@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import dns from "node:dns";
 
 import { requireAdmin } from "@/lib/requireAdmin";
 import { downloadToSupabase } from "@/lib/storage";
@@ -6,6 +7,54 @@ export const runtime = "nodejs";
 
 const META_VALUE =
   /<meta[^>]+(?:property|name)=["']([^"']+)["'][^>]+content=["']([^"']+)["']/gi;
+
+// Allowlist: only these domains can be fetched via SSRF
+const ALLOWED_HOSTS = new Set([
+  "amazon.com",
+  "www.amazon.com",
+  "m.media-amazon.com",
+  "goodreads.com",
+  "www.goodreads.com",
+  "openlibrary.org",
+  "covers.openlibrary.org",
+  "archive.org",
+  "www.archive.org",
+]);
+
+function isAllowedUrl(raw: string): { ok: boolean; error?: string } {
+  try {
+    const u = new URL(raw);
+    if (u.protocol !== "https:") return { ok: false, error: "Only HTTPS URLs are allowed" };
+    if (!ALLOWED_HOSTS.has(u.hostname)) {
+      return { ok: false, error: "Domain not in allowlist" };
+    }
+    return { ok: true };
+  } catch {
+    return { ok: false, error: "Invalid URL" };
+  }
+}
+
+async function isPrivateHost(hostname: string): Promise<boolean> {
+  try {
+    const addresses = await dns.promises.lookup(hostname, { all: true });
+    return addresses.some((a) => {
+      const ip = a.address;
+      return (
+        ip === "127.0.0.1" ||
+        ip === "::1" ||
+        ip === "0.0.0.0" ||
+        /^10\./.test(ip) ||
+        /^172\.(1[6-9]|2\d|3[01])\./.test(ip) ||
+        /^192\.168\./.test(ip) ||
+        /^169\.254\./.test(ip) ||
+        /^fc00:/i.test(ip) ||
+        /^fe80:/i.test(ip)
+      );
+    });
+  } catch {
+    return true; // fail closed
+  }
+}
 
 function meta(html: string, keys: string[]): string | null {
   let m: RegExpExecArray | null;
@@ -39,24 +88,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "Missing url" }, { status: 400 });
   }
 
-  // Block private/internal IPs to prevent SSRF
-  try {
-    const u = new URL(link);
-    const host = u.hostname;
-    if (
-      host === "localhost" ||
-      host === "0.0.0.0" ||
-      host === "127.0.0.1" ||
-      host === "::1" ||
-      /^10\./.test(host) ||
-      /^172\.(1[6-9]|2\d|3[01])\./.test(host) ||
-      /^192\.168\./.test(host) ||
-      /^169\.254\./.test(host)
-    ) {
-      return NextResponse.json({ error: "Private/internal URLs are not allowed" }, { status: 400 });
-    }
-  } catch {
-    return NextResponse.json({ error: "Invalid URL" }, { status: 400 });
+  // Allowlist check — only known domains
+  const check = isAllowedUrl(link);
+  if (!check.ok) {
+    return NextResponse.json({ error: check.error }, { status: 400 });
+  }
+
+  // DNS resolution check — block private IPs even if domain resolves to them
+  const u = new URL(link);
+  if (await isPrivateHost(u.hostname)) {
+    return NextResponse.json({ error: "Private/internal URLs are not allowed" }, { status: 400 });
   }
 
   const asin = amazonAsin(link);

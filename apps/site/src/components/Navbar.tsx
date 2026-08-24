@@ -383,7 +383,7 @@ export function Navbar() {
               <Link
                 href="/blog"
                 onClick={() => setHovered(null)}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
+                className={`menu-trigger flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
                   pathname.startsWith("/blog") ||
                   pathname.startsWith("/content") ||
                   pathname.startsWith("/quotes") ||
@@ -406,27 +406,24 @@ export function Navbar() {
               {hovered === "Blogs" && (
                 <div className="absolute left-1/2 -translate-x-1/2 top-full pt-2 w-56 z-50">
                   <div className="rounded-xl border border-border bg-background/95 backdrop-blur-md shadow-lg p-2">
-                    <Link
+                    <FlyoutLink
                       href="/blog"
+                      icon={<FileText className="w-4 h-4" />}
+                      title="Blog"
                       onClick={() => setHovered(null)}
-                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
-                    >
-                      Blog
-                    </Link>
-                    <Link
+                    />
+                    <FlyoutLink
                       href="/videos"
+                      icon={<Film className="w-4 h-4" />}
+                      title="Videos"
                       onClick={() => setHovered(null)}
-                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
-                    >
-                      Videos
-                    </Link>
-                    <Link
+                    />
+                    <FlyoutLink
                       href="/quotes"
+                      icon={<MessageSquareQuote className="w-4 h-4" />}
+                      title="Quotes"
                       onClick={() => setHovered(null)}
-                      className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
-                    >
-                      Quotes
-                    </Link>
+                    />
 
                     <div className="border-t border-border my-1.5" />
 
@@ -461,16 +458,16 @@ export function Navbar() {
               )}
             </div>
 
-            {/* Books mega menu */}
+            {/* Books — clicking opens /books; hover shows sub-pages */}
             <div
               className="relative"
               onMouseEnter={() => setHovered("Books")}
               onMouseLeave={() => setHovered(null)}
             >
-              <button
-                type="button"
-                aria-expanded={hovered === "Books"}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
+              <Link
+                href="/books"
+                onClick={() => setHovered(null)}
+                className={`menu-trigger flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
                   isActive("/books") || isActive("/books-read") || isActive("/ebooks")
                     ? "bg-brand text-white font-semibold"
                     : heroLight
@@ -485,7 +482,7 @@ export function Navbar() {
                     hovered === "Books" ? "rotate-180" : ""
                   }`}
                 />
-              </button>
+              </Link>
 
               {hovered === "Books" && (
                 <div className="absolute left-0 top-full pt-2 w-72 z-50">
@@ -555,7 +552,6 @@ export function Navbar() {
                       href="/books-read"
                       icon={<BookMarked className="w-4 h-4" />}
                       title="Books I Read"
-                      desc="Books that shaped me"
                       onClick={() => setHovered(null)}
                     />
 
@@ -564,7 +560,6 @@ export function Navbar() {
                       href="/ebooks"
                       icon={<Library className="w-4 h-4" />}
                       title="E-books"
-                      desc="Guides & downloads"
                       onClick={() => setHovered(null)}
                     />
                   </div>
@@ -572,16 +567,16 @@ export function Navbar() {
               )}
             </div>
 
-            {/* About mega menu (About Me + Public Speaking) */}
+            {/* About — clicking opens /about; hover shows sub-pages */}
             <div
               className="relative"
               onMouseEnter={() => setHovered("About")}
               onMouseLeave={() => setHovered(null)}
             >
-              <button
-                type="button"
-                aria-expanded={hovered === "About"}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
+              <Link
+                href="/about"
+                onClick={() => setHovered(null)}
+                className={`menu-trigger flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
                   isActive("/about") || isActive("/speaking")
                     ? "bg-brand text-white font-semibold"
                     : heroLight
@@ -596,7 +591,7 @@ export function Navbar() {
                     hovered === "About" ? "rotate-180" : ""
                   }`}
                 />
-              </button>
+              </Link>
 
               {hovered === "About" && (
                 <div className="absolute left-0 top-full pt-2 w-72 z-50">
@@ -605,14 +600,12 @@ export function Navbar() {
                       href="/about"
                       icon={<User className="w-4 h-4" />}
                       title="About Me"
-                      desc="My story & journey"
                       onClick={() => setHovered(null)}
                     />
                     <FlyoutLink
                       href="/speaking"
                       icon={<Mic2 className="w-4 h-4" />}
                       title="Public Speaking"
-                      desc="Keynotes & talks"
                       onClick={() => setHovered(null)}
                     />
                   </div>

@@ -33,7 +33,6 @@ import {
   Heading1,
   Heading2,
   List,
-  ListOrdered,
   Quote as QuoteIcon,
   Link as LinkIcon,
   Image as ImageIcon,
@@ -1382,6 +1381,23 @@ export function TipTapEditor({
     return () => document.removeEventListener("keydown", handler);
   }, [editor, linkOpen]);
 
+  // Viewport rect of the selected media node. The image's own DOM rect is more
+  // accurate than coordsAtPos (which can measure line-height for floats), and
+  // it's exactly what the drag-resize grip needs to sit on the corner.
+  const rectOfSelected = (ed: Editor) => {
+    const { selection } = ed.state;
+    if (!(selection instanceof NodeSelection)) return null;
+    const node = selection.node;
+    if (node?.type.name !== "image" && node?.type.name !== "embed") return null;
+    const dom = ed.view.nodeDOM(selection.$from.pos) as HTMLElement | null;
+    if (dom) {
+      const r = dom.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, width: r.width };
+    }
+    const c = ed.view.coordsAtPos(selection.$from.pos);
+    return { top: c.top, bottom: c.bottom, left: c.left, width: c.right - c.left };
+  };
+
   // Track when an image or embed node is selected so we can show layout controls.
   useEffect(() => {
     if (!editor) return;
@@ -1480,23 +1496,6 @@ export function TipTapEditor({
   const deleteSelectedNode = () => {
     if (!editor) return;
     editor.chain().focus().deleteSelection().run();
-  };
-
-  // Viewport rect of the selected media node. The image's own DOM rect is more
-  // accurate than coordsAtPos (which can measure line-height for floats), and
-  // it's exactly what the drag-resize grip needs to sit on the corner.
-  const rectOfSelected = (ed: Editor) => {
-    const { selection } = ed.state;
-    if (!(selection instanceof NodeSelection)) return null;
-    const node = selection.node;
-    if (node?.type.name !== "image" && node?.type.name !== "embed") return null;
-    const dom = ed.view.nodeDOM(selection.$from.pos) as HTMLElement | null;
-    if (dom) {
-      const r = dom.getBoundingClientRect();
-      return { top: r.top, bottom: r.bottom, left: r.left, width: r.width };
-    }
-    const c = ed.view.coordsAtPos(selection.$from.pos);
-    return { top: c.top, bottom: c.bottom, left: c.left, width: c.right - c.left };
   };
 
   // Keep the editor's <img> element in sync with the node's dataWidth attr —

@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
+import crypto from "node:crypto";
 import { processNewsletterQueue } from "@/lib/newsletter";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+}
 
 // Triggered by Vercel Cron, an external scheduler (e.g. GitHub Actions), or a
 // crontab on a self-hosted server. Requires CRON_SECRET so randoms can't drain
 // the daily email quota. Both GET (Vercel Cron default) and POST are accepted.
 async function drain(request: Request) {
   const secret = process.env.CRON_SECRET;
-  if (!secret || request.headers.get("authorization") !== `Bearer ${secret}`) {
+  const authHeader = request.headers.get("authorization") ?? "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  if (!secret || !timingSafeEqual(token, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

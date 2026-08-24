@@ -1,14 +1,9 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from "@/lib/gsap";
 import { TrendingUp, Users, Eye } from "lucide-react";
 import { METRICS } from "@/lib/metrics";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 type Stat = {
   icon: typeof TrendingUp;
@@ -60,17 +55,18 @@ export function BookStats() {
         render();
         gsap.fromTo(
           item,
-          { opacity: 0, y: 24 },
+          { opacity: 0, y: 24, filter: "blur(3px)" },
           {
             opacity: 1,
             y: 0,
+            filter: "blur(0px)",
             duration: 0.7,
             delay: i * 0.1,
             ease: "power3.out",
             scrollTrigger: {
               trigger: item,
               start: "top 88%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );
@@ -86,7 +82,7 @@ export function BookStats() {
             scrollTrigger: {
               trigger: item,
               start: "top 88%",
-              toggleActions: "play none none reverse",
+              toggleActions: "play none none none",
             },
           }
         );

@@ -59,6 +59,7 @@ export function PostPreview({
 
   // New URL → new iframe (key change) → back to the loading state.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- reset loading state on URL change
     setLoaded(false);
   }, [url]);
 

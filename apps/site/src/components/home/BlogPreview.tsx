@@ -34,7 +34,7 @@ export function BlogPreview({
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={post.coverImage || postCover(post.slug)}
-                  alt=""
+                  alt={post.title}
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                   loading="lazy"
                 />

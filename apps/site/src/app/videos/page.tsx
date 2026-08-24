@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { FaYoutube, FaInstagram } from "react-icons/fa6";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getPublishedVideos } from "@/lib/content";
 import { VideoFeed } from "@/components/video/VideoFeed";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Videos",
@@ -21,6 +22,16 @@ export default async function VideosPage() {
 
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Videos", item: `${SITE.url}/videos` },
+          ],
+        }}
+      />
       <PageHeader
         eyebrow="Videos"
         title="Learn by watching"

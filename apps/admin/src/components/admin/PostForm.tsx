@@ -72,7 +72,7 @@ export function PostForm({
   const [uploadMessage, setUploadMessage] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [categoryOptions, setCategoryOptions] = useState(categories);
+  const [categoryOptions] = useState(categories);
 
   async function onUploadFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -376,7 +376,6 @@ export function PostForm({
         if (raw) draft = JSON.parse(raw);
       } catch {}
       if (!draft || typeof draft.form !== "object") return null;
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time draft restore on mount, guarded by the localStorage read above
       setForm((f) => ({ ...f, ...draft!.form }));
       if (withPostId && draft.postId) setPostId(draft.postId);
       return draft;
@@ -394,6 +393,7 @@ export function PostForm({
       } catch {}
       if (dirty === "1") restore(EDIT_DRAFT_KEY, false);
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration gate
     setHydrated(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

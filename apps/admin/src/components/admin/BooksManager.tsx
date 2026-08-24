@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { showToast } from "@/components/admin/Toast";
 import {
   Plus,
   Trash2,
   Loader2,
   Pencil,
-  AlertCircle,
-  CheckCircle2,
   Link2,
   FileUp,
 } from "lucide-react";
@@ -15,6 +14,7 @@ import { ImageUpload } from "@/components/admin/ImageUpload";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Modal } from "@/components/ui/Modal";
+import { inputCls } from "@/components/ui/Input";
 
 type BookType = "PUBLISHED" | "READ" | "EBOOK";
 
@@ -77,9 +77,6 @@ const TABS: { value: BookType | "ALL"; label: string }[] = [
   { value: "EBOOK", label: "E-books" },
 ];
 
-const inputCls =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
-
 export function BooksManager() {
   const [books, setBooks] = useState<Book[]>([]);
   const [tab, setTab] = useState<BookType | "ALL">("ALL");
@@ -88,17 +85,13 @@ export function BooksManager() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [importing, setImporting] = useState(false);
-  const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
 
   async function importFromLink() {
     if (!editing || !editing.buyUrl.trim()) {
-      setError("Enter a buy link first, then import.");
+      showToast("Enter a buy link first, then import.", undefined, "error");
       return;
     }
     setImporting(true);
-    setError("");
-    setOk("");
     try {
       const res = await fetch(
         `/api/admin/books/import?url=${encodeURIComponent(editing.buyUrl.trim())}`
@@ -111,12 +104,12 @@ export function BooksManager() {
           description: data.description || editing.description,
           imageUrl: data.imageUrl || editing.imageUrl,
         });
-        setOk("Book details imported from the link.");
+        showToast("Book details imported from the link.");
       } else {
-        setError(data.error ?? "Could not import from that link.");
+        showToast(data.error ?? "Could not import from that link.", undefined, "error");
       }
     } catch {
-      setError("Could not reach the link.");
+      showToast("Could not reach the link.", undefined, "error");
     } finally {
       setImporting(false);
     }
@@ -125,15 +118,13 @@ export function BooksManager() {
   async function handleUploadEbook(file: File) {
     if (!file) return;
     if (!["application/pdf", "application/epub+zip", "application/x-mobipocket-ebook", "application/vnd.amazon.ebook"].includes(file.type)) {
-      setError("Unsupported file type. Use PDF, EPUB, MOBI or AZW3.");
+      showToast("Unsupported file type. Use PDF, EPUB, MOBI or AZW3.", undefined, "error");
       return;
     }
     if (file.size > 25 * 1024 * 1024) {
-      setError("File too large. Max size is 25MB.");
+      showToast("File too large. Max size is 25MB.", undefined, "error");
       return;
     }
-    setError("");
-    setOk("");
     try {
       const fd = new FormData();
       fd.append("file", file);
@@ -141,19 +132,17 @@ export function BooksManager() {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.path) {
         setEditing({ ...editing!, fileKey: data.path });
-        setOk("E-book file uploaded (stored privately).");
+        showToast("E-book file uploaded (stored privately).");
       } else {
-        setError(data.error ?? "Could not upload the file.");
+        showToast(data.error ?? "Could not upload the file.", undefined, "error");
       }
     } catch {
-      setError("Could not upload the file.");
+      showToast("Could not upload the file.", undefined, "error");
     }
   }
 
   async function handlePastedImage(dataUrl: string) {
     if (!editing) return;
-    setError("");
-    setOk("");
     try {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
@@ -163,12 +152,12 @@ export function BooksManager() {
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
         setEditing({ ...editing, imageUrl: data.url });
-        setOk("Pasted image uploaded.");
+        showToast("Pasted image uploaded.");
       } else {
-        setError(data.error ?? "Could not upload that image.");
+        showToast(data.error ?? "Could not upload that image.", undefined, "error");
       }
     } catch {
-      setError("Could not upload the pasted image.");
+      showToast("Could not upload the pasted image.", undefined, "error");
     }
   }
 
@@ -192,8 +181,6 @@ export function BooksManager() {
     const targetType = type ?? (tab === "ALL" ? "PUBLISHED" : tab);
     setEditing({ ...empty, type: targetType });
     setEditingId(null);
-    setError("");
-    setOk("");
   }
 
   function startEdit(b: Book) {
@@ -214,24 +201,19 @@ export function BooksManager() {
       sortOrder: b.sortOrder,
     });
     setEditingId(b.id);
-    setError("");
-    setOk("");
   }
 
   function cancelEdit() {
     setEditing(null);
     setEditingId(null);
-    setError("");
   }
 
   async function save() {
     if (!editing || !editing.title.trim()) {
-      setError("Title is required.");
+      showToast("Title is required.", undefined, "error");
       return;
     }
     setBusy(true);
-    setError("");
-    setOk("");
     const savedType = editing.type;
     const payload = {
       ...(editingId ? { id: editingId } : {}),
@@ -259,13 +241,13 @@ export function BooksManager() {
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Something went wrong.");
+      showToast(data.error ?? "Something went wrong.", undefined, "error");
       return;
     }
     setEditing(null);
     setEditingId(null);
     setTab(savedType);
-    setOk(editingId ? "Book updated successfully." : `Book added to ${TABS.find(t => t.value === savedType)?.label}.`);
+    showToast(editingId ? "Book updated successfully." : `Book added to ${TABS.find(t => t.value === savedType)?.label}.`);
     await load();
   }
 
@@ -298,7 +280,6 @@ export function BooksManager() {
             value={tab}
             onChange={(v) => {
               setTab(v as BookType | "ALL");
-              if (!editing) setOk("");
             }}
             options={[
               { value: "ALL", label: `All (${books.length})` },
@@ -320,17 +301,6 @@ export function BooksManager() {
           </button>
         )}
       </div>
-
-      {error && (
-        <p className="flex items-center gap-1.5 text-sm text-red-600" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
-      )}
-      {ok && (
-        <p className="flex items-center gap-1.5 text-sm text-emerald-600" role="status">
-          <CheckCircle2 className="w-4 h-4 shrink-0" /> {ok}
-        </p>
-      )}
 
       {editing && (
         <Modal

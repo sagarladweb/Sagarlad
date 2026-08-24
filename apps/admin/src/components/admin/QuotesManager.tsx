@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, Loader2, Pencil, AlertCircle, CheckCircle2 } from "lucide-react";
+import { Plus, Trash2, Pencil } from "lucide-react";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
+import { showToast } from "@/components/admin/Toast";
 import { Modal } from "@/components/ui/Modal";
+import { Button, IconButton } from "@/components/ui/Button";
+import { Badge } from "@/components/ui/Badge";
+import { inputCls } from "@/components/ui/Input";
 
 type Quote = {
   id: string;
@@ -11,17 +15,12 @@ type Quote = {
   tag: string;
 };
 
-const inputCls =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full";
-
 export function QuotesManager() {
   const [quotes, setQuotes] = useState<Quote[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Quote | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const [ok, setOk] = useState("");
 
   async function load() {
     try {
@@ -42,31 +41,24 @@ export function QuotesManager() {
   function startNew() {
     setEditing({ id: "", text: "", tag: "" });
     setEditingId(null);
-    setError("");
-    setOk("");
   }
 
   function startEdit(q: Quote) {
     setEditing({ ...q });
     setEditingId(q.id);
-    setError("");
-    setOk("");
   }
 
   function cancelEdit() {
     setEditing(null);
     setEditingId(null);
-    setError("");
   }
 
   async function save() {
     if (!editing || !editing.text.trim() || !editing.tag.trim()) {
-      setError("Text and tag are required.");
+      showToast("Text and tag are required.", undefined, "error");
       return;
     }
     setBusy(true);
-    setError("");
-    setOk("");
     const payload = {
       ...(editingId ? { id: editingId } : {}),
       text: editing.text.trim(),
@@ -80,12 +72,12 @@ export function QuotesManager() {
     const data = await res.json().catch(() => ({}));
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Something went wrong.");
+      showToast(data.error ?? "Something went wrong.", undefined, "error");
       return;
     }
     setEditing(null);
     setEditingId(null);
-    setOk(editingId ? "Quote updated successfully." : "Quote added successfully.");
+    showToast(editingId ? "Quote updated successfully." : "Quote added successfully.");
     await load();
   }
 
@@ -112,25 +104,11 @@ export function QuotesManager() {
           {quotes.length} quote{quotes.length === 1 ? "" : "s"}
         </p>
         {!editing && (
-          <button
-            onClick={startNew}
-            className="ml-auto inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold hover:opacity-90 transition-opacity shadow-sm"
-          >
+          <Button onClick={startNew} className="ml-auto">
             <Plus className="w-4 h-4" /> Add quote
-          </button>
+          </Button>
         )}
       </div>
-
-      {error && (
-        <p className="flex items-center gap-1.5 text-sm text-red-600" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
-      )}
-      {ok && (
-        <p className="flex items-center gap-1.5 text-sm text-emerald-600" role="status">
-          <CheckCircle2 className="w-4 h-4 shrink-0" /> {ok}
-        </p>
-      )}
 
       {editing && (
         <Modal
@@ -139,22 +117,12 @@ export function QuotesManager() {
           onClose={cancelEdit}
           footer={
             <>
-              <button
-                type="submit"
-                form="quote-form"
-                disabled={busy}
-                className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold disabled:opacity-60"
-              >
-                {busy && <Loader2 className="w-4 h-4 animate-spin" />}
+              <Button type="submit" form="quote-form" disabled={busy} loading={busy}>
                 {editingId ? "Save changes" : "Add quote"}
-              </button>
-              <button
-                type="button"
-                onClick={cancelEdit}
-                className="flex-1 sm:flex-none rounded-full border border-border px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-              >
+              </Button>
+              <Button type="button" variant="secondary" onClick={cancelEdit} className="flex-1 sm:flex-none">
                 Cancel
-              </button>
+              </Button>
             </>
           }
         >
@@ -201,26 +169,16 @@ export function QuotesManager() {
               className="flex items-center gap-4 rounded-2xl border border-border bg-card card-grad p-4"
             >
               <div className="min-w-0 flex-1">
-                <p className="font-medium">“{q.text}”</p>
-                <span className="mt-1 inline-block rounded-full bg-accent/15 text-accent px-2 py-0.5 text-xs">
-                  {q.tag}
-                </span>
+                <p className="font-medium">&ldquo;{q.text}&rdquo;</p>
+                <Badge variant="accent" className="mt-1">{q.tag}</Badge>
               </div>
               <div className="flex items-center gap-1 shrink-0">
-                <button
-                  onClick={() => startEdit(q)}
-                  aria-label="Edit quote"
-                  className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
-                >
+                <IconButton onClick={() => startEdit(q)} title="Edit quote">
                   <Pencil className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => remove(q.id)}
-                  aria-label="Delete quote"
-                  className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50"
-                >
+                </IconButton>
+                <IconButton variant="danger" onClick={() => remove(q.id)} title="Delete quote">
                   <Trash2 className="w-4 h-4" />
-                </button>
+                </IconButton>
               </div>
             </li>
           ))}

@@ -2,8 +2,9 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { ArrowRight, Film, FileText } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getCategories } from "@/lib/content";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Content",
@@ -19,6 +20,16 @@ export default async function ContentPage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Content", item: `${SITE.url}/content` },
+          ],
+        }}
+      />
       <PageHeader
         eyebrow="Content"
         title="Learn by topic"

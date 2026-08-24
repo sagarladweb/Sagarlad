@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     const path = await uploadEbook({ buffer, mime: file.type, filename: file.name });
     return NextResponse.json({ path });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Upload failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[ebook] upload failed:", err);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

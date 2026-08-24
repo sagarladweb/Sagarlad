@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  Trash2,
-  Download,
-  Search,
-} from "lucide-react";
+import { Trash2, Download, Search } from "lucide-react";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { Button, IconButton } from "@/components/ui/Button";
+import { Badge, CountBadge } from "@/components/ui/Badge";
 import { SITE } from "@/lib/site";
+import { showToast } from "@/components/admin/Toast";
 
 type Subscriber = { id: string; email: string; createdAt: string };
 type Comment = {
@@ -84,12 +83,61 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
+function EnquiryList({
+  enquiries,
+  onDelete,
+}: {
+  enquiries: Enquiry[];
+  onDelete: (id: string) => void;
+}) {
+  if (enquiries.length === 0) {
+    return <EmptyState text="No inquiries yet." />;
+  }
+
+  return (
+    <ul className="divide-y divide-border border-y border-border">
+      {enquiries.map((e) => (
+        <li key={e.id} className="py-4 flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold text-sm">
+                {`${e.firstName} ${e.lastName ?? ""}`.trim()}
+              </span>
+              <Badge variant="muted">{e.type}</Badge>
+              <time className="text-xs text-muted-foreground" dateTime={e.createdAt}>
+                {new Date(e.createdAt).toLocaleString()}
+              </time>
+            </div>
+            <p className="text-sm">
+              <a href={`mailto:${e.email}`} className="text-accent hover:underline">
+                {e.email}
+              </a>
+              {e.phone && <span className="text-muted-foreground"> · {e.phone}</span>}
+            </p>
+            <p className="text-sm text-muted-foreground">{e.organization}</p>
+            {e.eventDate && (
+              <p className="text-sm text-muted-foreground">
+                Event date: {new Date(e.eventDate).toLocaleDateString()}
+              </p>
+            )}
+            {e.message && (
+              <p className="text-sm text-muted-foreground leading-relaxed">{e.message}</p>
+            )}
+          </div>
+          <IconButton variant="danger" onClick={() => onDelete(e.id)} title="Delete inquiry">
+            <Trash2 className="w-4 h-4" />
+          </IconButton>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function ModerationPanel() {
   const [data, setData] = useState<Data | null>(null);
   const [tab, setTab] = useState<Tab>(() => tabFromUrl());
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [subscriberFilter, setSubscriberFilter] = useState("");
-  const [error, setError] = useState("");
 
   async function load(): Promise<boolean> {
     try {
@@ -121,7 +169,7 @@ export function ModerationPanel() {
       body: JSON.stringify({ kind, action: "delete", ids }),
     });
     if (!res.ok) {
-      setError("Action failed. Please try again.");
+      showToast("Action failed. Please try again.", undefined, "error");
       return;
     }
     setSelected(new Set());
@@ -208,12 +256,6 @@ export function ModerationPanel() {
         </p>
       </header>
 
-      {error && (
-        <p className="rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600" role="alert">
-          {error}
-        </p>
-      )}
-
       <div className="flex gap-2 border-b border-border">
         {TABS.map((t) => (
           <button
@@ -227,13 +269,7 @@ export function ModerationPanel() {
             }`}
           >
             {t}
-            <span
-              className={`ml-2 inline-flex rounded-full px-2 py-0.5 text-xs font-bold ${
-                tab === t ? "bg-accent text-accent-foreground" : "bg-muted text-muted-foreground"
-              }`}
-            >
-              {counts[t]}
-            </span>
+            <CountBadge count={counts[t]} active={tab === t} />
           </button>
         ))}
       </div>
@@ -247,10 +283,7 @@ export function ModerationPanel() {
               <label className="flex items-center gap-2 text-sm">
                 <input
                   type="checkbox"
-                  checked={
-                    data.comments.length > 0 &&
-                    data.comments.every((c) => selected.has(c.id))
-                  }
+                  checked={data.comments.length > 0 && data.comments.every((c) => selected.has(c.id))}
                   onChange={() => toggleAll(data.comments.map((c) => c.id))}
                   className="accent-[var(--accent)]"
                 />
@@ -258,9 +291,7 @@ export function ModerationPanel() {
               </label>
               {selected.size > 0 && (
                 <>
-                  <span className="text-xs text-muted-foreground">
-                    {selected.size} selected
-                  </span>
+                  <span className="text-xs text-muted-foreground">{selected.size} selected</span>
                   <div className="w-52">
                     <Dropdown
                       id="comment-actions"
@@ -275,13 +306,9 @@ export function ModerationPanel() {
                   </div>
                 </>
               )}
-              <button
-                type="button"
-                onClick={exportCommentsCsv}
-                className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent transition-colors ml-auto"
-              >
+              <Button variant="secondary" size="sm" onClick={exportCommentsCsv} className="ml-auto">
                 <Download className="w-4 h-4" /> Export CSV
-              </button>
+              </Button>
             </div>
           )}
           {data.comments.length === 0 ? (
@@ -302,33 +329,20 @@ export function ModerationPanel() {
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">{c.name}</span>
                         {c.email && (
-                          <a
-                            href={`mailto:${c.email}`}
-                            className="text-xs text-muted-foreground hover:text-accent"
-                          >
+                          <a href={`mailto:${c.email}`} className="text-xs text-muted-foreground hover:text-accent">
                             {c.email}
                           </a>
                         )}
-                        <span className="text-xs text-muted-foreground">
-                          on {c.post.title}
-                        </span>
+                        <span className="text-xs text-muted-foreground">on {c.post.title}</span>
                         <time className="text-xs text-muted-foreground" dateTime={c.createdAt}>
                           {new Date(c.createdAt).toLocaleString()}
                         </time>
                       </div>
-                      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                        {c.content}
-                      </p>
+                      <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{c.content}</p>
                       <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold ${
-                            c.approved
-                              ? "bg-green-50 text-green-700 dark:bg-green-500/15 dark:text-green-400"
-                              : "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"
-                          }`}
-                        >
+                        <Badge variant={c.approved ? "success" : "warning"}>
                           {c.approved ? "Approved" : "Pending"}
-                        </span>
+                        </Badge>
                         <a
                           href={`${SITE.url}/blog/${c.post.slug}`}
                           target="_blank"
@@ -356,14 +370,9 @@ export function ModerationPanel() {
                       </div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => act("comment", [c.id])}
-                    aria-label="Delete comment"
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
+                  <IconButton variant="danger" onClick={() => act("comment", [c.id])} title="Delete comment">
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </IconButton>
                 </li>
               ))}
             </ul>
@@ -382,14 +391,9 @@ export function ModerationPanel() {
                 className="w-full rounded-xl border border-border bg-background pl-9 pr-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
-            <button
-              type="button"
-              onClick={exportSubscribersCsv}
-              disabled={data.subscribers.length === 0}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent disabled:opacity-50 transition-colors"
-            >
+            <Button variant="secondary" size="sm" onClick={exportSubscribersCsv} disabled={data.subscribers.length === 0}>
               <Download className="w-4 h-4" /> Export CSV
-            </button>
+            </Button>
           </div>
           {filteredSubscribers.length === 0 ? (
             <EmptyState text={subscriberFilter ? "No subscribers match your filter." : "No subscribers yet."} />
@@ -399,18 +403,11 @@ export function ModerationPanel() {
                 <li key={s.id} className="py-3 flex items-center justify-between gap-4">
                   <div className="min-w-0">
                     <p className="text-sm truncate">{s.email}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(s.createdAt).toLocaleString()}
-                    </p>
+                    <p className="text-xs text-muted-foreground">{new Date(s.createdAt).toLocaleString()}</p>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => act("subscriber", [s.id])}
-                    aria-label="Remove subscriber"
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
+                  <IconButton variant="danger" onClick={() => act("subscriber", [s.id])} title="Remove subscriber">
                     <Trash2 className="w-4 h-4" />
-                  </button>
+                  </IconButton>
                 </li>
               ))}
             </ul>
@@ -419,8 +416,9 @@ export function ModerationPanel() {
       ) : tab === "Contact" ? (
         <div>
           <div className="mb-4 flex justify-end">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 if (!data) return;
                 download("contact-enquiries.csv", [
@@ -438,58 +436,18 @@ export function ModerationPanel() {
                 ]);
               }}
               disabled={contactEnquiries.length === 0}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent disabled:opacity-50 transition-colors"
             >
               <Download className="w-4 h-4" /> Export CSV
-            </button>
+            </Button>
           </div>
-          {contactEnquiries.length === 0 ? (
-            <EmptyState text="No contact form submissions yet." />
-          ) : (
-            <ul className="divide-y divide-border border-y border-border">
-              {contactEnquiries.map((e) => (
-                <li key={e.id} className="py-4 flex items-start justify-between gap-4">
-                  <div className="min-w-0 space-y-1.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm">
-                        {`${e.firstName} ${e.lastName ?? ""}`.trim()}
-                      </span>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {e.type}
-                      </span>
-                      <time className="text-xs text-muted-foreground" dateTime={e.createdAt}>
-                        {new Date(e.createdAt).toLocaleString()}
-                      </time>
-                    </div>
-                    <p className="text-sm">
-                      <a href={`mailto:${e.email}`} className="text-accent hover:underline">
-                        {e.email}
-                      </a>
-                      {e.phone && <span className="text-muted-foreground"> · {e.phone}</span>}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{e.organization}</p>
-                    {e.message && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">{e.message}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => act("enquiry", [e.id])}
-                    aria-label="Delete enquiry"
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <EnquiryList enquiries={contactEnquiries} onDelete={(id) => act("enquiry", [id])} />
         </div>
       ) : (
         <div>
           <div className="mb-4 flex justify-end">
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => {
                 if (!data) return;
                 download("speaking-enquiries.csv", [
@@ -507,57 +465,11 @@ export function ModerationPanel() {
                 ]);
               }}
               disabled={speakingEnquiries.length === 0}
-              className="inline-flex items-center gap-2 rounded-full border border-border px-4 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-accent disabled:opacity-50 transition-colors"
             >
               <Download className="w-4 h-4" /> Export CSV
-            </button>
+            </Button>
           </div>
-          {speakingEnquiries.length === 0 ? (
-            <EmptyState text="No public speaking inquiries yet." />
-          ) : (
-            <ul className="divide-y divide-border border-y border-border">
-              {speakingEnquiries.map((e) => (
-                <li key={e.id} className="py-4 flex items-start justify-between gap-4">
-                  <div className="min-w-0 space-y-1.5">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm">
-                        {`${e.firstName} ${e.lastName ?? ""}`.trim()}
-                      </span>
-                      <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
-                        {e.type}
-                      </span>
-                      <time className="text-xs text-muted-foreground" dateTime={e.createdAt}>
-                        {new Date(e.createdAt).toLocaleString()}
-                      </time>
-                    </div>
-                    <p className="text-sm">
-                      <a href={`mailto:${e.email}`} className="text-accent hover:underline">
-                        {e.email}
-                      </a>
-                      {e.phone && <span className="text-muted-foreground"> · {e.phone}</span>}
-                    </p>
-                    <p className="text-sm text-muted-foreground">{e.organization}</p>
-                    {e.eventDate && (
-                      <p className="text-sm text-muted-foreground">
-                        Event date: {new Date(e.eventDate).toLocaleDateString()}
-                      </p>
-                    )}
-                    {e.message && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">{e.message}</p>
-                    )}
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => act("enquiry", [e.id])}
-                    aria-label="Delete enquiry"
-                    className="p-2 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
+          <EnquiryList enquiries={speakingEnquiries} onDelete={(id) => act("enquiry", [id])} />
         </div>
       )}
     </div>

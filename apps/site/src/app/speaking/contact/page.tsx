@@ -109,7 +109,7 @@ export default function SpeakingContactPage() {
             <div className="relative mx-auto w-full max-w-[380px]">
               <div aria-hidden="true" className="absolute left-1/2 top-1/2 aspect-square w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-light/45 via-brand-light/20 to-transparent blur-2xl" />
               <Image
-                src="/images/Sagar's.png"
+                src="/images/sagar-author.webp"
                 alt="Sagar Lad"
                 width={477}
                 height={523}

@@ -4,6 +4,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { logAudit } from "@/lib/audit";
+import { revalidatePublic } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
@@ -56,6 +57,7 @@ export async function PATCH(request: Request) {
       },
     });
     await logAudit("PROFILE_UPDATE", { userId: user.id });
+    revalidatePublic();
     return NextResponse.json({ ok: true, name: name?.trim() || null, image: image?.trim() || null });
   }
 

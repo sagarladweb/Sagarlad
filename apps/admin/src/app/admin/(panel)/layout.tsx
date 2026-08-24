@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import Link from "next/link";
 import {
   LayoutDashboard,
@@ -9,10 +8,10 @@ import {
   Share2,
   Mail,
   Layers,
+  ShieldOff,
   type LucideIcon,
 } from "lucide-react";
-import { auth } from "@/lib/auth";
-import { SignOutButton } from "@/components/admin/SignOutButton";
+import { auth, signOut } from "@/lib/auth";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MobileNav } from "@/components/admin/MobileNav";
 import { ToastContainer } from "@/components/admin/Toast";
@@ -33,14 +32,52 @@ const nav: { label: string; href: string; icon: LucideIcon; phase: number }[] = 
   { label: "Settings", href: "/admin/settings", icon: Settings, phase: 1 },
 ].filter((item) => !PHASE_1 || item.phase === 1);
 
+async function signOutAction() {
+  "use server";
+  await signOut({ redirectTo: "/admin" });
+}
+
 export default async function AdminPanelLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
   const session = await auth();
+
   if (!session?.user || session.user.role !== "ADMIN") {
-    redirect("/admin");
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="w-full max-w-md text-center space-y-6">
+          <span className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-red-50 text-red-500 mx-auto">
+            <ShieldOff className="h-8 w-8" />
+          </span>
+          <div className="space-y-2">
+            <h1 className="font-display text-2xl font-bold">Session Expired</h1>
+            <p className="text-sm text-muted-foreground">
+              Your admin session could not be verified. This happens when the database
+              is temporarily unreachable or your session has expired.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3">
+            <form action={signOutAction}>
+              <button
+                type="submit"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground transition-all hover:opacity-90 active:scale-[0.99]"
+              >
+                Sign out and sign in again
+              </button>
+            </form>
+            <Link
+              href="https://www.sagarlad.com"
+              target="_blank"
+              className="inline-flex items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <ExternalLink className="h-4 w-4" /> Visit sagarlad.com
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -73,7 +110,11 @@ export default async function AdminPanelLayout({
           <Link href="https://www.sagarlad.com" target="_blank" className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="View site">
             <ExternalLink className="w-4 h-4" />
           </Link>
-          <SignOutButton />
+          <form action={signOutAction}>
+            <button type="submit" className="p-2 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground" aria-label="Sign out">
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
 

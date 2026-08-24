@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { ShoppingBag, BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
+import { DotPagination } from "@/components/ui/CarouselNav";
 
 export type BookCarouselBook = {
   id: string;
@@ -19,7 +19,6 @@ const FALLBACK_DESCRIPTION =
   "A practical guide by Sagar Lad — part of the MIND UP library.";
 
 export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
-  // Sort so the MIND UP Theory book is always first
   const sortedBooks = [...books].sort((a, b) => {
     const aIsMindUp = a.title.toLowerCase().includes("mind up");
     const bIsMindUp = b.title.toLowerCase().includes("mind up");
@@ -39,8 +38,6 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
   const prev = () => setIndex((i) => (i - 1 + total) % total);
   const next = () => setIndex((i) => (i + 1) % total);
 
-  // Auto-scroll every 8 seconds, but only once the whole section is on screen
-  // (and not hovered).
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
@@ -71,7 +68,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
       aria-label="Featured books"
     >
       {/* Section header + counter */}
-      <div className="flex items-end justify-between gap-4 mb-10 md:mb-12">
+      <div className="flex items-end justify-between gap-4 mb-10 md:mb-12" data-animate>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
             The library
@@ -88,9 +85,19 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
         </p>
       </div>
 
-      <div className="relative">
+      <div className="relative flex items-center gap-3">
+        {/* Prev arrow */}
+        <button
+          type="button"
+          onClick={prev}
+          aria-label="Previous book"
+          className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+
         {/* Book slide */}
-        <div key={book.id} className="book-slide-enter">
+        <div key={book.id} className="book-slide-enter min-w-0 flex-1">
           <article className="flex flex-col md:flex-row items-center gap-8 md:gap-12 lg:gap-16">
             <div className="w-full md:w-2/5 lg:w-2/5 shrink-0 flex justify-center">
               <div className="relative aspect-[3/4] w-[70vw] max-w-[300px] md:w-full">
@@ -126,7 +133,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
               <div className="mt-7 inline-block">
                 <SiteLogo className="h-9 w-auto" />
               </div>
-              <div className="mt-4 flex flex-wrap items-center justify-center gap-4 md:justify-start">
+              <div className="mt-4 flex items-center justify-center md:justify-start">
                 <a
                   href={book.buyUrl ?? "/books"}
                   target="_blank"
@@ -136,72 +143,30 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
                   <ShoppingBag className="w-4 h-4" />
                   Get your Copy
                 </a>
-                <Link
-                  href="/books"
-                  className="inline-flex items-center gap-1.5 text-sm font-semibold hover:underline underline-offset-4"
-                >
-                  <BookOpen className="w-4 h-4" />
-                  Read more about this book
-                </Link>
               </div>
             </div>
           </article>
         </div>
 
-        {/* Arrows — mobile: row below the slide; desktop: edges on hover */}
-        <div className="mt-8 flex items-center justify-center gap-3 lg:hidden">
-          <button
-            type="button"
-            onClick={prev}
-            aria-label="Previous book"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/90 text-foreground shadow-sm hover:bg-muted transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next book"
-            className="grid h-10 w-10 place-items-center rounded-full border border-border bg-background/90 text-foreground shadow-sm hover:bg-muted transition-colors"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-        <div className="hidden lg:flex lg:absolute lg:inset-y-0 lg:left-0 lg:right-0 lg:items-center lg:justify-between lg:pointer-events-none lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300">
-          <button
-            type="button"
-            onClick={prev}
-            aria-label="Previous book"
-            className="pointer-events-auto grid h-11 w-11 place-items-center rounded-full border border-border bg-background/95 text-foreground shadow-lg hover:bg-muted transition-colors -ml-5"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next book"
-            className="pointer-events-auto grid h-11 w-11 place-items-center rounded-full border border-border bg-background/95 text-foreground shadow-lg hover:bg-muted transition-colors -mr-5"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
+        {/* Next arrow */}
+        <button
+          type="button"
+          onClick={next}
+          aria-label="Next book"
+          className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
       </div>
 
-      {/* Dot pagination — always on touch, fade in on hover for pointer devices */}
-      <div className="mt-8 flex items-center justify-center gap-2 lg:opacity-0 lg:group-hover/carousel:opacity-100 transition-opacity duration-300">
-        {books.map((b, i) => (
-          <button
-            key={b.id}
-            type="button"
-            onClick={() => setIndex(i)}
-            aria-label={`Go to book ${i + 1}`}
-            aria-current={i === index}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === index ? "w-7 bg-brand" : "w-2 bg-border hover:bg-muted-foreground/40"
-            }`}
-          />
-        ))}
-      </div>
+      {/* Dot pagination */}
+      <DotPagination
+        total={books.length}
+        current={index}
+        onChange={setIndex}
+        label="book"
+        className="mt-8 lg:opacity-0 lg:group-hover/carousel:opacity-100 transition-opacity duration-300"
+      />
     </div>
   );
 }

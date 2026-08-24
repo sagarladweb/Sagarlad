@@ -3,13 +3,8 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap } from "@/lib/gsap";
 import { ArrowUpRight } from "lucide-react";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 import { METRICS } from "@/lib/metrics";
 import { SiteLogo } from "@/components/SiteLogo";
@@ -42,10 +37,11 @@ export function AboutMe() {
     const ctx = gsap.context(() => {
       gsap.fromTo(
         "[data-story-head]",
-        { opacity: 0, y: 36 },
+        { opacity: 0, y: 36, filter: "blur(4px)" },
         {
           opacity: 1,
           y: 0,
+          filter: "blur(0px)",
           duration: 0.9,
           ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 80%", toggleActions: "play none none none" },
@@ -54,11 +50,12 @@ export function AboutMe() {
 
       gsap.fromTo(
         "[data-story-visual]",
-        { opacity: 0, scale: 0.94, y: 50 },
+        { opacity: 0, scale: 0.94, y: 50, filter: "blur(4px)" },
         {
           opacity: 1,
           scale: 1,
           y: 0,
+          filter: "blur(0px)",
           duration: 1.1,
           ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play none none none" },
@@ -78,10 +75,11 @@ export function AboutMe() {
         render();
         gsap.fromTo(
           card,
-          { opacity: 0, y: 24 },
+          { opacity: 0, y: 24, filter: "blur(3px)" },
           {
             opacity: 1,
             y: 0,
+            filter: "blur(0px)",
             duration: 0.7,
             delay: i * 0.08,
             ease: "power3.out",
@@ -136,7 +134,7 @@ export function AboutMe() {
               />
               <figure className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-border shadow-2xl bg-card">
                 <Image
-                  src="/images/sagar-author.png"
+                  src="/images/sagar-author.webp"
                   alt="Sagar Lad"
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
@@ -158,7 +156,7 @@ export function AboutMe() {
           </div>
 
           {/* Content */}
-          <div className="lg:col-span-7 order-2 space-y-8">
+          <div className="lg:col-span-7 order-2 space-y-8 text-center lg:text-left">
             <div data-story-head>
               <span className="inline-flex items-center rounded-full bg-accent/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-accent-strong">
                 About Sagar

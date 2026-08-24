@@ -1,48 +1,56 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 
 const BADGE_KEY = "admin-moderation-last-viewed";
-const COUNT_KEY = "admin-moderation-badge-count";
 
 export function CommunityBadge({ className = "" }: { className?: string }) {
   const [count, setCount] = useState(0);
+  const initialized = useRef(false);
 
   const fetchCount = useCallback(async () => {
     try {
-      let since = "1970-01-01T00:00:00.000Z";
+      let since: string;
       try {
         const saved = localStorage.getItem(BADGE_KEY);
-        if (saved) since = saved;
-      } catch {}
+        if (saved) {
+          since = saved;
+        } else {
+          // First visit: stamp now so we only show future items
+          since = new Date().toISOString();
+          localStorage.setItem(BADGE_KEY, since);
+          initialized.current = true;
+          setCount(0);
+          return;
+        }
+      } catch {
+        return;
+      }
       const res = await fetch(`/api/admin/moderation/counts?since=${encodeURIComponent(since)}`);
       if (!res.ok) return;
       const data = await res.json();
-      const total = data.total ?? 0;
-      setCount(total);
-      try { localStorage.setItem(COUNT_KEY, String(total)); } catch {}
+      setCount(data.total ?? 0);
     } catch {
       // ignore
     }
   }, []);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- async fetch with setState in callback
     fetchCount();
     const interval = setInterval(fetchCount, 30_000);
     return () => clearInterval(interval);
   }, [fetchCount]);
 
-  // Clear badge when on moderation page
+  // Clear badge when on moderation page — stamp "last viewed" to now
   useEffect(() => {
-    const onModPage =
-      window.location.pathname === "/admin/moderation" ||
-      window.location.pathname.startsWith("/admin/moderation/");
-    if (onModPage) {
+    const path = window.location.pathname;
+    if (path === "/admin/moderation" || path.startsWith("/admin/moderation/")) {
       try {
         localStorage.setItem(BADGE_KEY, new Date().toISOString());
       } catch {}
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- clear badge on moderation page
       setCount(0);
-      try { localStorage.setItem(COUNT_KEY, "0"); } catch {}
     }
   }, []);
 

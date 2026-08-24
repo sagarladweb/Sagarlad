@@ -15,4 +15,8 @@ export function revalidatePublic() {
   revalidatePath("/content/[slug]", "page");
   revalidateTag("socials", "max");
   revalidateTag("content", "max");
+  revalidateTag("categories", "max");
+  revalidateTag("videos", "max");
+  revalidateTag("books", "max");
+  revalidateTag("quotes", "max");
 }

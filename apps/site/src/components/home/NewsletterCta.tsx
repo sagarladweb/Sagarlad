@@ -73,7 +73,7 @@ export function NewsletterCta() {
               />
               <figure className="relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-border shadow-xl bg-card">
                 <Image
-                  src="/images/sagar-author.png"
+                  src="/images/sagar-author.webp"
                   alt="Sagar Lad"
                   fill
                   sizes="(max-width: 640px) 100vw, 18rem"

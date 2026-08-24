@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getSiteSocials } from "@/lib/social-links";
 import { SocialsGrid } from "@/components/socials/SocialsGrid";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Social Links",
@@ -14,6 +15,16 @@ export default async function SocialsPage() {
 
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Socials", item: `${SITE.url}/socials` },
+          ],
+        }}
+      />
       <section className="border-b border-border bg-background py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center space-y-3">
           <span className="text-xs font-bold uppercase tracking-widest text-brand">

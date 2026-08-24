@@ -16,12 +16,38 @@ export const getPostBySlug = cache((slug: string) =>
 );
 
 // Shared read-model helpers for stable public content (categories, videos,
-// books). The results are cached for a week and re-validated instantly on
-// admin writes via `revalidatePublic()` -> revalidateTag("content").
-const WEEKLY = 604800;
+// books). The results are cached and re-validated instantly on admin writes
+// via `revalidatePublic()` -> revalidateTag("content").
+// In development, cache for 60 seconds so fixes apply quickly.
+const CACHE_TTL = process.env.NODE_ENV === "development" ? 60 : 604800;
 
 // Supabase free-tier pauses the DB after inactivity; every content fetcher
 // returns an empty fallback instead of crashing the page.
+const FALLBACK_CATEGORIES = [
+  { name: "Life Lessons", slug: "life-lessons" },
+  { name: "Money", slug: "money" },
+  { name: "Books", slug: "books" },
+  { name: "Productivity", slug: "productivity" },
+  { name: "Startups", slug: "startups" },
+  { name: "Anxiety", slug: "anxiety" },
+  { name: "Confidence", slug: "confidence" },
+  { name: "Habits", slug: "habits" },
+  { name: "Happiness", slug: "happiness" },
+  { name: "Health", slug: "health" },
+  { name: "Relationship", slug: "relationship" },
+  { name: "Motivation", slug: "motivation" },
+  { name: "Technology", slug: "technology" },
+  { name: "Career", slug: "career" },
+  { name: "Soft Skills", slug: "soft-skills" },
+  { name: "Mindset", slug: "mindset" },
+  { name: "Communication", slug: "communication" },
+  { name: "Emotional Intelligence", slug: "emotional-intelligence" },
+].map((c) => ({
+  id: `fallback-${c.slug}`,
+  name: c.name,
+  slug: c.slug,
+  _count: { posts: 0, videos: 0 },
+}));
 
 export type VideoCard = {
   id: string;
@@ -36,17 +62,18 @@ export type VideoCard = {
 export const getCategories = unstable_cache(
   async () => {
     try {
-      return await prisma.category.findMany({
+      const cats = await prisma.category.findMany({
         orderBy: { name: "asc" },
         include: { _count: { select: { posts: true, videos: true } } },
       });
+      return cats.length > 0 ? cats : FALLBACK_CATEGORIES;
     } catch (err) {
-      console.warn("[content] getCategories failed:", (err as Error).message);
-      return [];
+      console.warn("[content] getCategories failed, using fallback:", (err as Error).message);
+      return FALLBACK_CATEGORIES;
     }
   },
   ["categories"],
-  { revalidate: WEEKLY, tags: ["content", "categories"] }
+  { revalidate: CACHE_TTL, tags: ["content", "categories"] }
 );
 
 export const getPublishedVideos = unstable_cache(
@@ -85,7 +112,7 @@ export const getPublishedVideos = unstable_cache(
     }
   },
   ["videos"],
-  { revalidate: WEEKLY, tags: ["content", "videos"] }
+  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
 );
 
 export const getPublishedVideoBySlug = unstable_cache(
@@ -111,7 +138,7 @@ export const getPublishedVideoBySlug = unstable_cache(
     }
   },
   ["video-by-slug"],
-  { revalidate: WEEKLY, tags: ["content", "videos"] }
+  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
 );
 
 export const getQuotes = unstable_cache(
@@ -127,7 +154,7 @@ export const getQuotes = unstable_cache(
     }
   },
   ["quotes"],
-  { revalidate: WEEKLY, tags: ["content", "quotes"] }
+  { revalidate: CACHE_TTL, tags: ["content", "quotes"] }
 );
 
 export const getPublishedBooks = unstable_cache(
@@ -158,5 +185,5 @@ export const getPublishedBooks = unstable_cache(
     }
   },
   ["books"],
-  { revalidate: WEEKLY, tags: ["content", "books"] }
+  { revalidate: CACHE_TTL, tags: ["content", "books"] }
 );

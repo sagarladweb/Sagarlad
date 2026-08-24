@@ -39,9 +39,9 @@ export async function MindUpBook() {
         <BookCarousel books={slides} />
       </div>
 
-      {/* Author Stats Bar */}
+      {/* Stats below the carousel — counts once on scroll, no re-count on book change */}
       <div className="border-t border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 md:py-14">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 md:py-12">
           <BookStats />
         </div>
       </div>

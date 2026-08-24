@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { prisma, dbSafe } from "@/lib/db";
-import { pageMetadata, formatDate, postCover } from "@/lib/site";
+import { SITE, pageMetadata, formatDate, postCover } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 
 export const revalidate = 604800;
@@ -36,6 +37,17 @@ export default async function ContentCategoryPage({
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Content", item: `${SITE.url}/content` },
+            { "@type": "ListItem", position: 3, name: category.name, item: `${SITE.url}/content/${category.slug}` },
+          ],
+        }}
+      />
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 md:py-20">
           <Link

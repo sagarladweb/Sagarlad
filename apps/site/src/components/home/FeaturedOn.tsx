@@ -32,11 +32,11 @@ function Logo({ name, src }: { name: string; src: string }) {
 export function FeaturedOn() {
   return (
     <section
-      className="py-12 border-b border-border bg-card/40"
+      className="py-14 md:py-16 border-b border-border bg-card/40"
       aria-label="Featured in the press"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground" data-animate="blur">
           Featured on
         </p>
 

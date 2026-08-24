@@ -14,15 +14,26 @@ const STATIC_PATHS = [
   "/ebooks",
   "/newsletter",
   "/contact",
+  "/quotes",
+  "/socials",
+  "/mentorship",
+  "/speaking",
+  "/content",
   "/privacy",
   "/terms",
 ];
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const posts = await prisma.post.findMany({
-    where: { published: true, deletedAt: null },
-    select: { slug: true, updatedAt: true },
-  });
+  const [posts, videos] = await Promise.all([
+    prisma.post.findMany({
+      where: { published: true, deletedAt: null },
+      select: { slug: true, updatedAt: true },
+    }),
+    prisma.video.findMany({
+      where: { published: true, deletedAt: null },
+      select: { slug: true, createdAt: true },
+    }),
+  ]);
 
   return [
     ...STATIC_PATHS.map((p) => ({
@@ -37,5 +48,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
+    ...videos
+      .filter((v) => v.slug)
+      .map((video) => ({
+        url: `${SITE.url}/videos/${video.slug}`,
+        lastModified: video.createdAt,
+        changeFrequency: "monthly" as const,
+        priority: 0.7,
+      })),
   ];
 }

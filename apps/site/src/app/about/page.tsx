@@ -3,15 +3,10 @@
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SocialLinks } from "@/components/SocialLinks";
 import { SiteLogo } from "@/components/SiteLogo";
-
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
 
 import { METRICS } from "@/lib/metrics";
 
@@ -87,7 +82,7 @@ const chapters = [
   {
     period: "Jun 2026",
     title: "First TEDx speech",
-    text: "Taking the MIND UP message to the TEDx stage.",
+    text: "Give Speech on AI to the TEDx stage.",
     tag: "Speaker",
   },
 ];
@@ -104,10 +99,11 @@ export default function AboutPage() {
       gsap.utils.toArray<HTMLElement>("[data-reveal]").forEach((block) => {
         gsap.fromTo(
           block,
-          { opacity: 0, y: 36 },
+          { opacity: 0, y: 36, filter: "blur(4px)" },
           {
             opacity: 1,
             y: 0,
+            filter: "blur(0px)",
             duration: 0.9,
             ease: "power3.out",
             scrollTrigger: {
@@ -174,7 +170,7 @@ export default function AboutPage() {
 
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="order-2 lg:order-none lg:col-span-7 space-y-6">
+            <div className="order-2 lg:order-none lg:col-span-7 space-y-6 text-center lg:text-left">
               <span
                 data-reveal
                 className="inline-flex items-center rounded-full bg-brand-light/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand"
@@ -198,7 +194,7 @@ export default function AboutPage() {
               </p>
               <p
                 data-reveal
-                className="mt-4 border-l-2 border-accent pl-4 font-display text-base sm:text-lg font-semibold leading-snug text-foreground"
+                className="mt-4 border-l-2 border-accent pl-4 font-display text-base sm:text-lg font-semibold leading-snug text-foreground text-center lg:text-left"
               >
                 People don&apos;t make poor choices — they make the best choices
                 they can with the information they have.
@@ -333,7 +329,7 @@ export default function AboutPage() {
       {/* ---------- Growing Up ---------- */}
       <section id="journey" className="scroll-mt-32 py-20 md:py-28 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div>
+          <div className="text-center lg:text-left">
             <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Modest Beginnings</span>
             <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
               I always knew what I wanted
@@ -386,7 +382,7 @@ export default function AboutPage() {
       {/* ---------- Milestones / Chapters ---------- */}
       <section className="py-20 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
             <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Milestones</span>
             <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
               The story, in dates
@@ -428,7 +424,7 @@ export default function AboutPage() {
       <section id="running" className="scroll-mt-32 py-20 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5">
+            <div className="lg:col-span-5 text-center lg:text-left">
               <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Beyond The Code</span>
               <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
                 Runner for life

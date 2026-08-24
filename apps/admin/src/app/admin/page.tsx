@@ -126,19 +126,12 @@ function AdminLogin() {
   const [error, setError] = useState("");
   const [mounted, setMounted] = useState(false);
 
-  // Target panel destination based on active Phase
   const targetRoute = PHASE_1 ? "/admin/posts" : "/admin/dashboard";
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- hydration gate
     setMounted(true);
   }, []);
-
-  // Already logged in — go straight to the admin panel, no intermediate card.
-  useEffect(() => {
-    if (status === "authenticated") {
-      router.push(targetRoute);
-    }
-  }, [status, router, targetRoute]);
 
   const hour = new Date().getHours();
   const rawGreeting =
@@ -267,33 +260,24 @@ function AdminLogin() {
       <div className="grid min-h-screen lg:grid-cols-2">
         {/* ---- Left: brand panel with luxury animated vectors ---- */}
         <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#060b26] via-[#0A1930] to-[#04081c] text-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
-          {/* Animated geometric vector & orb layer */}
           <div aria-hidden="true" className="pointer-events-none absolute inset-0">
-            {/* Soft glowing ambient orbs */}
             <div className="login-orb absolute -left-20 -top-20 h-[30rem] w-[30rem] rounded-full bg-accent/20 blur-3xl" />
             <div className="login-orb login-orb-2 absolute -bottom-24 -right-20 h-[34rem] w-[34rem] rounded-full bg-brand-light/30 blur-3xl" />
-
-            {/* Concentric rotating vector rings */}
             <svg className="login-ring absolute -right-32 top-1/4 h-[32rem] w-[32rem] text-white/10" viewBox="0 0 100 100" fill="none">
               <circle cx="50" cy="50" r="48" stroke="currentColor" strokeWidth="0.3" strokeDasharray="2 2" />
               <circle cx="50" cy="50" r="38" stroke="currentColor" strokeWidth="0.4" />
               <circle cx="50" cy="50" r="28" stroke="currentColor" strokeWidth="0.3" strokeDasharray="3 3" />
               <circle cx="50" cy="50" r="18" stroke="currentColor" strokeWidth="0.4" />
             </svg>
-
-            {/* Floating diamond particles */}
             <div className="login-shape absolute left-16 top-28 h-3.5 w-3.5 rotate-45 bg-accent/50 blur-[0.5px]" />
             <div className="login-shape absolute left-1/3 bottom-44 h-2 w-2 rotate-45 bg-white/40" />
             <div className="login-shape login-orb-2 absolute right-20 top-20 h-3 w-3 rotate-45 bg-accent/70" />
-
-            {/* Precision dotted matrix */}
             <div
               className="absolute inset-x-0 bottom-0 h-80 opacity-15"
               style={{ backgroundImage: "radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px)", backgroundSize: "32px 32px" }}
             />
           </div>
 
-          {/* Top Brand Mark */}
           <div className="relative flex items-center gap-3">
             <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent font-display text-lg font-bold text-accent-foreground shadow-lg shadow-accent/20">
               SL
@@ -304,12 +288,10 @@ function AdminLogin() {
             </div>
           </div>
 
-          {/* Main Hero Banner & Personalized Quote */}
           <div className="relative max-w-lg space-y-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3.5 py-1.5 text-xs font-medium text-white/90 backdrop-blur-md">
               <span>{timeOfDayGreeting}, Sagar Lad</span>
             </div>
-
             <h1 className="font-display text-4xl font-bold leading-tight xl:text-5xl">
               Your ideas,
               <br />
@@ -322,7 +304,6 @@ function AdminLogin() {
             </p>
           </div>
 
-          {/* Footer */}
           <p className="relative text-xs text-white/40">
             © {new Date().getFullYear()} Sagar Lad · Encrypted Administrator Access
           </p>
@@ -331,7 +312,6 @@ function AdminLogin() {
         {/* ---- Right: Login Form & Active Session Handler ---- */}
         <main className="flex items-center justify-center px-4 py-12 sm:px-8 bg-background">
           <div className="w-full max-w-md">
-            {/* Mobile brand header */}
             <div className="mb-8 flex items-center gap-3 lg:hidden">
               <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-accent font-display text-lg font-bold text-accent-foreground">
                 SL
@@ -353,18 +333,35 @@ function AdminLogin() {
               </div>
 
               {status === "authenticated" ? (
-                /* ---- Already logged in: redirect in progress ---- */
-                <div className="mt-6 space-y-5 animate-fade-in">
+                <div className="mt-6 space-y-4 animate-fade-in">
                   <div className="flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4">
-                    <Loader2 className="h-5 w-5 shrink-0 animate-spin text-accent" />
+                    <CheckCircle2 className="h-5 w-5 shrink-0 text-accent" />
                     <div>
-                      <p className="text-xs font-bold uppercase tracking-wider text-accent">Signed in as {session?.user?.name || "Sagar Lad"}</p>
-                      <p className="text-xs text-muted-foreground">Redirecting to admin panel…</p>
+                      <p className="text-xs font-bold uppercase tracking-wider text-accent">
+                        Signed in as {session?.user?.name || "Sagar Lad"}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Your session is active.
+                      </p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => router.push(targetRoute)}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3.5 text-sm font-semibold text-accent-foreground transition-all duration-200 hover:opacity-90 active:scale-[0.99] shadow-md shadow-accent/20"
+                  >
+                    Continue to Admin Panel
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/admin" }));
+                    }}
+                    className="inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    Sign out and use a different account
+                  </button>
                 </div>
               ) : (
-                /* ---- Credentials / OTP Form ---- */
                 <>
                   <h2 className="mt-5 font-display text-2xl font-bold">
                     {step === "otp" ? "Two-factor verification" : "Admin Sign In"}
@@ -375,7 +372,6 @@ function AdminLogin() {
                       : "Welcome back — sign in to continue to your admin suite."}
                   </p>
 
-                  {/* Success / Greeting Feedback Overlay */}
                   {greetingState === "success" && (
                     <div className="mt-6 flex items-center gap-3 rounded-2xl border border-accent/30 bg-accent/10 p-4 text-accent animate-fade-in">
                       <CheckCircle2 className="h-5 w-5 shrink-0 animate-bounce" />

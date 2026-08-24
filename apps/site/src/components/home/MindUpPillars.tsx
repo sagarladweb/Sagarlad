@@ -238,7 +238,7 @@ export function MindUpPillars() {
   return (
     <section
       aria-label="Mind Up Theory — Six Pillars"
-      className="relative overflow-hidden bg-[#FAF9F6] py-20 md:py-28"
+      className="relative overflow-hidden bg-[#FAF9F6] py-20 md:py-24 border-b border-border"
     >
       {/* Soft radial tint behind the diagram */}
       <div
@@ -250,9 +250,9 @@ export function MindUpPillars() {
         }}
       />
 
-      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6">
         {/* ---------- Intro (mobile / tablet) ---------- */}
-        <div className="text-center lg:hidden">
+        <div className="text-center lg:hidden" data-animate="blur">
           <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#1738B8]">
             The Mind Up Theory
           </p>
@@ -268,7 +268,7 @@ export function MindUpPillars() {
         </div>
 
         {/* ---------- Desktop row: info panel (left) + ring (right) ---------- */}
-        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-14 xl:gap-20">
+        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-14 xl:gap-20" data-animate="blur">
           <div className="lg:min-h-[250px]">
             <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#1738B8]">
               The Mind Up Theory
@@ -314,7 +314,7 @@ export function MindUpPillars() {
         </div>
 
         {/* ---------- Mobile / tablet ring ---------- */}
-        <div className="mt-12 lg:hidden">
+        <div className="mt-12 lg:hidden" data-animate="zoom">
           <PillarRing
             active={active}
             activePillar={activePillar}

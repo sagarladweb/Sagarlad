@@ -65,8 +65,8 @@ export async function POST(request: Request) {
       const url = await upload(buffer, match[1], folder);
       return NextResponse.json({ url });
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Upload failed";
-      return NextResponse.json({ error: message }, { status: 500 });
+      console.error("[upload] base64 upload failed:", err);
+      return NextResponse.json({ error: "Upload failed" }, { status: 500 });
     }
   }
 
@@ -97,7 +97,7 @@ export async function POST(request: Request) {
     const url = await upload(buffer, file.type, folder);
     return NextResponse.json({ url });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Upload failed";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[upload] file upload failed:", err);
+    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
   }
 }

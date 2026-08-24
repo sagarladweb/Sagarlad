@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getQuotes } from "@/lib/content";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Quotes",
@@ -15,6 +16,16 @@ export default async function QuotesPage() {
   const quotes = await getQuotes();
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Quotes", item: `${SITE.url}/quotes` },
+          ],
+        }}
+      />
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 md:py-20">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">

@@ -5,11 +5,11 @@ import {
   ShieldCheck,
   ShieldOff,
   Loader2,
-  AlertCircle,
   CheckCircle2,
   Copy,
   Check,
 } from "lucide-react";
+import { showToast } from "@/components/admin/Toast";
 
 type SetupState = { secret: string; qr: string } | null;
 
@@ -20,7 +20,6 @@ export function SecuritySettings() {
   const [setup, setSetup] = useState<SetupState>(null);
   const [code, setCode] = useState("");
   const [recoveryCodes, setRecoveryCodes] = useState<string[] | null>(null);
-  const [error, setError] = useState("");
   const [copied, setCopied] = useState(false);
 
   async function load() {
@@ -39,7 +38,6 @@ export function SecuritySettings() {
 
   async function startSetup() {
     setBusy(true);
-    setError("");
     const res = await fetch("/api/admin/security", {
       method: "POST",
       body: JSON.stringify({ action: "setup" }),
@@ -47,7 +45,7 @@ export function SecuritySettings() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Could not start setup");
+      showToast(data.error ?? "Could not start setup", undefined, "error");
       return;
     }
     setSetup({ secret: data.secret, qr: data.qr });
@@ -55,11 +53,10 @@ export function SecuritySettings() {
 
   async function enable() {
     if (!setup || code.trim().length !== 6) {
-      setError("Enter the 6-digit code from your authenticator app.");
+      showToast("Enter the 6-digit code from your authenticator app.", undefined, "error");
       return;
     }
     setBusy(true);
-    setError("");
     const res = await fetch("/api/admin/security", {
       method: "POST",
       body: JSON.stringify({ action: "enable", secret: setup.secret, token: code }),
@@ -67,7 +64,7 @@ export function SecuritySettings() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Could not enable 2FA");
+      showToast(data.error ?? "Could not enable 2FA", undefined, "error");
       return;
     }
     setRecoveryCodes(data.recoveryCodes);
@@ -77,11 +74,10 @@ export function SecuritySettings() {
 
   async function disable() {
     if (code.trim().length !== 6) {
-      setError("Enter the 6-digit code from your authenticator app to confirm.");
+      showToast("Enter the 6-digit code from your authenticator app to confirm.", undefined, "error");
       return;
     }
     setBusy(true);
-    setError("");
     const res = await fetch("/api/admin/security", {
       method: "POST",
       body: JSON.stringify({ action: "disable", token: code }),
@@ -89,7 +85,7 @@ export function SecuritySettings() {
     const data = await res.json();
     setBusy(false);
     if (!res.ok) {
-      setError(data.error ?? "Could not disable 2FA");
+      showToast(data.error ?? "Could not disable 2FA", undefined, "error");
       return;
     }
     setEnabled(false);
@@ -116,12 +112,6 @@ export function SecuritySettings() {
 
   return (
     <div className="max-w-2xl space-y-6">
-      {error && (
-        <p className="flex items-center gap-1.5 text-sm text-red-600" role="alert">
-          <AlertCircle className="w-4 h-4 shrink-0" /> {error}
-        </p>
-      )}
-
       {recoveryCodes ? (
         <div className={card}>
           <h2 className="flex items-center gap-2 font-semibold">
@@ -211,7 +201,6 @@ export function SecuritySettings() {
             onClick={() => {
               setSetup(null);
               setCode("");
-              setError("");
             }}
             className="mt-4 text-sm text-muted-foreground hover:text-foreground"
           >

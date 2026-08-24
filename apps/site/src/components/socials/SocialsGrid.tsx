@@ -1,6 +1,6 @@
 "use client";
 
-import { socialIcon, type IconType } from "@/lib/social-icons";
+import { socialIcon } from "@/lib/social-icons";
 import { Globe } from "lucide-react";
 
 type Social = {

@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getPublishedVideoBySlug } from "@/lib/content";
-import { pageMetadata, formatDate } from "@/lib/site";
+import { SITE, pageMetadata, formatDate } from "@/lib/site";
 import { youtubeThumb } from "@/lib/youtube";
 import { normalizeVideoUrl, platformFromUrl, type VideoPlatform } from "@/lib/video";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
+import { JsonLd } from "@/components/JsonLd";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export const revalidate = 604800;
 
@@ -37,12 +39,48 @@ export default async function VideoArticlePage({
   const body = hasText ? (
     <div
       className="prose prose-neutral max-w-none text-muted-foreground leading-relaxed [&_p]:my-4 [&_h2]:font-display [&_h2]:font-bold [&_h2]:text-foreground [&_h3]:font-display [&_h3]:font-semibold [&_h3]:text-foreground [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5 [&_a]:text-accent-strong [&_a]:underline [&_strong]:text-foreground"
-      dangerouslySetInnerHTML={{ __html: content }}
+      dangerouslySetInnerHTML={{ __html: sanitizeHtml(content) }}
     />
   ) : null;
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "VideoObject",
+          name: video.title,
+          description: video.content
+            ? video.content.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 320)
+            : `Watch ${video.title} by Sagar Lad.`,
+          thumbnailUrl: thumb ?? undefined,
+          uploadDate: video.createdAt.toISOString(),
+          duration: undefined,
+          contentUrl: embedSrc,
+          embedUrl: embedSrc,
+          publisher: {
+            "@type": "Organization",
+            name: SITE.name,
+            url: SITE.url,
+          },
+          author: {
+            "@type": "Person",
+            name: SITE.name,
+            url: SITE.url,
+          },
+        }}
+      />
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Videos", item: `${SITE.url}/videos` },
+            { "@type": "ListItem", position: 3, name: video.title, item: `${SITE.url}/videos/${video.slug}` },
+          ],
+        }}
+      />
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 md:py-20">
           <Link

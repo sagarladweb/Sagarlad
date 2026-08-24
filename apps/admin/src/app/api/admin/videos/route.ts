@@ -15,7 +15,7 @@ const videoSchema = z.object({
   id: z.string().optional(),
   title: z.string().trim().min(1).max(200),
   slug: z.string().trim().max(200).optional().nullable(),
-  embedUrl: z.string().trim().min(1).max(2000),
+  embedUrl: z.string().trim().min(1).max(2000).optional(),
   thumbnail: z.string().trim().url().optional().nullable(),
   content: z.string().trim().max(100_000).optional().nullable(),
   layout: z.enum(["video-first", "text-first", "split"]).optional(),
@@ -47,6 +47,9 @@ export async function POST(request: Request) {
   if (id) {
     return NextResponse.json({ error: "Use PUT to update" }, { status: 400 });
   }
+  if (!data.embedUrl) {
+    return NextResponse.json({ error: "embedUrl is required" }, { status: 400 });
+  }
   const norm = normalizeVideoUrl(data.embedUrl);
   if (!norm) {
     return NextResponse.json(
@@ -76,14 +79,17 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
   const { id, ...data } = parsed.data;
-  const norm = normalizeVideoUrl(data.embedUrl);
-  if (!norm) {
-    return NextResponse.json(
-      { error: "That doesn't look like a YouTube or Instagram link." },
-      { status: 400 }
-    );
+  if (data.embedUrl) {
+    const norm = normalizeVideoUrl(data.embedUrl);
+    if (!norm) {
+      return NextResponse.json(
+        { error: "That doesn't look like a YouTube or Instagram link." },
+        { status: 400 }
+      );
+    }
+    data.embedUrl = norm.url;
   }
-  const video = await prisma.video.update({ where: { id }, data: { ...data, embedUrl: norm.url } });
+  const video = await prisma.video.update({ where: { id }, data });
   revalidatePublic();
   return NextResponse.json({ video });
 }

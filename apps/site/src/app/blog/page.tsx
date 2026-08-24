@@ -2,9 +2,10 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
-import { pageMetadata, formatDate, postCover } from "@/lib/site";
+import { SITE, pageMetadata, formatDate, postCover } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Blog",
@@ -103,6 +104,16 @@ export default async function BlogPage({
 
   return (
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16 overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE.url}/blog` },
+          ],
+        }}
+      />
       {/* Profile header */}
       <header>
         <div className="flex items-start justify-center sm:justify-start gap-5 sm:gap-8">
@@ -112,7 +123,7 @@ export default async function BlogPage({
             </div>
           </div>
 
-          <div className="flex-1 min-w-0 text-left">
+          <div className="flex-1 min-w-0 text-center sm:text-left">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="font-display text-2xl sm:text-3xl font-bold">
                 sagarlad
@@ -191,6 +202,7 @@ export default async function BlogPage({
       <nav
         className="mt-10 border-t border-border flex items-stretch"
         aria-label="Blog content"
+        data-animate
       >
         {(["posts", "videos"] as Tab[]).map((t) => (
           <Link
@@ -260,12 +272,13 @@ export default async function BlogPage({
               <p>No articles found. Try a different filter or search.</p>
             </div>
           ) : (
-            <div className="mt-8 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="mt-8 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4" data-animate-group>
               {posts.map((post) => (
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
                   className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted"
+                  data-animate-item
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

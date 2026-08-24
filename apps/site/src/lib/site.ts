@@ -78,9 +78,9 @@ export function slugify(text: string): string {
 }
 
 export const BLOG_COVERS = [
-  "/images/blog/blog-1.png",
-  "/images/blog/blog-2.png",
-  "/images/blog/blog-3.png",
+  "/images/blog/blog-1.webp",
+  "/images/blog/blog-2.webp",
+  "/images/blog/blog-3.webp",
 ];
 
 export function postCover(slug: string): string {

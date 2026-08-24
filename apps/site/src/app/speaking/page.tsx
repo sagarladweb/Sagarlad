@@ -15,8 +15,10 @@ import {
   Trophy,
   HeartHandshake,
 } from "lucide-react";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
+import { GalleryCarousel } from "@/components/speaking/GalleryCarousel";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Public Speaking & Keynotes",
@@ -125,6 +127,16 @@ const testimonials = [
 export default function SpeakingPage() {
   return (
     <div className="bg-background overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Speaking", item: `${SITE.url}/speaking` },
+          ],
+        }}
+      />
       {/* Stage Hero — full-bleed landscape, copy overlaid on the dark left zone */}
       <section className="relative -mt-16 min-h-[calc(100svh+4rem)] bg-foreground text-background overflow-hidden border-b border-border">
         <div className="absolute inset-0" aria-hidden="true">
@@ -133,7 +145,7 @@ export default function SpeakingPage() {
             alt=""
             fill
             priority
-            className="object-cover object-center"
+            className="object-cover object-center hero-drift"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
@@ -141,9 +153,9 @@ export default function SpeakingPage() {
           <div className="absolute inset-0 bg-brand/20" />
         </div>
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-center py-32">
-          <div className="max-w-3xl space-y-6">
-            <span className="inline-flex items-center rounded-full bg-accent/30 border border-accent/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-end pb-20 sm:pb-28 pt-32">
+          <div className="max-w-2xl space-y-5 text-center sm:text-left mx-auto sm:mx-0">
+            <span className="inline-flex items-center justify-center sm:justify-start rounded-full bg-accent/30 border border-accent/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
               Public Speaker &amp; Author
             </span>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.1] drop-shadow-md">
@@ -152,10 +164,10 @@ export default function SpeakingPage() {
             <p className="text-white/90 text-base sm:text-lg leading-relaxed max-w-2xl drop-shadow-sm font-medium">
               Delivering story-driven, actionable keynotes on AI leadership, financial freedom, and career momentum for summits, universities, and enterprise events worldwide.
             </p>
-            <div className="pt-2 flex flex-col sm:flex-row flex-wrap gap-4 items-center">
+            <div className="pt-2 flex flex-col gap-4 items-center sm:flex-row sm:items-center">
               <Link
                 href="/speaking/contact"
-                className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 transition-all shadow-xl"
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 transition-all shadow-xl w-full sm:w-auto"
               >
                 Inquire about speaking <ArrowRight className="w-4 h-4" />
               </Link>
@@ -163,7 +175,7 @@ export default function SpeakingPage() {
                 href="https://sessionize.com/sagar-lad/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-white/40 backdrop-blur-xl bg-black/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-black/50 transition-colors"
+                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 backdrop-blur-xl bg-black/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-black/50 transition-colors w-full sm:w-auto"
               >
                 View Sessionize profile ↗
               </a>
@@ -177,11 +189,11 @@ export default function SpeakingPage() {
         <div className="pointer-events-none absolute inset-x-0 -top-24 h-64 bg-brand-light/15 blur-3xl" aria-hidden="true" />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-            <div className="lg:col-span-5">
-              <span className="inline-flex items-center rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-strong">
+            <div className="lg:col-span-5 text-center lg:text-left" data-animate="left">
+              <span className="inline-flex items-center justify-center lg:justify-start rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-strong">
                 Watch him speak
               </span>
-              <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold leading-tight">
+              <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold leading-tight text-accent-strong">
                 The AI talk he gives on every stage
               </h2>
               <p className="mt-4 text-muted-foreground leading-relaxed">
@@ -202,7 +214,7 @@ export default function SpeakingPage() {
                 ))}
               </ul>
             </div>
-            <div className="lg:col-span-7">
+            <div className="lg:col-span-7" data-animate="right">
               <VideoPlayer
                 title="TEDx — The MIND UP message"
                 src="https://www.youtube.com/embed/G5F3kJ-lsYk"
@@ -225,17 +237,21 @@ export default function SpeakingPage() {
         </div>
       </section>
 
-      {/* Videos & Photos — bento-box image gallery, image only */}
+      {/* Videos & Photos — bento on desktop, horizontal snap carousel on mobile */}
       <section className="border-b border-border bg-muted/30 py-20 md:py-24 overflow-hidden" aria-label="Videos and photos">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          {/* Mobile: stack | Tablet: 2-col | Desktop: bento 12-col grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-3 sm:gap-4">
-            {/* Large feature — left, spans 2 rows on desktop */}
+          {/* Mobile: horizontal snap carousel */}
+          <div className="lg:hidden">
+            <GalleryCarousel />
+          </div>
+
+          {/* Desktop: bento grid */}
+          <div className="hidden lg:grid grid-cols-12 gap-3 sm:gap-4">
             {/* Large feature — left, spans 2 rows on desktop */}
             <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-2xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
               <Image
-                src="/images/heroes/speaking.webp"
-                alt=""
+                src="/images/speaking/main full width image.webp"
+                alt="Sagar Lad delivering a keynote"
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 58vw"
@@ -246,8 +262,8 @@ export default function SpeakingPage() {
             {/* Top right */}
             <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
-                src="/images/heroes/tedx.webp"
-                alt=""
+                src="/images/speaking/candid.webp"
+                alt="Sagar Lad candid"
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 42vw"
@@ -258,8 +274,8 @@ export default function SpeakingPage() {
             {/* Bottom right */}
             <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
-                src="/images/sagar-author.png"
-                alt=""
+                src="/images/speaking/candid speaking.webp"
+                alt="Sagar Lad speaking"
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 42vw"
@@ -267,14 +283,24 @@ export default function SpeakingPage() {
               <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
             </div>
 
-            {/* Bottom row — 3 equal cards on desktop, stack on tablet/mobile */}
+            {/* Bottom row — 3 equal cards on desktop */}
             <div className="sm:col-span-2 lg:col-span-12 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-              {[1, 2, 3].map((n) => (
+              {[
+                { src: "/images/speaking/candid presetation.webp", alt: "Sagar Lad presenting" },
+                { src: "/images/speaking/too close.webp", alt: "Sagar Lad portrait" },
+                { src: "/images/heroes/tedx.webp", alt: "Sagar Lad at TEDx" },
+              ].map((img) => (
                 <div
-                  key={n}
+                  key={img.src}
                   className="rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[160px]"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-brand-light/20 to-brand-light/5" />
+                  <Image
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                    sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 26vw"
+                  />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-500" />
                 </div>
               ))}
@@ -287,10 +313,10 @@ export default function SpeakingPage() {
       <section className="border-b border-border bg-background py-20 md:py-24" aria-label="Stages and Credentials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">
           {/* Events Hosted — divided list */}
-          <div>
-            <div className="max-w-2xl mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">Events &amp; Summits</span>
-              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold">Stages he&apos;s graced</h2>
+          <div data-animate>
+            <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
+              <span className="text-xs font-bold uppercase tracking-widest text-accent-strong">Events &amp; Summits</span>
+              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Stages he&apos;s graced</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Keynotes delivered across regional tech groups, academic institutions, and international summits.
               </p>
@@ -328,10 +354,10 @@ export default function SpeakingPage() {
           </div>
 
           {/* Memberships & Certifications — 2-col hairline grid */}
-          <div>
-            <div className="max-w-2xl mb-10">
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">Recognitions &amp; Credentials</span>
-              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold">Certifications &amp; Memberships</h2>
+          <div data-animate>
+            <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
+              <span className="text-xs font-bold uppercase tracking-widest text-accent-strong">Recognitions &amp; Credentials</span>
+              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Certifications &amp; Memberships</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
               </p>
@@ -367,21 +393,22 @@ export default function SpeakingPage() {
       {/* Professional Experience — how the engagement works, then the ask */}
       <section className="py-20 md:py-28 border-b border-border bg-card/40" aria-label="Professional experience">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl">
+          <div className="max-w-2xl text-center sm:text-left mx-auto sm:mx-0" data-animate>
             <span className="text-xs font-bold uppercase tracking-wider text-accent-strong">How We Work Together</span>
-            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold">A calm, three-step process</h2>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">A calm, three-step process</h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
               No last-minute scrambles. Every engagement follows the same rhythm, so you know exactly what to expect.
             </p>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-6" data-animate-group>
             {processSteps.map((step, i) => (
               <div
                 key={step.n}
                 className={`group rounded-2xl border border-border bg-card p-7 sm:p-8 transition-colors hover:border-brand-light/60 ${
                   i === 0 ? "lg:col-span-7" : "lg:col-span-5"
                 }`}
+                data-animate-item
               >
                 <span className="inline-grid place-items-center w-12 h-12 rounded-xl bg-brand-light/15 font-display text-lg font-extrabold text-brand">
                   {step.n}
@@ -402,7 +429,7 @@ export default function SpeakingPage() {
             ))}
 
             {/* Booking card fills the grid */}
-            <div className="lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8">
+            <div className="lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8" data-animate-item>
               <span aria-hidden="true" className="pointer-events-none absolute -top-24 -left-10 h-48 w-72 rounded-full bg-accent/15 blur-3xl" />
               <div className="relative shrink-0 mx-auto md:mx-0">
                 <div className="w-16 h-16 rounded-2xl bg-brand grid place-items-center text-white">
@@ -429,17 +456,18 @@ export default function SpeakingPage() {
       {/* Organizer voices — final proof before the ask */}
       <section className="py-20 md:py-28 bg-background" aria-label="What organizers say">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto text-center">
+          <div className="max-w-2xl mx-auto text-center" data-animate>
             <span className="text-xs font-bold uppercase tracking-wider text-accent-strong">From event organizers</span>
-            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold">Rooms Remember It</h2>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Rooms Remember It</h2>
           </div>
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-5">
+          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-5" data-animate-group>
             {testimonials.map((t, i) => (
               <blockquote
                 key={t.quote}
                 className={`rounded-2xl border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-colors hover:border-brand-light/60 ${
                   i === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-6"
                 }`}
+                data-animate-item
               >
                 <Quote className="w-6 h-6 text-accent-strong" aria-hidden="true" />
                 <p className={`text-foreground/85 leading-relaxed ${i === 0 ? "text-lg" : "text-sm"}`}>{t.quote}</p>

@@ -4,7 +4,7 @@ import { pageMetadata } from "@/lib/site";
 export const metadata: Metadata = pageMetadata({
   title: "Contact",
   description:
-    "Get in touch with Sagar Lad for media, events, collaborations and interviews.",
+    "Get in touch with Sagar Lad for speaking engagements, collaborations, or general inquiries.",
   path: "/contact",
 });
 

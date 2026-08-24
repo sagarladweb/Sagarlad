@@ -17,6 +17,7 @@ import {
   NewsletterComposer,
   type InsertItem,
 } from "@/components/admin/NewsletterComposer";
+import { showConfirm } from "@/components/admin/ConfirmDialog";
 import type { NewsletterContent } from "@/lib/newsletterTemplates";
 import { emptyNewsletter } from "@/lib/newsletterTemplates";
 
@@ -143,7 +144,8 @@ export function NewsletterManager({ insert }: Props) {
   }
 
   async function deleteDraft(id: string) {
-    if (!window.confirm("Delete this draft?")) return;
+    const ok = await showConfirm({ title: "Delete draft?", message: "This draft will be permanently removed." });
+    if (!ok) return;
     const res = await fetch(`/api/admin/newsletter/drafts?id=${id}`, { method: "DELETE" });
     if (res.ok) {
       setMessage({ ok: true, text: "Draft deleted." });
@@ -154,7 +156,8 @@ export function NewsletterManager({ insert }: Props) {
   }
 
   async function deleteSubscriber(s: Subscriber) {
-    if (!window.confirm(`Remove ${s.email} from the list? This can't be undone.`)) return;
+    const ok = await showConfirm({ title: "Remove subscriber?", message: `Remove ${s.email} from the list? This can't be undone.` });
+    if (!ok) return;
     const res = await fetch(`/api/admin/newsletter/subscribers/${s.id}`, {
       method: "DELETE",
     });

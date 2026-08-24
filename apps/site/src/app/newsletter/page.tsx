@@ -4,7 +4,8 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FaYoutube, FaInstagram, FaTelegram } from "react-icons/fa6";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "The Sagar Lad Letter",
@@ -16,6 +17,16 @@ export const metadata: Metadata = pageMetadata({
 export default function NewsletterPage() {
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Newsletter", item: `${SITE.url}/newsletter` },
+          ],
+        }}
+      />
       <PageHeader
         eyebrow="Newsletter"
         title="The Sagar Lad Letter"

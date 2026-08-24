@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
@@ -59,17 +58,25 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
+    languages: {
+      "en": "/",
+      "x-default": "/",
+    },
   },
   openGraph: {
     title: SITE.name,
     description: SITE.description,
     type: "website",
     siteName: SITE.name,
+    url: SITE.url,
+    images: [{ url: SITE.ogImage, alt: SITE.name }],
+    locale: SITE.locale,
   },
   twitter: {
     card: "summary_large_image",
     title: SITE.name,
     description: SITE.description,
+    images: [SITE.ogImage],
   },
   icons: {
     icon: "/favicon.png",
@@ -85,16 +92,12 @@ export default function RootLayout({
       lang="en"
       className={`${beVietnamPro.variable} ${rethinkSans.variable} ${greatVibes.variable} h-full antialiased`}
     >
-      <Script
-        async
-        src="https://www.googletagmanager.com/gtag/js?id=G-E4FSLTC6RJ"
-      />
-      <Script id="google-analytics">
-        {`window.dataLayer = window.dataLayer || [];
-function gtag(){dataLayer.push(arguments);}
-gtag('js', new Date());
-gtag('config', 'G-E4FSLTC6RJ');`}
-      </Script>
+      <head>
+        <link rel="preconnect" href="https://i.ytimg.com" />
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="preconnect" href="https://www.instagram.com" />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
+      </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SiteFrame>{children}</SiteFrame>
       </body>

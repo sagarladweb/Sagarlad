@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import { ArrowUpRight, TrendingUp, Users, Eye } from "lucide-react";
 import { getPublishedBooks } from "@/lib/content";
-import { pageMetadata } from "@/lib/site";
+import { SITE, pageMetadata } from "@/lib/site";
 import { METRICS } from "@/lib/metrics";
 import { BookLibrary } from "@/components/books/BookLibrary";
+import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
   title: "Books by Sagar Lad",
@@ -18,7 +19,7 @@ export const revalidate = 604800;
 const AMAZON_AUTHOR_URL =
   "https://www.amazon.com/stores/author/B0B5R12SHN/allbooks?ccs_id=0ebd2f24-24b0-4f50-bbc5-e74510a792dd";
 
-const AUTHOR_PORTRAIT = "/images/Sagar's.png";
+const AUTHOR_PORTRAIT = "/images/sagar-author.webp";
 
 export default async function BooksPage() {
   const books = await getPublishedBooks("PUBLISHED");
@@ -26,11 +27,21 @@ export default async function BooksPage() {
 
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          itemListElement: [
+            { "@type": "ListItem", position: 1, name: "Home", item: SITE.url },
+            { "@type": "ListItem", position: 2, name: "Books", item: `${SITE.url}/books` },
+          ],
+        }}
+      />
       {/* -------- MIND UP editorial hero -------- */}
       <header className="overflow-hidden border-b border-border bg-background text-black">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-16 px-4 py-20 sm:px-6 md:py-28 lg:grid-cols-12 lg:gap-10 lg:py-32">
           {/* Portrait — layered over the blue disc */}
-          <div className="lg:col-span-5">
+          <div className="lg:col-span-5" data-animate="left">
             <div className="relative mx-auto w-full max-w-[420px] isolate">
               <svg
                 aria-hidden="true"
@@ -79,7 +90,7 @@ export default async function BooksPage() {
           </div>
 
           {/* Typography */}
-          <div className="lg:col-span-7 lg:pl-6 xl:pl-12">
+          <div className="lg:col-span-7 lg:pl-6 xl:pl-12 text-center lg:text-left" data-animate="right">
             <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#0D21A1]">
               Mindset
             </p>
@@ -132,7 +143,7 @@ export default async function BooksPage() {
       {/* -------- The Library -------- */}
       <section className="border-b border-border bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
-          <div className="flex flex-wrap items-end justify-between gap-4">
+          <div className="flex flex-wrap items-end justify-between gap-4" data-animate>
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
                 The Library
@@ -154,7 +165,7 @@ export default async function BooksPage() {
 
       {/* -------- Colophon -------- */}
       <section className="bg-background">
-        <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 md:py-24">
+        <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 md:py-24" data-animate>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground">
             Colophon
           </p>

@@ -3,13 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { DotPagination } from "@/components/ui/CarouselNav";
 
 const photos = [
-  { src: "/images/sagar-author.png", alt: "Sagar Lad", className: "object-top" },
-  { src: "/images/heroes/hero.webp", alt: "Sagar Lad portrait", className: "object-top" },
-  { src: "/images/heroes/speaking.webp", alt: "Sagar Lad speaking on stage", className: "object-center" },
-  { src: "/images/heroes/hero-home.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/images/speaking/main full width image.webp", alt: "Sagar Lad on stage", className: "object-top" },
+  { src: "/images/sagar-author.webp", alt: "Sagar Lad", className: "object-top" },
+  { src: "/images/speaking/candid.webp", alt: "Sagar Lad candid", className: "object-center" },
+  { src: "/images/speaking/candid speaking.webp", alt: "Sagar Lad speaking", className: "object-center" },
+  { src: "/images/speaking/candid presetation.webp", alt: "Sagar Lad presenting", className: "object-center" },
+  { src: "/images/speaking/too close.webp", alt: "Sagar Lad portrait", className: "object-top" },
 ];
 
 export function SagarGallery() {
@@ -61,6 +64,7 @@ export function SagarGallery() {
             ))}
           </div>
 
+          {/* Arrows — vertically centered on edges */}
           {photos.length > 1 && (
             <>
               <button
@@ -68,38 +72,30 @@ export function SagarGallery() {
                 onClick={() => goTo(index - 1)}
                 disabled={index === 0}
                 aria-label="Previous photo"
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/90 backdrop-blur border border-border text-foreground shadow-lg hover:bg-background transition-colors disabled:opacity-40"
+                className="absolute left-3 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-full bg-background/90 backdrop-blur border border-border text-foreground shadow-lg hover:bg-background transition-colors disabled:opacity-40 z-10"
               >
-                <ChevronLeft className="w-4 h-4" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
               </button>
               <button
                 type="button"
                 onClick={() => goTo(index + 1)}
                 disabled={index === photos.length - 1}
                 aria-label="Next photo"
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-background/90 backdrop-blur border border-border text-foreground shadow-lg hover:bg-background transition-colors disabled:opacity-40"
+                className="absolute right-3 top-1/2 -translate-y-1/2 grid h-9 w-9 place-items-center rounded-full bg-background/90 backdrop-blur border border-border text-foreground shadow-lg hover:bg-background transition-colors disabled:opacity-40 z-10"
               >
-                <ChevronRight className="w-4 h-4" />
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
               </button>
             </>
           )}
         </div>
 
-        {photos.length > 1 && (
-          <div className="mt-4 flex items-center justify-center gap-2" data-animate>
-            {photos.map((p, i) => (
-              <button
-                key={p.src}
-                type="button"
-                onClick={() => goTo(i)}
-                aria-label={`Go to photo ${i + 1}`}
-                className={`h-2 rounded-full transition-all ${
-                  i === index ? "w-6 bg-accent" : "w-2 bg-foreground/15 hover:bg-foreground/30"
-                }`}
-              />
-            ))}
-          </div>
-        )}
+        <DotPagination
+          total={photos.length}
+          current={index}
+          onChange={goTo}
+          label="photo"
+          className="mt-4"
+        />
 
         <div className="mt-6 flex flex-col items-center gap-2.5 text-center" data-animate>
           <h2 className="font-display text-2xl md:text-3xl font-bold leading-tight text-foreground">

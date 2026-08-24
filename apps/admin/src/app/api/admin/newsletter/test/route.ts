@@ -29,8 +29,9 @@ export async function POST(request: Request) {
     await sendTestEmail(to, parsed.data.subject, parsed.data.html);
     return NextResponse.json({ ok: true, to });
   } catch (err) {
+    console.error("[newsletter] test send failed:", err);
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "Test send failed" },
+      { error: "Test send failed" },
       { status: 500 }
     );
   }
