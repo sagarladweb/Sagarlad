@@ -527,20 +527,22 @@ export function PostForm({
       }`}
       noValidate
     >
-      {/* Page header: back + title scroll with the page, not sticky */}
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          onClick={handleBackClick}
-          className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
-          title="Back to posts list"
-        >
-          <ChevronLeft className="w-4 h-4" /> Back
-        </button>
-        <h2 className="font-display text-lg font-bold">
-          {initial ? "Edit Post" : "Create New Post"}
-        </h2>
-      </div>
+      {/* Page header: back + title — only in fullscreen mode */}
+      {isFullscreen && (
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleBackClick}
+            className="inline-flex items-center gap-1 rounded-xl border border-border px-3 py-1.5 text-xs font-semibold text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            title="Back to posts list"
+          >
+            <ChevronLeft className="w-4 h-4" /> Back
+          </button>
+          <h2 className="font-display text-lg font-bold">
+            {initial ? "Edit Post" : "Create New Post"}
+          </h2>
+        </div>
+      )}
 
       <div className="flex flex-col items-start gap-4 lg:flex-row">
         {/* ---- Main canvas ---- */}
