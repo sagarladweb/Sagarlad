@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   Loader2,
   AlertCircle,
-  CheckCircle2,
   Save,
   Lock,
   Clock,
@@ -65,7 +64,6 @@ export function PostForm({
     published: initial?.published ?? true,
     scheduledAt: initial?.scheduledAt ?? "",
   });
-  const [message, setMessage] = useState("");
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [previewError, setPreviewError] = useState("");
   const [isFullscreen, setIsFullscreen] = useState(true);
@@ -158,12 +156,10 @@ export function PostForm({
   async function save(isRealtime = false) {
     const error = validate();
     if (error) {
-      setMessage(error);
       if (!isRealtime) setSaveState("error");
       return false;
     }
 
-    setMessage("");
     if (!isRealtime) setSaveState("loading");
 
     const url = postId
@@ -176,7 +172,6 @@ export function PostForm({
     // API revalidates the public site, so the update lands there too.
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       enqueue(url, method, form, postId ? undefined : "new-post-draft");
-      setMessage("Saved on this device — will sync when you're back online.");
       if (!isRealtime) {
         setSaveState("saved");
         showToast("Saved offline — syncs automatically when online", undefined, "success");
@@ -195,7 +190,6 @@ export function PostForm({
         if (data.post?.id && !postId) setPostId(data.post.id);
         clearDraft?.();
         const msg = postId ? "Post updated successfully." : "Post created successfully.";
-        setMessage(msg);
         if (!isRealtime) {
           setSaveState("saved");
           showToast(msg, undefined, "success");
@@ -211,7 +205,6 @@ export function PostForm({
       } else {
         const data = await res.json().catch(() => ({}));
         const errMsg = data.error ?? "Something went wrong.";
-        setMessage(errMsg);
         if (!isRealtime) {
           setSaveState("error");
           showToast("Failed to save post", errMsg, "error");
@@ -220,7 +213,6 @@ export function PostForm({
       }
     } catch {
       const errMsg = "Network error. Please try again.";
-      setMessage(errMsg);
       if (!isRealtime) {
         setSaveState("error");
         showToast("Network error", errMsg, "error");
@@ -628,23 +620,6 @@ export function PostForm({
             <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
               Publish
             </h3>
-            <div className="flex items-center gap-2">
-              {saveState === "loading" && (
-                <span className="flex items-center gap-1.5 rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] font-medium text-muted-foreground animate-pulse">
-                  <Loader2 className="w-3 h-3 animate-spin" /> Saving…
-                </span>
-              )}
-              {saveState === "saved" && (
-                <span className="flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700">
-                  <CheckCircle2 className="w-3 h-3" /> All changes saved
-                </span>
-              )}
-              {saveState === "error" && (
-                <span className="flex items-center gap-1.5 rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-[11px] font-medium text-red-600">
-                  <AlertCircle className="w-3 h-3" /> {message || "Error saving"}
-                </span>
-              )}
-            </div>
             <button
               type="submit"
               disabled={saveState === "loading"}

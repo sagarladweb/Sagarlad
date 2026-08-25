@@ -27,10 +27,9 @@ export function RssBanner() {
   if (dismissed || !show) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50 animate-in slide-in-from-bottom-4 fade-in duration-500">
+    <div className="fixed bottom-0 inset-x-0 z-50" style={{ animation: "rss-slide-up 0.5s ease-out" }}>
       <div className="bg-brand text-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-3.5">
-          {/* Left — icon + text */}
           <div className="flex items-center gap-2.5">
             <Rss className="h-5 w-5 text-accent shrink-0" />
             <span className="text-sm sm:text-base font-semibold text-white">
@@ -38,7 +37,6 @@ export function RssBanner() {
             </span>
           </div>
 
-          {/* Right — CTA + dismiss */}
           <div className="flex items-center gap-2">
             <a
               href="https://feedly.com/i/subscription/feed/https://sagarlad.com/rss.xml"
