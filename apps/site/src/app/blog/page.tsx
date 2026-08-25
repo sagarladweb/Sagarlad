@@ -6,6 +6,7 @@ import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover, readingT
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
 import { JsonLd } from "@/components/JsonLd";
+import { RssBanner } from "@/components/RssBanner";
 
 export const metadata: Metadata = pageMetadata({
   title: "Blog",
@@ -112,6 +113,7 @@ export default async function BlogPage({
     );
 
   return (
+    <>
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16 overflow-x-clip">
       <JsonLd
         data={{
@@ -395,5 +397,7 @@ export default async function BlogPage({
         </>
       )}
     </div>
+    <RssBanner />
+    </>
   );
 }

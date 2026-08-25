@@ -8,6 +8,7 @@ import type { Post, Category } from "@sagarlad/db";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";
+import { RssBanner } from "@/components/RssBanner";
 
 const AboutMe = dynamic(() => import("@/components/home/AboutMe").then((m) => m.AboutMe));
 const TopicsGrid = dynamic(() => import("@/components/home/TopicsGrid").then((m) => m.TopicsGrid));
@@ -86,6 +87,7 @@ export default async function HomePage() {
       <MentorshipCta />
       <NewsletterCta />
       <SagarGallery />
+      <RssBanner />
     </>
   );
 }

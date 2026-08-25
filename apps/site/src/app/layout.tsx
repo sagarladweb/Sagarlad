@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
-import { RssBanner } from "@/components/RssBanner";
 import { SITE } from "@/lib/site";
 import { heartbeat } from "@/lib/heartbeat";
 
@@ -109,7 +108,6 @@ export default async function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
         <SiteFrame>{children}</SiteFrame>
-        <RssBanner />
       </body>
     </html>
   );
