@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { SITE, VISIBLE_POST_WHERE } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -25,14 +25,22 @@ const STATIC_PATHS = [
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, videos] = await Promise.all([
-    prisma.post.findMany({
-      where: VISIBLE_POST_WHERE,
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.video.findMany({
-      where: { published: true, deletedAt: null },
-      select: { slug: true, createdAt: true },
-    }),
+    dbSafe(
+      () =>
+        prisma.post.findMany({
+          where: VISIBLE_POST_WHERE,
+          select: { slug: true, updatedAt: true },
+        }),
+      []
+    ),
+    dbSafe(
+      () =>
+        prisma.video.findMany({
+          where: { published: true, deletedAt: null },
+          select: { slug: true, createdAt: true },
+        }),
+      []
+    ),
   ]);
 
   return [

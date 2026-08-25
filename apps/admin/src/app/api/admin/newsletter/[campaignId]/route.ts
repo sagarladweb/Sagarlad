@@ -10,7 +10,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ campaignId: string }> }
 ) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(_request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { campaignId } = await params;

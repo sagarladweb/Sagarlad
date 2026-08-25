@@ -134,6 +134,7 @@ export function getDashboardStats() {
   return Promise.all([
     prisma.post.count({ where: { published: true } }),
     prisma.post.count({ where: { published: false } }),
+    prisma.post.count({ where: { scheduledAt: { not: null }, published: false } }),
     prisma.newsletterSubscriber.count(),
     prisma.post.findMany({
       orderBy: { updatedAt: "desc" },

@@ -13,7 +13,7 @@ const ALLOWED = new Set([
 ]);
 
 export async function POST(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const form = await request.formData().catch(() => null);

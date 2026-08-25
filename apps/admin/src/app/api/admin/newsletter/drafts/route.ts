@@ -14,7 +14,7 @@ const draftSchema = z.object({
 
 // Save (or update) an unsent newsletter so the admin can come back to it later.
 export async function POST(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
 
 // Drop a draft.
 export async function DELETE(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { enqueueCampaign, processNewsletterQueue } from "@/lib/newsletter";
 import { logAudit } from "@/lib/audit";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export const runtime = "nodejs";
 
@@ -75,7 +76,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
@@ -87,9 +88,12 @@ export async function POST(request: Request) {
     );
   }
 
+  // Sanitize HTML before sending — strip any scripts/iframes/event handlers
+  const cleanHtml = sanitizeHtml(parsed.data.html);
+
   const { campaign, queued } = await enqueueCampaign(
     parsed.data.subject,
-    parsed.data.html
+    cleanHtml
   );
   // Store the structured composer state so the campaign can be duplicated later.
   if (parsed.data.contentJson !== undefined) {

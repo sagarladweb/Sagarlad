@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, ChevronLeft, ChevronRight, CalendarClock } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, ChevronLeft, ChevronRight, CalendarClock, Play } from "lucide-react";
 import { showToast } from "@/components/admin/Toast";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -64,6 +64,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
   const [filter, setFilter] = useState<"all" | "published" | "draft" | "scheduled">("all");
   const [page, setPage] = useState(1);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [publishingId, setPublishingId] = useState<string | null>(null);
 
   const PER_PAGE = 15;
 
@@ -110,6 +111,34 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
       showToast("Network error", "Could not delete post.", "error");
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handlePublishNow(id: string, title: string) {
+    const ok = await showConfirm({
+      title: "Publish now?",
+      message: `Publish "${title}" immediately? It will become visible on the site right away.`,
+    });
+    if (!ok) return;
+    setPublishingId(id);
+    try {
+      const res = await fetch(`/api/admin/posts/${id}/publish-now`, { method: "POST" });
+      if (res.ok) {
+        setPosts((prev) =>
+          prev.map((p) =>
+            p.id === id ? { ...p, published: true, scheduledAt: null } : p
+          )
+        );
+        showToast("Post published!", undefined, "success");
+        router.refresh();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast("Failed to publish", data.error ?? "Error occurred", "error");
+      }
+    } catch {
+      showToast("Network error", "Could not publish post.", "error");
+    } finally {
+      setPublishingId(null);
     }
   }
 
@@ -198,6 +227,21 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
+                      {isScheduled(p) && (
+                        <button
+                          onClick={() => handlePublishNow(p.id, p.title)}
+                          disabled={publishingId === p.id}
+                          className="inline-flex items-center gap-1 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-100 hover:border-emerald-400 transition-all disabled:opacity-50"
+                          title="Publish now"
+                        >
+                          {publishingId === p.id ? (
+                            <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Play className="w-3 h-3" />
+                          )}
+                          Publish
+                        </button>
+                      )}
                       <Link href={`/admin/posts/${p.slug}/edit`} className="inline-flex items-center gap-1 rounded-full border border-border px-3 py-1 text-xs font-medium hover:bg-accent hover:text-accent-foreground hover:border-accent transition-all">
                         <Pencil className="w-3 h-3" /> Edit
                       </Link>

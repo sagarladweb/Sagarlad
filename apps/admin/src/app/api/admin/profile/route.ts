@@ -30,7 +30,7 @@ const bodySchema = z.discriminatedUnion("action", [
 ]);
 
 export async function PATCH(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

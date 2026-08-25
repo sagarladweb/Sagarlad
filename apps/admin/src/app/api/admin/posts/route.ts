@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { adminPostSchema } from "@/lib/validations";
 import { sanitizeHtml } from "@/lib/sanitize";
 import { revalidatePublic } from "@/lib/revalidate";
+import { NO_STORE_HEADERS } from "@/lib/cache-headers";
 
 import { requireAdmin } from "@/lib/requireAdmin";
 export const runtime = "nodejs";
@@ -32,7 +33,7 @@ export async function GET() {
       select: LIST_SELECT,
       orderBy: { updatedAt: "desc" },
     });
-    return NextResponse.json({ posts });
+    return NextResponse.json({ posts }, { headers: NO_STORE_HEADERS });
   } catch (err) {
     console.error("[posts] GET failed:", (err as Error).message);
     return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
@@ -40,7 +41,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
@@ -95,7 +96,7 @@ export async function POST(request: Request) {
 }
 
 export async function PUT(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(request.url);
@@ -157,7 +158,7 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(request.url);

@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
 import { SITE } from "@/lib/site";
+import { heartbeat } from "@/lib/heartbeat";
 
 // Self-hosted fonts — never depend on Google Fonts being reachable at build
 // or serve time, so CSS always loads. Files in src/app/fonts/.
@@ -62,6 +63,9 @@ export const metadata: Metadata = {
       "en": "/",
       "x-default": "/",
     },
+    types: {
+      "application/rss+xml": `${SITE.url}/rss.xml`,
+    },
   },
   openGraph: {
     title: SITE.name,
@@ -84,9 +88,13 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Self-contained heartbeat: keeps Supabase alive + auto-publishes scheduled
+  // posts. Runs once per 60s. Zero external dependencies.
+  heartbeat();
+
   return (
     <html
       lang="en"

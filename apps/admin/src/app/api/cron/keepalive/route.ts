@@ -5,15 +5,26 @@ import { revalidatePublic } from "@/lib/revalidate";
 
 export const runtime = "nodejs";
 
-function timingSafeEqual(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
+function constantTimeCompare(a: string, b: string): boolean {
+  // Pad shorter string so lengths match — prevents length-leak timing attack
+  const maxLen = Math.max(a.length, b.length);
+  return crypto.timingSafeEqual(
+    Buffer.from(a.padEnd(maxLen)),
+    Buffer.from(b.padEnd(maxLen))
+  );
 }
 
 export async function GET(request: Request) {
   const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    return NextResponse.json(
+      { status: "error", message: "CRON_SECRET not configured" },
+      { status: 500 }
+    );
+  }
+
   const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
-  if (!secret || !timingSafeEqual(token, secret)) {
+  if (!constantTimeCompare(token, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -37,6 +48,7 @@ export async function GET(request: Request) {
       await revalidatePublic();
     }
 
+    // Ping Supabase — any query keeps it alive
     const post = await prisma.post.findFirst({ select: { id: true, title: true } });
     return NextResponse.json({
       status: "active",

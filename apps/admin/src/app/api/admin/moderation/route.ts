@@ -26,7 +26,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);

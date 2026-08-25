@@ -7,7 +7,7 @@ import { downloadToSupabase } from "@/lib/storage";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const url = new URL(request.url);

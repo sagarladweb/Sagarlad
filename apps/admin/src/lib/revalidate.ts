@@ -23,9 +23,11 @@ export async function revalidatePublic(): Promise<boolean> {
   try {
     await fetch(`${rawUrl}/api/revalidate`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ secret: process.env.CRON_SECRET }),
-      signal: AbortSignal.timeout(3000),
+      headers: {
+        "Content-Type": "application/json",
+        "x-revalidate-secret": process.env.CRON_SECRET ?? "",
+      },
+      signal: AbortSignal.timeout(5000),
     });
     return true;
   } catch (err) {

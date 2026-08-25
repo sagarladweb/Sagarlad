@@ -20,16 +20,8 @@ function createClient() {
     config.database ?? ""
   }`;
 
-  // The deployed database requires TLS but its cert isn't CA-verifiable from
-  // this host. `pg-connection-string` may surface `sslmode` as `true`, a cert
-  // path string, or an `SSLConfig`; collapse any of those to verified TLS,
-  // otherwise connect TLS-without-verification as the working fallback.
   const ssl: boolean | ConnectionOptions = config.ssl ? true : { rejectUnauthorized: false };
 
-  // Small pool: serverless functions each open a pool, and free-tier
-  // Postgres (Supabase/Neon) caps concurrent connections. 1–5 keeps a burst
-  // of lambdas from exhausting the DB. Route traffic through the provider's
-  // transaction pooler in production (see CLIENT_SETUP_GUIDE.md).
   const max = Math.min(Math.max(parseInt(process.env.DATABASE_POOL_MAX ?? "5", 10) || 5, 1), 10);
   const pool = new pg.Pool({ connectionString, ssl, max });
   pool.on("error", (err) => {
@@ -44,17 +36,6 @@ function createClient() {
   });
 }
 
-// Lazy client: created on first property access, never at import. `next build`
-// evaluates route modules to collect page data, and `.env` is not uploaded to
-// Vercel, so an eager module-scope throw made every admin deploy fail with
-// "DATABASE_URL is not set". Queries still fail loudly if the env is genuinely
-// missing, and dbSafe() turns that into a fallback instead of a crash.
-//
-// The client is cached on globalThis in ALL environments (including
-// production): `globalThis` persists per serverless instance, so a warm lambda
-// reuses one PrismaClient + one pg.Pool instead of opening a fresh pool (up to
-// 5 connections) per query, which exhausted the Supabase free-tier connection
-// cap and made login/other queries fail intermittently on Vercel.
 function getClient(): PrismaClient {
   const existing = globalForPrisma.prisma;
   if (existing) return existing;
@@ -65,7 +46,6 @@ function getClient(): PrismaClient {
 
 export const prisma = new Proxy({} as PrismaClient, {
   get(_target, prop) {
-    // Keep the Proxy from being treated as a Promise/thenable.
     if (prop === "then") return undefined;
     const client = getClient();
     const value = (client as unknown as Record<PropertyKey, unknown>)[prop];
@@ -73,13 +53,26 @@ export const prisma = new Proxy({} as PrismaClient, {
   },
 });
 
-// Run a DB read with a fallback value so a paused/unreachable database (Supabase
-// free tier auto-pauses) renders the page instead of crashing the request.
+// Only swallow connection/infrastructure errors — business logic errors
+// (constraint violations, auth failures) still propagate.
+const CONNECTION_ERROR_CODES = new Set([
+  "P1001", "P1002", "P1003", "P1008", "P1010", "P1011", "P1012", "P1017",
+]);
+
+function isConnectionError(err: unknown): boolean {
+  if (err && typeof err === "object" && "code" in err) {
+    return CONNECTION_ERROR_CODES.has((err as { code: string }).code);
+  }
+  const msg = (err as Error).message?.toLowerCase() ?? "";
+  return msg.includes("connect") || msg.includes("timeout") || msg.includes("econnrefused") || msg.includes("database is paused");
+}
+
 export async function dbSafe<T>(query: () => Promise<T>, fallback: T): Promise<T> {
   try {
     return await query();
   } catch (err) {
-    console.warn("[db] query failed, using fallback:", (err as Error).message);
+    if (!isConnectionError(err)) throw err;
+    console.warn("[db] connection error, using fallback:", (err as Error).message);
     return fallback;
   }
 }

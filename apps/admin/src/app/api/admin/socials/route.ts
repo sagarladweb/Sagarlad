@@ -31,7 +31,7 @@ export async function GET() {
 // Social links are update-only: the brand's set of links is fixed in code, so
 // admin can refine the details but must not create or delete entries.
 export async function PUT(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);

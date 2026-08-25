@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { requireAdmin } from "@/lib/requireAdmin";
 import { sendTestEmail } from "@/lib/newsletter";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,7 @@ const testSchema = z.object({
 // Send the composed email to the admin's own inbox so they can check the real
 // render before broadcasting to everyone.
 export async function POST(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await request.json().catch(() => null);
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
   if (!to) return NextResponse.json({ error: "No email on your account" }, { status: 400 });
 
   try {
-    await sendTestEmail(to, parsed.data.subject, parsed.data.html);
+    await sendTestEmail(to, parsed.data.subject, sanitizeHtml(parsed.data.html));
     return NextResponse.json({ ok: true, to });
   } catch (err) {
     console.error("[newsletter] test send failed:", err);

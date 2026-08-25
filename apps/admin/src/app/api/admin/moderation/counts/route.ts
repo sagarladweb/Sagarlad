@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/requireAdmin";
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
-  const session = await requireAdmin();
+  const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { searchParams } = new URL(request.url);

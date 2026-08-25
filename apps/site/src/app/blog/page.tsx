@@ -2,10 +2,11 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { prisma, dbSafe } from "@/lib/db";
 import { getCategories, getPublishedVideos } from "@/lib/content";
-import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover } from "@/lib/site";
+import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover, readingTime } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { SiteLogo } from "@/components/SiteLogo";
 import { JsonLd } from "@/components/JsonLd";
+import { RssBanner } from "@/components/RssBanner";
 
 export const metadata: Metadata = pageMetadata({
   title: "Blog",
@@ -58,7 +59,7 @@ export default async function BlogPage({
 
   // Only fetch the rows for the active tab. Categories and the two stats
   // counts are always needed; the list+count for the other tab are not.
-  let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date }[] = [];
+  let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date; excerpt: string | null }[] = [];
   let total = 0;
   let videos: Awaited<ReturnType<typeof getPublishedVideos>> = [];
 
@@ -74,6 +75,7 @@ export default async function BlogPage({
               title: true,
               coverImage: true,
               publishedAt: true,
+              excerpt: true,
             },
             orderBy: { publishedAt: "desc" },
             take: PAGE_SIZE,
@@ -299,8 +301,10 @@ export default async function BlogPage({
                     <h2 className="text-sm sm:text-base font-bold text-white leading-snug line-clamp-2">
                       {post.title}
                     </h2>
-                    <p className="mt-1 text-[11px] text-white/60">
-                      {formatDate(post.publishedAt)}
+                    <p className="mt-1 text-[11px] text-white/60 flex items-center gap-2">
+                      <span>{formatDate(post.publishedAt)}</span>
+                      <span>·</span>
+                      <span>{readingTime(post.excerpt || post.title)} min read</span>
                     </p>
                   </div>
                 </Link>
@@ -391,6 +395,7 @@ export default async function BlogPage({
           )}
         </>
       )}
+      <RssBanner />
     </div>
   );
 }

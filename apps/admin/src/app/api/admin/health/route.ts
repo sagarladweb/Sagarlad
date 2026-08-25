@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma, dbSafe } from "@/lib/db";
 import { requireAdmin } from "@/lib/requireAdmin";
+import { NO_STORE_HEADERS } from "@/lib/cache-headers";
 
 export const runtime = "nodejs";
 
@@ -29,16 +30,15 @@ export async function GET() {
     };
   }
 
-  // 2. Environment Variables Audit (no secrets or names exposed)
-  const envVars = [
+  // 2. Environment Variables Audit — only check presence, never expose values or names
+  const requiredEnvVars = [
     process.env.DATABASE_URL,
     process.env.AUTH_SECRET,
     process.env.ADMIN_EMAIL,
-    process.env.ADMIN_PASSWORD,
     process.env.CRON_SECRET,
     process.env.SITE_URL,
   ];
-  const envOk = envVars.every(Boolean);
+  const envOk = requiredEnvVars.every(Boolean);
 
   checks.environment = {
     ok: envOk,
@@ -97,5 +97,5 @@ export async function GET() {
     status: allOk ? "healthy" : "degraded",
     timestamp: new Date().toISOString(),
     checks,
-  });
+  }, { headers: NO_STORE_HEADERS });
 }

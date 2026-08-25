@@ -49,6 +49,9 @@ export default async function DashboardPage() {
   if (PHASE_1) redirect("/admin/posts");
 
   let recentPosts: { title: string; slug: string; published: boolean; views: number }[] = [];
+  let published = 0;
+  let drafts = 0;
+  let scheduled = 0;
   let extras: {
     activeSubs: number;
     lastCampaign: { subject: string; createdAt: Date; _count: { deliveries: number } } | null;
@@ -70,9 +73,10 @@ export default async function DashboardPage() {
   };
 
   try {
-    const [, , , recent] = await getDashboardStats();
+    const [published, drafts, scheduled, subs, recent, viewsAgg] = await getDashboardStats();
     recentPosts = recent;
     extras = await getDashboardExtras();
+    extras.activeSubs = subs;
   } catch (e) {
     console.error("Failed to load dashboard stats:", e);
   }
@@ -114,6 +118,12 @@ export default async function DashboardPage() {
     { label: "Pending comments", value: extras.pendingComments, href: "/admin/moderation", icon: MessagesSquare },
   ];
 
+  const postStats = [
+    { label: "Published", value: published ?? 0, icon: FileText, color: "text-green-600" },
+    { label: "Drafts", value: drafts ?? 0, icon: FileText, color: "text-amber-600" },
+    { label: "Scheduled", value: scheduled ?? 0, icon: Timer, color: "text-brand" },
+  ];
+
   return (
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -137,6 +147,15 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {kpis.map((k) => (
           <KPICard key={k.label} {...k} sparkline={<Sparkline values={k.values} />} />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        {postStats.map((s) => (
+          <Card key={s.label} title={s.label} icon={s.icon}>
+            <p className="text-3xl font-bold tabular-nums">{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label.toLowerCase()} posts</p>
+          </Card>
         ))}
       </div>
 

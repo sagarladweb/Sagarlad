@@ -51,7 +51,7 @@ export const adminPostSchema = z.object({
     .max(200)
     .regex(/^[a-z0-9-]+$/, "Slug must be lowercase letters, numbers and dashes"),
   excerpt: z.string().trim().max(400).optional().or(z.literal("")),
-  content: z.string().trim().min(10, "Content is too short"),
+  content: z.string().trim().min(10, "Content is too short").max(500_000, "Content is too long"),
   coverImage: z.string().trim().max(500).optional().or(z.literal("")),
   categoryId: z.string().trim().optional().or(z.literal("")),
   featured: z.boolean().optional(),
