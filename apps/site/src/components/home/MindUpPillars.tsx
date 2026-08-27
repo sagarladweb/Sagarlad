@@ -1,53 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import { Play, Brain, Heart, Users, Briefcase, TrendingUp, Star } from "lucide-react";
 import { MINDUP_PILLARS, type MindUpPillar } from "@/lib/mindup";
-
-// MIND UP THEORY — Six Pillars. One Unshakable Life.
-// One interactive system: the SVG ring, the pillar cards and the info panel
-// all read from a single `active` state. Pastel palette from design/mindup.ts.
+import { Pill } from "@/components/ui/Pill";
 
 const CX = 200;
 const CY = 200;
 const OUTER = 188;
 const INNER = 106;
 const MID = (OUTER + INNER) / 2;
-const GAP = 1.4; // degrees of off-white divider between segments
+const GAP = 1.4;
 const STEP = 360 / MINDUP_PILLARS.length;
+const TRACE_DUR = 1800; // ms per segment trace
 
-// Abstract line marks per pillar (24×24 space) — no letters, no avatars.
-const MARKS: Record<string, React.ReactNode> = {
-  M: (
-    <>
-      <path d="M12 3l7 9-7 9-7-9 7-9z" />
-      <path d="M12 8.5l3.5 3.5-3.5 3.5-3.5-3.5 3.5-3.5z" />
-    </>
-  ),
-  I: <path d="M3 12h4l2-5 4 10 2-5h6" />,
-  N: (
-    <>
-      <circle cx="9" cy="12" r="6" />
-      <circle cx="15" cy="12" r="6" />
-    </>
-  ),
-  D: (
-    <>
-      <path d="M3 21h18" />
-      <path d="M7 21v-4h3v-4h3v-4h3V5" />
-    </>
-  ),
-  P: (
-    <>
-      <path d="M20 12a8 8 0 1 1-2.34-5.66" />
-      <path d="M20 3v4h-4" />
-    </>
-  ),
-  U: (
-    <>
-      <circle cx="12" cy="10" r="5" />
-      <path d="M12 15v6" />
-    </>
-  ),
+// Real Lucide icons for each pillar
+const PILLAR_ICONS: Record<string, typeof Brain> = {
+  M: Brain,
+  I: Heart,
+  N: Users,
+  D: Briefcase,
+  P: TrendingUp,
+  U: Star,
 };
 
 const polar = (angleDeg: number, radius: number): [number, number] => {
@@ -72,54 +46,115 @@ function sectorPath(startDeg: number, endDeg: number): string {
   ].join(" ");
 }
 
+// Trace path: the outer arc of each sector (for the glowing line)
+function traceArc(startDeg: number, endDeg: number): string {
+  const s = startDeg + GAP;
+  const e = endDeg - GAP;
+  const [ox, oy] = polar(s, OUTER);
+  const [ex, ey] = polar(e, OUTER);
+  const large = e - s > 180 ? 1 : 0;
+  return `M ${ox} ${oy} A ${OUTER} ${OUTER} 0 ${large} 1 ${ex} ${ey}`;
+}
+
 type RingProps = {
   active: string | null;
   activePillar: MindUpPillar | null;
+  playing: boolean;
+  playIdx: number;
+  playProgress: number; // 0-1 for current segment
   onHover: (id: string) => void;
   onLeave: () => void;
   onSelect: (id: string) => void;
+  onPlayToggle: () => void;
 };
 
-// The six-pillar ring. Every segment carries its icon at all breakpoints; the
-// centre swaps to the selected pillar.
-function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingProps) {
+function PillarRing({
+  active,
+  activePillar,
+  playing,
+  playIdx,
+  playProgress,
+  onHover,
+  onLeave,
+  onSelect,
+  onPlayToggle,
+}: RingProps) {
+  const arcLen = 2 * Math.PI * MID;
+  const segArc = arcLen / MINDUP_PILLARS.length;
+
   return (
     <div className="mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[480px]">
       <div className="relative aspect-square w-full select-none">
-        <svg
-          viewBox="0 0 400 400"
-          className="h-full w-full"
-          role="img"
-          aria-labelledby="mindup-pillars-title"
-        >
-          <title id="mindup-pillars-title">
-            Mind Up Theory — Six Pillars. One Unshakable Life.
-          </title>
+        <svg viewBox="0 0 400 400" className="h-full w-full" role="img" aria-labelledby="mindup-title">
+          <title id="mindup-title">Mind Up Theory — Six Pillars. One Unshakable Life.</title>
+
+          <defs>
+            {/* Glow filter for active tracing */}
+            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            {/* Stronger glow for the trailing particle */}
+            <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
+              <feGaussianBlur stdDeviation="7" result="blur" />
+              <feMerge>
+                <feMergeNode in="blur" />
+                <feMergeNode in="blur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+
           {/* Subtle guide ring */}
-          <circle
-            cx={CX}
-            cy={CY}
-            r={OUTER + 12}
-            fill="none"
-            stroke="#111827"
-            strokeOpacity={0.05}
-            strokeWidth={1}
-            strokeDasharray="2 6"
-          />
-          {/* Off-white ring behind the segments forms the dividers */}
-          <circle
-            cx={CX}
-            cy={CY}
-            r={MID}
-            fill="none"
-            stroke="#FAF9F6"
-            strokeWidth={OUTER - INNER + 2}
-          />
+          <circle cx={CX} cy={CY} r={OUTER + 12} fill="none" stroke="#111827" strokeOpacity={0.04} strokeWidth={1} strokeDasharray="2 6" />
+
+          {/* Off-white ring behind segments */}
+          <circle cx={CX} cy={CY} r={MID} fill="none" stroke="#FAF9F6" strokeWidth={OUTER - INNER + 2} />
+
+          {/* Background pulsing glow synced to active segment */}
+          {playing && playIdx >= 0 && playIdx < MINDUP_PILLARS.length && (
+            <circle
+              cx={CX}
+              cy={CY}
+              r={MID}
+              fill="none"
+              stroke={MINDUP_PILLARS[playIdx].color}
+              strokeWidth={OUTER - INNER + 8}
+              strokeOpacity={0.12 + playProgress * 0.08}
+              className="mindup-pulse"
+              style={{ transition: "stroke-opacity 0.3s ease" }}
+            />
+          )}
+
+          {/* Base segments */}
           {MINDUP_PILLARS.map((p, i) => {
             const start = -90 - STEP / 2 + i * STEP;
-            const centerDeg = start + STEP / 2;
-            const [ix, iy] = polar(centerDeg, MID);
             const isActive = active === p.id;
+            const isPlayingDone = playing && i < playIdx;
+            const isPlayingActive = playing && i === playIdx;
+            const isPlayingPending = playing && i > playIdx;
+
+            // During play: pending segments are dark/glass, active gets full color at end
+            let fill = p.color;
+            let opacity = 1;
+            if (playing) {
+              if (isPlayingPending) {
+                fill = "#94a3b8"; // slate-400
+                opacity = 0.25;
+              } else if (isPlayingActive) {
+                fill = p.color;
+                opacity = 0.3 + playProgress * 0.7;
+              } else {
+                fill = p.color;
+                opacity = 1;
+              }
+            } else if (active && !isActive) {
+              opacity = 0.3;
+            }
+
             return (
               <g
                 key={p.id}
@@ -138,78 +173,152 @@ function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingPr
                     onSelect(p.id);
                   }
                 }}
-                className="cursor-pointer focus:outline-none focus-visible:opacity-90"
+                className="cursor-pointer focus:outline-none"
                 style={{
-                  opacity: active && !isActive ? 0.35 : 1,
-                  transform: isActive ? "scale(1.04)" : "scale(1)",
+                  opacity,
+                  transform: isActive && !playing ? "scale(1.03)" : "scale(1)",
                   transformBox: "fill-box",
                   transformOrigin: "center",
-                  transition: "opacity 0.3s ease, transform 0.3s ease",
+                  transition: "opacity 0.4s ease, transform 0.3s ease",
                 }}
               >
                 <path
                   d={sectorPath(start, start + STEP)}
-                  fill={p.color}
+                  fill={fill}
                   stroke="#FAF9F6"
                   strokeWidth={2}
                   strokeLinejoin="round"
                   strokeLinecap="round"
-                  style={{
-                    filter: isActive
-                      ? "drop-shadow(0 8px 14px rgba(17,24,39,0.14))"
-                      : undefined,
-                    transition: "filter 0.3s ease",
-                  }}
                 />
-                {/* Icon — visible at every breakpoint */}
-                <g
-                  transform={`translate(${ix - 15} ${iy - 15}) scale(1.25)`}
-                  fill="none"
-                  stroke={isActive ? "#111827" : p.color}
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                {/* Real Lucide icon */}
+                <foreignObject
+                  x={polar(start + STEP / 2, MID)[0] - 14}
+                  y={polar(start + STEP / 2, MID)[1] - 14}
+                  width={28}
+                  height={28}
                   aria-hidden="true"
                 >
-                  {MARKS[p.id]}
-                </g>
+                  <div
+                    className="flex h-full w-full items-center justify-center"
+                  >
+                    {(() => {
+                      const Icon = PILLAR_ICONS[p.id] ?? Brain;
+                      return (
+                        <Icon
+                          className="h-5 w-5 sm:h-6 sm:w-6"
+                          style={{
+                            color: playing && isPlayingPending ? "#64748b" : isActive ? "#1e293b" : p.color,
+                            transition: "color 0.3s ease",
+                          }}
+                          strokeWidth={1.5}
+                        />
+                      );
+                    })()}
+                  </div>
+                </foreignObject>
+              </g>
+            );
+          })}
+
+          {/* Animated glowing trace lines */}
+          {playing && MINDUP_PILLARS.map((p, i) => {
+            const start = -90 - STEP / 2 + i * STEP;
+            const d = traceArc(start, start + STEP);
+            const status = i < playIdx ? "done" : i === playIdx ? "active" : "pending";
+
+            if (status === "pending") return null;
+
+            return (
+              <g key={`trace-${p.id}`}>
+                {/* Glow layer */}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={p.color}
+                  strokeWidth={6}
+                  strokeLinecap="round"
+                  strokeDasharray={segArc}
+                  strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
+                  filter="url(#glow-strong)"
+                  opacity={status === "done" ? 0.4 : 0.7}
+                  style={{ transition: status === "done" ? "none" : undefined }}
+                />
+                {/* Core trace line */}
+                <path
+                  d={d}
+                  fill="none"
+                  stroke={p.color}
+                  strokeWidth={3}
+                  strokeLinecap="round"
+                  strokeDasharray={segArc}
+                  strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
+                  opacity={status === "done" ? 0.9 : 1}
+                  style={{ transition: status === "done" ? "none" : undefined }}
+                />
+                {/* Trailing particle dot */}
+                {status === "active" && playProgress > 0.05 && (
+                  <circle
+                    r={5}
+                    fill={p.color}
+                    filter="url(#glow)"
+                    opacity={0.9}
+                    className="mindup-trace-dot"
+                    style={{
+                      offsetPath: `path("${d}")`,
+                      offsetDistance: `${playProgress * 100}%`,
+                    }}
+                  />
+                )}
               </g>
             );
           })}
         </svg>
 
-        {/* Centre core — MIND UP, or the selected pillar */}
+        {/* Centre core */}
         <div
           aria-live="polite"
-          className="pointer-events-none absolute left-1/2 top-1/2 flex h-[46%] w-[46%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-[#FAF9F6] text-center ring-1 ring-black/5"
+          className="pointer-events-none absolute left-1/2 top-1/2 flex h-[52%] w-[52%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-[#FAF9F6]/95 text-center ring-1 ring-black/5 overflow-hidden"
         >
-          {activePillar ? (
-            <div key={activePillar.id} className="pillar-swap px-5">
-              <p className="text-[0.62rem] font-bold uppercase tracking-[0.4em] text-[#1738B8]">
+          {playing && activePillar ? (
+            <div key={`play-${activePillar.id}`} className="pillar-swap px-5 z-10">
+              <p className="text-[0.6rem] font-bold uppercase tracking-[0.35em]" style={{ color: activePillar.color }}>
                 {activePillar.short}
               </p>
-              <p className="mt-1.5 font-display text-sm font-bold leading-snug text-[#111827]">
+              <p className="mt-1 font-display text-sm font-semibold leading-snug text-[#1e293b]">
+                {activePillar.shortDescription}
+              </p>
+            </div>
+          ) : activePillar ? (
+            <div key={activePillar.id} className="pillar-swap px-5 z-10">
+              <p className="text-[0.6rem] font-bold uppercase tracking-[0.35em] text-[#94a3b8]">
+                {activePillar.short}
+              </p>
+              <p className="mt-1.5 font-display text-sm sm:text-base font-bold leading-snug text-[#1e293b]">
                 {activePillar.shortDescription}
               </p>
             </div>
           ) : (
-            <>
-              <p className="font-display text-[1.15rem] font-extrabold uppercase leading-none tracking-[0.14em] text-[#111827] sm:text-[1.3rem]">
+            <div className="relative flex flex-col items-center justify-center w-full h-full p-2">
+              <p className="font-display text-[1rem] sm:text-[1.15rem] font-bold uppercase leading-none tracking-[0.12em] text-[#1e293b]">
                 Mind Up
               </p>
-              <p className="mt-1.5 text-[0.6rem] font-bold uppercase tracking-[0.45em] text-[#1738B8]">
+              <p className="mt-1 text-[0.55rem] font-semibold uppercase tracking-[0.4em] text-[#94a3b8]">
                 Theory
               </p>
-              <span aria-hidden="true" className="mt-2 h-px w-8 bg-black/10" />
-              <p className="mt-2 px-6 text-[0.72rem] font-medium leading-snug text-[#666666]">
-                The Unshakable Life
-              </p>
-            </>
+              <button
+                type="button"
+                onClick={onPlayToggle}
+                aria-label="Play pillar walkthrough"
+                className="btn-premium pointer-events-auto z-10 mt-4 flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center rounded-full border border-[#1e293b]/15 bg-transparent hover:bg-[#1e293b]/5 text-[#1e293b] active:scale-95"
+              >
+                <Play className="h-6 w-6 sm:h-7 sm:w-7 ml-0.5" />
+              </button>
+            </div>
           )}
         </div>
       </div>
 
-      <p className="mt-7 text-center text-xs text-[#999999]">
+      <p className="mt-8 text-center text-xs text-[#94a3b8]">
         <span className="lg:hidden">Tap a pillar to explore it.</span>
         <span className="hidden lg:inline">Hover over a pillar to explore it.</span>
       </p>
@@ -219,84 +328,155 @@ function PillarRing({ active, activePillar, onHover, onLeave, onSelect }: RingPr
 
 export function MindUpPillars() {
   const [active, setActive] = useState<string | null>(null);
+  const [playing, setPlaying] = useState(false);
+  const [playIdx, setPlayIdx] = useState(-1);
+  const [playProgress, setPlayProgress] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rafRef = useRef<number>(0);
+  const idxRef = useRef(0);
+  const startTimeRef = useRef(0);
 
   const activePillar = active
     ? (MINDUP_PILLARS.find((p) => p.id === active) ?? null)
     : null;
 
+  const stopPlay = useCallback(() => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    timerRef.current = null;
+    rafRef.current = 0;
+    setPlaying(false);
+    setPlayIdx(-1);
+    setPlayProgress(0);
+    idxRef.current = 0;
+  }, []);
+
+  const animateSegment = useCallback(() => {
+    const elapsed = performance.now() - startTimeRef.current;
+    const progress = Math.min(elapsed / TRACE_DUR, 1);
+    setPlayProgress(progress);
+
+    if (progress < 1) {
+      rafRef.current = requestAnimationFrame(animateSegment);
+    }
+    // When progress reaches 1, the RAF loop stops naturally.
+    // playNext is triggered by its own setTimeout, which fires after TRACE_DUR.
+  }, []);
+
+  const playNext = useCallback(() => {
+    const i = idxRef.current;
+    if (i >= MINDUP_PILLARS.length) {
+      timerRef.current = setTimeout(() => {
+        stopPlay();
+        setActive(null);
+      }, 500);
+      return;
+    }
+    // Cancel any lingering RAF from previous segment
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    setActive(MINDUP_PILLARS[i].id);
+    setPlayIdx(i);
+    setPlayProgress(0);
+    startTimeRef.current = performance.now();
+    rafRef.current = requestAnimationFrame(animateSegment);
+    idxRef.current = i + 1;
+    timerRef.current = setTimeout(playNext, TRACE_DUR + 50);
+  }, [stopPlay, animateSegment]);
+
+  const startPlay = useCallback(() => {
+    if (playing) {
+      stopPlay();
+      return;
+    }
+    idxRef.current = 0;
+    setPlaying(true);
+    playNext();
+  }, [playing, stopPlay, playNext]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, []);
+
   const hoverDevice = () =>
     typeof window !== "undefined" && window.matchMedia("(hover: hover)").matches;
 
   const hover = (id: string) => {
-    if (hoverDevice()) setActive(id);
+    if (hoverDevice() && !playing) setActive(id);
   };
   const leave = () => {
-    if (hoverDevice()) setActive(null);
+    if (hoverDevice() && !playing) setActive(null);
   };
-  const select = (id: string) => setActive((prev) => (prev === id ? null : id));
+  const select = (id: string) => {
+    stopPlay();
+    setActive((prev) => (prev === id ? null : id));
+  };
 
   return (
     <section
       aria-label="Mind Up Theory — Six Pillars"
-      className="relative overflow-hidden bg-[#FAF9F6] py-20 md:py-24 border-b border-border"
+      className="relative overflow-hidden bg-[#FAF9F6] py-28 md:py-36 border-b border-[#e2e8f0]/40"
     >
-      {/* Soft radial tint behind the diagram */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute right-[-10%] top-1/3 hidden h-[520px] w-[520px] rounded-full opacity-60 blur-3xl lg:block"
-        style={{
-          background:
-            "radial-gradient(circle, rgba(102,116,184,0.10), rgba(249,249,246,0) 65%)",
-        }}
-      />
+      {/* Background pulse synced to active segment */}
+      {playing && playIdx >= 0 && playIdx < MINDUP_PILLARS.length && (
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full blur-[140px] mindup-bg-pulse"
+          style={{
+            background: MINDUP_PILLARS[playIdx].color,
+            opacity: 0.04 + playProgress * 0.04,
+          }}
+        />
+      )}
 
-      <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        {/* ---------- Intro (mobile / tablet) ---------- */}
+      <div className="mx-auto max-w-7xl px-6 sm:px-8">
+        {/* Mobile / tablet */}
         <div className="text-center lg:hidden" data-animate="blur">
-          <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#1738B8]">
-            The Mind Up Theory
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.08] tracking-tight text-[#111827] sm:text-5xl">
+          <Pill>The Mind Up Theory</Pill>
+          <h2 className="mt-8 font-display text-4xl font-bold leading-[1.1] tracking-tight text-[#1e293b] sm:text-5xl">
             Six Pillars.
             <br />
-            One <em className="italic text-[#1738B8]">Unshakable</em> Life.
+            One Unshakable Life.
           </h2>
-          <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-[#666666] sm:text-lg">
+          <p className="mx-auto mt-6 max-w-md text-base leading-relaxed text-[#64748b] sm:text-lg">
             Master your mind and build a life that stays strong no matter what
             comes your way.
           </p>
+          <p className="mt-3 text-sm text-[#94a3b8]">By: Sagar Lad</p>
         </div>
 
-        {/* ---------- Desktop row: info panel (left) + ring (right) ---------- */}
-        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-14 xl:gap-20" data-animate="blur">
-          <div className="lg:min-h-[250px]">
-            <p className="text-xs font-bold uppercase tracking-[0.3em] text-[#1738B8]">
-              The Mind Up Theory
-            </p>
-            <div key={activePillar?.id ?? "intro"} className="pillar-swap mt-4">
-              {activePillar ? (
+        {/* Desktop: info panel (left) + ring (right) */}
+        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24" data-animate="blur">
+          <div className="lg:min-h-[280px]">
+            <Pill>The Mind Up Theory</Pill>
+            <div key={activePillar?.id ?? "intro"} className="pillar-swap mt-8">
+              {activePillar && !playing ? (
                 <>
-                  <h2 className="font-display text-4xl xl:text-[3.25rem] font-bold leading-[1.05] tracking-tight text-[#111827]">
+                  <h2 className="font-display text-4xl xl:text-[3.25rem] font-bold leading-[1.05] tracking-tight text-[#1e293b]">
                     {activePillar.short}
                   </h2>
-                  <p className="mt-3 text-lg font-semibold text-[#111827]">
+                  <p className="mt-4 text-lg font-semibold text-[#1e293b]">
                     {activePillar.shortDescription}
                   </p>
-                  <p className="mt-2 max-w-md text-base leading-relaxed text-[#666666]">
+                  <p className="mt-3 max-w-md text-base leading-relaxed text-[#64748b]">
                     {activePillar.description}
                   </p>
                 </>
               ) : (
                 <>
-                  <h2 className="font-display text-4xl xl:text-[3.25rem] font-bold leading-[1.05] tracking-tight text-[#111827]">
+                  <h2 className="font-display text-4xl xl:text-[3.25rem] font-bold leading-[1.05] tracking-tight text-[#1e293b]">
                     Six Pillars.
                     <br />
-                    One <em className="italic text-[#1738B8]">Unshakable</em> Life.
+                    One Unshakable Life.
                   </h2>
-                  <p className="mt-4 max-w-md text-base leading-relaxed text-[#666666]">
+                  <p className="mt-5 max-w-md text-base leading-relaxed text-[#64748b]">
                     Master your mind and build a life that stays strong no
                     matter what comes your way.
                   </p>
+                  <p className="mt-3 text-sm text-[#94a3b8]">By: Sagar Lad</p>
                 </>
               )}
             </div>
@@ -306,21 +486,29 @@ export function MindUpPillars() {
             <PillarRing
               active={active}
               activePillar={activePillar}
+              playing={playing}
+              playIdx={playIdx}
+              playProgress={playProgress}
               onHover={hover}
               onLeave={leave}
               onSelect={select}
+              onPlayToggle={startPlay}
             />
           </div>
         </div>
 
-        {/* ---------- Mobile / tablet ring ---------- */}
-        <div className="mt-12 lg:hidden" data-animate="zoom">
+        {/* Mobile / tablet ring */}
+        <div className="mt-14 lg:hidden" data-animate="zoom">
           <PillarRing
             active={active}
             activePillar={activePillar}
+            playing={playing}
+            playIdx={playIdx}
+            playProgress={playProgress}
             onHover={hover}
             onLeave={leave}
             onSelect={select}
+            onPlayToggle={startPlay}
           />
         </div>
       </div>

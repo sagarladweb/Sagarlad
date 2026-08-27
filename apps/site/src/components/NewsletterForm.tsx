@@ -60,12 +60,13 @@ export function NewsletterForm() {
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Your email address"
           aria-label="Email address"
-          className="flex-1 rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent transition-shadow"
+          style={{ borderRadius: "9999px" }}
+          className="flex-1 !rounded-full border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent focus:!rounded-full focus-visible:!rounded-full transition-shadow"
         />
         <button
           type="submit"
           disabled={state === "loading"}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+          className="btn-premium inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90"
         >
           {state === "loading" ? (
             <Loader2 className="w-4 h-4 animate-spin" />

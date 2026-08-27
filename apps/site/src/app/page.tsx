@@ -1,14 +1,12 @@
-import { prisma, dbSafe } from "@/lib/db";
 import { SITE, VISIBLE_POST_WHERE } from "@/lib/site";
 import { getSiteSocials } from "@/lib/social-links";
-import { getCategories } from "@/lib/content";
+import { getCategories, getFeaturedPosts } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 import dynamic from "next/dynamic";
 import type { Post, Category } from "@sagarlad/db";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";
-import { RssBanner } from "@/components/RssBanner";
 
 const AboutMe = dynamic(() => import("@/components/home/AboutMe").then((m) => m.AboutMe));
 const TopicsGrid = dynamic(() => import("@/components/home/TopicsGrid").then((m) => m.TopicsGrid));
@@ -24,16 +22,7 @@ export const revalidate = 604800;
 
 export default async function HomePage() {
   const [posts, socials, allCategories] = await Promise.all([
-    dbSafe(
-      () =>
-        prisma.post.findMany({
-          where: VISIBLE_POST_WHERE,
-          include: { category: true },
-          orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-          take: 4,
-        }) as Promise<(Post & { category: Category | null })[]>,
-      []
-    ),
+    getFeaturedPosts(VISIBLE_POST_WHERE, 4),
     getSiteSocials(),
     getCategories(),
   ]);
@@ -87,7 +76,6 @@ export default async function HomePage() {
       <MentorshipCta />
       <NewsletterCta />
       <SagarGallery />
-      <RssBanner />
     </>
   );
 }

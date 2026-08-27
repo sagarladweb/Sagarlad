@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import { unstable_cache } from "next/cache";
 import { prisma, dbSafe } from "@/lib/db";
-import { getPostBySlug } from "@/lib/content";
+import { getPostBySlug, getRelatedPosts } from "@/lib/content";
 import { SITE, VISIBLE_POST_WHERE, stripHtml } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 import { ReadingProgress } from "@/components/blog/ReadingProgress";
@@ -11,24 +12,29 @@ export const revalidate = 604800;
 
 type Props = { params: Promise<{ slug: string }> };
 
-// Prerender every published post at build time so pages are served straight
-// from the CDN cache — no DB query per visitor. New/edited posts update via
-// `revalidatePublic()` on admin writes, plus the weekly ISR fallback.
-export async function generateStaticParams() {
-  const posts = await dbSafe(
-    () =>
-      prisma.post.findMany({
+const getAllPostSlugs = unstable_cache(
+  async () => {
+    try {
+      return await prisma.post.findMany({
         where: VISIBLE_POST_WHERE,
         select: { slug: true },
-      }),
-    []
-  );
-  return posts.map((p) => ({ slug: p.slug }));
+      });
+    } catch {
+      return [];
+    }
+  },
+  ["post-slugs"],
+  { revalidate: 604800, tags: ["content", "posts"] }
+);
+
+export async function generateStaticParams() {
+  const posts = await getAllPostSlugs();
+  return posts.map((p: { slug: string }) => ({ slug: p.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const post = await dbSafe(() => getPostBySlug(slug), null);
+  const post = await getPostBySlug(slug).catch(() => null);
   if (!post) return {};
   const description = post.excerpt ?? stripHtml(post.content ?? "");
   const url = `${SITE.url}/blog/${slug}`;
@@ -56,43 +62,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function PostPage({ params }: Props) {
   const { slug } = await params;
-  const post = await dbSafe(() => getPostBySlug(slug), null);
+  const post = await getPostBySlug(slug).catch(() => null);
 
   if (!post || !post.published) notFound();
 
-  // Same-category reads first, newest published fallback when the category is
-  // thin. Excludes the current post.
-  const related = await dbSafe(
-    () =>
-      prisma.post.findMany({
-        where: {
-          ...VISIBLE_POST_WHERE,
-          NOT: { id: post.id },
-          ...(post.categoryId
-            ? { categoryId: post.categoryId }
-            : { categoryId: null }),
-        },
-        select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
-        orderBy: { publishedAt: "desc" },
-        take: 3,
-      }),
-    []
-  );
-  const relatedPosts =
-    related.length >= 3
-      ? related
-      : (
-          await dbSafe(
-            () =>
-              prisma.post.findMany({
-                where: { ...VISIBLE_POST_WHERE, NOT: { id: post.id } },
-                select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
-                orderBy: { publishedAt: "desc" },
-                take: 3,
-              }),
-            []
-          )
-        ).slice(0, 3);
+  const relatedPosts = await getRelatedPosts(post.id, post.categoryId).catch(() => []);
 
   return (
     <article>

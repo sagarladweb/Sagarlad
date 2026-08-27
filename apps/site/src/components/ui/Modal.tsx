@@ -20,11 +20,15 @@ export function Modal({
 }) {
   useEffect(() => {
     if (!open) return;
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
     document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -42,7 +46,7 @@ export function Modal({
         aria-hidden="true"
       />
       <div
-        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in zoom-in-95 fade-in-0 ${
+        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-2xl animate-in zoom-in-95 fade-in-0 ${
           wide ? "max-w-3xl" : "max-w-xl"
         }`}
       >
@@ -51,7 +55,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="btn-premium p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted"
           >
             <X className="w-4 h-4" />
           </button>

@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "@/lib/gsap";
-import { ArrowRight, BookOpen } from "lucide-react";
+import { BookOpen } from "lucide-react";
 import { DESIGNATION } from "@/lib/site";
 
 export function Hero() {
@@ -104,49 +104,47 @@ export function Hero() {
       </div>
 
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-end py-12 sm:py-32">
-        <div className="max-w-3xl space-y-6 text-center mx-auto sm:text-left sm:mx-0 mt-auto">
-          <p
-            data-hero-desig
-            className="text-xs sm:text-sm font-semibold uppercase tracking-[0.22em] text-accent"
-          >
-            {DESIGNATION}
-          </p>
+        <div className="max-w-3xl text-center sm:text-left mt-auto" style={{ display: "grid", gap: "0" }}>
+          {/* Pill */}
+          <div data-hero-desig className="mb-4">
+            <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-white/70 border border-white/20 rounded-full px-5 py-1.5">
+              {DESIGNATION}
+            </span>
+          </div>
 
-          <h1 className="font-display text-6xl sm:text-7xl md:text-8xl font-bold leading-[1.02] text-white">
-            <span data-hero-word className="inline-block">Sagar</span>{" "}
-            <span data-hero-word className="inline-block">Lad</span>
+          {/* Name */}
+          <h1 className="mb-6">
+            <span data-hero-word className="font-display text-6xl sm:text-7xl md:text-8xl font-bold leading-[1.1] text-white">
+              Sagar Lad
+            </span>
           </h1>
 
+          {/* Tagline */}
           <p
             data-hero-tag
-            className="font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white"
+            className="mb-8 font-display text-2xl sm:text-3xl md:text-4xl font-bold text-white"
           >
             Mind <span className="text-accent">Up.</span> Rise Within.
           </p>
 
+          {/* Description */}
           <p
             data-hero-desc
-            className="max-w-xl text-base sm:text-lg text-white/85 leading-relaxed"
+            className="mb-10 max-w-xl text-base sm:text-lg text-white/75 leading-relaxed"
           >
             Strengthen your mind, rise beyond your limits, succeed with
             purpose, and lift others.
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-start">
+
+          {/* CTA */}
+          <div>
             <Link
               href="/books"
               data-hero-cta
-              className="hero-cta-primary inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold"
+              className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3 text-sm font-semibold"
             >
               <BookOpen className="w-4 h-4" />
               Get the MIND UP Theory
-            </Link>
-            <Link
-              href="/blog"
-              data-hero-cta
-              className="hero-cta-secondary inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 backdrop-blur px-6 py-3 text-sm font-semibold text-white"
-            >
-              Read the blog
-              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
         </div>

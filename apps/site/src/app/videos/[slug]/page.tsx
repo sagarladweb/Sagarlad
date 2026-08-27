@@ -1,6 +1,5 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { getPublishedVideoBySlug } from "@/lib/content";
 import { SITE, pageMetadata, formatDate } from "@/lib/site";
@@ -20,8 +19,19 @@ export default async function VideoArticlePage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const video = await getPublishedVideoBySlug(slug);
-  if (!video) notFound();
+  const video = await getPublishedVideoBySlug(slug).catch(() => null);
+  if (!video) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 text-center">
+        <p className="text-5xl mb-4">🎬</p>
+        <h1 className="font-display text-2xl font-bold">Video not found</h1>
+        <p className="mt-3 text-muted-foreground">This video may have been removed or is temporarily unavailable.</p>
+        <Link href="/videos" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline">
+          <ArrowLeft className="w-4 h-4" /> Browse all videos
+        </Link>
+      </div>
+    );
+  }
 
   const embedId = video.embedUrl;
   const norm = normalizeVideoUrl(embedId);
@@ -90,7 +100,7 @@ export default async function VideoArticlePage({
             <ArrowLeft className="w-4 h-4" /> All videos
           </Link>
           {video.category && (
-            <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
+            <p className="btn-premium mt-6 inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
               {video.category.name}
             </p>
           )}

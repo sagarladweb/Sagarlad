@@ -45,7 +45,7 @@ export default async function VideosPage() {
           <VideoFeed initial={videos} masonry />
         </section>
 
-        <div className="rounded-2xl bg-foreground text-background p-8 sm:p-12 text-center">
+        <div className="rounded-xl bg-foreground text-background p-8 sm:p-12 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-bold">
             Subscribe for the full library
           </h2>
@@ -57,7 +57,7 @@ export default async function VideosPage() {
               href="https://www.youtube.com/@Sagarlad692"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold hover:opacity-90 transition-opacity"
+              className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold hover:opacity-90"
             >
               <FaYoutube className="w-4 h-4" /> Subscribe on YouTube
             </a>

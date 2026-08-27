@@ -204,7 +204,7 @@ function NavLink({ href, label, external, active, onClick, prefetch, light = fal
       {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
       onClick={onClick}
       prefetch={prefetch}
-      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-500 ${
+      className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium shrink-0 whitespace-nowrap transition-colors duration-500 ${
         active
           ? "bg-brand text-white font-semibold"
           : light
@@ -436,7 +436,7 @@ export function Navbar() {
                           key={c.id}
                           href={`/content/${c.slug}`}
                           onClick={() => setHovered(null)}
-                          className="block rounded-lg px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
+                          className="block rounded-md px-3 py-1.5 text-sm font-medium text-foreground hover:bg-muted/80 hover:text-accent-strong transition-colors"
                         >
                           {c.name}
                         </Link>
@@ -449,7 +449,7 @@ export function Navbar() {
                     <Link
                       href="/blog"
                       onClick={() => setHovered(null)}
-                      className="mt-0.5 block rounded-lg px-3 py-1.5 text-xs font-semibold text-accent-strong hover:bg-muted/80 transition-colors"
+                      className="mt-0.5 block rounded-md px-3 py-1.5 text-xs font-semibold text-accent-strong hover:bg-muted/80 transition-colors"
                     >
                       View all →
                     </Link>
@@ -492,7 +492,7 @@ export function Navbar() {
                       <Link
                         href="/books"
                         onClick={() => setHovered(null)}
-                        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-lg hover:bg-muted/80 transition-colors text-sm font-medium text-foreground"
+                        className="w-full flex items-center justify-between gap-3 px-3 py-2 rounded-md hover:bg-muted/80 transition-colors text-sm font-medium text-foreground"
                       >
                         <div className="flex items-center gap-2.5">
                           <BookOpen className="w-4 h-4 text-brand-light/80" />
@@ -501,7 +501,7 @@ export function Navbar() {
                         <ChevronRight className="w-3.5 h-3.5 text-muted-foreground transition-transform" />
                       </Link>
                       <div className="absolute left-full top-0 pl-2 w-[420px] z-50 invisible opacity-0 translate-x-1 pointer-events-none transition-all duration-200 group-hover/published:visible group-hover/published:opacity-100 group-hover/published:translate-x-0 group-hover/published:pointer-events-auto">
-                        <div className="rounded-2xl border border-border bg-background/98 backdrop-blur-xl shadow-2xl p-3 space-y-2 max-h-[82vh] overflow-y-auto no-scrollbar">
+                        <div className="rounded-xl border border-border bg-background/98 backdrop-blur-xl shadow-2xl p-3 space-y-2 max-h-[82vh] overflow-y-auto no-scrollbar">
                           <div className="px-2 pt-1 pb-2 border-b border-border flex items-center justify-between">
                             <span className="text-xs font-bold uppercase tracking-wider text-accent-strong">
                               Published Books by Sagar Lad
@@ -623,13 +623,12 @@ export function Navbar() {
             </div>
 
             {/* Mentorship */}
-            <div className="relative">
-              <NavLink
-                href="/mentorship"
-                label="Mentorship"
-                active={isActive("/mentorship")}
-                light={heroLight}
-              />
+            <div
+              className="relative"
+              onMouseEnter={() => setHovered("Mentorship")}
+              onMouseLeave={() => setHovered(null)}
+            >
+              <NavLink href="/mentorship" label="Mentorship" active={isActive("/mentorship")} light={heroLight} />
             </div>
           </div>
 
@@ -683,7 +682,7 @@ export function Navbar() {
                 />
                 <button
                   type="button"
-                  className="p-2 rounded-full hover:bg-muted transition-colors"
+                  className="btn-premium p-2 rounded-full hover:bg-muted"
                   onClick={() => setOpen(false)}
                   aria-label="Close menu"
                 >
@@ -694,7 +693,7 @@ export function Navbar() {
                 <div className="space-y-1">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted transition-colors"
+                    className="btn-premium w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted"
                     onClick={() => setMobileOpen((c) => (c === "Blogs" ? null : "Blogs"))}
                   >
                     <span className="flex items-center gap-2">
@@ -711,21 +710,21 @@ export function Navbar() {
                       <Link
                         href="/blog"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <FileText className="w-4 h-4 text-brand-light" /> All Blogs
                       </Link>
                       <Link
                         href="/videos"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <Film className="w-4 h-4 text-brand-light" /> Videos
                       </Link>
                       <Link
                         href="/quotes"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <MessageSquareQuote className="w-4 h-4 text-brand-light" /> Quotes
                       </Link>
@@ -735,7 +734,7 @@ export function Navbar() {
                           key={c.id}
                           href={`/content/${c.slug}`}
                           onClick={() => setOpen(false)}
-                          className="block px-3 py-1.5 text-sm font-medium text-foreground hover:text-accent-strong rounded-lg"
+                          className="block px-3 py-1.5 text-sm font-medium text-foreground hover:text-accent-strong rounded-md"
                         >
                           {c.name}
                         </Link>
@@ -743,7 +742,7 @@ export function Navbar() {
                       <Link
                         href="/blog"
                         onClick={() => setOpen(false)}
-                        className="block px-3 py-1.5 text-xs font-semibold text-accent-strong hover:text-accent-strong rounded-lg"
+                        className="block px-3 py-1.5 text-xs font-semibold text-accent-strong hover:text-accent-strong rounded-md"
                       >
                         All topics →
                       </Link>
@@ -754,7 +753,7 @@ export function Navbar() {
                 <div className="space-y-1">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted transition-colors"
+                    className="btn-premium w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted"
                     onClick={() => setMobileOpen((c) => (c === "Books" ? null : "Books"))}
                   >
                     <span className="flex items-center gap-2">
@@ -771,7 +770,7 @@ export function Navbar() {
                       <Link
                         href="/books"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <BookOpen className="w-4 h-4 text-brand-light" />
                         Books I Publish
@@ -779,7 +778,7 @@ export function Navbar() {
                       <Link
                         href="/books-read"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <BookMarked className="w-4 h-4 text-brand-light" />
                         Books I Read
@@ -787,7 +786,7 @@ export function Navbar() {
                       <Link
                         href="/ebooks"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <Library className="w-4 h-4 text-brand-light" />
                         E-books
@@ -799,7 +798,7 @@ export function Navbar() {
                 <div className="space-y-1">
                   <button
                     type="button"
-                    className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted transition-colors"
+                    className="btn-premium w-full flex items-center justify-between px-3 py-2.5 text-sm font-semibold rounded-xl hover:bg-muted"
                     onClick={() => setMobileOpen((c) => (c === "About" ? null : "About"))}
                   >
                     <span className="flex items-center gap-2">
@@ -816,7 +815,7 @@ export function Navbar() {
                       <Link
                         href="/about"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <User className="w-4 h-4 text-brand-light" />
                         About Me
@@ -824,7 +823,7 @@ export function Navbar() {
                       <Link
                         href="/speaking"
                         onClick={() => setOpen(false)}
-                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-lg"
+                        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-foreground hover:text-accent-strong rounded-md"
                       >
                         <Mic2 className="w-4 h-4 text-brand-light" />
                         Public Speaking

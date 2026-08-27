@@ -66,7 +66,7 @@ export function CommentForm({
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-8 rounded-2xl border border-border bg-card p-6 space-y-4" noValidate>
+    <form onSubmit={onSubmit} className="card-hover mt-8 rounded-lg border border-border bg-card p-6 space-y-4" noValidate>
       <h3 className="font-display text-lg font-bold">Leave a comment</h3>
       <div>
         <input
@@ -79,7 +79,7 @@ export function CommentForm({
           placeholder="Your name"
           aria-label="Your name"
           required
-          className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent ${
+          className={`w-full rounded-md border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent ${
             errors.name ? "border-red-500" : "border-border"
           }`}
         />
@@ -96,7 +96,7 @@ export function CommentForm({
           aria-label="Comment"
           required
           rows={4}
-          className={`w-full rounded-xl border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent resize-y ${
+          className={`w-full rounded-md border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent resize-y ${
             errors.content ? "border-red-500" : "border-border"
           }`}
         />
@@ -106,7 +106,7 @@ export function CommentForm({
       <button
         type="submit"
         disabled={state === "loading"}
-        className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-2.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+        className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-2.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90"
       >
         {state === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
         Post comment

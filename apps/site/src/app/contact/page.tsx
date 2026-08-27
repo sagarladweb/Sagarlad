@@ -91,10 +91,9 @@ export default function ContactPage() {
   }
 
   const inputClasses = (hasError?: boolean) =>
-    `w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors ${
-      hasError
-        ? "border-red-400 focus:ring-2 focus:ring-red-300"
-        : "border-border bg-background focus:border-accent focus:ring-2 focus:ring-accent/20"
+    `w-full rounded-xl border px-4 py-3 text-sm outline-none transition-colors ${hasError
+      ? "border-red-400 focus:ring-2 focus:ring-red-300"
+      : "border-border bg-background focus:border-accent focus:ring-2 focus:ring-accent/20"
     }`;
 
   const fieldError = (key: keyof Errors) =>
@@ -107,30 +106,39 @@ export default function ContactPage() {
   return (
     <div className="overflow-x-clip">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="overflow-hidden border-b border-border bg-background py-12 sm:py-16">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-10">
+      <header className="overflow-hidden border-b border-border bg-background pt-6 pb-10 sm:pt-10 sm:pb-14">
+        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8">
           {/* Portrait */}
-          <div className="lg:col-span-5" data-animate="left">
-            <div className="relative mx-auto w-full max-w-[380px]">
+          <div className="lg:col-span-5 relative" data-animate="left">
+            <div className="relative w-full max-w-[560px] mx-auto">
+              {/* Background: two overlapping soft circles */}
               <div
-                aria-hidden="true"
-                className="absolute left-1/2 top-1/2 aspect-square w-[75%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-brand-light/45 via-brand-light/20 to-transparent blur-2xl"
+                className="absolute -left-8 top-1/6 z-0 h-72 w-72 rounded-full blur-3xl"
+                style={{ background: "rgba(13, 33, 161, 0.06)" }}
+              />
+              <div
+                className="absolute -right-6 bottom-1/5 z-0 h-64 w-64 rounded-full blur-3xl"
+                style={{ background: "rgba(255, 213, 29, 0.10)" }}
               />
               <Image
-                src="/images/sagar-author.webp"
+                src="/images/section.png"
                 alt="Sagar Lad"
-                width={477}
-                height={523}
+                width={800}
+                height={890}
                 priority
-                className="relative z-10 h-auto w-full drop-shadow-2xl"
+                className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)]"
+                style={{
+                  maskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
+                  WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
+                }}
               />
             </div>
           </div>
 
           {/* Copy */}
-          <div className="lg:col-span-7 lg:pl-6 text-center lg:text-left" data-animate="right">
-            <span className="inline-block rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.25em] text-brand">
-              Get In Touch
+          <div className="lg:col-span-7 lg:pl-2 text-center lg:text-left" data-animate="right">
+            <span className="btn-premium inline-block rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand">
+              Say hello
             </span>
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
               Let&apos;s <span className="text-brand">connect.</span>
@@ -164,7 +172,7 @@ export default function ContactPage() {
           <div data-animate>
             <form
               onSubmit={onSubmit}
-              className="rounded-2xl border border-border bg-card p-6 sm:p-8 shadow-sm space-y-5"
+              className="card-hover rounded-lg border border-border bg-card p-6 sm:p-8 shadow-sm space-y-5"
               noValidate
             >
               <div>
@@ -290,7 +298,7 @@ export default function ContactPage() {
               <button
                 type="submit"
                 disabled={state === "loading"}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+                className="btn-premium w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3.5 text-sm font-semibold disabled:opacity-60 hover:opacity-90"
               >
                 {state === "loading" && (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -315,9 +323,9 @@ export default function ContactPage() {
           {/* ── Sidebar ───────────────────────────────────────── */}
           <aside className="flex flex-col gap-4" data-animate-group>
             {/* Contact info */}
-            <div className="rounded-2xl border border-border bg-card p-5 space-y-4" data-animate-item>
+            <div className="card-hover rounded-lg border border-border bg-card p-5 space-y-4" data-animate-item>
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
@@ -336,7 +344,7 @@ export default function ContactPage() {
               <div className="h-px bg-border" />
 
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
@@ -352,7 +360,7 @@ export default function ContactPage() {
               <div className="h-px bg-border" />
 
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-xl bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
@@ -367,7 +375,7 @@ export default function ContactPage() {
             </div>
 
             {/* Common topics */}
-            <div className="rounded-2xl border border-border bg-card p-5" data-animate-item>
+            <div className="card-hover rounded-lg border border-border bg-card p-5" data-animate-item>
               <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3">
                 Common topics
               </h3>
@@ -391,34 +399,36 @@ export default function ContactPage() {
       </section>
 
       {/* ── Social Links ────────────────────────────────────── */}
-      <section className="py-10 border-t border-border bg-card/40" data-animate>
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground mb-5">
-          Follow Sagar
-        </p>
-        <div className="flex items-center justify-center gap-4">
-          {[
-            { label: "YouTube", Icon: FaYoutube, href: "https://youtube.com/@sagarlad" },
-            { label: "Instagram", Icon: FaInstagram, href: "https://instagram.com/sagarlad" },
-            { label: "LinkedIn", Icon: FaLinkedinIn, href: "https://linkedin.com/in/sagarlad" },
-            { label: "Medium", Icon: null, href: "https://medium.com/@sagarlad" },
-          ].map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={item.label}
-              className="group flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background transition-all duration-300 hover:border-brand-light/60 hover:shadow-md hover:scale-110"
-            >
-              {item.Icon ? (
-                <item.Icon className="h-5 w-5 text-muted-foreground group-hover:text-brand transition-colors" />
-              ) : (
-                <span className="text-muted-foreground group-hover:text-brand transition-colors text-base font-bold">
-                  M
-                </span>
-              )}
-            </a>
-          ))}
+      <section className="card-hover py-10 border-t border-border bg-card/40" data-animate>
+        <div className="flex flex-col items-center gap-5">
+          <p className="btn-premium text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+            Connect
+          </p>
+          <div className="flex items-center justify-center gap-4">
+            {[
+              { label: "YouTube", Icon: FaYoutube, href: "https://youtube.com/@sagarlad" },
+              { label: "Instagram", Icon: FaInstagram, href: "https://instagram.com/sagarlad" },
+              { label: "LinkedIn", Icon: FaLinkedinIn, href: "https://linkedin.com/in/sagarlad" },
+              { label: "Medium", Icon: null, href: "https://medium.com/@sagarlad" },
+            ].map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.label}
+                className="group flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background transition-all duration-300 hover:border-brand-light/60 hover:shadow-md hover:scale-110"
+              >
+                {item.Icon ? (
+                  <item.Icon className="h-5 w-5 text-muted-foreground group-hover:text-brand transition-colors" />
+                ) : (
+                  <span className="text-muted-foreground group-hover:text-brand transition-colors text-base font-bold">
+                    M
+                  </span>
+                )}
+              </a>
+            ))}
+          </div>
         </div>
       </section>
     </div>

@@ -44,10 +44,10 @@ export default async function ContentPage() {
               <Link
                 key={c.id}
                 href={`/content/${c.slug}`}
-                className="group rounded-2xl border border-border bg-card p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5"
+                className="card-hover group rounded-lg border border-border bg-card p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5"
               >
                 <div>
-                  <span className="inline-flex w-11 h-11 items-center justify-center rounded-xl bg-brand-light/15 text-brand mb-4">
+                  <span className="inline-flex w-11 h-11 items-center justify-center rounded-md bg-brand-light/15 text-brand mb-4">
                     <span className="w-2 h-2 rounded-full bg-brand-light" aria-hidden="true" />
                   </span>
                   <h2 className="font-display text-xl font-bold group-hover:text-brand transition-colors">

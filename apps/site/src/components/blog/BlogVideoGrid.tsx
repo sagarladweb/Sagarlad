@@ -69,11 +69,12 @@ export function BlogVideoGrid({
 
   useEffect(() => {
     if (!playing) return;
+    window.scrollTo(0, 0);
+    document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
@@ -124,7 +125,7 @@ export function BlogVideoGrid({
       <article
         key={v.id}
         onClick={() => setPlaying(v)}
-        className="group flex flex-col rounded-2xl border border-border bg-card overflow-hidden hover:-translate-y-1 hover:shadow-xl transition-all duration-300 cursor-pointer"
+        className="card-hover group flex flex-col rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-brand-light/70 hover:shadow-md cursor-pointer"
       >
         {/* Image Container with precise aspect ratio. Reels are capped so
             a 9:16 portrait never towers over the feed. */}
@@ -167,63 +168,58 @@ export function BlogVideoGrid({
   // Video Modal Player — plays both Instagram and YouTube in-page.
   const modal = playing && (
     <div
-      className="fixed inset-0 z-[100] bg-black/85 backdrop-blur-md overflow-y-auto"
+      className="fixed inset-0 z-[100] bg-black/90 flex overflow-y-auto"
       role="dialog"
       aria-modal="true"
       aria-label={playing.title}
-      onClick={close}
     >
+      {/* Close button — fixed to viewport, always on top */}
       <button
         type="button"
         onClick={close}
         aria-label="Close video"
-        className="fixed top-4 right-4 z-[110] grid h-11 w-11 place-items-center rounded-full bg-white/15 hover:bg-white/25 text-white border border-white/20 transition-colors"
+        className="btn-premium fixed top-3 right-3 sm:top-4 sm:right-4 z-[101] grid h-9 w-9 sm:h-10 sm:w-10 place-items-center rounded-full bg-white/20 hover:bg-white/30 text-white"
       >
-        <X className="w-5 h-5" />
+        <X className="w-4 h-4 sm:w-5 sm:h-5" />
       </button>
 
-      <div className="min-h-full grid place-items-center py-6 sm:py-10">
-        <div
-          className="w-full max-w-3xl px-4 sm:px-6"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className="flex items-start gap-4">
-            <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">
-                {isInstagramUrl(playing.embedUrl) ? "Instagram reel" : "YouTube"}
-              </p>
-              <h3 className="mt-1 text-white font-display text-base sm:text-xl font-bold leading-snug line-clamp-2">
-                {playing.title}
-              </h3>
-            </div>
+      {/* Content — my-auto centers when fits, collapses to 0 when overflows */}
+      <div className="mx-auto my-auto w-full max-w-3xl px-4 sm:px-6 py-12 sm:py-16">
+        <div className="flex items-start gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">
+              {isInstagramUrl(playing.embedUrl) ? "Instagram reel" : "YouTube"}
+            </p>
+            <h3 className="mt-1 text-white font-display text-sm sm:text-lg font-bold leading-snug line-clamp-2">
+              {playing.title}
+            </h3>
           </div>
-          <div
-            className={`mt-4 overflow-hidden rounded-2xl bg-black shadow-2xl border border-white/10 ${
-              isInstagramUrl(playing.embedUrl)
-                ? "aspect-[9/16] sm:aspect-[9/16] max-h-[75vh] sm:max-h-[70vh] mx-auto w-full max-w-[420px]"
-                : "aspect-video"
-            }`}
-          >
-            <iframe
-              src={
-                isInstagramUrl(playing.embedUrl)
-                  ? instagramEmbedUrl(playing.embedUrl) ?? ""
-                  : `${youtubeEmbedUrl(playing.embedUrl) ?? youtubeWatchUrl(playing.embedUrl)}?autoplay=1&rel=0`
-              }
-              title={playing.title}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            />
-          </div>
-
-          {playing.content && (
-            <div
-              className="mt-4 rounded-2xl bg-white p-5 text-sm text-neutral-800 leading-relaxed max-h-[40vh] overflow-y-auto prose prose-sm prose-neutral max-w-none [&_p]:my-3 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
-              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(playing.content) }}
-            />
-          )}
         </div>
+        <div
+          className={`mt-3 sm:mt-4 overflow-hidden rounded-xl bg-black shadow-2xl border border-white/10 ${
+            isInstagramUrl(playing.embedUrl)
+              ? "aspect-[9/16] max-h-[65vh] mx-auto w-full max-w-[340px] sm:max-w-[400px]"
+              : "aspect-video"
+          }`}
+        >
+          <iframe
+            src={
+              isInstagramUrl(playing.embedUrl)
+                ? instagramEmbedUrl(playing.embedUrl) ?? ""
+                : `${youtubeEmbedUrl(playing.embedUrl) ?? youtubeWatchUrl(playing.embedUrl)}?autoplay=1&rel=0`
+            }
+            title={playing.title}
+            className="w-full h-full"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          />
+        </div>
+        {playing.content && (
+          <div
+            className="mt-3 sm:mt-4 rounded-lg bg-white p-4 sm:p-5 text-sm text-neutral-800 leading-relaxed max-h-[35vh] sm:max-h-[40vh] overflow-y-auto prose prose-sm prose-neutral max-w-none [&_p]:my-3 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(playing.content) }}
+          />
+        )}
       </div>
     </div>
   );

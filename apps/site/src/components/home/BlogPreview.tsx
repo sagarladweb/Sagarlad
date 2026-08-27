@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import type { Post, Category } from "@sagarlad/db";
 import { formatDate, readingTime, postCover } from "@/lib/site";
+import { Pill } from "@/components/ui/Pill";
 
 export function BlogPreview({
   posts,
@@ -13,9 +14,7 @@ export function BlogPreview({
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" data-animate-group>
           <div data-animate-item>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
-              The blog
-            </p>
+            <Pill>The Blog</Pill>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold">
               Recent writing
             </h2>
@@ -28,7 +27,7 @@ export function BlogPreview({
               key={post.id}
               data-animate-item
               href={`/blog/${post.slug}`}
-              className="group rounded-2xl border border-border bg-card overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
+              className="card-hover group rounded-2xl border border-border bg-card overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
             >
               <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -52,7 +51,7 @@ export function BlogPreview({
                   {post.excerpt}
                 </p>
                 <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                  <time dateTime={post.publishedAt.toISOString()}>
+                  <time dateTime={new Date(post.publishedAt).toISOString()}>
                     {formatDate(post.publishedAt)}
                   </time>
                   <span aria-hidden="true">·</span>
@@ -67,7 +66,7 @@ export function BlogPreview({
         <div className="mt-12 text-center">
           <Link
             href="/blog"
-            className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3.5 text-sm font-bold shadow-sm hover:opacity-90 transition-opacity"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-strong hover:underline underline-offset-4 transition-colors"
           >
             View More
             <ArrowRight className="w-4 h-4" />

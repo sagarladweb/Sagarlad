@@ -43,7 +43,7 @@ export function ShareButtons({
     "inline-flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted-foreground transition-colors hover:border-brand-light/50 hover:text-brand";
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-card px-5 py-3">
+    <div className="card-hover flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border bg-card px-5 py-3">
       <p className="text-sm font-semibold">Share this article</p>
       <div className="flex items-center gap-2">
         <a

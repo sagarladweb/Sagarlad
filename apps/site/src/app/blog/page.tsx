@@ -1,12 +1,11 @@
 import Link from "next/link";
+import Image from "next/image";
 import type { Metadata } from "next";
-import { prisma, dbSafe } from "@/lib/db";
-import { getCategories, getPublishedVideos } from "@/lib/content";
+import { getCategories, getPublishedVideos, getPostCount, getVideoCount, getPostList } from "@/lib/content";
 import { SITE, VISIBLE_POST_WHERE, pageMetadata, formatDate, postCover, readingTime } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
-import { SiteLogo } from "@/components/SiteLogo";
 import { JsonLd } from "@/components/JsonLd";
-import { RssBanner } from "@/components/RssBanner";
+import { SubscribeModal } from "@/components/blog/SubscribeModal";
 
 export const metadata: Metadata = pageMetadata({
   title: "Blog",
@@ -34,8 +33,8 @@ export default async function BlogPage({
 
   const [categories, totalPosts, totalVideos] = await Promise.all([
     getCategories(),
-    dbSafe(() => prisma.post.count({ where: VISIBLE_POST_WHERE }), 0),
-    dbSafe(() => prisma.video.count({ where: { published: true, deletedAt: null } }), 0),
+    getPostCount(VISIBLE_POST_WHERE),
+    getVideoCount(),
   ]);
   const categorySlug = categories.some((c) => c.slug === params.category)
     ? params.category
@@ -65,25 +64,8 @@ export default async function BlogPage({
 
   if (tab === "posts") {
     [posts, total] = await Promise.all([
-      dbSafe(
-        () =>
-          prisma.post.findMany({
-            where,
-            select: {
-              id: true,
-              slug: true,
-              title: true,
-              coverImage: true,
-              publishedAt: true,
-              excerpt: true,
-            },
-            orderBy: { publishedAt: "desc" },
-            take: PAGE_SIZE,
-            skip: (page - 1) * PAGE_SIZE,
-          }),
-        []
-      ),
-      dbSafe(() => prisma.post.count({ where }), 0),
+      getPostList(where, { take: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE }),
+      getPostCount(where),
     ]);
   } else {
     videos = await getPublishedVideos(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE);
@@ -113,7 +95,6 @@ export default async function BlogPage({
     );
 
   return (
-    <>
     <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16 overflow-x-clip">
       <JsonLd
         data={{
@@ -125,88 +106,75 @@ export default async function BlogPage({
           ],
         }}
       />
-      {/* Profile header */}
-      <header>
-        <div className="flex items-start justify-center sm:justify-start gap-5 sm:gap-8">
-          <div className="shrink-0">
-            <div className="grid h-24 w-24 sm:h-28 sm:w-28 place-items-center rounded-full border-2 border-border bg-gradient-to-br from-brand-light/20 via-background to-brand-light/10 shadow-inner overflow-hidden">
-              <SiteLogo className="h-10 w-auto" />
-            </div>
+      {/* Profile Header — Sagar's exact content with bottom aligned buttons */}
+      <header className="pb-8">
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 sm:gap-10">
+          {/* Avatar Left */}
+          <div className="relative h-28 w-28 sm:h-36 sm:w-36 rounded-full overflow-hidden border-2 border-border shadow-md shrink-0 bg-muted">
+            <Image
+              src="/images/profile/about.webp"
+              alt="Sagar Lad"
+              fill
+              sizes="144px"
+              className="object-cover"
+              priority
+            />
           </div>
 
-          <div className="flex-1 min-w-0 text-center sm:text-left">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="font-display text-2xl sm:text-3xl font-bold">
-                sagarlad
+          {/* Right Info Section */}
+          <div className="flex-1 text-center sm:text-left space-y-4">
+            <div>
+              <h1 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
+                Sagar Lad
               </h1>
+              <p className="mt-1 text-sm font-medium text-muted-foreground">
+                Author · Investor · Public Speaker
+              </p>
+            </div>
+
+            {/* Stats Matrix */}
+            <dl className="flex items-center justify-center sm:justify-start gap-6 sm:gap-8 text-sm">
+              <div className="text-center sm:text-left">
+                <dd className="font-extrabold text-foreground text-base sm:text-lg">{totalPosts}</dd>
+                <dt className="text-xs text-muted-foreground font-medium">Blogs</dt>
+              </div>
+              <div className="text-center sm:text-left">
+                <dd className="font-extrabold text-foreground text-base sm:text-lg">10K+</dd>
+                <dt className="text-xs text-muted-foreground font-medium">Community</dt>
+              </div>
+              <div className="text-center sm:text-left">
+                <dd className="font-extrabold text-foreground text-base sm:text-lg">6</dd>
+                <dt className="text-xs text-muted-foreground font-medium">Books</dt>
+              </div>
+            </dl>
+
+            {/* Bio Description */}
+            <p className="max-w-xl text-sm leading-relaxed text-muted-foreground">
+              Writing about money, career growth, and intentional living. I believe
+              practical ideas — not motivational fluff — are what actually move the
+              needle. Here you&apos;ll find honest articles, free eBooks, and
+              frameworks I&apos;ve used to build businesses and invest wisely.
+            </p>
+
+            {/* Both Action Buttons placed AT THE BOTTOM after Bio end, perfectly aligned */}
+            <div className="pt-2 flex flex-wrap items-center justify-center sm:justify-start gap-3">
               <a
                 href="https://www.instagram.com/grow_with__sagar/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 rounded-full bg-[#0095F6] text-white px-4 py-1 text-xs sm:text-sm sm:px-5 sm:py-1.5 font-semibold hover:opacity-90 transition-opacity"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#0095F6] text-white px-5 py-2.5 text-xs font-bold hover:opacity-90 transition-opacity shadow-sm"
               >
-                <svg
-                  width="14"
-                  height="14"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  aria-hidden="true"
-                >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" aria-hidden="true">
                   <rect x="2.5" y="2.5" width="19" height="19" rx="5.5" />
                   <circle cx="12" cy="12" r="4.2" />
                   <circle cx="17.4" cy="6.6" r="1.3" fill="currentColor" stroke="none" />
                 </svg>
                 Follow
               </a>
-            </div>
-
-            <dl className="mt-3 flex items-center gap-5 sm:gap-6">
-              {stats.map((s) => (
-                <div key={s.label} className="text-center sm:text-left">
-                  <dt className="sr-only">{s.label}</dt>
-                  <dd className="text-base font-bold">
-                    {s.value.toLocaleString()}
-                  </dd>
-                  <dd className="text-xs text-muted-foreground">{s.label}</dd>
-                </div>
-              ))}
-            </dl>
-
-            <p className="mt-3 font-semibold text-[15px]">Sagar Lad</p>
-            <p className="mt-0.5 text-sm text-muted-foreground">
-              Author · Investor · Public Speaker
-            </p>
-            <div className="mt-1.5 flex items-center gap-4 text-sm">
-              <Link
-                href="https://www.linkedin.com/in/ladsagar"
-                target="_blank"
-                className="inline-flex items-center gap-1 font-medium text-accent-strong underline decoration-accent-strong underline-offset-4 hover:opacity-80 transition-opacity"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <rect x="2" y="9" width="4" height="12" />
-                  <circle cx="4" cy="4" r="2" />
-                </svg>
-                LinkedIn
-              </Link>
-              <Link
-                href="https://www.youtube.com/@Sagarlad692"
-                target="_blank"
-                className="inline-flex items-center gap-1 font-medium text-accent-strong underline decoration-accent-strong underline-offset-4 hover:opacity-80 transition-opacity"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-                  <rect x="2" y="5" width="20" height="14" rx="4" />
-                  <path d="M10 9.5l5 2.5-5 2.5v-5z" fill="currentColor" stroke="none" />
-                </svg>
-                YouTube
-              </Link>
+              <SubscribeModal />
             </div>
           </div>
         </div>
-
       </header>
 
       {/* Tabs */}
@@ -288,7 +256,7 @@ export default async function BlogPage({
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted"
+                  className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
                   data-animate-item
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -397,7 +365,5 @@ export default async function BlogPage({
         </>
       )}
     </div>
-    <RssBanner />
-    </>
   );
 }

@@ -25,7 +25,7 @@ export default function Error({
       </p>
       <button
         onClick={reset}
-        className="mt-8 inline-flex rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold hover:opacity-90 transition-opacity"
+        className="btn-premium mt-8 inline-flex rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold hover:opacity-90"
       >
         Try again
       </button>

@@ -27,8 +27,8 @@ export default async function SocialsPage() {
       />
       <section className="border-b border-border bg-background py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 text-center space-y-3">
-          <span className="text-xs font-bold uppercase tracking-widest text-brand">
-            Follow Sagar
+          <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+            Connect
           </span>
           <h1 className="font-display text-4xl sm:text-5xl font-bold tracking-tight text-foreground">
             Find me <span className="text-brand">everywhere.</span>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Quote as QuoteIcon } from "lucide-react";
 import { DotPagination } from "@/components/ui/CarouselNav";
+import { Pill } from "@/components/ui/Pill";
 
 const testimonials = [
   {
@@ -36,7 +37,9 @@ export function Testimonials() {
   const [drag, setDrag] = useState(0);
   const [dragging, setDragging] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [fullyVisible, setFullyVisible] = useState(false);
   const startX = useRef(0);
+  const rootRef = useRef<HTMLDivElement>(null);
   const total = testimonials.length;
 
   const go = useCallback((next: number) => {
@@ -46,11 +49,23 @@ export function Testimonials() {
   const next = useCallback(() => go(index + 1), [go, index]);
   const prev = useCallback(() => go(index - 1), [go, index]);
 
+  // IntersectionObserver: start auto-scroll only when 100% visible
   useEffect(() => {
-    if (paused) return;
+    const el = rootRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => setFullyVisible(entry.isIntersecting),
+      { threshold: 1 }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (paused || !fullyVisible) return;
     const timer = setInterval(next, 3000);
     return () => clearInterval(timer);
-  }, [next, paused]);
+  }, [next, paused, fullyVisible]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -93,12 +108,10 @@ export function Testimonials() {
   const t = testimonials[index];
 
   return (
-    <section className="py-20 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
+    <section ref={rootRef} className="card-hover py-20 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center" data-animate-group>
-          <p data-animate-item className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
-            Testimonials
-          </p>
+          <Pill data-animate-item>Testimonials</Pill>
           <h2 data-animate-item className="mt-3 font-display text-3xl md:text-4xl font-bold">
             What people say
           </h2>
@@ -111,14 +124,14 @@ export function Testimonials() {
               type="button"
               onClick={prev}
               aria-label="Previous testimonial"
-              className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+              className="btn-premium shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted lg:opacity-0 lg:group-hover/carousel:opacity-100 lg: lg:"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M15 18l-6-6 6-6"/></svg>
             </button>
 
             {/* Card */}
             <div
-              className="min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
+              className="card-hover min-w-0 flex-1 overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12 text-center touch-pan-y select-none"
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
@@ -126,8 +139,8 @@ export function Testimonials() {
               onMouseEnter={() => setPaused(true)}
               onMouseLeave={() => setPaused(false)}
             >
-              <QuoteIcon className="w-10 h-10 mx-auto text-brand-light" aria-hidden="true" />
-              <blockquote className="mt-6 font-display text-xl sm:text-2xl md:text-3xl font-bold leading-snug min-h-[120px] sm:min-h-[140px] flex items-center justify-center">
+              <QuoteIcon className="w-10 h-10 mx-auto text-brand-light shrink-0" aria-hidden="true" />
+              <blockquote className="mt-6 font-display text-xl sm:text-2xl md:text-3xl font-bold leading-snug min-h-[100px] sm:min-h-[120px] flex items-center justify-center px-2">
                 &ldquo;{t.quote}&rdquo;
               </blockquote>
               <p className="mt-6 font-semibold">{t.name}</p>
@@ -139,7 +152,7 @@ export function Testimonials() {
               type="button"
               onClick={next}
               aria-label="Next testimonial"
-              className="shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted transition-colors lg:opacity-0 lg:group-hover/carousel:opacity-100 lg:transition-opacity lg:duration-300"
+              className="btn-premium shrink-0 grid h-10 w-10 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm hover:bg-muted lg:opacity-0 lg:group-hover/carousel:opacity-100 lg: lg:"
             >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 18l6-6-6-6"/></svg>
             </button>

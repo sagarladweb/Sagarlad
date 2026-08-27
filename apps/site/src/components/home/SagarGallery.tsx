@@ -1,18 +1,17 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { DotPagination } from "@/components/ui/CarouselNav";
 
 const photos = [
-  { src: "/images/speaking/main full width image.webp", alt: "Sagar Lad on stage", className: "object-top" },
-  { src: "/images/sagar-author.webp", alt: "Sagar Lad", className: "object-top" },
-  { src: "/images/speaking/candid.webp", alt: "Sagar Lad candid", className: "object-center" },
-  { src: "/images/speaking/candid speaking.webp", alt: "Sagar Lad speaking", className: "object-center" },
-  { src: "/images/speaking/candid presetation.webp", alt: "Sagar Lad presenting", className: "object-center" },
-  { src: "/images/speaking/too close.webp", alt: "Sagar Lad portrait", className: "object-top" },
+  { src: "/about.webp", alt: "Sagar Lad", className: "object-top" },
+  { src: "/about 2.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/about 3.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/about 4.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/about 5.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/about 6.webp", alt: "Sagar Lad", className: "object-top" },
 ];
 
 export function SagarGallery() {
@@ -49,12 +48,11 @@ export function SagarGallery() {
                 key={p.src}
                 className="relative aspect-[4/3] w-full shrink-0 snap-center overflow-hidden"
               >
-                <Image
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
                   src={p.src}
                   alt={p.alt}
-                  fill
-                  sizes="100vw"
-                  className={`object-cover ${p.className}`}
+                  className={`absolute inset-0 w-full h-full object-cover ${p.className}`}
                 />
                 <div
                   aria-hidden="true"

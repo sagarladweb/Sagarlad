@@ -158,7 +158,7 @@ export function Calendar({
         <div
           role="dialog"
           aria-label={label}
-          className="absolute left-0 z-30 mt-1.5 w-72 rounded-2xl border border-border bg-card p-4 shadow-xl"
+          className="card-hover absolute left-0 z-30 mt-1.5 w-72 rounded-xl border border-border bg-card p-4 shadow-xl"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-2">

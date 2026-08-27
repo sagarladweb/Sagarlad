@@ -127,7 +127,7 @@ export function Dropdown({
           id={`${id}-listbox`}
           role="listbox"
           aria-label={label}
-          className="absolute left-0 right-0 z-30 mt-1.5 max-h-60 overflow-y-auto rounded-xl border border-border bg-card shadow-xl py-1.5"
+          className="card-hover absolute left-0 right-0 z-30 mt-1.5 max-h-60 overflow-y-auto rounded-xl border border-border bg-card shadow-xl py-1.5"
         >
           {options.map((opt, i) => {
             const isActive = i === activeIndex;

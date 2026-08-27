@@ -16,6 +16,8 @@ import {
   Minimize2,
   ChevronLeft,
   CalendarClock,
+  CalendarCheck,
+  Trash2,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -189,7 +191,13 @@ export function PostForm({
         const data = await res.json().catch(() => ({}));
         if (data.post?.id && !postId) setPostId(data.post.id);
         clearDraft?.();
-        const msg = postId ? "Post updated successfully." : "Post created successfully.";
+        let msg: string;
+        if (form.scheduledAt) {
+          const d = new Date(form.scheduledAt);
+          msg = `Post scheduled for ${d.toLocaleDateString("en-US", { month: "short", day: "numeric" })} at ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
+        } else {
+          msg = postId ? "Post updated successfully." : "Post created successfully.";
+        }
         if (!isRealtime) {
           setSaveState("saved");
           showToast(msg, undefined, "success");
@@ -218,6 +226,28 @@ export function PostForm({
         showToast("Network error", errMsg, "error");
       }
       return false;
+    }
+  }
+
+  async function deletePost() {
+    if (!postId) return;
+    setDeleteState("loading");
+    try {
+      const res = await fetch(`/api/admin/posts?id=${postId}`, { method: "DELETE" });
+      if (res.ok) {
+        showToast("Post deleted.", undefined, "success");
+        clearDraft();
+        router.push("/admin/posts");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        showToast("Failed to delete", data.error ?? "Please try again.", "error");
+        setDeleteState("idle");
+        setShowDeleteModal(false);
+      }
+    } catch {
+      showToast("Network error", "Please try again.", "error");
+      setDeleteState("idle");
+      setShowDeleteModal(false);
     }
   }
 
@@ -449,6 +479,8 @@ export function PostForm({
   }, []);
 
   const [showExitModal, setShowExitModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteState, setDeleteState] = useState<"idle" | "loading">("idle");
 
   const isDirty =
     form.title !== (initial?.title ?? "") ||
@@ -651,6 +683,15 @@ export function PostForm({
                 </>
               )}
             </button>
+            {initial && (
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(true)}
+                className="w-full inline-flex items-center justify-center gap-1.5 rounded-xl border border-red-200 bg-red-50 text-red-600 px-4 py-2.5 text-xs font-semibold hover:bg-red-100 transition-colors dark:border-red-900/50 dark:bg-red-950/50 dark:text-red-400 dark:hover:bg-red-900/50"
+              >
+                <Trash2 className="w-3.5 h-3.5" /> Delete Post
+              </button>
+            )}
           </div>
 
           <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
@@ -693,9 +734,27 @@ export function PostForm({
               }
             />
             {form.scheduledAt && (
-              <p className="text-[11px] text-muted-foreground">
-                Post will auto-publish at this time.
-              </p>
+              <div className="flex items-start gap-2.5 rounded-xl bg-brand/10 border border-brand/20 p-3">
+                <CalendarCheck className="w-4 h-4 text-brand shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-foreground">
+                    Post is scheduled
+                  </p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    Will auto-publish on{" "}
+                    {new Date(form.scheduledAt).toLocaleDateString("en-US", {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}{" "}
+                    at{" "}
+                    {new Date(form.scheduledAt).toLocaleTimeString("en-US", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </div>
             )}
           </div>
 
@@ -889,6 +948,46 @@ export function PostForm({
                 className="w-full sm:w-auto rounded-xl bg-accent text-accent-foreground px-4 py-2 text-xs font-bold shadow hover:opacity-90"
               >
                 Save Draft & Exit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Post Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm animate-fade-in">
+          <div className="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+            <div className="flex items-center gap-3 text-red-600">
+              <Trash2 className="w-6 h-6 shrink-0" />
+              <h3 className="font-display text-lg font-bold text-foreground">
+                Delete Post
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to delete &ldquo;{initial?.title || form.title}&rdquo;? This action cannot be undone.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center justify-end gap-2 pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => { setShowDeleteModal(false); setDeleteState("idle"); }}
+                disabled={deleteState === "loading"}
+                className="w-full sm:w-auto rounded-xl border border-border px-4 py-2 text-xs font-semibold hover:bg-muted disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={deletePost}
+                disabled={deleteState === "loading"}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-xl bg-red-600 text-white px-4 py-2 text-xs font-bold hover:bg-red-700 transition-colors disabled:opacity-60"
+              >
+                {deleteState === "loading" ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="w-3.5 h-3.5" />
+                )}
+                Delete
               </button>
             </div>
           </div>

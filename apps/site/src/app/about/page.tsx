@@ -11,10 +11,10 @@ import { SiteLogo } from "@/components/SiteLogo";
 import { METRICS } from "@/lib/metrics";
 
 const stats = [
-  { value: `${METRICS.yearsExperience}+`, label: "Years in tech & data" },
-  { value: `${METRICS.countriesWorked}+`, label: "Countries lived & worked" },
-  { value: `${METRICS.booksPublished}+`, label: "Books published" },
-  { value: METRICS.communityReached, label: "Community reached" },
+  { value: Number(METRICS.yearsExperience), suffix: "+", label: "Years in tech & data" },
+  { value: Number(METRICS.countriesWorked), suffix: "+", label: "Countries lived & worked" },
+  { value: Number(METRICS.booksPublished), suffix: "+", label: "Books published" },
+  { value: Number(METRICS.communityReached.replace(/[^0-9]/g, "")), suffix: "K+", label: "Community reached" },
 ];
 
 const plan = [
@@ -162,6 +162,54 @@ export default function AboutPage() {
     };
   }, []);
 
+  // Counting animation for stat numbers
+  useEffect(() => {
+    const el = root.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      el.querySelectorAll<HTMLElement>("[data-stat]").forEach((card) => {
+        const numEl = card.querySelector("[data-stat-num]");
+        if (!numEl) return;
+        const target = Number(card.dataset.stat || "0");
+        const suffix = card.dataset.statSuffix || "";
+        numEl.textContent = `${target.toLocaleString("en-US")}${suffix}`;
+      });
+      return;
+    }
+
+    const ctx = gsap.context(() => {
+      gsap.utils.toArray<HTMLElement>("[data-stat]").forEach((card, i) => {
+        const numEl = card.querySelector("[data-stat-num]");
+        if (!numEl) return;
+        const target = Number(card.dataset.stat || "0");
+        const suffix = card.dataset.statSuffix || "";
+        const counter = { v: 0 };
+        const render = () => {
+          numEl.textContent = `${Math.round(counter.v).toLocaleString("en-US")}${suffix}`;
+        };
+        render();
+        gsap.fromTo(
+          counter,
+          { v: 0 },
+          {
+            v: target,
+            duration: 2,
+            delay: i * 0.08,
+            ease: "power2.out",
+            onUpdate: render,
+            scrollTrigger: {
+              trigger: card,
+              start: "top 90%",
+              toggleActions: "play none none reverse",
+            },
+          }
+        );
+      });
+    }, el);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
     <div ref={root} className="bg-background overflow-x-clip">
       {/* ---------- Visual Hero ---------- */}
@@ -173,16 +221,16 @@ export default function AboutPage() {
             <div className="order-2 lg:order-none lg:col-span-7 space-y-6 text-center lg:text-left">
               <span
                 data-reveal
-                className="inline-flex items-center rounded-full bg-brand-light/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-brand"
+                className="btn-premium inline-flex items-center rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand"
               >
-                Full Story &amp; Biography
+                The full story
               </span>
               <h1
                 data-reveal
                 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight text-foreground"
               >
                 A story of almost nothing,{" "}
-                <span className="text-muted-foreground">and everything.</span>
+                <span className="btn-premium inline-block bg-accent text-black px-3 py-0.5">and everything.</span>
               </h1>
               <p
                 data-reveal
@@ -200,7 +248,7 @@ export default function AboutPage() {
                 they can with the information they have.
               </p>
               <div data-reveal className="mt-2 inline-block">
-                <SiteLogo className="h-12 w-auto" />
+                <SiteLogo className="h-12 w-auto logo-black" />
               </div>
             </div>
 
@@ -208,9 +256,9 @@ export default function AboutPage() {
             <div data-reveal className="order-1 lg:order-none lg:col-span-5 relative">
               <div className="relative max-w-md mx-auto">
                 <div aria-hidden="true" className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/20 to-brand-light/10 blur-2xl opacity-75" />
-                <figure className="relative aspect-[3/4] rounded-[2.5rem] overflow-hidden border border-border shadow-2xl bg-card">
+                <figure className="card-hover relative aspect-[3/4] rounded-xl overflow-hidden border border-border shadow-2xl bg-card">
                   <Image
-                    src="/images/heroes/hero.webp"
+                    src="/images/profile/about-3.webp"
                     alt="Sagar Lad"
                     fill
                     sizes="(max-width: 1024px) 100vw, 40vw"
@@ -242,7 +290,7 @@ export default function AboutPage() {
                 href={`#${id}`}
                 data-subnav
                 data-target={id}
-                className="shrink-0 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[active=true]:bg-brand data-[active=true]:text-white"
+                className="shrink-0 rounded-full px-3.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted hover:text-foreground data-[active=true]:bg-brand data-[active=true]:text-white"
               >
                 {label}
               </a>
@@ -254,18 +302,23 @@ export default function AboutPage() {
       {/* ---------- Stats Band ---------- */}
       <section
         data-reveal
-        className="border-b border-border bg-card/40 py-10"
+        className="card-hover border-b border-border bg-card/40 py-10"
         aria-label="Quick facts about Sagar"
       >
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <dl className="grid grid-cols-2 gap-6 md:grid-cols-4">
             {stats.map((s) => (
-              <div key={s.label} className="flex flex-col text-center md:text-left">
+              <div
+                key={s.label}
+                data-stat={s.value}
+                data-stat-suffix={s.suffix}
+                className="flex flex-col text-center md:text-left"
+              >
                 <dt className="order-2 mt-1 text-xs uppercase tracking-wider font-semibold text-muted-foreground">
                   {s.label}
                 </dt>
-                <dd className="order-1 font-display text-4xl md:text-5xl font-extrabold text-accent-strong">
-                  {s.value}
+                <dd className="order-1 font-display text-4xl md:text-5xl font-extrabold text-accent-strong tabular-nums">
+                  <span data-stat-num>0{s.suffix}</span>
                 </dd>
               </div>
             ))}
@@ -276,8 +329,8 @@ export default function AboutPage() {
       {/* ---------- The Belief / Philosophy ---------- */}
       <section id="belief" className="scroll-mt-32 py-20 md:py-28 border-b border-border">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
-          <p data-reveal className="text-xs font-bold uppercase tracking-[0.2em] text-accent-strong">
-            What I believe
+          <p data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+            What drives me
           </p>
           <h2
             data-reveal
@@ -294,8 +347,11 @@ export default function AboutPage() {
             people can make life choices from a place of{" "}
             <span className="text-foreground font-semibold">awareness, not autopilot.</span>
           </p>
-          <p data-reveal className="mt-8 font-display text-2xl sm:text-3xl font-bold text-accent-strong">
-            Mindset shapes reality. <span className="italic">MIND UP.</span>
+          <p data-reveal className="mt-8 font-display text-2xl sm:text-3xl font-bold">
+            Mindset shapes reality.{" "}
+            <span className="btn-premium inline-block bg-accent text-black px-3 py-0.5">
+              MIND UP.
+            </span>
           </p>
         </div>
       </section>
@@ -303,8 +359,8 @@ export default function AboutPage() {
       {/* ---------- Rules I live by ---------- */}
       <section className="py-24 md:py-32 border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
-          <p data-reveal className="text-xs font-bold uppercase tracking-[0.2em] text-accent-strong">
-            A rule I live by
+          <p data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+            My philosophy
           </p>
           <h2
             data-reveal
@@ -330,7 +386,7 @@ export default function AboutPage() {
       <section id="journey" className="scroll-mt-32 py-20 md:py-28 border-b border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
-            <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Modest Beginnings</span>
+            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where it started</span>
             <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
               I always knew what I wanted
             </h2>
@@ -349,7 +405,7 @@ export default function AboutPage() {
                 <div
                   key={step.n}
                   data-reveal
-                  className="group flex items-start gap-4 rounded-2xl border border-border bg-card p-5 transition-all duration-300 hover:border-brand-light/70 hover:shadow-lg"
+                  className="card-hover group flex items-start gap-4 rounded-lg border border-border bg-card p-5 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
                 >
                   <span className="font-display text-2xl font-bold text-accent-strong">
                     {step.n}
@@ -366,9 +422,9 @@ export default function AboutPage() {
           </div>
 
           <div data-reveal className="relative">
-            <div className="relative overflow-hidden rounded-2xl aspect-[4/5] max-w-md mx-auto border border-border shadow-2xl">
+            <div className="relative overflow-hidden rounded-xl aspect-[3/4] max-w-md mx-auto border border-border shadow-2xl">
               <Image
-                src="/images/heroes/hero.webp"
+                src="/images/profile/about-6.webp"
                 alt="Sagar Lad"
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
@@ -380,10 +436,10 @@ export default function AboutPage() {
       </section>
 
       {/* ---------- Milestones / Chapters ---------- */}
-      <section className="py-20 md:py-28 border-b border-border bg-card/30">
+      <section className="card-hover py-20 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-            <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Milestones</span>
+            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Key moments</span>
             <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
               The story, in dates
             </h2>
@@ -404,7 +460,7 @@ export default function AboutPage() {
                   {c.period}
                 </span>
                 <div>
-                  <span className="inline-block rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
+                  <span className="btn-premium inline-block rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
                     {c.tag}
                   </span>
                   <h3 className="mt-2 font-display text-lg font-bold leading-snug group-hover:text-accent-strong transition-colors">
@@ -421,11 +477,11 @@ export default function AboutPage() {
       </section>
 
       {/* ---------- Runner for Life ---------- */}
-      <section id="running" className="scroll-mt-32 py-20 md:py-28 border-b border-border bg-card/30">
+      <section id="running" className="card-hover scroll-mt-32 py-20 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             <div className="lg:col-span-5 text-center lg:text-left">
-              <span data-reveal className="text-xs font-bold uppercase tracking-wider text-accent-strong">Beyond The Code</span>
+              <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Off the clock</span>
               <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
                 Runner for life
               </h2>
@@ -469,9 +525,9 @@ export default function AboutPage() {
                     <div
                       key={r.race}
                       data-reveal
-                      className="rounded-2xl border border-border bg-background p-6 text-center hover:border-brand-light/60 hover:shadow-xl transition-all duration-300"
+                      className="rounded-lg border border-border bg-background p-6 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
                     >
-                      <div className="mx-auto w-12 h-12 rounded-xl bg-brand-light/15 grid place-items-center text-brand">
+                      <div className="mx-auto w-12 h-12 rounded-md bg-brand-light/15 grid place-items-center text-brand">
                         <Icon className="w-6 h-6" />
                       </div>
                       <p className="mt-4 font-display text-3xl font-extrabold text-accent-strong">
@@ -491,7 +547,7 @@ export default function AboutPage() {
       </section>
 
       {/* ---------- Connect CTA ---------- */}
-      <section id="connect" className="scroll-mt-32 py-20 md:py-28 bg-card/50">
+      <section id="connect" className="card-hover scroll-mt-32 py-20 md:py-28 bg-card/50">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center space-y-6">
           <h2 data-reveal className="font-display text-3xl sm:text-4xl font-bold">
             Come say hi &amp; connect.
@@ -503,7 +559,7 @@ export default function AboutPage() {
           <div data-reveal className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-2">
             <Link
               href="/contact"
-              className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 transition-opacity shadow-lg"
+              className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 shadow-lg"
             >
               Get in touch <ArrowRight className="w-4 h-4" />
             </Link>

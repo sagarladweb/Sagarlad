@@ -1,3 +1,5 @@
+import { Pill } from "@/components/ui/Pill";
+
 const PRESS = [
   { name: "Packt", src: "/images/featured/packt_logo.png" },
   { name: "Apress", src: "/images/featured/apress.png" },
@@ -35,10 +37,8 @@ export function FeaturedOn() {
       className="py-14 md:py-16 border-b border-border bg-card/40"
       aria-label="Featured in the press"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-muted-foreground" data-animate="blur">
-          Featured on
-        </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center lg:text-left">
+        <Pill data-animate="blur">Featured on</Pill>
 
         {/* Mobile + Tablet — seamless marquee */}
         <div className="mt-8 lg:hidden marquee-mask overflow-hidden">

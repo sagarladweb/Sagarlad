@@ -52,7 +52,7 @@ export function CommentsSection({ postSlug }: { postSlug: string }) {
               <p className="text-sm text-muted-foreground">Be the first to comment.</p>
             )}
             {comments.map((c) => (
-              <div key={c.id} className="rounded-2xl border border-border bg-card p-5">
+              <div key={c.id} className="card-hover rounded-lg border border-border bg-card p-5">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-semibold">{c.name}</span>
                   <span aria-hidden="true">·</span>

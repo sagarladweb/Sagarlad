@@ -150,13 +150,12 @@ export default function SpeakingPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
-          <div className="absolute inset-0 bg-brand/20" />
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-end pb-20 sm:pb-28 pt-32">
           <div className="max-w-2xl space-y-5 text-center sm:text-left mx-auto sm:mx-0">
-            <span className="inline-flex items-center justify-center sm:justify-start rounded-full bg-accent/30 border border-accent/40 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white backdrop-blur-md">
-              Public Speaker &amp; Author
+            <span className="btn-premium inline-flex items-center justify-center sm:justify-start rounded-full bg-accent px-4 py-1.5 text-xs font-semibold tracking-wide text-accent-foreground shadow-md">
+              Speaking
             </span>
             <h1 className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-[1.1] drop-shadow-md">
               Ideas that ignite rooms and transform mindsets.
@@ -167,7 +166,7 @@ export default function SpeakingPage() {
             <div className="pt-2 flex flex-col gap-4 items-center sm:flex-row sm:items-center">
               <Link
                 href="/speaking/contact"
-                className="inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 transition-all shadow-xl w-full sm:w-auto"
+                className="btn-premium inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-semibold hover:opacity-95 shadow-xl w-full sm:w-auto"
               >
                 Inquire about speaking <ArrowRight className="w-4 h-4" />
               </Link>
@@ -175,7 +174,7 @@ export default function SpeakingPage() {
                 href="https://sessionize.com/sagar-lad/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-full border border-white/40 backdrop-blur-xl bg-black/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-black/50 transition-colors w-full sm:w-auto"
+                className="btn-premium inline-flex items-center justify-center gap-2 rounded-full border border-white/40 backdrop-blur-xl bg-black/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-black/50 w-full sm:w-auto"
               >
                 View Sessionize profile ↗
               </a>
@@ -185,13 +184,12 @@ export default function SpeakingPage() {
       </section>
 
       {/* TEDx Spotlight — the strongest proof, right after the hook */}
-      <section className="relative py-20 md:py-28 border-b border-border bg-card/60 overflow-hidden" aria-label="Sagar's TEDx talk">
-        <div className="pointer-events-none absolute inset-x-0 -top-24 h-64 bg-brand-light/15 blur-3xl" aria-hidden="true" />
+      <section className="card-hover relative py-20 md:py-28 border-b border-border bg-card/60 overflow-hidden" aria-label="Sagar's TEDx talk">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-5 text-center lg:text-left" data-animate="left">
-              <span className="inline-flex items-center justify-center lg:justify-start rounded-full bg-accent/15 border border-accent/25 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-accent-strong">
-                Watch him speak
+              <span className="btn-premium inline-flex items-center justify-center lg:justify-start rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand">
+                Watch
               </span>
               <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold leading-tight text-accent-strong">
                 The AI talk he gives on every stage
@@ -208,7 +206,7 @@ export default function SpeakingPage() {
                   "A practical playbook you can apply the same day",
                 ].map((point) => (
                   <li key={point} className="flex items-start gap-3 text-foreground/80">
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 text-brand shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 mt-0.5 text-accent-strong shrink-0" />
                     <span>{point}</span>
                   </li>
                 ))}
@@ -248,7 +246,7 @@ export default function SpeakingPage() {
           {/* Desktop: bento grid */}
           <div className="hidden lg:grid grid-cols-12 gap-3 sm:gap-4">
             {/* Large feature — left, spans 2 rows on desktop */}
-            <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-2xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
+            <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
               <Image
                 src="/images/speaking/main full width image.webp"
                 alt="Sagar Lad delivering a keynote"
@@ -260,7 +258,7 @@ export default function SpeakingPage() {
             </div>
 
             {/* Top right */}
-            <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
+            <div className="sm:col-span-1 lg:col-span-5 rounded-xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
                 src="/images/speaking/candid.webp"
                 alt="Sagar Lad candid"
@@ -272,7 +270,7 @@ export default function SpeakingPage() {
             </div>
 
             {/* Bottom right */}
-            <div className="sm:col-span-1 lg:col-span-5 rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
+            <div className="sm:col-span-1 lg:col-span-5 rounded-xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
                 src="/images/speaking/candid speaking.webp"
                 alt="Sagar Lad speaking"
@@ -292,7 +290,7 @@ export default function SpeakingPage() {
               ].map((img) => (
                 <div
                   key={img.src}
-                  className="rounded-2xl overflow-hidden relative group aspect-[4/3] min-h-[160px]"
+                  className="rounded-xl overflow-hidden relative group aspect-[4/3] min-h-[160px]"
                 >
                   <Image
                     src={img.src}
@@ -315,13 +313,13 @@ export default function SpeakingPage() {
           {/* Events Hosted — divided list */}
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
-              <span className="text-xs font-bold uppercase tracking-widest text-accent-strong">Events &amp; Summits</span>
+              <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where I've spoken</span>
               <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Stages he&apos;s graced</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Keynotes delivered across regional tech groups, academic institutions, and international summits.
               </p>
             </div>
-            <div className="rounded-2xl border border-border divide-y divide-border overflow-hidden bg-card">
+            <div className="card-hover rounded-lg border border-border divide-y divide-border overflow-hidden bg-card">
               {eventsHosted.map((e, i) => {
                 const Icon = e.icon;
                 return (
@@ -332,7 +330,7 @@ export default function SpeakingPage() {
                     <span className="w-8 shrink-0 font-display text-lg sm:text-xl font-extrabold text-muted-foreground/35 tabular-nums">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-brand-light/10 text-brand transition-colors group-hover:bg-brand group-hover:text-white">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-accent/10 text-accent-strong transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
                       <Icon className="w-4 h-4" />
                     </span>
                     <div className="min-w-0 flex-1">
@@ -356,23 +354,23 @@ export default function SpeakingPage() {
           {/* Memberships & Certifications — 2-col hairline grid */}
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
-              <span className="text-xs font-bold uppercase tracking-widest text-accent-strong">Recognitions &amp; Credentials</span>
+              <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Background</span>
               <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Certifications &amp; Memberships</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
                 Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-2xl border border-border bg-border">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
               {memberships.map((m) => {
                 const Icon = m.icon;
                 return (
                   <div
                     key={m.title}
-                    className="group bg-card p-6 sm:p-7 flex flex-col justify-between min-h-[150px] transition-colors hover:bg-muted/40"
+                    className="card-hover group bg-card p-6 sm:p-7 flex flex-col justify-between min-h-[150px] transition-colors hover:bg-muted/40"
                   >
                     <div className="flex items-start justify-between gap-3">
-                      <Icon className="w-5 h-5 text-brand-light" />
-                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-light/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand">
+                      <Icon className="w-5 h-5 text-accent-strong" />
+                      <span className="btn-premium inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
                         <CheckCircle2 className="w-3 h-3" /> Verified
                       </span>
                     </div>
@@ -391,10 +389,10 @@ export default function SpeakingPage() {
       </section>
 
       {/* Professional Experience — how the engagement works, then the ask */}
-      <section className="py-20 md:py-28 border-b border-border bg-card/40" aria-label="Professional experience">
+      <section className="card-hover py-20 md:py-28 border-b border-border bg-card/40" aria-label="Professional experience">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl text-center sm:text-left mx-auto sm:mx-0" data-animate>
-            <span className="text-xs font-bold uppercase tracking-wider text-accent-strong">How We Work Together</span>
+            <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">How it works</span>
             <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">A calm, three-step process</h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
               No last-minute scrambles. Every engagement follows the same rhythm, so you know exactly what to expect.
@@ -405,12 +403,12 @@ export default function SpeakingPage() {
             {processSteps.map((step, i) => (
               <div
                 key={step.n}
-                className={`group rounded-2xl border border-border bg-card p-7 sm:p-8 transition-colors hover:border-brand-light/60 ${
+                className={`group rounded-lg border border-border bg-card p-7 sm:p-8 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md ${
                   i === 0 ? "lg:col-span-7" : "lg:col-span-5"
                 }`}
                 data-animate-item
               >
-                <span className="inline-grid place-items-center w-12 h-12 rounded-xl bg-brand-light/15 font-display text-lg font-extrabold text-brand">
+                <span className="inline-grid place-items-center w-12 h-12 rounded-md bg-accent/15 font-display text-lg font-extrabold text-accent-strong">
                   {step.n}
                 </span>
                 <h3 className="mt-4 font-display text-xl font-bold">{step.title}</h3>
@@ -419,9 +417,9 @@ export default function SpeakingPage() {
                   {step.bullets.map((b) => (
                     <li
                       key={b}
-                      className="inline-flex items-center gap-1.5 text-xs text-foreground bg-foreground/5 px-3 py-1.5 rounded-full"
+                      className="btn-premium inline-flex items-center gap-1.5 text-xs text-foreground bg-foreground/5 px-3 py-1.5 rounded-full"
                     >
-                      <CheckCircle2 className="w-3.5 h-3.5 text-accent-strong" /> {b}
+                      <CheckCircle2 className="w-3.5 h-3.5 text-accent" /> {b}
                     </li>
                   ))}
                 </ul>
@@ -429,23 +427,23 @@ export default function SpeakingPage() {
             ))}
 
             {/* Booking card fills the grid */}
-            <div className="lg:col-span-7 relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8" data-animate-item>
+            <div className="card-hover lg:col-span-7 relative overflow-hidden rounded-lg border border-border bg-card p-8 sm:p-10 shadow-xl flex flex-col md:flex-row md:items-center gap-8" data-animate-item>
               <span aria-hidden="true" className="pointer-events-none absolute -top-24 -left-10 h-48 w-72 rounded-full bg-accent/15 blur-3xl" />
               <div className="relative shrink-0 mx-auto md:mx-0">
-                <div className="w-16 h-16 rounded-2xl bg-brand grid place-items-center text-white">
+                <div className="w-16 h-16 rounded-md bg-accent grid place-items-center text-accent-foreground">
                   <Calendar className="w-8 h-8" />
                 </div>
               </div>
               <div className="relative flex-1 text-center md:text-left space-y-3">
                 <h3 className="font-display text-xl sm:text-2xl font-bold">Ready to book Sagar for your next event?</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Accepting keynote and workshop invitations for conferences, corporate summits, and academic institutions worldwide.
+                  Invite Sagar Lad to speak at your conference, company, university, podcast, or event.
                 </p>
                 <Link
                   href="/speaking/contact"
-                  className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3.5 text-sm font-semibold hover:opacity-95 transition-opacity shadow-md"
+                  className="btn-premium mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3.5 text-sm font-semibold hover:opacity-95 shadow-md"
                 >
-                  Check Availability &amp; Rates <ArrowRight className="w-4 h-4" />
+                  Contact For Speaking <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
             </div>
@@ -457,14 +455,14 @@ export default function SpeakingPage() {
       <section className="py-20 md:py-28 bg-background" aria-label="What organizers say">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl mx-auto text-center" data-animate>
-            <span className="text-xs font-bold uppercase tracking-wider text-accent-strong">From event organizers</span>
+            <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Kind words</span>
             <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Rooms Remember It</h2>
           </div>
           <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-5" data-animate-group>
             {testimonials.map((t, i) => (
               <blockquote
                 key={t.quote}
-                className={`rounded-2xl border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-colors hover:border-brand-light/60 ${
+                className={`rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md ${
                   i === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-6"
                 }`}
                 data-animate-item

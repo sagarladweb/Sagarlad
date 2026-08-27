@@ -33,7 +33,7 @@ export default function NewsletterPage() {
         subtitle="One email a week. No spam, no noise — just the frameworks I use for money, work and life."
       />
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16">
-        <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-10">
+        <div className="card-hover relative overflow-hidden rounded-lg border border-border bg-card p-8 sm:p-10">
           <div className="absolute right-0 top-0 hidden sm:block h-full w-1/3 pointer-events-none" aria-hidden="true">
             <Image
               src="/images/heroes/hero.webp"

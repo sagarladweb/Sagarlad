@@ -188,3 +188,108 @@ export const getPublishedBooks = unstable_cache(
   ["books"],
   { revalidate: CACHE_TTL, tags: ["content", "books"] }
 );
+
+// ── Blog listing helpers ──────────────────────────────────────────────
+// Wrapped in unstable_cache so the blog listing page doesn't hit the DB
+// on every request. Revalidates weekly + instantly on admin writes via
+// revalidateTag("content").
+
+export const getPostCount = unstable_cache(
+  async (where?: Record<string, unknown>) => {
+    try {
+      return await prisma.post.count({ where: where ?? VISIBLE_POST_WHERE });
+    } catch {
+      return 0;
+    }
+  },
+  ["post-count"],
+  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
+);
+
+export const getVideoCount = unstable_cache(
+  async () => {
+    try {
+      return await prisma.video.count({ where: { published: true, deletedAt: null } });
+    } catch {
+      return 0;
+    }
+  },
+  ["video-count"],
+  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
+);
+
+export const getPostList = unstable_cache(
+  async (
+    where: Record<string, unknown>,
+    opts: { take: number; skip: number }
+  ) => {
+    try {
+      return await prisma.post.findMany({
+        where,
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          coverImage: true,
+          publishedAt: true,
+          excerpt: true,
+        },
+        orderBy: { publishedAt: "desc" },
+        take: opts.take,
+        skip: opts.skip,
+      });
+    } catch {
+      return [];
+    }
+  },
+  ["post-list"],
+  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
+);
+
+export const getFeaturedPosts = unstable_cache(
+  async (where: Record<string, unknown>, take: number) => {
+    try {
+      return await prisma.post.findMany({
+        where,
+        include: { category: true },
+        orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+        take,
+      });
+    } catch {
+      return [];
+    }
+  },
+  ["featured-posts"],
+  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
+);
+
+export const getRelatedPosts = unstable_cache(
+  async (postId: string, categoryId: string | null) => {
+    try {
+      const where = {
+        ...VISIBLE_POST_WHERE,
+        NOT: { id: postId },
+        ...(categoryId ? { categoryId } : { categoryId: null }),
+      };
+      let related = await prisma.post.findMany({
+        where,
+        select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
+        orderBy: { publishedAt: "desc" },
+        take: 3,
+      });
+      if (related.length < 3) {
+        related = await prisma.post.findMany({
+          where: { ...VISIBLE_POST_WHERE, NOT: { id: postId } },
+          select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
+          orderBy: { publishedAt: "desc" },
+          take: 3,
+        });
+      }
+      return related.slice(0, 3);
+    } catch {
+      return [];
+    }
+  },
+  ["related-posts"],
+  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
+);

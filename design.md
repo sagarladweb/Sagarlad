@@ -78,11 +78,11 @@ yellow. Applied on the admin layout root and the login page root.
 ## Spacing, Radii & UI Conventions
 
 - **Radii** (standardised across the site):
-  - Small tiles / chips / rows ≤ 48px → `rounded-xl` (12px).
-  - Standard cards → `rounded-2xl` (16px).
+  - Small tiles / chips / rows ≤ 48px → `rounded-md` (6px).
+  - Standard cards → `rounded-lg` (8px).
   - Large surfaces (videos, cover images, modals, iframes, carousels) →
-    `rounded-3xl` (24px).
-  - Oversized portrait images → `rounded-[2.5rem]` / `rounded-[3rem]`.
+    `rounded-xl` (12px).
+  - Oversized portrait images → `rounded-xl` (12px).
 - **Buttons**: pill-shaped (`rounded-full`). Primary = `bg-accent text-accent-foreground`
   (yellow); secondary/emphasis = `bg-brand text-white`; ghost = `hover:bg-muted`.
   Consistent `transition`, `disabled:opacity-60`.

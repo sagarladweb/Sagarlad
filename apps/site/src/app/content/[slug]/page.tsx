@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArrowLeft } from "lucide-react";
 import { prisma, dbSafe } from "@/lib/db";
@@ -40,7 +39,19 @@ export default async function ContentCategoryPage({
       } | null>,
     null
   );
-  if (!category) notFound();
+
+  if (!category) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 py-24 text-center">
+        <p className="text-5xl mb-4">📭</p>
+        <h1 className="font-display text-2xl font-bold">Topic not found</h1>
+        <p className="mt-3 text-muted-foreground">This topic may have been moved or is temporarily unavailable.</p>
+        <Link href="/content" className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-brand hover:underline">
+          <ArrowLeft className="w-4 h-4" /> Browse all topics
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -63,8 +74,8 @@ export default async function ContentCategoryPage({
           >
             <ArrowLeft className="w-4 h-4" /> All topics
           </Link>
-          <p className="mt-6 text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
-            Content
+          <p className="btn-premium mt-6 inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+            Read
           </p>
           <h1 className="mt-3 font-display text-4xl md:text-5xl font-bold tracking-tight">
             {category.name}
@@ -92,7 +103,7 @@ export default async function ContentCategoryPage({
                 <Link
                   key={post.id}
                   href={`/blog/${post.slug}`}
-                  className="group relative aspect-square overflow-hidden rounded-2xl border border-border bg-muted"
+                  className="group relative aspect-square overflow-hidden rounded-lg border border-border bg-muted"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img

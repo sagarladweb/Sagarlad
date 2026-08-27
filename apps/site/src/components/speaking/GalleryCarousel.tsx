@@ -46,7 +46,7 @@ export function GalleryCarousel() {
         {images.map((img) => (
           <div
             key={img.src}
-            className="snap-center [scroll-snap-stop:always] shrink-0 w-[85vw] max-w-[360px] aspect-[4/3] rounded-2xl overflow-hidden relative"
+            className="snap-center [scroll-snap-stop:always] shrink-0 w-[85vw] max-w-[360px] aspect-[4/3] rounded-xl overflow-hidden relative"
           >
             <Image
               src={img.src}

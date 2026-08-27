@@ -81,6 +81,12 @@ html {
   outline-offset: 2px;
   border-radius: 4px;
 }
+.rounded-full:focus-visible,
+input.rounded-full:focus-visible,
+button.rounded-full:focus-visible,
+a.rounded-full:focus-visible {
+  border-radius: 9999px !important;
+}
 
 h1,
 h2,
@@ -603,6 +609,62 @@ h6 {
   animation: marquee 40s linear infinite;
   will-change: transform;
 }
+.marquee-pauser:hover .animate-marquee {
+  animation-play-state: paused !important;
+}
+
+/* ── Mind Up donut progressive fill ─────────────────────────────── */
+.mindup-donut-fill {
+  animation: donut-fill 2s ease-out forwards;
+}
+.mindup-donut-done {
+  stroke-dashoffset: 0 !important;
+}
+.mindup-donut-pending {
+  opacity: 0;
+}
+@keyframes donut-fill {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Mind Up trace dot — travels along the arc path */
+.mindup-trace-dot {
+  offset-rotate: 0deg;
+  animation: mindup-dot-pulse 0.8s ease-in-out infinite alternate;
+}
+@keyframes mindup-dot-pulse {
+  from { r: 4; opacity: 0.7; }
+  to   { r: 6; opacity: 1; }
+}
+
+/* Mind Up background pulse */
+.mindup-bg-pulse {
+  animation: mindup-bg-breathe 2.5s ease-in-out infinite alternate;
+}
+@keyframes mindup-bg-breathe {
+  from { transform: translate(-50%, -50%) scale(0.95); opacity: 0.03; }
+  to   { transform: translate(-50%, -50%) scale(1.05); opacity: 0.08; }
+}
+
+/* 3D Book hover tilt */
+.book-3d-hover:hover {
+  transform: rotateY(-4deg);
+}
+
+/* 3D Book crossfade — front/back covers swap on hover */
+.book-front {
+  transition: opacity 0.7s ease-in-out;
+}
+.book-back {
+  opacity: 0;
+  transition: opacity 0.7s ease-in-out;
+}
+.group\/book:hover .book-front {
+  opacity: 0;
+}
+.group\/book:hover .book-back {
+  opacity: 1;
+}
 
 /* Navbar flyout hover bridge — prevents onMouseLeave firing in the gap
    between trigger link and flyout panel. */
@@ -648,6 +710,58 @@ li.is-active [data-dot] {
 .book-slide-enter {
   animation: book-slide-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* ── Book page flip animations ─────────────────────────────────────── */
+
+/* Desktop: outgoing page fades + rotates away */
+@keyframes book-page-out-left {
+  from { transform: rotateY(0deg); opacity: 1; }
+  to   { transform: rotateY(-80deg); opacity: 0; }
+}
+@keyframes book-page-out-right {
+  from { transform: rotateY(0deg); opacity: 1; }
+  to   { transform: rotateY(80deg); opacity: 0; }
+}
+
+/* Desktop: incoming page rotates in from edge */
+@keyframes book-page-in-left {
+  from { transform: rotateY(80deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+@keyframes book-page-in-right {
+  from { transform: rotateY(-80deg); opacity: 0; }
+  to   { transform: rotateY(0deg); opacity: 1; }
+}
+
+.book-page-out-left  { animation: book-page-out-left  0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.book-page-out-right { animation: book-page-out-right 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.book-page-in-left   { animation: book-page-in-left   0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both; }
+.book-page-in-right  { animation: book-page-in-right  0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both; }
+
+/* Mobile: outgoing page slides down/up */
+@keyframes book-mob-out-down {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to   { transform: translateY(40px) scale(0.97); opacity: 0; }
+}
+@keyframes book-mob-out-up {
+  from { transform: translateY(0) scale(1); opacity: 1; }
+  to   { transform: translateY(-40px) scale(0.97); opacity: 0; }
+}
+
+/* Mobile: incoming page slides up/down */
+@keyframes book-mob-in-up {
+  from { transform: translateY(40px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes book-mob-in-down {
+  from { transform: translateY(-40px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+.book-mob-out-down { animation: book-mob-out-down 0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.book-mob-out-up   { animation: book-mob-out-up   0.35s cubic-bezier(0.4, 0, 0.2, 1) both; }
+.book-mob-in-up    { animation: book-mob-in-up    0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both; }
+.book-mob-in-down  { animation: book-mob-in-down  0.35s cubic-bezier(0.4, 0, 0.2, 1) 0.06s both; }
 
 @keyframes slide-in-up {
   from {
@@ -749,21 +863,26 @@ video {
    PREMIUM ANIMATION & TRANSITION SYSTEM
    ═══════════════════════════════════════════════════════════════════ */
 
-/* ── Card hover: lift + shadow + scale ───────────────────────────── */
-[data-animate-item] {
+/* ── Card hover: lift + subtle shadow ────────────────────────────── */
+.card-hover,
+[data-animate-item],
+[data-card-hover] {
   transition:
-    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1),
-    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
   will-change: transform;
 }
-[data-animate-item]:hover {
-  transform: translateY(-4px) scale(1.01);
-  box-shadow:
-    0 8px 25px -5px rgba(0, 0, 0, 0.08),
-    0 16px 40px -10px rgba(0, 0, 0, 0.05);
+.card-hover:hover,
+[data-animate-item]:hover,
+[data-card-hover]:hover {
+  transform: translateY(-2px);
+  border-color: rgba(63, 136, 197, 0.45);
+  box-shadow: 0 4px 12px -2px rgba(0, 0, 0, 0.06);
 }
-[data-animate-item]:active {
-  transform: translateY(-1px) scale(1.005);
+[data-animate-item]:active,
+.card-hover:active {
+  transform: translateY(0);
   transition-duration: 0.1s;
 }
 
@@ -798,23 +917,20 @@ video {
   border-color: rgba(255, 255, 255, 0.55);
 }
 
-/* ── Generic CTA buttons (non-hero): press + hover ──────────────── */
-a[class*="rounded-full"][class*="bg-accent"],
-button[class*="rounded-full"][class*="bg-accent"] {
-  transition:
-    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.25s ease,
-    box-shadow 0.25s ease;
+/* ── Universal Premium Minimal Button Animation ──────────────────── */
+.btn-premium {
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform, box-shadow, opacity;
 }
-a[class*="rounded-full"][class*="bg-accent"]:hover,
-button[class*="rounded-full"][class*="bg-accent"]:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.1);
+.btn-premium:hover {
+  transform: scale(1.02) !important;
+  box-shadow: 0 10px 24px -8px rgba(0, 0, 0, 0.12) !important;
 }
-a[class*="rounded-full"][class*="bg-accent"]:active,
-button[class*="rounded-full"][class*="bg-accent"]:active {
-  transform: scale(0.97);
-  transition-duration: 0.1s;
+.btn-premium:active {
+  transform: scale(0.96) !important;
+  box-shadow: 0 2px 4px -2px rgba(0, 0, 0, 0.08) !important;
+  opacity: 0.85 !important;
+  transition-duration: 0.15s !important;
 }
 
 /* ── Link underline animation ───────────────────────────────────── */
@@ -934,4 +1050,16 @@ nav a:not([class*="rounded-full"]) {
   .link-underline::after {
     display: none;
   }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.logo-black {
+  filter: grayscale(1) brightness(0) contrast(1.2);
 }

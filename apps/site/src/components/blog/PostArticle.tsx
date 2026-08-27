@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react";
 import { SITE, formatDate, readingTime } from "@/lib/site";
 import { SanitizedContent } from "@/components/SanitizedContent";
@@ -64,7 +65,7 @@ export function PostArticle({
           {post.category && (
             <Link
               href={`/blog?category=${post.category.slug ?? ""}`}
-              className="inline-flex items-center rounded-full border border-brand-light/30 bg-brand-light/10 px-3 py-1 text-xs font-semibold text-brand transition-colors hover:bg-brand-light/20"
+              className="btn-premium inline-flex items-center rounded-full border border-brand-light/30 bg-brand-light/10 px-4 py-1.5 text-xs font-semibold text-brand hover:bg-brand-light/20"
             >
               {post.category.name}
             </Link>
@@ -88,9 +89,15 @@ export function PostArticle({
 
         <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-3">
           <div className="flex items-center gap-3">
-            <span className="grid h-11 w-11 place-items-center rounded-full bg-brand font-display text-base font-bold text-white">
-              {initials(authorName)}
-            </span>
+            <div className="relative h-11 w-11 shrink-0 rounded-full overflow-hidden bg-muted">
+              <Image
+                src="/images/profile/about.webp"
+                alt={authorName}
+                fill
+                sizes="44px"
+                className="object-cover"
+              />
+            </div>
             <div className="text-sm leading-tight">
               <p className="font-semibold">{authorName}</p>
               <p className="text-xs text-muted-foreground">Author</p>
@@ -120,7 +127,7 @@ export function PostArticle({
 
       <div id="post-content">
         {post.coverImage && post.showCover && (
-          <div className="mb-10 overflow-hidden rounded-2xl border border-border shadow-sm">
+          <div className="mb-10 overflow-hidden rounded-lg border border-border shadow-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={post.coverImage}
@@ -140,16 +147,22 @@ export function PostArticle({
       )}
 
       {post.footerNote && (
-        <div className="mt-8 rounded-2xl border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
+        <div className="mt-8 rounded-lg border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
           {post.footerNote}
         </div>
       )}
 
       {post.showAuthorBox && (
-        <div className="mt-8 flex items-center gap-5 rounded-2xl border border-border bg-card p-6 sm:p-8">
-          <span className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-brand font-display text-xl font-bold text-white">
-            {initials(authorName)}
-          </span>
+        <div className="card-hover mt-8 flex items-center gap-5 rounded-lg border border-border bg-card p-6 sm:p-8">
+          <div className="relative h-16 w-16 shrink-0 rounded-md overflow-hidden bg-muted">
+            <Image
+              src="/images/profile/about.webp"
+              alt={authorName}
+              fill
+              sizes="64px"
+              className="object-cover"
+            />
+          </div>
           <div className="min-w-0">
             <p className="font-display text-lg font-bold">{authorName}</p>
             <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
@@ -175,7 +188,7 @@ export function PostArticle({
               <Link
                 key={p.slug}
                 href={`/blog/${p.slug}`}
-                className="group min-w-[260px] max-w-[280px] flex-none snap-start overflow-hidden rounded-2xl border border-border bg-card transition-shadow hover:shadow-sm sm:min-w-0 sm:max-w-none sm:flex-none"
+                className="card-hover group min-w-[260px] max-w-[280px] flex-none snap-start overflow-hidden rounded-lg border border-border bg-card transition-all duration-200 hover:border-brand-light/70 hover:shadow-md sm:min-w-0 sm:max-w-none sm:flex-none"
               >
                 <div className="aspect-video w-full overflow-hidden bg-muted">
                   {p.coverImage ? (

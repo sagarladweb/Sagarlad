@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Pill } from "@/components/ui/Pill";
 
 export function MentorshipCta() {
   return (
@@ -8,9 +9,7 @@ export function MentorshipCta() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong mb-4">
-            1-on-1 Mentorship
-          </p>
+          <Pill className="mb-4">1-on-1 Mentorship</Pill>
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-accent-strong">
             One conversation. Total clarity.
           </h2>

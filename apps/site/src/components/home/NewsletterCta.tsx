@@ -6,6 +6,7 @@ import { useState } from "react";
 import { CheckCircle2, Loader2, AlertCircle, Mail } from "lucide-react";
 import { validateEmail } from "@/lib/client-validators";
 import { SiteLogo } from "@/components/SiteLogo";
+import { Pill } from "@/components/ui/Pill";
 
 export function NewsletterCta() {
   const [email, setEmail] = useState("");
@@ -61,42 +62,34 @@ export function NewsletterCta() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div
-          className="mx-auto max-w-2xl overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-brand-light/30 via-brand-light/15 to-brand-light/5 shadow-lg shadow-brand-light/20"
+          className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-lg"
           data-animate
         >
-          <div className="flex flex-col items-center gap-10 px-6 pt-10 pb-12 sm:px-12 sm:pt-14 sm:pb-16">
-            {/* Sagar image */}
-            <div className="relative w-full max-w-[18rem]" data-animate>
-              <div
-                aria-hidden="true"
-                className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/25 via-brand-light/20 to-transparent blur-2xl opacity-75"
-              />
-              <figure className="relative aspect-[4/5] rounded-[2rem] overflow-hidden border border-border shadow-xl bg-card">
-                <Image
-                  src="/images/sagar-author.webp"
-                  alt="Sagar Lad"
-                  fill
-                  sizes="(max-width: 640px) 100vw, 18rem"
-                  className="object-cover object-top"
-                />
-                <div
-                  aria-hidden="true"
-                  className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent"
-                />
-                <figcaption className="absolute bottom-0 inset-x-0 p-6 text-white">
-                  <SiteLogo light className="h-9 w-auto" />
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
-                    One useful idea, every week
-                  </p>
-                </figcaption>
-              </figure>
-            </div>
-
-            {/* Newsletter form */}
-            <div className="w-full text-center mx-auto max-w-md" data-animate>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent-strong">
-                The Sagar Lad Letter
+          {/* Full-width blog image — top 60%, no gradient overlay */}
+          <div className="relative w-full aspect-[16/10] overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/blog.webp"
+              alt="Blog"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8 bg-gradient-to-t from-black/60 to-transparent">
+              <SiteLogo light className="h-8 w-auto" />
+              <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/80">
+                One useful idea, every week
               </p>
+            </div>
+          </div>
+
+          {/* Newsletter form — bottom 40%, light blue blend to white */}
+          <div
+            className="flex flex-col items-center px-6 pt-8 pb-10 sm:px-12 sm:pt-10 sm:pb-12"
+            style={{
+              background: "linear-gradient(180deg, #e8f0fe 0%, #f4f7fd 35%, #ffffff 70%)",
+            }}
+          >
+            <div className="w-full text-center mx-auto max-w-md" data-animate>
+              <Pill>The Sagar Lad Letter</Pill>
               <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold leading-tight text-foreground">
                 One practical idea. Every week.
               </h2>

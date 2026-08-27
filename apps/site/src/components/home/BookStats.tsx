@@ -95,7 +95,7 @@ export function BookStats() {
   return (
     <div
       ref={root}
-      className="rounded-2xl border border-border bg-background/80 backdrop-blur px-3 py-6 sm:px-6 sm:py-8 grid grid-cols-3 divide-x divide-border"
+      className="rounded-lg border border-border bg-background/80 backdrop-blur px-3 py-6 sm:px-6 sm:py-8 grid grid-cols-3 divide-x divide-border"
     >
       {stats.map((s) => (
         <div

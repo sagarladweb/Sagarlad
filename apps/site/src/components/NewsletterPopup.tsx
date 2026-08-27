@@ -85,35 +85,28 @@ export function NewsletterPopup() {
 
   return (
     <div
-      className="fixed inset-x-0 bottom-0 z-[60] p-4 sm:p-0 sm:inset-auto sm:left-8 sm:bottom-6 sm:w-[420px]"
+      className="fixed inset-x-0 bottom-[44px] z-[60] p-4 sm:p-0 sm:inset-auto sm:left-6 sm:bottom-6 sm:w-[420px]"
       onMouseDownCapture={onInteract}
       onTouchStartCapture={onInteract}
     >
-      <div className="rounded-2xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/15 overflow-hidden animate-slide-in-up">
-        {/* Shining header bar — light-blue base with light-blue + light-yellow
-            shimmer sweeps (light yellow is the brand accent's lighter shade). */}
-        <div className="relative h-1.5 w-full overflow-hidden bg-gradient-to-r from-brand-light via-brand-light/40 to-brand-light">
-          <div className="absolute inset-0 animate-shine bg-gradient-to-r from-transparent via-brand-light/90 to-transparent" />
-          <div className="absolute inset-0 animate-shine-delay bg-gradient-to-r from-transparent via-[#ffe784]/90 to-transparent" />
-        </div>
-
+      <div className="card-hover rounded-xl border border-border/80 bg-card/95 backdrop-blur-xl shadow-2xl shadow-black/15 overflow-hidden animate-slide-in-up">
         <div className="p-6 sm:p-7">
           <div className="flex items-start justify-between gap-4">
-            <span className="inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent-strong">
+            <span className="btn-premium inline-flex items-center rounded-full bg-accent/10 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-accent-strong">
               Sagar&apos;s Weekly Dispatch
             </span>
             <button
               type="button"
               onClick={close}
               aria-label="Close newsletter popup"
-              className="p-1.5 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+              className="btn-premium p-1.5 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground shrink-0"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
 
           {state === "success" ? (
-            <div className="mt-5 flex items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
+            <div className="mt-5 flex items-center gap-3 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-sm font-medium">
               <CheckCircle2 className="w-5 h-5 shrink-0" />
               <span>{message}</span>
             </div>
@@ -147,7 +140,7 @@ export function NewsletterPopup() {
                 <button
                   type="submit"
                   disabled={state === "loading"}
-                  className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold shadow-lg shadow-accent/20 hover:opacity-95 transition-all disabled:opacity-60"
+                  className="btn-premium w-full inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-semibold shadow-lg shadow-accent/20 hover:opacity-95 disabled:opacity-60"
                 >
                   {state === "loading" ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

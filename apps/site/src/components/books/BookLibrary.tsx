@@ -156,7 +156,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                     className="object-contain drop-shadow-xl transition-transform duration-500 group-hover:-translate-y-1.5"
                   />
                 ) : (
-                  <div className="grid h-full w-full place-items-center rounded-2xl bg-muted p-6">
+                  <div className="grid h-full w-full place-items-center rounded-xl bg-muted p-6">
                     <span className="font-display font-bold text-muted-foreground">{book.title}</span>
                   </div>
                 )}
@@ -196,7 +196,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   <button
                     type="button"
                     onClick={() => openDownload(book)}
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+                    className="btn-premium inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm hover:opacity-90"
                   >
                     <Download className="h-4 w-4" />
                     Download
@@ -208,7 +208,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                     onClick={(e) => !book.buyUrl && e.preventDefault()}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+                    className="btn-premium inline-flex items-center justify-center gap-2 rounded-full bg-accent px-6 py-2.5 text-sm font-semibold text-accent-foreground shadow-sm hover:opacity-90"
                   >
                     <ShoppingBag className="h-4 w-4" />
                     {ctaLabel()}
@@ -270,7 +270,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
             role="dialog"
             aria-modal="true"
             aria-label={active.title}
-            className="relative grid w-full max-w-3xl max-h-[85vh] grid-cols-1 overflow-y-auto rounded-2xl border border-border bg-background shadow-2xl sm:grid-cols-2"
+            className="relative grid w-full max-w-3xl max-h-[85vh] grid-cols-1 overflow-y-auto rounded-xl border border-border bg-background shadow-2xl sm:grid-cols-2"
           >
             <button
               type="button"
@@ -293,7 +293,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   />
                 </div>
               ) : (
-                <div className="grid aspect-[3/4] w-full max-w-[280px] place-items-center rounded-2xl bg-muted p-6">
+                <div className="grid aspect-[3/4] w-full max-w-[280px] place-items-center rounded-xl bg-muted p-6">
                   <span className="font-display font-bold text-muted-foreground">{active.title}</span>
                 </div>
               )}
@@ -342,7 +342,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   <button
                     type="button"
                     onClick={() => openDownload(active)}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90"
+                    className="btn-premium inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm hover:opacity-90"
                   >
                     <Download className="h-4 w-4" />
                     Download
@@ -356,7 +356,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   className="mt-auto inline-flex items-center justify-center gap-2 pt-8"
                   onClick={() => setActive(null)}
                 >
-                  <span className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90">
+                  <span className="btn-premium inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm hover:opacity-90">
                     <ShoppingBag className="h-4 w-4" />
                     Buy Now
                   </span>
@@ -375,18 +375,18 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
             role="dialog"
             aria-modal="true"
             aria-label="Download eBook"
-            className="relative w-full max-w-md rounded-2xl border border-border bg-background p-8 shadow-2xl"
+            className="relative w-full max-w-md rounded-xl border border-border bg-background p-8 shadow-2xl"
           >
             <button
               type="button"
               onClick={resetForm}
               aria-label="Close"
-              className="absolute right-5 top-5 rounded-full p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="btn-premium absolute right-5 top-5 rounded-full p-2 text-muted-foreground hover:bg-muted hover:text-foreground"
             >
               <X className="h-4 w-4" />
             </button>
 
-            <div className="mx-auto grid h-12 w-12 place-items-center rounded-2xl bg-brand text-white">
+            <div className="mx-auto grid h-12 w-12 place-items-center rounded-md bg-brand text-white">
               <Download className="h-5 w-5" />
             </div>
             <p className="mt-5 text-center text-[10px] font-semibold uppercase tracking-[0.2em] text-accent-strong">
@@ -411,7 +411,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent"
+                  className="w-full rounded-md border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent"
                 />
               </div>
 
@@ -426,7 +426,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="you@example.com"
-                  className="w-full rounded-2xl border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent"
+                  className="w-full rounded-md border border-border bg-background px-4 py-2.5 text-sm outline-none transition-colors focus:border-accent focus:ring-2 focus:ring-accent"
                 />
               </div>
 
@@ -471,7 +471,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               <button
                 type="submit"
                 disabled={submitting || !acceptedTerms}
-                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="btn-premium inline-flex w-full items-center justify-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-semibold text-accent-foreground shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                 {submitting ? "Preparing…" : "Download"}

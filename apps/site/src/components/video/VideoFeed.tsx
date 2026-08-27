@@ -59,7 +59,7 @@ export function VideoFeed({
             type="button"
             onClick={loadMore}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold transition-colors hover:border-brand-light/60 hover:text-brand disabled:opacity-60"
+            className="btn-premium card-hover inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold hover:border-brand-light/60 hover:text-brand disabled:opacity-60"
           >
             {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? "Loading…" : "Load more videos"}

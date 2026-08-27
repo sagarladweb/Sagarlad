@@ -120,7 +120,8 @@ export default function SpeakingContactPage() {
           </div>
 
           <div className="lg:col-span-7 lg:pl-6">
-            <span className="text-xs font-bold uppercase tracking-[0.25em] text-brand">
+            <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+              Book Sagar
               Speaking &amp; Keynotes
             </span>
             <h1 className="mt-4 font-display text-4xl font-bold leading-tight sm:text-5xl tracking-tight">
@@ -179,7 +180,7 @@ export default function SpeakingContactPage() {
 
         <form
           onSubmit={onSubmit}
-          className="lg:col-span-3 rounded-2xl border border-border bg-card p-6 sm:p-8 space-y-4"
+          className="card-hover lg:col-span-3 rounded-lg border border-border bg-card p-6 sm:p-8 space-y-4"
           noValidate
         >
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -328,7 +329,7 @@ export default function SpeakingContactPage() {
           <button
             type="submit"
             disabled={state === "loading"}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3 text-sm font-semibold disabled:opacity-60 hover:opacity-90 transition-opacity"
+            className="btn-premium w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3 text-sm font-semibold disabled:opacity-60 hover:opacity-90"
           >
             {state === "loading" && <Loader2 className="w-4 h-4 animate-spin" />}
             Submit booking request

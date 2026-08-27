@@ -63,7 +63,7 @@ export default function TestimonialCarousel({ items }: { items: Item[] }) {
         {items.map((t, i) => (
           <blockquote
             key={i}
-            className="snap-center shrink-0 w-full rounded-2xl border border-border bg-card p-6 sm:p-8"
+            className="card-hover snap-center shrink-0 w-full rounded-lg border border-border bg-card p-6 sm:p-8"
           >
             <p className="text-sm sm:text-base leading-relaxed">&ldquo;{t.quote}&rdquo;</p>
             <footer className="mt-4 text-xs text-muted-foreground">

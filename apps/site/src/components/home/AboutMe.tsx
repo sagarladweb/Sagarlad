@@ -8,6 +8,7 @@ import { ArrowUpRight } from "lucide-react";
 
 import { METRICS } from "@/lib/metrics";
 import { SiteLogo } from "@/components/SiteLogo";
+import { Pill } from "@/components/ui/Pill";
 
 const stats = [
   { value: Number(METRICS.yearsExperience), suffix: "+", label: "Years in tech & data" },
@@ -124,17 +125,25 @@ export function AboutMe() {
       />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6">
+        {/* Mobile: Pill + heading centered, then image, then content */}
+        <div className="lg:hidden text-center" data-story-head>
+          <Pill>About Sagar</Pill>
+          <h2 className="mt-6 font-display text-3xl sm:text-4xl font-bold leading-[1.15] tracking-tight text-[#1e293b]">
+            A story of almost nothing, and everything.
+          </h2>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          {/* Visual */}
-          <div data-story-visual className="lg:col-span-5 relative order-1">
+          {/* Visual — first on mobile, left on desktop */}
+          <div data-story-visual className="lg:col-span-5 order-2 lg:order-1 relative">
             <div className="relative max-w-md mx-auto lg:mx-0">
               <div
                 aria-hidden="true"
                 className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/25 via-brand-light/10 to-transparent blur-2xl opacity-75"
               />
-              <figure className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden border border-border shadow-2xl bg-card">
+              <figure className="card-hover relative aspect-[4/5] rounded-xl overflow-hidden border border-[#e2e8f0]/60 bg-card">
                 <Image
-                  src="/images/sagar-author.webp"
+                  src="/images/profile/about-3.webp"
                   alt="Sagar Lad"
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
@@ -155,16 +164,14 @@ export function AboutMe() {
             </div>
           </div>
 
-          {/* Content */}
-          <div className="lg:col-span-7 order-2 space-y-8 text-center lg:text-left">
-            <div data-story-head>
-              <span className="inline-flex items-center rounded-full bg-accent/10 px-3.5 py-1 text-xs font-bold uppercase tracking-wider text-accent-strong">
-                About Sagar
-              </span>
-              <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
+          {/* Content — second on mobile, right on desktop */}
+          <div className="lg:col-span-7 order-3 lg:order-2 text-center lg:text-left">
+            <div data-story-head className="hidden lg:block">
+              <Pill>About Sagar</Pill>
+              <h2 className="mt-6 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-[1.15] tracking-tight text-[#1e293b]">
                 A story of almost nothing, and everything.
               </h2>
-              <p className="mt-4 text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl">
+              <p className="mt-6 text-base sm:text-lg text-[#64748b] leading-loose max-w-xl mx-auto lg:mx-0">
                 From a small town in Gujarat to leading Data &amp; AI
                 transformations across Europe. I left a comfortable life with no
                 savings and no plan — then built it back through awareness,
@@ -172,23 +179,30 @@ export function AboutMe() {
                 through books, videos and a global community.
               </p>
             </div>
+            <p className="mt-6 text-base sm:text-lg text-[#64748b] leading-loose max-w-xl mx-auto lg:mx-0 lg:hidden">
+              From a small town in Gujarat to leading Data &amp; AI
+              transformations across Europe. I left a comfortable life with no
+              savings and no plan — then built it back through awareness,
+              habit and early investing. Today I share everything I know
+              through books, videos and a global community.
+            </p>
 
             {/* Stats matrix */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {stats.map((s) => (
                 <div
                   key={s.label}
                   data-story-stat={s.value}
                   data-story-suffix={s.suffix}
-                  className="group rounded-2xl border border-border bg-card/70 p-4 text-center hover:border-brand-light/70 hover:shadow-md transition-all"
+                  className="text-center card-hover rounded-xl p-4 transition-all hover:bg-card/40"
                 >
                   <p
                     data-story-num
-                    className="font-display text-2xl sm:text-3xl font-extrabold text-accent-strong tabular-nums"
+                    className="font-display text-2xl sm:text-3xl font-extrabold text-[#1e293b] tabular-nums"
                   >
                     0{s.suffix}
                   </p>
-                  <p className="mt-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+                  <p className="mt-1.5 text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8] leading-tight">
                     {s.label}
                   </p>
                 </div>
@@ -196,10 +210,10 @@ export function AboutMe() {
             </div>
 
             {/* Footer Action */}
-            <div className="pt-2 text-center sm:text-left">
+            <div className="mt-10 text-center sm:text-left">
               <Link
                 href="/about"
-                className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3.5 text-sm font-semibold hover:opacity-95 transition-opacity shadow-lg"
+                className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3 text-sm font-semibold"
               >
                 More about me <ArrowUpRight className="w-4 h-4" />
               </Link>

@@ -5,74 +5,82 @@ import { Rss, X } from "lucide-react";
 
 export function RssBanner() {
   const [show, setShow] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
-    try {
-      if (sessionStorage.getItem("rss-banner-dismissed")) {
-        setDismissed(true);
-        return;
-      }
-    } catch {}
     const t = setTimeout(() => setShow(true), 16000);
     return () => clearTimeout(t);
   }, []);
 
-  function dismiss() {
-    setShow(false);
-    setDismissed(true);
-    try { sessionStorage.setItem("rss-banner-dismissed", "1"); } catch {}
-  }
+  useEffect(() => {
+    if (!show) return;
+    const t = setTimeout(() => setShow(false), 5000);
+    return () => clearTimeout(t);
+  }, [show]);
 
-  if (dismissed || !show) return null;
+  if (!show) return null;
 
   return (
-    <div className="fixed bottom-0 inset-x-0 z-50" style={{ animation: "rss-slide-up 0.5s ease-out" }}>
-      <div className="bg-brand text-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-4 py-3 sm:px-6 sm:py-3.5">
-          <div className="flex items-center gap-2.5">
-            <Rss className="h-5 w-5 text-accent shrink-0" />
-            <span className="text-sm sm:text-base font-semibold text-white">
-              Subscribe via RSS
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <a
-              href="https://feedly.com/i/subscription/feed/https://sagarlad.com/rss.xml"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-5 py-2 text-sm font-bold hover:opacity-90 transition-opacity whitespace-nowrap"
-            >
-              <svg viewBox="0 0 24 24" className="h-4 w-4 shrink-0" fill="none">
-                <path
-                  d="M6 17.5V9.5C6 7.567 7.567 6 9.5 6H10V8.5H9.5C8.672 8.5 8 9.172 8 10V11H10.5V17.5H6ZM12 17.5V13.5H14.5V17.5H12ZM16 17.5V10.5H18.5V17.5H16Z"
-                  fill="currentColor"
-                />
-              </svg>
-              Follow on Feedly
-            </a>
-
-            <a
-              href="/rss.xml"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center h-9 w-9 rounded-full text-white/70 hover:bg-white/10 hover:text-white transition-colors"
-              title="Open RSS feed"
-            >
-              <Rss className="h-4 w-4" />
-            </a>
-
-            <button
-              type="button"
-              onClick={dismiss}
-              className="inline-flex items-center justify-center h-9 w-9 rounded-full text-white/50 hover:bg-white/10 hover:text-white transition-colors"
-            >
-              <X className="h-4 w-4" />
-            </button>
+    <>
+      {/* Mobile: compact bottom bar */}
+      <div className="fixed bottom-0 inset-x-0 z-[70] sm:hidden">
+        <div className="bg-white border-t border-border/60">
+          <div className="flex items-center justify-between w-full px-3 py-2">
+            <div className="flex items-center gap-2">
+              <Rss className="h-3.5 w-3.5 text-brand" />
+              <span className="text-xs font-medium text-foreground">Subscribe via RSS</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <a
+                href="https://feedly.com/i/subscription/feed/http%3A%2F%2Fsagarlad.com%2Frss.xml"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-premium inline-flex items-center rounded-full bg-accent px-3 py-1 text-[11px] font-bold text-accent-foreground hover:opacity-90"
+              >
+                Open Feed
+              </a>
+              <button
+                type="button"
+                onClick={() => setShow(false)}
+                className="inline-flex items-center justify-center h-6 w-6 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                aria-label="Close"
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Desktop: toast popup bottom-right */}
+      <div className="hidden sm:block fixed bottom-6 right-6 z-[70]">
+        <div className="bg-white rounded-lg border border-border/60 shadow-lg shadow-black/5 p-4 w-[300px]">
+          <div className="flex items-start justify-between gap-3">
+            <div className="grid h-9 w-9 place-items-center rounded-full bg-accent/10 shrink-0">
+              <Rss className="h-4 w-4 text-accent-strong" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Subscribe via RSS</p>
+              <p className="text-xs text-muted-foreground mt-0.5">Get updates in your feed reader</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setShow(false)}
+              className="inline-flex items-center justify-center h-6 w-6 rounded-full text-muted-foreground hover:bg-muted hover:text-foreground transition-colors shrink-0"
+              aria-label="Close"
+            >
+              <X className="h-3.5 w-3.5" />
+            </button>
+          </div>
+          <a
+            href="https://feedly.com/i/subscription/feed/http%3A%2F%2Fsagarlad.com%2Frss.xml"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-premium mt-3 flex items-center justify-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-foreground hover:opacity-90 w-full"
+          >
+            Open Feed
+          </a>
+        </div>
+      </div>
+    </>
   );
 }

@@ -7,6 +7,12 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollTopButton } from "@/components/ui/ScrollTopButton";
 import { GoogleAnalytics } from "@/components/GoogleAnalytics";
+import { RssBanner } from "@/components/RssBanner";
+
+const PageEntrance = dynamic(
+  () => import("@/components/PageEntrance").then((m) => m.PageEntrance),
+  { ssr: false }
+);
 
 const ScrollAnimations = dynamic(
   () => import("@/components/home/ScrollAnimations").then((m) => m.ScrollAnimations),
@@ -21,6 +27,7 @@ const NewsletterPopup = dynamic(
 export function SiteFrame({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith("/admin");
+  const showRss = pathname === "/" || pathname === "/blog";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -50,10 +57,12 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
       <main className="flex-1">
         {children}
         {!isAdmin && <ScrollAnimations />}
+        {!isAdmin && <PageEntrance />}
       </main>
       {!isAdmin && <ScrollTopButton />}
       {!isAdmin && <Footer />}
       {!isAdmin && pathname === "/" && <NewsletterPopup />}
+      {!isAdmin && showRss && <RssBanner />}
     </>
   );
 }
