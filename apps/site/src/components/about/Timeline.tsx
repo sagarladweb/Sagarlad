@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { BookOpen, GraduationCap, Briefcase, Mic, PenTool } from "lucide-react";
+import { GraduationCap, Briefcase, Mic, PenTool } from "lucide-react";
 
 type TimelineNode = {
   year: string;
@@ -14,6 +14,7 @@ type TimelineNode = {
   icon: React.ComponentType<{ className?: string }>;
   image?: string;
   href?: string;
+  hrefLabel?: string;
 };
 
 const nodes: TimelineNode[] = [
@@ -29,7 +30,8 @@ const nodes: TimelineNode[] = [
   {
     year: "2009 – 2013",
     title: "B.E. Computer Engineering",
-    description: "BVM College — the foundation of my technical career begins in earnest.",
+    description:
+      "BVM College — the foundation of my technical career begins in earnest.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-2.webp",
@@ -37,7 +39,8 @@ const nodes: TimelineNode[] = [
   {
     year: "2013",
     title: "TCS",
-    description: "My professional journey begins — and soon takes me to Europe.",
+    description:
+      "My professional journey begins — and soon takes me to Europe.",
     tag: "Career",
     icon: Briefcase,
     image: "/images/profile/about-4.webp",
@@ -45,7 +48,8 @@ const nodes: TimelineNode[] = [
   {
     year: "2019 – 2020",
     title: "PG in Data Science",
-    description: "IIIT Bangalore — the year that reshaped how I think, learn, and solve problems.",
+    description:
+      "IIIT Bangalore — the year that reshaped how I think, learn, and solve problems.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-5.webp",
@@ -53,23 +57,28 @@ const nodes: TimelineNode[] = [
   {
     year: "2022 – 2026",
     title: "Six Books Published",
-    description: "First book in February 2022, sixth in March 2026 — writing alongside a full career.",
+    description:
+      "First book in February 2022, sixth in March 2026 — writing alongside a full career.",
     tag: "Author",
     icon: PenTool,
     image: "/images/books/mindup-front.jpg",
     href: "/books",
+    hrefLabel: "View books",
   },
   {
     year: "2025 – 2026",
     title: "Masters in Gen AI",
-    description: "Purdue University — sharpening the frontier, artificial intelligence done right.",
+    description:
+      "Purdue University — sharpening the frontier, artificial intelligence done right.",
     tag: "Education",
     icon: GraduationCap,
+    image: "/images/profile/about-5.webp",
   },
   {
     year: "2026",
     title: "First TEDx Speech",
-    description: "Give a speech on AI to the TEDx stage.",
+    description:
+      "Give a speech on AI to the TEDx stage.",
     tag: "Speaker",
     icon: Mic,
     image: "/images/heroes/tedx.webp",
@@ -79,8 +88,23 @@ const nodes: TimelineNode[] = [
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
+  const [active, setActive] = useState<number | null>(null);
 
-  // Horizontal grab-to-drag on desktop
+  const toggle = useCallback(
+    (i: number) => setActive((prev) => (prev === i ? null : i)),
+    []
+  );
+
+  // Close on outside click
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActive(null);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  // Horizontal grab-to-drag
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -90,36 +114,39 @@ export function Timeline() {
     let scrollLeft = 0;
 
     const onPointerDown = (e: PointerEvent) => {
+      // Don't interfere with card clicks
+      if ((e.target as HTMLElement).closest("[data-tl-card]")) return;
       isDown = true;
       startX = e.pageX - track.offsetLeft;
       scrollLeft = track.scrollLeft;
       track.style.cursor = "grabbing";
+      track.setPointerCapture(e.pointerId);
     };
-    const onPointerUp = () => {
+    const onPointerUp = (e: PointerEvent) => {
       isDown = false;
       track.style.cursor = "grab";
+      track.releasePointerCapture(e.pointerId);
     };
     const onPointerMove = (e: PointerEvent) => {
       if (!isDown) return;
-      e.preventDefault();
       const x = e.pageX - track.offsetLeft;
       track.scrollLeft = scrollLeft - (x - startX) * 1.5;
     };
 
     track.addEventListener("pointerdown", onPointerDown);
     track.addEventListener("pointerup", onPointerUp);
-    track.addEventListener("pointerleave", onPointerUp);
+    track.addEventListener("pointercancel", onPointerUp);
     track.addEventListener("pointermove", onPointerMove);
 
     return () => {
       track.removeEventListener("pointerdown", onPointerDown);
       track.removeEventListener("pointerup", onPointerUp);
-      track.removeEventListener("pointerleave", onPointerUp);
+      track.removeEventListener("pointercancel", onPointerUp);
       track.removeEventListener("pointermove", onPointerMove);
     };
   }, []);
 
-  // GSAP reveal animations
+  // GSAP reveal
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -140,20 +167,17 @@ export function Timeline() {
       );
 
       gsap.fromTo(
-        "[data-tl-node]",
-        { opacity: 0, y: 40, scale: 0.95 },
+        "[data-tl-dot]",
+        { scale: 0 },
         {
-          opacity: 1,
-          y: 0,
           scale: 1,
-          duration: 0.7,
-          stagger: 0.1,
-          ease: "power3.out",
+          duration: 0.5,
+          stagger: 0.08,
+          ease: "back.out(2)",
           scrollTrigger: { trigger: trackRef.current, start: "top 85%" },
         }
       );
 
-      // Animate the axis line width from 0
       gsap.fromTo(
         "[data-tl-line]",
         { scaleX: 0 },
@@ -191,33 +215,130 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Mobile: Vertical timeline ── */}
-      <div className="lg:hidden max-w-lg mx-auto px-4 sm:px-6">
-        <div className="relative">
-          {/* Vertical axis */}
+      {/* Horizontal scroll track — same on all viewports */}
+      <div
+        ref={trackRef}
+        className="overflow-x-auto overflow-y-visible cursor-grab px-6 sm:px-10 no-scrollbar"
+        style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
+      >
+        <div
+          className="relative mx-auto"
+          style={{ width: `${nodes.length * 300 + 120}px` }}
+        >
+          {/* Axis line */}
           <div
             aria-hidden="true"
-            className="absolute left-5 top-0 bottom-0 w-px bg-gradient-to-b from-brand/40 via-brand/20 to-transparent"
+            data-tl-line
+            className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/25 to-transparent origin-left"
+            style={{ top: "180px" }}
           />
-          <div className="space-y-10">
+
+          {/* Nodes */}
+          <div
+            className="relative flex items-start"
+            style={{ minHeight: "440px" }}
+          >
             {nodes.map((n, i) => {
               const Icon = n.icon;
+              const above = i % 2 === 0;
+              const isOpen = active === i;
+
               return (
-                <div key={n.title} className="relative pl-12" data-tl-node>
-                  {/* Dot */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute left-[13px] top-1 h-3.5 w-3.5 rounded-full border-2 border-brand bg-background z-10"
-                    style={{ boxShadow: "0 0 0 4px var(--background)" }}
+                <div
+                  key={n.title}
+                  className="relative flex flex-col items-center"
+                  style={{ width: "300px", flexShrink: 0 }}
+                >
+                  {/* Dot on axis */}
+                  <button
+                    data-tl-dot
+                    onClick={() => toggle(i)}
+                    aria-expanded={isOpen}
+                    aria-label={`${n.title} — ${n.year}`}
+                    className="absolute left-1/2 -translate-x-1/2 z-20 h-4 w-4 rounded-full border-[2.5px] border-brand bg-background transition-all duration-300 hover:scale-150 hover:shadow-[0_0_0_8px_rgba(13,33,161,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                    style={{ top: "174px" }}
                   />
 
-                  {/* Year */}
-                  <span className="block text-xs font-bold uppercase tracking-wider text-brand mb-1">
-                    {n.year}
-                  </span>
+                  {/* Year label — always visible */}
+                  <div
+                    className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none"
+                    style={{
+                      top: above ? "140px" : "198px",
+                    }}
+                  >
+                    <span
+                      className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${
+                        isOpen ? "text-brand" : "text-muted-foreground"
+                      }`}
+                    >
+                      {n.year}
+                    </span>
+                  </div>
+
+                  {/* Connector line */}
+                  <div
+                    aria-hidden="true"
+                    className="absolute left-1/2 -translate-x-px w-px transition-all duration-500"
+                    style={{
+                      height: isOpen ? "48px" : "28px",
+                      top: above ? "152px" : "186px",
+                      background: isOpen
+                        ? "var(--brand)"
+                        : "rgba(13,33,161,0.12)",
+                    }}
+                  />
 
                   {/* Card */}
-                  <MobileCard node={n} Icon={Icon} />
+                  <div
+                    data-tl-card
+                    className={`absolute left-1/2 -translate-x-1/2 w-[260px] transition-all duration-500 ease-out z-30 ${
+                      isOpen
+                        ? "opacity-100 scale-100 pointer-events-auto"
+                        : "opacity-0 scale-95 pointer-events-none"
+                    }`}
+                    style={{
+                      [above ? "bottom" : "top"]: "228px",
+                    }}
+                  >
+                    <div className="rounded-2xl border border-white/25 bg-white/80 dark:bg-white/[0.08] backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] overflow-hidden">
+                      {/* Image */}
+                      {n.image && (
+                        <div className="relative h-40 w-full overflow-hidden">
+                          <Image
+                            src={n.image}
+                            alt={n.title}
+                            fill
+                            sizes="260px"
+                            className="object-cover object-top transition-transform duration-700 hover:scale-110"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                          {/* Tag badge on image */}
+                          <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand">
+                            <Icon className="w-3 h-3" />
+                            {n.tag}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="p-4">
+                        <h3 className="font-display text-sm font-bold leading-snug text-foreground">
+                          {n.title}
+                        </h3>
+                        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                          {n.description}
+                        </p>
+                        {n.href && (
+                          <Link
+                            href={n.href}
+                            className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {n.hrefLabel ?? "Learn more"} →
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               );
             })}
@@ -225,179 +346,10 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Desktop: Horizontal scroll ── */}
-      <div className="hidden lg:block">
-        <div
-          ref={trackRef}
-          className="overflow-x-auto overflow-y-hidden cursor-grab px-8 no-scrollbar"
-          style={{ scrollBehavior: "auto", WebkitOverflowScrolling: "touch" }}
-        >
-          {/* Axis line */}
-          <div className="relative mx-auto" style={{ width: `${nodes.length * 280}px` }}>
-            <div
-              aria-hidden="true"
-              data-tl-line
-              className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/30 to-transparent origin-left"
-              style={{ transform: "translateY(-50%)" }}
-            />
-
-            <div className="relative flex items-center" style={{ minHeight: "420px" }}>
-              {nodes.map((n, i) => {
-                const Icon = n.icon;
-                const above = i % 2 === 0;
-                return (
-                  <div
-                    key={n.title}
-                    data-tl-node
-                    className="relative flex flex-col items-center"
-                    style={{ width: "280px", flexShrink: 0 }}
-                  >
-                    {/* Dot on axis */}
-                    <div
-                      aria-hidden="true"
-                      className="absolute left-1/2 -translate-x-1/2 h-3 w-3 rounded-full border-2 border-brand bg-background z-10 transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_0_6px_rgba(13,33,161,0.15)]"
-                      style={{ top: "calc(50% - 6px)" }}
-                    />
-
-                    {/* Connector line */}
-                    <div
-                      aria-hidden="true"
-                      className="absolute left-1/2 -translate-x-px w-px bg-brand/15"
-                      style={{
-                        height: "80px",
-                        top: above ? "calc(50% - 86px)" : "calc(50% + 6px)",
-                      }}
-                    />
-
-                    {/* Year label */}
-                    <div
-                      className="absolute left-1/2 -translate-x-1/2 text-center"
-                      style={{
-                        top: above ? "calc(50% - 110px)" : "calc(50% + 90px)",
-                      }}
-                    >
-                      <span className="text-xs font-bold uppercase tracking-wider text-brand">
-                        {n.year}
-                      </span>
-                    </div>
-
-                    {/* Glassmorphism card */}
-                    <DesktopCard node={n} Icon={Icon} above={above} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Drag hint */}
-        <p className="text-center mt-4 text-xs text-muted-foreground/60 select-none">
-          ← drag to explore →
-        </p>
-      </div>
+      {/* Hint */}
+      <p className="text-center mt-6 text-xs text-muted-foreground/50 select-none">
+        Tap a dot to explore · drag to scroll
+      </p>
     </section>
-  );
-}
-
-/* ── Mobile Card ─────────────────────────────────────── */
-function MobileCard({ node, Icon }: { node: TimelineNode; Icon: React.ComponentType<{ className?: string }> }) {
-  return (
-    <div className="group rounded-xl border border-border bg-card p-4 transition-all duration-300 hover:border-brand-light/60 hover:shadow-lg">
-      <div className="flex items-start gap-3">
-        <div className="shrink-0 w-9 h-9 rounded-lg bg-brand-light/10 grid place-items-center text-brand">
-          <Icon className="w-4.5 h-4.5" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-block rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
-              {node.tag}
-            </span>
-          </div>
-          <h3 className="mt-1.5 font-display text-base font-bold leading-snug group-hover:text-brand transition-colors">
-            {node.title}
-          </h3>
-          <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-            {node.description}
-          </p>
-          {node.image && (
-            <div className="mt-3 relative h-28 w-full rounded-lg overflow-hidden">
-              <Image
-                src={node.image}
-                alt={node.title}
-                fill
-                sizes="(max-width: 640px) 100vw, 50vw"
-                className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
-              />
-            </div>
-          )}
-          {node.href && (
-            <Link
-              href={node.href}
-              className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:underline"
-            >
-              View books →
-            </Link>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── Desktop Card (glassmorphism on hover) ─────────── */
-function DesktopCard({
-  node,
-  Icon,
-  above,
-}: {
-  node: TimelineNode;
-  Icon: React.ComponentType<{ className?: string }>;
-  above: boolean;
-}) {
-  return (
-    <div
-      className="absolute left-1/2 -translate-x-1/2 w-56 opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100 transition-all duration-300 ease-out pointer-events-none group-hover:pointer-events-auto z-20"
-      style={{
-        [above ? "bottom" : "top"]: "calc(50% + 24px)",
-      }}
-    >
-      <div className="rounded-xl border border-white/20 bg-white/70 dark:bg-white/10 backdrop-blur-xl shadow-2xl p-4 overflow-hidden">
-        {/* Image */}
-        {node.image && (
-          <div className="relative h-24 w-full rounded-lg overflow-hidden mb-3 -mx-1">
-            <Image
-              src={node.image}
-              alt={node.title}
-              fill
-              sizes="224px"
-              className="object-cover object-top"
-            />
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 mb-2">
-          <div className="w-7 h-7 rounded-md bg-brand/10 grid place-items-center text-brand">
-            <Icon className="w-3.5 h-3.5" />
-          </div>
-          <span className="inline-block rounded-full bg-accent/15 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-strong">
-            {node.tag}
-          </span>
-        </div>
-        <h3 className="font-display text-sm font-bold leading-snug text-foreground">
-          {node.title}
-        </h3>
-        <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-          {node.description}
-        </p>
-        {node.href && (
-          <Link
-            href={node.href}
-            className="mt-2.5 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
-          >
-            View books →
-          </Link>
-        )}
-      </div>
-    </div>
   );
 }
