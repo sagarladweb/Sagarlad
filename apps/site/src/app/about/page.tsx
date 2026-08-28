@@ -157,7 +157,7 @@ export default function AboutPage() {
             alt="About Sagar Lad"
             fill
             priority
-            className="object-cover object-center"
+            className="object-cover object-right sm:object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
