@@ -1,16 +1,20 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { gsap } from "@/lib/gsap";
 
 export function ScrollAnimations() {
   const pathname = usePathname();
+  const hydrated = useRef(false);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const timer = setTimeout(() => {
+    /* Wait for React hydration to finish before GSAP touches the DOM */
+    const raf = requestAnimationFrame(() => {
+      hydrated.current = true;
+
       const ctx = gsap.context(() => {
         // ── Individual reveals ──────────────────────────────────────
         gsap.utils.toArray<HTMLElement>("[data-animate]").forEach((item) => {
@@ -131,9 +135,9 @@ export function ScrollAnimations() {
       });
 
       return () => ctx.revert();
-    }, 60);
+    });
 
-    return () => clearTimeout(timer);
+    return () => cancelAnimationFrame(raf);
   }, [pathname]);
 
   return null;
