@@ -172,14 +172,6 @@ export default function SpeakingPage() {
               >
                 Inquire about speaking <ArrowRight className="w-4 h-4" />
               </Link>
-              <a
-                href="https://sessionize.com/sagar-lad/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-premium inline-flex items-center justify-center gap-2 rounded-full border border-white/40 backdrop-blur-xl bg-black/30 px-7 py-3.5 text-sm font-semibold text-white hover:bg-black/50 w-full sm:w-auto"
-              >
-                View Sessionize profile ↗
-              </a>
             </div>
           </div>
         </div>
@@ -217,7 +209,7 @@ export default function SpeakingPage() {
             <div className="lg:col-span-7" data-animate="right">
               <VideoPlayer
                 title="TEDx — The MIND UP message"
-                src="https://www.youtube.com/embed/G5F3kJ-lsYk"
+                src="https://youtu.be/A5CJpNDusAU?si=DyeRhRJKxUYsr_eL"
                 thumb="/images/heroes/tedx.webp"
                 platform="youtube"
                 pauseOnLeave

@@ -196,7 +196,7 @@ export function Timeline() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 md:mb-14">
         <div className="text-center" data-tl-heading>
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand border border-brand/20 rounded-full px-4 py-1.5 bg-transparent">
-            Where it started &amp; key moments
+            Where it started
           </span>
           <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
             The story, in dates
