@@ -106,16 +106,25 @@ export default function ContactPage() {
     <div className="overflow-x-clip">
       {/* ── Hero ─────────────────────────────────────────────── */}
       <header className="relative overflow-hidden border-b border-border bg-background">
-        {/* Subtle warm accent behind portrait */}
+        {/* Very soft blue gradient — bottom-left, barely there */}
+        <div
+          className="absolute inset-0 z-0"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(13,33,161,0.03) 0%, rgba(13,33,161,0.06) 40%, transparent 70%)",
+          }}
+        />
+        {/* Tiny warm accent near portrait */}
         <div
           className="absolute z-0"
           style={{
-            width: "500px",
-            height: "500px",
-            left: "0%",
-            top: "15%",
-            background: "radial-gradient(circle, rgba(255,213,29,0.06) 0%, transparent 70%)",
-            filter: "blur(60px)",
+            width: "400px",
+            height: "400px",
+            left: "5%",
+            top: "20%",
+            background:
+              "radial-gradient(circle, rgba(13,33,161,0.04) 0%, transparent 70%)",
+            filter: "blur(50px)",
           }}
         />
 
@@ -141,7 +150,7 @@ export default function ContactPage() {
 
           {/* Copy */}
           <div className="lg:col-span-7 lg:pl-6 text-center lg:text-left" data-animate="right">
-            <span className="inline-block rounded-full bg-brand/5 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand/60 border border-brand/10">
+            <span className="inline-block rounded-full bg-muted px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-muted-foreground">
               Get in touch
             </span>
             <h1 className="mt-6 font-display text-[2.75rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-foreground">
@@ -159,7 +168,7 @@ export default function ContactPage() {
                   className="flex items-start gap-3 text-sm font-medium text-foreground/70"
                 >
                   <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground"
                     aria-hidden="true"
                   />
                   {item}
@@ -330,7 +339,7 @@ export default function ContactPage() {
             {/* Contact info */}
             <div className="card-hover rounded-lg border border-border bg-card p-5 space-y-4" data-animate-item>
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-muted text-muted-foreground grid place-items-center shrink-0">
                   <Mail className="w-4 h-4" />
                 </div>
                 <div>
@@ -349,7 +358,7 @@ export default function ContactPage() {
               <div className="h-px bg-border" />
 
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-muted text-muted-foreground grid place-items-center shrink-0">
                   <MapPin className="w-4 h-4" />
                 </div>
                 <div>
@@ -365,7 +374,7 @@ export default function ContactPage() {
               <div className="h-px bg-border" />
 
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-md bg-brand/10 text-brand grid place-items-center shrink-0">
+                <div className="w-9 h-9 rounded-md bg-muted text-muted-foreground grid place-items-center shrink-0">
                   <Clock className="w-4 h-4" />
                 </div>
                 <div>
@@ -386,16 +395,16 @@ export default function ContactPage() {
               </h3>
               <ul className="space-y-2.5 text-sm text-muted-foreground">
                 <li className="flex gap-2">
-                  <span className="text-brand">✦</span> Book feedback &amp; discussions
+                  <span className="text-accent">✦</span> Book feedback &amp; discussions
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-brand">✦</span> Speaking &amp; event inquiries
+                  <span className="text-accent">✦</span> Speaking &amp; event inquiries
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-brand">✦</span> Collaboration &amp; partnerships
+                  <span className="text-accent">✦</span> Collaboration &amp; partnerships
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-brand">✦</span> Career &amp; mentorship questions
+                  <span className="text-accent">✦</span> Career &amp; mentorship questions
                 </li>
               </ul>
             </div>
