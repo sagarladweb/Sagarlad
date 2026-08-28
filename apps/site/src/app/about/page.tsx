@@ -6,6 +6,7 @@ import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
+import { Timeline } from "@/components/about/Timeline";
 
 import { METRICS } from "@/lib/metrics";
 
@@ -16,74 +17,11 @@ const stats = [
   { value: Number(METRICS.communityReached.replace(/[^0-9]/g, "")), suffix: "K+", label: "Community reached" },
 ];
 
-const plan = [
-  {
-    n: "01",
-    title: "Study computer engineering",
-    text: "A first step that a kid from a modest home in India could barely dare to dream of.",
-  },
-  {
-    n: "02",
-    title: "Grow in the IT industry",
-    text: "Rise fast and learn from global enterprise leaders, working closely with CXOs across Europe.",
-  },
-  {
-    n: "03",
-    title: "Give back to society",
-    text: "Turn everything learned into published books, mentorship, and free education.",
-  },
-];
-
 const pageNav = [
   ["belief", "The Belief"],
   ["journey", "My Journey"],
   ["running", "Runner for Life"],
   ["connect", "Connect"],
-];
-
-const chapters = [
-  {
-    period: "2009",
-    title: "School education",
-    text: "Years of relentless effort pay off — I earn my place at a top university for computer engineering.",
-    tag: "Education",
-  },
-  {
-    period: "2009 – 2013",
-    title: "B.E. Computer Engineering · BVM College",
-    text: "The foundation of my technical career begins in earnest.",
-    tag: "Education",
-  },
-  {
-    period: "Oct 2013 – Now",
-    title: "TCS",
-    text: "My professional journey begins — and soon takes me to Europe.",
-    tag: "Career",
-  },
-  {
-    period: "2019 – 2020",
-    title: "PG in Data Science · IIIT Bangalore",
-    text: "The year that reshaped how I think, learn, and solve problems.",
-    tag: "Education",
-  },
-  {
-    period: "2025 – 2026",
-    title: "Masters in Gen AI · Purdue University",
-    text: "Sharpening the frontier — artificial intelligence, done right.",
-    tag: "Education",
-  },
-  {
-    period: "Feb 2022 – Mar 2026",
-    title: "Six books published",
-    text: "First book in February 2022, sixth in March 2026 — writing alongside a full career.",
-    tag: "Author",
-  },
-  {
-    period: "Jun 2026",
-    title: "First TEDx speech",
-    text: "Give Speech on AI to the TEDx stage.",
-    tag: "Speaker",
-  },
 ];
 
 export default function AboutPage() {
@@ -340,7 +278,7 @@ export default function AboutPage() {
       <section className="py-16 md:py-24 border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <p data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
-            My philosophy
+            Current Life Razor
           </p>
           <h2
             data-reveal
@@ -362,99 +300,10 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {/* ---------- Growing Up ---------- */}
-      <section id="journey" className="scroll-mt-32 py-20 md:py-28 border-b border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left">
-            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where it started</span>
-            <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
-              I always knew what I wanted
-            </h2>
-            <p data-reveal className="mt-4 text-muted-foreground leading-relaxed">
-              Growing up with almost nothing, money was always tight and
-              travelling the world felt borderline impossible. But my parents
-              never compromised on education — believing, unwaveringly, that my
-              sisters and I would change the trajectory of our family.
-            </p>
-            <p data-reveal className="mt-4 text-muted-foreground leading-relaxed">
-              I had a three-step plan:
-            </p>
-
-            <div className="mt-8 space-y-4">
-              {plan.map((step) => (
-                <div
-                  key={step.n}
-                  data-reveal
-                  className="card-hover group flex items-start gap-4 rounded-lg border border-border bg-card p-5 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
-                >
-                  <span className="font-display text-2xl font-bold text-accent-strong">
-                    {step.n}
-                  </span>
-                  <div>
-                    <h3 className="font-display font-bold text-foreground">{step.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
-                      {step.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div data-reveal className="relative">
-            <div className="relative overflow-hidden rounded-xl aspect-[3/4] max-w-md mx-auto border border-border shadow-2xl">
-              <Image
-                src="/images/profile/about-6.webp"
-                alt="Sagar Lad"
-                fill
-                sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover object-center"
-              />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ---------- Milestones / Chapters ---------- */}
-      <section className="card-hover py-20 md:py-28 border-b border-border bg-card/30">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Key moments</span>
-            <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
-              The story, in dates
-            </h2>
-            <p data-reveal className="mt-4 text-muted-foreground leading-relaxed">
-              Education, career, books, and the first talk — every milestone
-              that made today possible.
-            </p>
-          </div>
-
-          <div className="mt-12">
-            {chapters.map((c) => (
-              <div
-                key={c.title}
-                data-reveal
-                className="group grid grid-cols-1 sm:grid-cols-[200px_1fr] gap-1 sm:gap-10 border-b border-border py-7 last:border-b-0 items-start"
-              >
-                <span className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-accent-strong">
-                  {c.period}
-                </span>
-                <div>
-                  <span className="btn-premium inline-block rounded-full bg-accent/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
-                    {c.tag}
-                  </span>
-                  <h3 className="mt-2 font-display text-lg font-bold leading-snug group-hover:text-accent-strong transition-colors">
-                    {c.title}
-                  </h3>
-                  <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">
-                    {c.text}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* ---------- Journey Timeline ---------- */}
+      <div id="journey" className="scroll-mt-32">
+        <Timeline />
+      </div>
 
       {/* ---------- Runner for Life ---------- */}
       <section id="running" className="card-hover scroll-mt-32 py-20 md:py-28 border-b border-border bg-card/30">
