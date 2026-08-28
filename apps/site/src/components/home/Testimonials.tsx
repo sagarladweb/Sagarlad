@@ -110,14 +110,14 @@ export function Testimonials() {
   return (
     <section ref={rootRef} className="card-hover py-16 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        <div className="text-center" data-animate-group>
-          <Pill data-animate-item>Testimonials</Pill>
-          <h2 data-animate-item className="mt-3 font-display text-3xl md:text-4xl font-bold">
-            What people say
-          </h2>
-        </div>
+        <div className="text-center" data-animate-group suppressHydrationWarning>
+           <Pill data-animate-item suppressHydrationWarning>Testimonials</Pill>
+           <h2 data-animate-item suppressHydrationWarning className="mt-3 font-display text-3xl md:text-4xl font-bold">
+             What people say
+           </h2>
+         </div>
 
-        <div className="mt-12" data-animate="zoom">
+         <div className="mt-12" data-animate="zoom" suppressHydrationWarning>
           <div className="flex items-center gap-3">
             {/* Prev arrow */}
             <button

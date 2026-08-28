@@ -22,8 +22,8 @@ export function BlogPreview({
   return (
     <section className="py-16 md:py-24 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left" data-animate-group>
-          <div data-animate-item>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left" data-animate-group suppressHydrationWarning>
+           <div data-animate-item suppressHydrationWarning>
             <Pill>The Blog</Pill>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold">
               Recent writing
@@ -31,11 +31,12 @@ export function BlogPreview({
           </div>
         </div>
 
-        <div data-animate-group className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div data-animate-group suppressHydrationWarning className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {posts.map((post) => (
             <Link
               key={post.id}
               data-animate-item
+              suppressHydrationWarning
               href={`/blog/${post.slug}`}
               className="card-hover group rounded-2xl border border-border bg-card overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
             >

@@ -137,7 +137,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
       />
 
       {/* Section Header */}
-      <div className="mb-12 md:mb-16 text-center md:text-left" data-animate>
+      <div className="mb-12 md:mb-16 text-center md:text-left" data-animate suppressHydrationWarning>
         <Pill>The Library</Pill>
         <h2 className="mt-6 font-display text-3xl md:text-4xl font-bold text-[#1e293b]">
           Featured books

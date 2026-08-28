@@ -37,7 +37,7 @@ export function SagarGallery() {
   return (
     <section className="border-b border-border bg-background py-16 md:py-24" aria-label="Get to know Sagar">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
-        <div className="relative" data-animate>
+        <div className="relative" data-animate suppressHydrationWarning>
           <div
             ref={trackRef}
             onScroll={onScroll}
@@ -95,7 +95,7 @@ export function SagarGallery() {
           className="mt-4"
         />
 
-        <div className="mt-6 flex flex-col items-center gap-2.5 text-center" data-animate>
+        <div className="mt-6 flex flex-col items-center gap-2.5 text-center" data-animate suppressHydrationWarning>
           <h2 className="font-display text-2xl md:text-3xl font-bold leading-tight text-foreground">
             It&apos;s your friend, Sagar.
           </h2>
