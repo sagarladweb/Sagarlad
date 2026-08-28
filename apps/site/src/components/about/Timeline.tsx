@@ -99,7 +99,6 @@ const nodes: Node[] = [
   },
 ];
 
-/* Wave y-positions for 7 nodes */
 const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
 
 function buildWavePath(width: number, height: number): string {
@@ -122,48 +121,56 @@ function buildWavePath(width: number, height: number): string {
 
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
-  const [openSet, setOpenSet] = useState<Set<number>>(new Set());
-  const [mobileActive, setMobileActive] = useState<number | null>(null);
+  const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [flipping, setFlipping] = useState<number | null>(null);
 
-  /* Desktop: hover shows, click toggles (multi-open) */
-  const toggleDesktop = useCallback((i: number) => {
-    setOpenSet((prev) => {
-      const next = new Set(prev);
-      if (next.has(i)) next.delete(i);
-      else next.add(i);
+  /* Desktop: hover shows card temporarily */
+  const hoverIn = useCallback((i: number) => {
+    setActiveCard(i);
+  }, []);
+
+  const hoverOut = useCallback(() => {
+    setActiveCard(null);
+  }, []);
+
+  /* Click/tap: toggle persistent card (overrides hover) */
+  const [pinnedCard, setPinnedCard] = useState<number | null>(null);
+
+  const handleClick = useCallback((i: number) => {
+    setPinnedCard((prev) => {
+      const next = prev === i ? null : i;
+      if (next !== null) setActiveCard(next);
+      else setActiveCard(null);
+      // Trigger flip animation
+      if (next !== null) {
+        setFlipping(next);
+        setTimeout(() => setFlipping(null), 500);
+      }
       return next;
     });
   }, []);
 
-  const showDesktop = useCallback((i: number) => {
-    setOpenSet((prev) => new Set(prev).add(i));
-  }, []);
-
-  /* Mobile: single-open, click toggles */
-  const toggleMobile = useCallback((i: number) => {
-    setMobileActive((prev) => (prev === i ? null : i));
-  }, []);
+  const displayCard = pinnedCard ?? activeCard;
 
   // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        setOpenSet(new Set());
-        setMobileActive(null);
+        setPinnedCard(null);
+        setActiveCard(null);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // GSAP animations (desktop + mobile)
+  // GSAP animations
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      // Heading
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -177,21 +184,18 @@ export function Timeline() {
         }
       );
 
-      // Desktop track slide in
       gsap.fromTo(
-        "[data-tl-scroll]",
-        { opacity: 0, x: 100 },
+        "[data-tl-track]",
+        { opacity: 0, x: 80 },
         {
           opacity: 1,
           x: 0,
           duration: 1,
           ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 75%" },
-          onComplete: () => setOpenSet(new Set([0])),
         }
       );
 
-      // Desktop dots
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -205,9 +209,8 @@ export function Timeline() {
         }
       );
 
-      // Desktop wave path draw
       gsap.fromTo(
-        "[data-tl-wave-path]",
+        "[data-tl-wave]",
         { strokeDashoffset: 2000 },
         {
           strokeDashoffset: 0,
@@ -218,7 +221,6 @@ export function Timeline() {
         }
       );
 
-      // Desktop connectors
       gsap.fromTo(
         "[data-tl-connector]",
         { scaleY: 0 },
@@ -231,74 +233,47 @@ export function Timeline() {
           scrollTrigger: { trigger: el, start: "top 75%" },
         }
       );
-
-      // Mobile: stagger cards in from left
-      gsap.utils.toArray<HTMLElement>("[data-tl-mobile-row]").forEach((row, i) => {
-        gsap.fromTo(
-          row,
-          { opacity: 0, x: -30 },
-          {
-            opacity: 1,
-            x: 0,
-            duration: 0.5,
-            ease: "power3.out",
-            delay: i * 0.08,
-            scrollTrigger: { trigger: row, start: "top 90%" },
-          }
-        );
-      });
-
-      // Mobile: draw vertical axis
-      gsap.fromTo(
-        "[data-tl-mobile-axis]",
-        { scaleY: 0 },
-        {
-          scaleY: 1,
-          duration: 1,
-          ease: "power2.out",
-          transformOrigin: "top center",
-          scrollTrigger: { trigger: el, start: "top 80%" },
-        }
-      );
     }, el);
 
     return () => ctx.revert();
   }, []);
 
   const trackWidth = 1100;
-  const trackHeight = 180;
+  const trackHeight = 160;
   const wavePath = buildWavePath(trackWidth, trackHeight);
+  const cardNode = displayCard !== null ? nodes[displayCard] : null;
+  const CardIcon = cardNode?.icon;
 
   return (
     <section
       ref={sectionRef}
-      className="relative py-16 md:py-24 border-b border-border bg-background overflow-hidden"
+      className="relative py-16 md:py-24 border-b border-border bg-background"
       aria-label="Journey timeline"
     >
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 md:mb-14">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 md:mb-12">
         <div className="text-center" data-tl-heading>
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand border border-brand/20 rounded-full px-4 py-1.5 bg-transparent">
-            Where it started &amp; key moments
+            Where it started
           </span>
           <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
-            The story, in dates
+            Key moments along the way
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
-            Tap any dot to read the chapter behind it.
+            Hover or tap any dot to read the chapter behind it.
           </p>
         </div>
       </div>
 
-      {/* ── Desktop: wave timeline ── */}
+      {/* ── Dots track (scrollable on all screens) ── */}
       <div
-        data-tl-scroll
-        className="hidden md:block overflow-x-auto scrollbar-hide"
+        data-tl-track
+        className="overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div
           className="relative mx-auto"
-          style={{ width: `${trackWidth}px`, height: `${trackHeight + 280}px`, minWidth: "900px" }}
+          style={{ width: `${trackWidth}px`, height: `${trackHeight + 60}px`, minWidth: "700px" }}
         >
           {/* SVG wave axis */}
           <svg
@@ -307,11 +282,11 @@ export function Timeline() {
             height={trackHeight}
             viewBox={`0 0 ${trackWidth} ${trackHeight}`}
             fill="none"
-            style={{ top: "60px" }}
+            style={{ top: "20px" }}
           >
             <path d={wavePath} stroke="rgba(13,33,161,0.06)" strokeWidth="8" strokeLinecap="round" fill="none" />
             <path
-              data-tl-wave-path
+              data-tl-wave
               d={wavePath}
               stroke="rgba(13,33,161,0.2)"
               strokeWidth="2"
@@ -333,11 +308,10 @@ export function Timeline() {
 
           {/* Nodes */}
           {nodes.map((n, i) => {
-            const Icon = n.icon;
-            const isOpen = openSet.has(i);
             const x = (i / (nodes.length - 1)) * trackWidth;
-            const y = (WAVE_Y[i] / 100) * trackHeight + 60;
+            const y = (WAVE_Y[i] / 100) * trackHeight + 20;
             const above = WAVE_Y[i] < 50;
+            const isOpen = displayCard === i;
 
             return (
               <div
@@ -345,13 +319,13 @@ export function Timeline() {
                 className="absolute"
                 style={{ left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)" }}
               >
-                {/* Connector line (dotted) */}
+                {/* Connector line */}
                 <div
                   data-tl-connector
                   aria-hidden="true"
                   className="absolute left-1/2 -translate-x-1/2 w-px"
                   style={{
-                    height: isOpen ? "56px" : "28px",
+                    height: isOpen ? "52px" : "24px",
                     top: above ? undefined : "12px",
                     bottom: above ? "12px" : undefined,
                     background: isOpen
@@ -365,11 +339,12 @@ export function Timeline() {
                 {/* Dot */}
                 <button
                   data-tl-dot
-                  onMouseEnter={() => showDesktop(i)}
-                  onClick={() => toggleDesktop(i)}
+                  onMouseEnter={() => hoverIn(i)}
+                  onMouseLeave={hoverOut}
+                  onClick={() => handleClick(i)}
                   aria-expanded={isOpen}
                   aria-label={`${n.title} — ${n.year}`}
-                  className="relative z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-full"
+                  className="relative z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-full cursor-pointer"
                 >
                   <span
                     className={`block h-4 w-4 rounded-full border-[2.5px] border-brand transition-all duration-300 ${
@@ -396,189 +371,84 @@ export function Timeline() {
                     {n.year}
                   </span>
                 </div>
-
-                {/* Card */}
-                <div
-                  data-tl-card
-                  className="absolute left-1/2 z-30"
-                  style={{
-                    top: above ? undefined : "calc(100% + 30px)",
-                    bottom: above ? "calc(100% + 30px)" : undefined,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    width: "210px",
-                    opacity: isOpen ? 1 : 0,
-                    pointerEvents: isOpen ? "auto" : "none",
-                    transition: "opacity 0.3s ease-out",
-                  }}
-                >
-                  <div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-                    {n.image && (
-                      <div className="relative h-24 w-full overflow-hidden">
-                        <Image
-                          src={n.image}
-                          alt={n.title}
-                          fill
-                          sizes="210px"
-                          className="object-cover"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                        <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                          <Icon className="w-2 h-2" />
-                          {n.tag}
-                        </span>
-                      </div>
-                    )}
-                    <div className="p-3">
-                      <h3 className="font-display text-[12px] font-bold leading-snug text-foreground">
-                        {n.title}
-                      </h3>
-                      <p className="mt-1 text-[10px] text-muted-foreground leading-relaxed">
-                        {n.description}
-                      </p>
-                      {n.href && (
-                        <Link
-                          href={n.href}
-                          className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
-                        >
-                          <BookOpen className="w-2.5 h-2.5" />
-                          {n.hrefLabel}
-                        </Link>
-                      )}
-                    </div>
-                  </div>
-                </div>
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* ── Mobile: vertical timeline with single-open, progress line ── */}
-      <div className="md:hidden px-4">
-        <div className="relative pl-8">
-          {/* Vertical axis (animated) */}
-          <div
-            aria-hidden="true"
-            data-tl-mobile-axis
-            className="absolute left-[11px] top-0 bottom-0 w-px"
-            style={{
-              background: "repeating-linear-gradient(to bottom, rgba(13,33,161,0.2) 0, rgba(13,33,161,0.2) 4px, transparent 4px, transparent 8px)",
-            }}
-          />
-
-          {/* Progress fill (blue line that grows as cards open) */}
-          <div
-            aria-hidden="true"
-            className="absolute left-[11px] top-0 w-px bg-brand/40 transition-all duration-500 ease-out"
-            style={{
-              height: mobileActive !== null
-                ? `${((mobileActive + 1) / nodes.length) * 100}%`
-                : "0%",
-            }}
-          />
-
-          <div className="space-y-0">
-            {nodes.map((n, i) => {
-              const Icon = n.icon;
-              const isOpen = mobileActive === i;
-
-              return (
-                <div key={n.title} data-tl-mobile-row className="relative">
-                  {/* Dot */}
-                  <button
-                    data-tl-dot
-                    onClick={() => toggleMobile(i)}
-                    aria-expanded={isOpen}
-                    aria-label={`${n.title} — ${n.year}`}
-                    className="absolute -left-8 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
-                    style={{ top: "14px" }}
-                  >
-                    <span
-                      className={`block h-3.5 w-3.5 rounded-full border-2 transition-all duration-300 ${
-                        isOpen
-                          ? "bg-brand border-brand scale-125 shadow-[0_0_0_5px_rgba(13,33,161,0.12)]"
-                          : "bg-background border-brand/40"
-                      }`}
-                    />
-                  </button>
-
-                  {/* Always-visible row */}
-                  <button
-                    onClick={() => toggleMobile(i)}
-                    className="w-full text-left py-3 pl-2 rounded-lg transition-colors duration-200 hover:bg-brand/5"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`text-[10px] font-bold tabular-nums transition-colors duration-200 ${
-                          isOpen ? "text-brand" : "text-muted-foreground/50"
-                        }`}
-                      >
-                        {n.year}
-                      </span>
-                      <span className="w-1 h-1 rounded-full bg-brand/20" />
-                      <span
-                        className={`text-sm font-semibold transition-colors duration-200 ${
-                          isOpen ? "text-brand" : "text-foreground"
-                        }`}
-                      >
-                        {n.title}
-                      </span>
-                    </div>
-                    <span className="block text-[11px] text-muted-foreground/50 mt-0.5">
-                      {n.oneLiner}
-                    </span>
-                  </button>
-
-                  {/* Expandable card */}
-                  <div
-                    className="overflow-hidden transition-all duration-400 ease-out"
-                    style={{
-                      maxHeight: isOpen ? "340px" : "0px",
-                      opacity: isOpen ? 1 : 0,
-                    }}
-                  >
-                    <div className="pb-4 pt-1 pl-2">
-                      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-                        {n.image && (
-                          <div className="relative aspect-[16/9] w-full overflow-hidden">
-                            <Image
-                              src={n.image}
-                              alt={n.title}
-                              fill
-                              sizes="100vw"
-                              className="object-cover"
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                            <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                              <Icon className="w-2 h-2" />
-                              {n.tag}
-                            </span>
-                          </div>
-                        )}
-                        <div className="p-3">
-                          <p className="text-[11px] text-muted-foreground leading-relaxed">
-                            {n.description}
-                          </p>
-                          {n.href && (
-                            <Link
-                              href={n.href}
-                              className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
-                            >
-                              <BookOpen className="w-2.5 h-2.5" />
-                              {n.hrefLabel}
-                            </Link>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+      {/* ── Card area (centered, no inner scroll, flip animation) ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+        <div
+          className="relative mx-auto"
+          style={{
+            maxWidth: "380px",
+            minHeight: displayCard !== null ? "320px" : "0px",
+            transition: "min-height 0.3s ease-out",
+          }}
+        >
+          {cardNode && (
+            <div
+              key={displayCard}
+              className="rounded-2xl border border-border bg-card shadow-xl overflow-visible"
+              style={{
+                perspective: "800px",
+                transformStyle: "preserve-3d",
+                animation: flipping === displayCard ? "cardFlip 0.5s ease-out" : "cardFadeIn 0.3s ease-out",
+              }}
+            >
+              {cardNode.image && (
+                <div className="relative h-44 w-full overflow-hidden rounded-t-2xl">
+                  <Image
+                    src={cardNode.image}
+                    alt={cardNode.title}
+                    fill
+                    sizes="380px"
+                    className="object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 border border-white/40 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                    {CardIcon && <CardIcon className="w-3 h-3" />}
+                    {cardNode.tag}
+                  </span>
                 </div>
-              );
-            })}
-          </div>
+              )}
+              <div className="p-5">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">{cardNode.year}</span>
+                  <span className="w-1 h-1 rounded-full bg-brand/30" />
+                  <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">{cardNode.oneLiner}</span>
+                </div>
+                <h3 className="font-display text-lg font-bold text-foreground">{cardNode.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cardNode.description}</p>
+                {cardNode.href && (
+                  <Link
+                    href={cardNode.href}
+                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
+                  >
+                    <BookOpen className="w-3 h-3" />
+                    {cardNode.hrefLabel}
+                  </Link>
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Flip + fade-in keyframes */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @keyframes cardFlip {
+          0% { opacity: 0; transform: rotateY(-90deg) scale(0.9); }
+          60% { opacity: 1; transform: rotateY(8deg) scale(1.02); }
+          80% { transform: rotateY(-3deg) scale(0.99); }
+          100% { transform: rotateY(0deg) scale(1); }
+        }
+        @keyframes cardFadeIn {
+          0% { opacity: 0; transform: translateY(8px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+      `}} />
     </section>
   );
 }

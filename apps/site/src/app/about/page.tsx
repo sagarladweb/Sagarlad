@@ -355,75 +355,78 @@ export default function AboutPage() {
       {/* ---------- Runner for Life ---------- */}
       <section id="running" className="card-hover scroll-mt-32 py-16 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          {/* Header — center on mobile, left on desktop */}
-          <div className="text-center lg:text-left mb-10 md:mb-14">
-            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Off the clock</span>
-            <h2 data-reveal className="mt-3 font-display text-3xl sm:text-4xl font-bold">
-              Runner for life
-            </h2>
-            <p data-reveal className="mt-4 text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
-              MIND UP isn&apos;t just something I write about — I live it. Running
-              is where I practice the discipline I preach: one step at a time,
-              showing up again and again, until the distance becomes part of you.
-            </p>
-            <div data-reveal className="mt-5 flex items-start gap-3 text-sm text-muted-foreground leading-relaxed justify-center lg:justify-start">
-              <Footprints className="w-5 h-5 text-accent-strong shrink-0 mt-0.5" />
-              <span>
-                Seven races across three distances — every medal a reminder
-                that consistency beats intensity.
-              </span>
+          {/* Desktop: side-by-side. Mobile: stacked */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+            {/* Left: header text */}
+            <div className="lg:col-span-5 text-center lg:text-left">
+              <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Off the clock</span>
+              <h2 data-reveal className="mt-3 font-display text-3xl sm:text-4xl font-bold">
+                Runner for life
+              </h2>
+              <p data-reveal className="mt-4 text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
+                MIND UP isn&apos;t just something I write about — I live it. Running
+                is where I practice the discipline I preach: one step at a time,
+                showing up again and again, until the distance becomes part of you.
+              </p>
+              <div data-reveal className="mt-5 flex items-start gap-3 text-sm text-muted-foreground leading-relaxed justify-center lg:justify-start">
+                <Footprints className="w-5 h-5 text-accent-strong shrink-0 mt-0.5" />
+                <span>
+                  Seven races across three distances — every medal a reminder
+                  that consistency beats intensity.
+                </span>
+              </div>
             </div>
-          </div>
 
-          {/* Race cards — horizontal scroll on mobile, grid on desktop */}
-          <div
-            data-runner-cards
-            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0"
-          >
-            {[
-              {
-                icon: Medal,
-                race: "TCS Amsterdam Half Marathon",
-                distance: "21 km",
-                count: 3,
-                label: "×3",
-              },
-              {
-                icon: Trophy,
-                race: "TCS Amsterdam Marathon",
-                distance: "8 km",
-                count: 2,
-                label: "×2",
-              },
-              {
-                icon: Trophy,
-                race: "Amsterdam DAM to DAM",
-                distance: "16 km",
-                count: 2,
-                label: "×2",
-              },
-            ].map((r, i) => {
-              const Icon = r.icon;
-              return (
-                <div
-                  key={r.race}
-                  data-runner-card
-                  data-count={r.count}
-                  className="snap-center shrink-0 w-[200px] md:w-auto rounded-xl border border-border bg-background p-5 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
-                >
-                  <div className="mx-auto w-10 h-10 rounded-lg bg-brand-light/15 grid place-items-center text-brand">
-                    <Icon className="w-5 h-5" />
+            {/* Right: race cards */}
+            <div
+              data-runner-cards
+              className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-4"
+            >
+              {[
+                {
+                  icon: Medal,
+                  race: "TCS Amsterdam Half Marathon",
+                  distance: "21 km",
+                  count: 3,
+                  label: "×3",
+                },
+                {
+                  icon: Trophy,
+                  race: "TCS Amsterdam Marathon",
+                  distance: "8 km",
+                  count: 2,
+                  label: "×2",
+                },
+                {
+                  icon: Trophy,
+                  race: "Amsterdam DAM to DAM",
+                  distance: "16 km",
+                  count: 2,
+                  label: "×2",
+                },
+              ].map((r) => {
+                const Icon = r.icon;
+                return (
+                  <div
+                    key={r.race}
+                    data-runner-card
+                    data-count={r.count}
+                    className="rounded-xl border border-border bg-background p-5 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
+                  >
+                    <div className="mx-auto w-10 h-10 rounded-lg bg-brand-light/15 grid place-items-center text-brand">
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <p className="mt-3 font-display text-2xl font-extrabold text-accent-strong runner-count">
+                      {r.label}
+                    </p>
+                    <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+                      {r.race}
+                    </p>
+                    <p className="mt-1 text-sm font-bold">{r.distance}</p>
                   </div>
-                  <p className="mt-3 font-display text-2xl font-extrabold text-accent-strong runner-count">
-                    {r.label}
-                  </p>
-                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
-                    {r.race}
-                  </p>
-                  <p className="mt-1 text-sm font-bold">{r.distance}</p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>

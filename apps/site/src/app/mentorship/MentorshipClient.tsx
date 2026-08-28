@@ -155,37 +155,15 @@ export function MentorshipClient() {
     <div ref={rootRef} className="min-h-screen bg-background text-foreground">
       {/* ── 1. Profile Hero ── */}
       <section className="relative overflow-hidden border-b border-border">
-        {/* Deep brand navy base */}
+        {/* Deep brand navy gradient */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#0A1930] via-[#0d21a1] to-[#0A1930] z-0" />
-        {/* Diagonal accent wash */}
         <div className="absolute inset-0 bg-gradient-to-tr from-accent/12 via-transparent to-transparent z-10" />
-        {/* Bottom depth */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 z-10" />
-        {/* Background image — blended */}
-        <div className="absolute inset-0 z-[5]">
-          <Image
-            src="/images/profile/about.webp"
-            alt=""
-            fill
-            sizes="100vw"
-            className="object-cover object-center opacity-20 mix-blend-luminosity"
-            priority
-          />
-        </div>
-        {/* Subtle grid texture */}
-        <div
-          className="absolute inset-0 opacity-[0.03] z-10"
-          style={{
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px)",
-          }}
-        />
 
         <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
             {/* Avatar */}
             <div data-m-hero className="relative shrink-0">
-              {/* Glow ring behind avatar */}
-              <div className="absolute -inset-3 rounded-full bg-gradient-to-br from-accent/30 via-brand-light/20 to-accent/10 blur-xl" />
               <div className="relative h-36 w-36 sm:h-48 sm:w-48 rounded-full overflow-hidden border-2 border-white/25 shadow-2xl">
                 <Image
                   src="/images/profile/about.webp"
