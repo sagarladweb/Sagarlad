@@ -106,7 +106,7 @@ export default function ContactPage() {
     <div className="overflow-x-clip">
       {/* ── Hero ─────────────────────────────────────────────── */}
       <header className="relative overflow-hidden border-b border-border bg-[#0A1930]">
-        {/* Portrait glow — warm, behind the image */}
+        {/* Portrait glow — cool blue, contrasts with warm skin/clothing */}
         <div
           className="absolute z-0"
           style={{
@@ -114,19 +114,19 @@ export default function ContactPage() {
             height: "600px",
             left: "5%",
             top: "10%",
-            background: "radial-gradient(circle, rgba(255,213,29,0.07) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(13,33,161,0.12) 0%, transparent 70%)",
             filter: "blur(60px)",
           }}
         />
-        {/* Ambient blue depth */}
+        {/* Accent warmth — subtle gold, NOT behind portrait */}
         <div
           className="absolute z-0"
           style={{
-            width: "500px",
-            height: "500px",
-            right: "10%",
-            bottom: "0%",
-            background: "radial-gradient(circle, rgba(13,33,161,0.06) 0%, transparent 70%)",
+            width: "400px",
+            height: "400px",
+            right: "5%",
+            top: "40%",
+            background: "radial-gradient(circle, rgba(255,213,29,0.06) 0%, transparent 70%)",
             filter: "blur(50px)",
           }}
         />
@@ -137,12 +137,12 @@ export default function ContactPage() {
           {/* Portrait */}
           <div className="lg:col-span-5 relative flex justify-center" data-animate="left">
             <div className="relative w-full max-w-[420px]">
-              {/* Soft glow behind portrait */}
+              {/* Soft blue halo behind portrait */}
               <div
-                className="absolute -inset-8 rounded-full opacity-40"
+                className="absolute -inset-10 rounded-full opacity-50"
                 style={{
-                  background: "radial-gradient(ellipse, rgba(255,213,29,0.08) 0%, transparent 65%)",
-                  filter: "blur(30px)",
+                  background: "radial-gradient(ellipse, rgba(13,33,161,0.15) 0%, transparent 65%)",
+                  filter: "blur(25px)",
                 }}
               />
               <Image

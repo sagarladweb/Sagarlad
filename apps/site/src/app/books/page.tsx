@@ -38,7 +38,7 @@ export default async function BooksPage() {
 
       {/* -------- Hero -------- */}
       <header className="relative overflow-hidden border-b border-border bg-[#0A1930] text-white">
-        {/* Portrait glow */}
+        {/* Portrait glow — cool blue, contrasts with skin/clothing */}
         <div
           className="absolute z-0"
           style={{
@@ -46,18 +46,18 @@ export default async function BooksPage() {
             height: "600px",
             left: "0%",
             top: "15%",
-            background: "radial-gradient(ellipse, rgba(13,33,161,0.1) 0%, transparent 70%)",
+            background: "radial-gradient(ellipse, rgba(13,33,161,0.14) 0%, transparent 70%)",
             filter: "blur(50px)",
           }}
         />
-        {/* Accent warmth */}
+        {/* Accent warmth — subtle gold, NOT behind portrait */}
         <div
           className="absolute z-0"
           style={{
-            width: "400px",
-            height: "400px",
-            right: "5%",
-            top: "30%",
+            width: "350px",
+            height: "350px",
+            right: "8%",
+            bottom: "20%",
             background: "radial-gradient(circle, rgba(255,213,29,0.05) 0%, transparent 70%)",
             filter: "blur(40px)",
           }}
@@ -70,11 +70,11 @@ export default async function BooksPage() {
             {/* ── Portrait ── */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
               <div className="relative w-full max-w-[400px]">
-                {/* Soft halo */}
+                {/* Soft blue halo */}
                 <div
                   className="absolute -inset-10 rounded-full opacity-50"
                   style={{
-                    background: "radial-gradient(ellipse, rgba(13,33,161,0.12) 0%, transparent 65%)",
+                    background: "radial-gradient(ellipse, rgba(13,33,161,0.15) 0%, transparent 65%)",
                     filter: "blur(25px)",
                   }}
                 />
