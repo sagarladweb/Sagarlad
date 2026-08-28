@@ -1089,12 +1089,14 @@ nav a:not([class*="rounded-full"]) {
 }
 
 .pf-page-inner {
-  padding: 2rem;
+  padding: 1.25rem 1.5rem;
   height: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .pf-center {
@@ -1106,6 +1108,7 @@ nav a:not([class*="rounded-full"]) {
 .pf-cover {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   border-radius: 2px;
+  overflow: hidden;
 }
 
 /* ── Loading skeleton shimmer ─────────────────────────────────────── */
