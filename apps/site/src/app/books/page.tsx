@@ -37,43 +37,27 @@ export default async function BooksPage() {
       />
 
       {/* -------- Hero -------- */}
-      <header className="relative overflow-hidden border-b border-border text-black">
-        {/* Deep brand navy base */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1930] via-[#0d21a1] to-[#0A1930] z-0" />
-        {/* Diagonal accent wash */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-accent/15 via-transparent to-transparent z-10" />
-        {/* Bottom fade for depth */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-10" />
-        {/* Subtle grid texture */}
-        <div
-          className="absolute inset-0 opacity-[0.03] z-10"
-          style={{
-            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px)",
-          }}
-        />
-        <div
-          className="mx-auto max-w-7xl px-6 sm:px-8"
-          style={{ paddingTop: 46, paddingBottom: 79 }}
-        >
-          <div
-            className="grid grid-cols-1 items-center lg:grid-cols-12"
-            style={{ gap: 135 }}
-          >
+      <header className="relative overflow-hidden border-b border-border bg-[#0A1930]">
+        {/* Subtle accent glow top-left */}
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-transparent z-10" />
+        {/* Bottom vignette */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1930] via-transparent to-transparent z-10" />
+
+        <div className="relative z-20 mx-auto max-w-7xl px-6 sm:px-8 pt-10 pb-14 sm:pt-14 sm:pb-20">
+          <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-10 lg:gap-16">
             {/* ── Image ── */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
-              <div className="relative" style={{ width: 533, maxWidth: "100%" }}>
+              <div className="relative w-full max-w-[440px]">
                 <Image
                   src="/images/section.png"
                   alt="Sagar Lad"
-                  width={840}
-                  height={960}
+                  width={800}
+                  height={890}
                   priority
-                  className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
+                  className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
                   style={{
-                    transform: "translateX(-53px) translateY(-10px) scale(1.28)",
-                    transformOrigin: "center center",
-                    maskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
-                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
+                    maskImage: "linear-gradient(to top, transparent 0%, black 25%, black 100%)",
+                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 25%, black 100%)",
                   }}
                 />
               </div>
@@ -82,7 +66,7 @@ export default async function BooksPage() {
             {/* ── Text + Metrics ── */}
             <div className="lg:col-span-7 flex flex-col" data-animate-group="up">
               <div data-animate-item>
-                <span className="inline-block w-fit text-xs font-semibold tracking-wide text-white/80 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 backdrop-blur-sm">
+                <span className="inline-block w-fit text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70 bg-white/8 border border-white/15 rounded-full px-4 py-1.5">
                   About the book
                 </span>
               </div>
@@ -100,7 +84,7 @@ export default async function BooksPage() {
               </div>
 
               <div data-animate-item>
-                <p className="mt-6 max-w-lg text-base font-normal leading-[1.75] text-white/60">
+                <p className="mt-6 max-w-lg text-[15px] font-normal leading-[1.75] text-white/50">
                   One simple shift to stop overthinking, break free from
                   self-doubt and build an unshakable mindset.
                 </p>
@@ -110,7 +94,7 @@ export default async function BooksPage() {
                 <p className="font-display text-xl font-medium tracking-tight text-white">
                   Sagar Lad
                 </p>
-                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-white/50">
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-white/40">
                   Author · Investor · Public Speaker
                 </p>
               </div>
