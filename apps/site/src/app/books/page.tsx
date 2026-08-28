@@ -37,42 +37,72 @@ export default async function BooksPage() {
       />
 
       {/* -------- Hero -------- */}
-      <header className="relative overflow-hidden border-b border-border bg-[#0A1930]">
-        {/* Subtle accent glow top-left */}
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/8 via-transparent to-transparent z-10" />
-        {/* Bottom vignette */}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0A1930] via-transparent to-transparent z-10" />
+      <header className="relative overflow-hidden border-b border-border bg-[#0A1930] text-white">
+        {/* Portrait glow */}
+        <div
+          className="absolute z-0"
+          style={{
+            width: "500px",
+            height: "600px",
+            left: "0%",
+            top: "15%",
+            background: "radial-gradient(ellipse, rgba(13,33,161,0.1) 0%, transparent 70%)",
+            filter: "blur(50px)",
+          }}
+        />
+        {/* Accent warmth */}
+        <div
+          className="absolute z-0"
+          style={{
+            width: "400px",
+            height: "400px",
+            right: "5%",
+            top: "30%",
+            background: "radial-gradient(circle, rgba(255,213,29,0.05) 0%, transparent 70%)",
+            filter: "blur(40px)",
+          }}
+        />
+        {/* Bottom edge fade */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1930] z-10" />
 
-        <div className="relative z-20 mx-auto max-w-7xl px-6 sm:px-8 pt-10 pb-14 sm:pt-14 sm:pb-20">
-          <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-10 lg:gap-16">
-            {/* ── Image ── */}
+        <div className="relative z-20 mx-auto max-w-7xl px-6 sm:px-8 pt-10 pb-16 sm:pt-16 sm:pb-24">
+          <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-12 lg:gap-20">
+            {/* ── Portrait ── */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
-              <div className="relative w-full max-w-[440px]">
+              <div className="relative w-full max-w-[400px]">
+                {/* Soft halo */}
+                <div
+                  className="absolute -inset-10 rounded-full opacity-50"
+                  style={{
+                    background: "radial-gradient(ellipse, rgba(13,33,161,0.12) 0%, transparent 65%)",
+                    filter: "blur(25px)",
+                  }}
+                />
                 <Image
                   src="/images/section.png"
                   alt="Sagar Lad"
                   width={800}
                   height={890}
                   priority
-                  className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.4)]"
+                  className="relative z-10 h-auto w-full drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)]"
                   style={{
-                    maskImage: "linear-gradient(to top, transparent 0%, black 25%, black 100%)",
-                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 25%, black 100%)",
+                    maskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
+                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
                   }}
                 />
               </div>
             </div>
 
-            {/* ── Text + Metrics ── */}
+            {/* ── Copy + Metrics ── */}
             <div className="lg:col-span-7 flex flex-col" data-animate-group="up">
               <div data-animate-item>
-                <span className="inline-block w-fit text-[11px] font-semibold uppercase tracking-[0.15em] text-white/70 bg-white/8 border border-white/15 rounded-full px-4 py-1.5">
+                <span className="inline-block w-fit text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50 bg-white/[0.05] border border-white/[0.08] rounded-full px-5 py-2">
                   About the book
                 </span>
               </div>
 
-              <div data-animate-item className="mt-6">
-                <h1 className="font-display text-[2.5rem] font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.4rem]">
+              <div data-animate-item className="mt-7">
+                <h1 className="font-display text-[2.75rem] sm:text-5xl xl:text-[3.5rem] font-bold leading-[1.05] tracking-tight text-white">
                   The MIND UP
                   <br />
                   Theory: Simple
@@ -84,22 +114,22 @@ export default async function BooksPage() {
               </div>
 
               <div data-animate-item>
-                <p className="mt-6 max-w-lg text-[15px] font-normal leading-[1.75] text-white/50">
+                <p className="mt-7 max-w-lg text-[15px] leading-[1.8] text-white/40">
                   One simple shift to stop overthinking, break free from
                   self-doubt and build an unshakable mindset.
                 </p>
               </div>
 
-              <div data-animate-item className="mt-8">
-                <p className="font-display text-xl font-medium tracking-tight text-white">
+              <div data-animate-item className="mt-10">
+                <p className="font-display text-xl font-medium tracking-tight text-white/90">
                   Sagar Lad
                 </p>
-                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-white/40">
+                <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.3em] text-white/30">
                   Author · Investor · Public Speaker
                 </p>
               </div>
 
-              <div data-animate-item className="mt-8 w-full max-w-lg">
+              <div data-animate-item className="mt-10 w-full max-w-lg">
                 <BookHeroMetrics />
               </div>
             </div>
