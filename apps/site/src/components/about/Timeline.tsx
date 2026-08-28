@@ -99,12 +99,21 @@ const nodes: Node[] = [
   },
 ];
 
-const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
+/* Wave: alternate above/below center */
+const WAVE_Y = [40, 60, 40, 60, 40, 60, 40];
 
-function buildWavePath(width: number, height: number): string {
+const TRACK_W = 1100;
+const TRACK_H = 140;
+const CARD_W = 300;
+const DOT_Y = TRACK_H / 2; /* dot vertical center = 70px */
+const CONN_H = 30; /* connector height: dot → card */
+const CARD_TOP = DOT_Y + 10 + CONN_H; /* card starts below dot (10 = half dot) */
+const TRACK_TOTAL_H = CARD_TOP + 210; /* full scroll container height */
+
+function buildWavePath(): string {
   const pts = nodes.map((_, i) => ({
-    x: (i / (nodes.length - 1)) * width,
-    y: (WAVE_Y[i] / 100) * height,
+    x: (i / (nodes.length - 1)) * TRACK_W,
+    y: (WAVE_Y[i] / 100) * TRACK_H,
   }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
@@ -116,16 +125,12 @@ function buildWavePath(width: number, height: number): string {
   return d;
 }
 
-const TRACK_W = 1100;
-const TRACK_H = 160;
-
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const [pinnedCard, setPinnedCard] = useState<number | null>(null);
   const [flipping, setFlipping] = useState<number | null>(null);
-  const [scrollLeft, setScrollLeft] = useState(0);
 
   const displayCard = pinnedCard ?? activeCard;
 
@@ -146,7 +151,6 @@ export function Timeline() {
     });
   }, []);
 
-  // Escape key
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -158,22 +162,7 @@ export function Timeline() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Track horizontal scroll to position card below active dot
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-    const onScroll = () => setScrollLeft(track.scrollLeft);
-    track.addEventListener("scroll", onScroll, { passive: true });
-    return () => track.removeEventListener("scroll", onScroll);
-  }, []);
-
-  // Card X position: align with the active dot's center, accounting for scroll
-  const cardLeftPx =
-    displayCard !== null
-      ? (displayCard / (nodes.length - 1)) * TRACK_W - scrollLeft
-      : 0;
-
-  // GSAP animations
+  /* GSAP animations */
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -243,11 +232,11 @@ export function Timeline() {
       );
 
       gsap.fromTo(
-        "[data-tl-connector]",
+        "[data-tl-conn]",
         { scaleY: 0 },
         {
           scaleY: 1,
-          duration: 0.5,
+          duration: 0.4,
           stagger: 0.06,
           ease: "power2.out",
           delay: 0.5,
@@ -263,9 +252,12 @@ export function Timeline() {
     return () => ctx.revert();
   }, []);
 
-  const wavePath = buildWavePath(TRACK_W, TRACK_H);
+  const wavePath = buildWavePath();
   const cardNode = displayCard !== null ? nodes[displayCard] : null;
   const CardIcon = cardNode?.icon;
+
+  /* Dot X positions */
+  const dotX = (i: number) => (i / (nodes.length - 1)) * TRACK_W;
 
   return (
     <section
@@ -288,18 +280,18 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* Scrollable dots track */}
+      {/* ── Single scrollable track: dots + connectors + cards ── */}
       <div
         ref={trackRef}
         data-tl-track
-        className="overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-2"
+        className="overflow-x-auto scrollbar-hide px-4 sm:px-6"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div
           className="relative mx-auto"
           style={{
             width: `${TRACK_W}px`,
-            height: `${TRACK_H + 50}px`,
+            height: `${TRACK_TOTAL_H}px`,
             minWidth: "700px",
           }}
         >
@@ -310,7 +302,7 @@ export function Timeline() {
             height={TRACK_H}
             viewBox={`0 0 ${TRACK_W} ${TRACK_H}`}
             fill="none"
-            style={{ top: "20px" }}
+            style={{ top: 0 }}
           >
             <path
               d={wavePath}
@@ -343,7 +335,7 @@ export function Timeline() {
               <path
                 d={(() => {
                   const pts = nodes.map((_, i) => ({
-                    x: (i / (nodes.length - 1)) * TRACK_W,
+                    x: dotX(i),
                     y: (WAVE_Y[i] / 100) * TRACK_H,
                   }));
                   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -364,11 +356,9 @@ export function Timeline() {
             )}
           </svg>
 
-          {/* Dots + connectors */}
+          {/* Dots + year labels */}
           {nodes.map((n, i) => {
-            const x = (i / (nodes.length - 1)) * TRACK_W;
-            const y = (WAVE_Y[i] / 100) * TRACK_H + 20;
-            const above = WAVE_Y[i] < 50;
+            const x = dotX(i);
             const isOpen = displayCard === i;
 
             return (
@@ -377,28 +367,10 @@ export function Timeline() {
                 className="absolute"
                 style={{
                   left: `${x}px`,
-                  top: `${y}px`,
+                  top: `${DOT_Y}px`,
                   transform: "translate(-50%, -50%)",
                 }}
               >
-                {/* Connector line */}
-                <div
-                  data-tl-connector
-                  aria-hidden="true"
-                  className="absolute left-1/2 -translate-x-1/2 w-px"
-                  style={{
-                    height: isOpen ? "52px" : "24px",
-                    top: above ? undefined : "12px",
-                    bottom: above ? "12px" : undefined,
-                    background: isOpen
-                      ? "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)"
-                      : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.15) 0, rgba(13,33,161,0.15) 3px, transparent 3px, transparent 7px)",
-                    transformOrigin: above ? "bottom center" : "top center",
-                    transition: "height 0.3s ease-out",
-                  }}
-                />
-
-                {/* Dot button */}
                 <button
                   data-tl-dot
                   onMouseEnter={() => hoverIn(i)}
@@ -417,12 +389,12 @@ export function Timeline() {
                   />
                 </button>
 
-                {/* Year label */}
+                {/* Year label (above or below dot) */}
                 <div
                   className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none z-10 whitespace-nowrap"
                   style={{
-                    top: above ? "calc(100% + 8px)" : undefined,
-                    bottom: above ? undefined : "calc(100% + 8px)",
+                    top: WAVE_Y[i] < 50 ? "calc(100% + 6px)" : undefined,
+                    bottom: WAVE_Y[i] >= 50 ? "calc(100% + 6px)" : undefined,
                   }}
                 >
                   <span
@@ -436,107 +408,121 @@ export function Timeline() {
               </div>
             );
           })}
-        </div>
-      </div>
 
-      {/* Card area — positioned directly below the active dot */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-1">
-        {/* Vertical connector from track to card */}
-        <div className="relative mx-auto" style={{ maxWidth: "1100px", minWidth: "700px" }}>
-          {displayCard !== null && (
-            <div
-              aria-hidden="true"
-              className="absolute top-0 w-px"
-              style={{
-                left: `${cardLeftPx + TRACK_W / 2}px`,
-                height: "20px",
-                background:
-                  "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)",
-                transition: "left 0.3s ease-out",
-                transform: "translateX(-50%)",
-              }}
-            />
-          )}
-        </div>
+          {/* Connectors: dotted line from dot → card */}
+          {nodes.map((n, i) => {
+            const x = dotX(i);
+            const isOpen = displayCard === i;
 
-        {/* Card — horizontally aligned with dot, centered on card */}
-        <div
-          className="relative mx-auto"
-          style={{
-            maxWidth: "1100px",
-            minWidth: "700px",
-            minHeight: displayCard !== null ? "320px" : "0px",
-            transition: "min-height 0.3s ease-out",
-          }}
-        >
-          {cardNode && (
-            <div
-              key={displayCard}
-              className="absolute"
-              style={{
-                left: `${cardLeftPx + TRACK_W / 2}px`,
-                transform: "translateX(-50%)",
-                width: "340px",
-                maxWidth: "calc(50vw - 2rem)",
-                transition: "left 0.3s ease-out",
-              }}
-            >
+            return (
               <div
-                className="rounded-2xl border border-border bg-card shadow-xl overflow-visible"
+                key={`conn-${n.title}`}
+                data-tl-conn
+                aria-hidden="true"
+                className="absolute w-px"
                 style={{
-                  perspective: "800px",
-                  transformStyle: "preserve-3d",
-                  animation:
-                    flipping === displayCard
-                      ? "tlCardFlip 0.5s ease-out"
-                      : "tlCardFadeIn 0.3s ease-out",
+                  left: `${x}px`,
+                  top: `${DOT_Y + 10}px`,
+                  height: `${CONN_H}px`,
+                  transform: "translateX(-50%)",
+                  transformOrigin: "top center",
+                  background: isOpen
+                    ? "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)"
+                    : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.08) 0, rgba(13,33,161,0.08) 3px, transparent 3px, transparent 7px)",
+                  transition: "background 0.3s ease-out",
+                }}
+              />
+            );
+          })}
+
+          {/* Cards — positioned at dot's X, below connector */}
+          {nodes.map((n, i) => {
+            const x = dotX(i);
+            const isOpen = displayCard === i;
+            const Icon = n.icon;
+
+            return (
+              <div
+                key={`card-${n.title}`}
+                className="absolute"
+                style={{
+                  left: `${x - CARD_W / 2}px`,
+                  top: `${CARD_TOP}px`,
+                  width: `${CARD_W}px`,
+                  opacity: isOpen ? 1 : 0,
+                  pointerEvents: isOpen ? "auto" : "none",
+                  transition: "opacity 0.3s ease-out",
+                  zIndex: isOpen ? 30 : 1,
                 }}
               >
-                {cardNode.image && (
-                  <div className="relative h-40 w-full overflow-hidden rounded-t-2xl">
-                    <Image
-                      src={cardNode.image}
-                      alt={cardNode.title}
-                      fill
-                      sizes="340px"
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                    <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 border border-white/40 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                      {CardIcon && <CardIcon className="w-3 h-3" />}
-                      {cardNode.tag}
-                    </span>
-                  </div>
-                )}
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">
-                      {cardNode.year}
-                    </span>
-                    <span className="w-1 h-1 rounded-full bg-brand/30" />
-                    <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">
-                      {cardNode.oneLiner}
-                    </span>
-                  </div>
-                  <h3 className="font-display text-base font-bold text-foreground">
-                    {cardNode.title}
-                  </h3>
-                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
-                    {cardNode.description}
-                  </p>
-                  {cardNode.href && (
-                    <Link
-                      href={cardNode.href}
-                      className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand hover:underline"
-                    >
-                      <BookOpen className="w-3 h-3" />
-                      {cardNode.hrefLabel}
-                    </Link>
+                <div
+                  className="rounded-2xl border border-border bg-card shadow-xl overflow-visible"
+                  style={{
+                    perspective: "800px",
+                    transformStyle: "preserve-3d",
+                    animation:
+                      isOpen && flipping === i
+                        ? "tlCardFlip 0.5s ease-out"
+                        : isOpen
+                          ? "tlCardFadeIn 0.3s ease-out"
+                          : "none",
+                  }}
+                >
+                  {/* Accent top border — connects visually to the dotted line */}
+                  <div
+                    className="absolute -top-px left-1/2 -translate-x-1/2 h-[3px] rounded-full transition-all duration-300"
+                    style={{
+                      width: isOpen ? "40px" : "0px",
+                      background: "var(--brand)",
+                    }}
+                  />
+
+                  {n.image && (
+                    <div className="relative h-36 w-full overflow-hidden rounded-t-2xl">
+                      <Image
+                        src={n.image}
+                        alt={n.title}
+                        fill
+                        sizes={`${CARD_W}px`}
+                        className="object-cover"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                      <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1.5 border border-white/40 rounded-full px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                        <Icon className="w-2.5 h-2.5" />
+                        {n.tag}
+                      </span>
+                    </div>
                   )}
+                  <div className="p-3.5">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[9px] font-bold text-brand/60 uppercase tracking-wider">
+                        {n.year}
+                      </span>
+                      <span className="w-0.5 h-0.5 rounded-full bg-brand/30" />
+                      <span className="text-[9px] font-semibold text-accent-strong uppercase tracking-wider">
+                        {n.oneLiner}
+                      </span>
+                    </div>
+                    <h3 className="font-display text-sm font-bold text-foreground leading-snug">
+                      {n.title}
+                    </h3>
+                    <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed line-clamp-3">
+                      {n.description}
+                    </p>
+                    {n.href && (
+                      <Link
+                        href={n.href}
+                        className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
+                      >
+                        <BookOpen className="w-2.5 h-2.5" />
+                        {n.hrefLabel}
+                      </Link>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })}
         </div>
       </div>
 
@@ -544,13 +530,13 @@ export function Timeline() {
         dangerouslySetInnerHTML={{
           __html: `
           @keyframes tlCardFlip {
-            0%   { opacity: 0; transform: rotateY(-90deg) scale(0.9); }
-            60%  { opacity: 1; transform: rotateY(8deg) scale(1.02); }
-            80%  { transform: rotateY(-3deg) scale(0.99); }
+            0%   { opacity: 0; transform: rotateY(-90deg) scale(0.92); }
+            60%  { opacity: 1; transform: rotateY(6deg) scale(1.01); }
+            80%  { transform: rotateY(-2deg) scale(0.995); }
             100% { transform: rotateY(0deg) scale(1); }
           }
           @keyframes tlCardFadeIn {
-            0%   { opacity: 0; transform: translateY(8px); }
+            0%   { opacity: 0; transform: translateY(6px); }
             100% { opacity: 1; transform: translateY(0); }
           }
         `,
