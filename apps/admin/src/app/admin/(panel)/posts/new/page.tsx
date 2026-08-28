@@ -4,7 +4,13 @@ import { PostForm } from "@/components/admin/PostForm";
 export const dynamic = "force-dynamic";
 
 export default async function NewPostPage() {
-  const categories = await prisma.category.findMany({ orderBy: { name: "asc" } });
+  let categories: Awaited<ReturnType<typeof getCategories>> = [];
+
+  try {
+    categories = await getCategories();
+  } catch (err) {
+    console.warn("[admin posts/new] DB query failed:", (err as Error).message);
+  }
 
   return (
     <div className="space-y-6">
@@ -17,4 +23,8 @@ export default async function NewPostPage() {
       <PostForm categories={categories} />
     </div>
   );
+}
+
+async function getCategories() {
+  return prisma.category.findMany({ orderBy: { name: "asc" } });
 }

@@ -6,11 +6,11 @@ export default function HomeLoading() {
   return (
     <div className="min-h-screen bg-background">
       {/* ── Hero ── */}
-      <section className="relative h-[100svh] bg-foreground flex flex-col items-center justify-end pb-20 px-6">
-        <Shimmer className="h-5 w-36 rounded-full bg-white/10 mb-5" />
-        <Shimmer className="h-11 w-72 max-w-full mb-3 bg-white/10" />
-        <Shimmer className="h-6 w-56 max-w-full mb-8 bg-white/10" />
-        <Shimmer className="h-11 w-32 rounded-full bg-accent/80" />
+      <section className="relative h-[100svh] bg-white flex flex-col items-center justify-end pb-20 px-6">
+        <Shimmer className="h-5 w-36 rounded-full mb-5" />
+        <Shimmer className="h-11 w-72 max-w-full mb-3" />
+        <Shimmer className="h-6 w-56 max-w-full mb-8" />
+        <Shimmer className="h-11 w-32 rounded-full" />
       </section>
 
       {/* ── FeaturedOn ── */}
@@ -99,12 +99,12 @@ export default function HomeLoading() {
       </section>
 
       {/* ── NewsletterCta ── */}
-      <section className="py-20 border-t border-border bg-foreground">
+      <section className="py-20 border-t border-border">
         <div className="max-w-2xl mx-auto px-6 text-center space-y-4">
-          <Shimmer className="h-8 w-64 mx-auto bg-white/10" />
-          <Shimmer className="h-4 w-80 max-w-full mx-auto bg-white/10" />
+          <Shimmer className="h-8 w-64 mx-auto" />
+          <Shimmer className="h-4 w-80 max-w-full mx-auto" />
           <div className="flex justify-center gap-3 mt-6">
-            <Shimmer className="h-11 w-48 rounded-full bg-white/10" />
+            <Shimmer className="h-11 w-48 rounded-full" />
           </div>
         </div>
       </section>

@@ -6,7 +6,15 @@ export const dynamic = "force-dynamic";
 
 export default async function NewsletterPage() {
   assertPhase2();
-  const insert = await getNewsletterInsertItems();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let insert: any = { posts: [], videos: [], books: [], read: [], quotes: [] };
+  try {
+    insert = await getNewsletterInsertItems();
+  } catch (err) {
+    console.warn("[admin newsletter] DB query failed:", (err as Error).message);
+  }
+
   return (
     <div className="space-y-8">
       <header className="border-b border-border pb-5">

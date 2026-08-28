@@ -13,19 +13,14 @@ export default async function TopicDetailPage({
 }) {
   assertPhase2();
   const { slug } = await params;
-  const category = await prisma.category.findUnique({
-    where: { slug },
-    include: {
-      posts: {
-        select: { id: true, title: true, slug: true, published: true },
-        orderBy: { createdAt: "desc" },
-      },
-      videos: {
-        select: { id: true, title: true, published: true },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
+
+  let category: Awaited<ReturnType<typeof getCategory>> = null;
+  try {
+    category = await getCategory(slug);
+  } catch (err) {
+    console.warn("[admin topic] DB query failed:", (err as Error).message);
+  }
+
   if (!category) notFound();
 
   const empty = category.posts.length === 0 && category.videos.length === 0;
@@ -146,4 +141,20 @@ export default async function TopicDetailPage({
       )}
     </div>
   );
+}
+
+async function getCategory(slug: string) {
+  return prisma.category.findUnique({
+    where: { slug },
+    include: {
+      posts: {
+        select: { id: true, title: true, slug: true, published: true },
+        orderBy: { createdAt: "desc" },
+      },
+      videos: {
+        select: { id: true, title: true, published: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
 }

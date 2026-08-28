@@ -4,7 +4,19 @@ import { PostsClientTable } from "@/components/admin/PostsClientTable";
 export const dynamic = "force-dynamic";
 
 export default async function PostsPage() {
-  const posts = await prisma.post.findMany({
+  let posts: Awaited<ReturnType<typeof getPosts>> = [];
+
+  try {
+    posts = await getPosts();
+  } catch (err) {
+    console.warn("[admin posts] DB query failed:", (err as Error).message);
+  }
+
+  return <PostsClientTable initialPosts={posts} />;
+}
+
+async function getPosts() {
+  return prisma.post.findMany({
     where: { deletedAt: null },
     select: {
       id: true,
@@ -17,6 +29,4 @@ export default async function PostsPage() {
     },
     orderBy: { updatedAt: "desc" },
   });
-
-  return <PostsClientTable initialPosts={posts} />;
 }

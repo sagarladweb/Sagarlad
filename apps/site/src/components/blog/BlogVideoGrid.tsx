@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 import { X, Play } from "lucide-react";
 import { FaYoutube, FaInstagram } from "@/lib/icons";
 import { youtubeId, youtubeEmbedUrl, youtubeWatchUrl, youtubeThumb } from "@/lib/youtube";
@@ -248,7 +249,7 @@ export function BlogVideoGrid({
         <div className="mt-8 grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
           {videos.map(renderCard)}
         </div>
-        {modal}
+        {modal && typeof document !== "undefined" && createPortal(modal, document.body)}
       </>
     );
   }
@@ -262,7 +263,7 @@ export function BlogVideoGrid({
           </div>
         ))}
       </div>
-      {modal}
+      {modal && typeof document !== "undefined" && createPortal(modal, document.body)}
     </>
   );
 }

@@ -9,7 +9,14 @@ import type { Session } from "next-auth";
  * Returns Session if valid, null otherwise.
  */
 export async function requireAdmin(request?: Request): Promise<Session | null> {
-  const session = await auth();
+  let session: Session | null = null;
+  try {
+    session = await auth();
+  } catch (err) {
+    console.warn("[requireAdmin] auth() failed:", (err as Error).message);
+    return null;
+  }
+
   if (!session?.user || session.user.role !== "ADMIN") {
     console.warn("[requireAdmin] Unauthorized access attempt");
     return null;

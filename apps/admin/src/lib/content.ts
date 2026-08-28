@@ -195,38 +195,37 @@ export function getDashboardExtras() {
 
 // Fresh content to offer as one-click inserts in the newsletter composer, so a
 // broadcast stays on-brand and always links current material.
-export function getNewsletterInsertItems() {
-  return Promise.all([
-    prisma.post.findMany({
-      where: { published: true },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { title: true, slug: true },
-    }),
-    prisma.video.findMany({
-      where: { published: true },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { title: true, slug: true },
-    }),
-    prisma.book.findMany({
-      where: { published: true, type: "PUBLISHED" },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { title: true, buyUrl: true },
-    }),
-    prisma.book.findMany({
-      where: { published: true, type: "READ" },
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { title: true, buyUrl: true },
-    }),
-    prisma.quote.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 5,
-      select: { text: true, tag: true },
-    }),
-  ]).then(([posts, videos, published, read, quotes]) => ({
+export async function getNewsletterInsertItems() {
+  const safeQuery = <T>(query: Promise<T>, fallback: T): Promise<T> =>
+    query.catch((err) => {
+      console.warn("[content] newsletter insert query failed:", (err as Error).message);
+      return fallback;
+    });
+
+  const [posts, videos, published, read, quotes] = await Promise.all([
+    safeQuery(
+      prisma.post.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, slug: true } }),
+      []
+    ),
+    safeQuery(
+      prisma.video.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, slug: true } }),
+      []
+    ),
+    safeQuery(
+      prisma.book.findMany({ where: { published: true, type: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, buyUrl: true } }),
+      []
+    ),
+    safeQuery(
+      prisma.book.findMany({ where: { published: true, type: "READ" }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, buyUrl: true } }),
+      []
+    ),
+    safeQuery(
+      prisma.quote.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: { text: true, tag: true } }),
+      []
+    ),
+  ]);
+
+  return {
     posts: posts.map((p) => ({ title: p.title, url: `${SITE.url}/blog/${p.slug}` })),
     videos: videos.map((v) => ({
       title: v.title,
@@ -235,5 +234,5 @@ export function getNewsletterInsertItems() {
     books: published.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
     read: read.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
     quotes: quotes.map((q) => ({ title: q.text, url: `${SITE.url}/quotes` })),
-  }));
+  };
 }

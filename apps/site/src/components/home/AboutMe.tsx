@@ -147,7 +147,7 @@ export function AboutMe() {
                   alt="Sagar Lad"
                   fill
                   sizes="(max-width: 1024px) 100vw, 40vw"
-                  className="object-cover object-top"
+                  className="object-cover object-right-top sm:object-top"
                   priority
                 />
                 <div
