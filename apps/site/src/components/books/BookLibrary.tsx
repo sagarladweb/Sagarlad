@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { ShoppingBag, X, Download, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { validateEmail, validateName } from "@/lib/client-validators";
@@ -260,7 +261,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
       )}
 
       {/* Detail modal */}
-      {active && (
+      {active && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             className="absolute inset-0 bg-black/50 backdrop-blur-sm"
@@ -364,11 +365,12 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               ) : null}
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Download gate modal */}
-      {target && (
+      {target && typeof document !== "undefined" && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={resetForm} />
           <div
@@ -478,7 +480,8 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );
