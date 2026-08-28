@@ -101,31 +101,29 @@ const nodes: Node[] = [
 
 /* ── Geometry ── */
 const TRACK_W = 1200;
-const TRACK_H = 480;
+const TRACK_H = 640;
 const PAD = 110;
-const WAVE_AMP = 65;
+const WAVE_AMP = 60;
 const CARD_W = 260;
-const CARD_IMG_H = 95;
-const CARD_TEXT_H = 120;
-const CARD_PAD = 16;
+const CARD_IMG_H = 80;
+const CARD_TEXT_H = 110;
 const CARD_H = CARD_IMG_H + CARD_TEXT_H;
-const CARD_GAP = 24;
 
-/* Wave center drifts upward from left → right (overall upward flow) */
-const WAVE_CY_L = 290;
-const WAVE_CY_R = 195;
+/* Wave center: drifts upward from left → right */
+const WAVE_CY_L = 230;
+const WAVE_CY_R = 150;
 const waveCenter = (i: number) => WAVE_CY_L + (i / (nodes.length - 1)) * (WAVE_CY_R - WAVE_CY_L);
 
-/* Dot placement: organic, NOT alternating. Overall upward trend.
+/* Dot placement: organic, overall upward trend.
    0↓ 1↑ 2↓ 3↑ 4↑ 5↓ 6↑ */
 const dotAbove = [false, true, false, true, true, false, true];
 
 const dotX = (i: number) => PAD + (i / (nodes.length - 1)) * (TRACK_W - PAD * 2);
 const dotY = (i: number) => waveCenter(i) + (dotAbove[i] ? -WAVE_AMP : WAVE_AMP);
 
-/* Card always below the dot — no cropping, no overflow */
-const CARD_BELOW_OFFSET = 14;
-const cardTop = (i: number) => dotY(i) + CARD_BELOW_OFFSET;
+/* Cards always below their dot */
+const CARD_GAP = 18;
+const cardTop = (i: number) => dotY(i) + CARD_GAP;
 
 /* ── Smooth cubic bezier wave path ── */
 function buildWave(): string {
@@ -319,7 +317,7 @@ export function Timeline() {
                   aria-label={`${n.title} — ${n.year}`}
                 />
 
-                {/* Word label — always on opposite side of dot */}
+                {/* Word label — opposite side of dot from card (above for below-dots, below for above-dots) */}
                 <span
                   className="absolute whitespace-nowrap pointer-events-none"
                   style={{
@@ -332,29 +330,11 @@ export function Timeline() {
                     left: "50%",
                     transform: "translateX(-50%)",
                     ...(isTop
-                      ? { bottom: 20 }
-                      : { top: 20 }),
+                      ? { top: "auto", bottom: -26 }
+                      : { bottom: "auto", top: -26 }),
                   }}
                 >
                   {n.word}
-                </span>
-
-                {/* Year — small, below/above word */}
-                <span
-                  className="absolute whitespace-nowrap pointer-events-none"
-                  style={{
-                    fontSize: "9px",
-                    fontWeight: 600,
-                    color: isOpen ? "var(--brand)" : "hsl(var(--muted-foreground) / 0.6)",
-                    transition: "color 0.3s ease-out",
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    ...(isTop
-                      ? { bottom: 6 }
-                      : { top: 6 }),
-                  }}
-                >
-                  {n.year}
                 </span>
               </div>
             );
@@ -367,8 +347,8 @@ export function Timeline() {
             const ct = cardTop(i);
             const isOpen = displayCard === i;
 
-            /* Always from dot bottom → card top (cards always below dots) */
-            const connTop = dy + 10;
+            /* Dot bottom edge → card top edge */
+            const connTop = dy + 9;
             const connBottom = ct;
             const connH = Math.max(0, connBottom - connTop);
 
