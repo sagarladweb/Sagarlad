@@ -101,31 +101,34 @@ const nodes: Node[] = [
 
 /* ── Geometry ── */
 const TRACK_W = 1200;
-const WAVE_CY = 220; /* wave center Y */
-const WAVE_AMP = 60; /* wave amplitude */
-/* Dot Y on wave: alternate above/below center */
-const dotY = (i: number) => WAVE_CY + (i % 2 === 0 ? -WAVE_AMP : WAVE_AMP);
-/* Card position: above or below the dot */
-const CARD_ABOVE = true; /* above-wave dots get cards above */
-const cardTop = (i: number) => {
-  const above = i % 2 === 0;
-  return above ? dotY(i) - 20 - 190 : dotY(i) + 20; /* 190 = card height approx */
-};
-const TRACK_H = 460; /* total height: enough for above + below cards */
-const CARD_W = 280;
+const TRACK_H = 500;
+const PAD = 100; /* side padding so first/last dots aren't at edges */
+const WAVE_CY = 250;
+const WAVE_AMP = 70;
+const CARD_W = 270;
+const CARD_H = 240; /* image 100 + text 100 + paddings ~40 */
+const CARD_GAP = 28; /* gap between dot and card edge */
+const CARD_ABOVE_Y = 12; /* top of above-wave cards */
+const CARD_BELOW_Y = WAVE_CY + WAVE_AMP + CARD_GAP; /* top of below-wave cards */
+const DOT_R = 6;
 
-/* ── Wave path ── */
+/* Organic wave pattern: not perfectly alternating.
+   0=up 1=down 2=up 3=up 4=down 5=down 6=up */
+const above = [true, false, true, true, false, false, true];
+const dotY = (i: number) => (above[i] ? WAVE_CY - WAVE_AMP : WAVE_CY + WAVE_AMP);
+const cardTop = (i: number) => (above[i] ? CARD_ABOVE_Y : CARD_BELOW_Y);
+const dotX = (i: number) => PAD + (i / (nodes.length - 1)) * (TRACK_W - PAD * 2);
+
+/* ── Smooth wave path through all dots ── */
 function buildWave(): string {
-  const pts = nodes.map((_, i) => ({
-    x: (i / (nodes.length - 1)) * TRACK_W,
-    y: dotY(i),
-  }));
+  const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
-    const prev = pts[i - 1];
-    const curr = pts[i];
-    const cx = prev.x + (curr.x - prev.x) * 0.5;
-    d += ` C ${cx} ${prev.y}, ${cx} ${curr.y}, ${curr.x} ${curr.y}`;
+    const p = pts[i - 1];
+    const c = pts[i];
+    const cx1 = p.x + (c.x - p.x) * 0.4;
+    const cx2 = p.x + (c.x - p.x) * 0.6;
+    d += ` C ${cx1} ${p.y}, ${cx2} ${c.y}, ${c.x} ${c.y}`;
   }
   return d;
 }
@@ -195,7 +198,6 @@ export function Timeline() {
   }, []);
 
   const wavePath = buildWave();
-  const dotX = (i: number) => (i / (nodes.length - 1)) * TRACK_W;
   const cardNode = displayCard !== null ? nodes[displayCard] : null;
   const CardIcon = cardNode?.icon;
 
@@ -220,17 +222,17 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Horizontal scrollable track ── */}
+      {/* ── Scrollable track — horizontal only ── */}
       <div
         data-tl-track
-        className="overflow-x-auto scrollbar-hide px-4 sm:px-6"
+        className="overflow-x-auto overflow-y-hidden scrollbar-hide px-4 sm:px-6 pb-4"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div
           className="relative mx-auto"
           style={{ width: `${TRACK_W}px`, height: `${TRACK_H}px`, minWidth: "700px" }}
         >
-          {/* SVG: wave + dots */}
+          {/* ── SVG: wave lines only ── */}
           <svg
             className="absolute inset-0 pointer-events-none"
             width={TRACK_W}
@@ -238,103 +240,126 @@ export function Timeline() {
             viewBox={`0 0 ${TRACK_W} ${TRACK_H}`}
             fill="none"
           >
-            {/* Background wave track */}
-            <path d={wavePath} stroke="rgba(13,33,161,0.06)" strokeWidth="8" strokeLinecap="round" fill="none" />
-            {/* Animated draw wave */}
-            <path data-tl-wave d={wavePath} stroke="rgba(13,33,161,0.2)" strokeWidth="2" strokeLinecap="round" fill="none" strokeDasharray="2000" strokeDashoffset="2000" />
-            {/* Dotted wave overlay */}
-            <path d={wavePath} stroke="rgba(13,33,161,0.35)" strokeWidth="2" strokeLinecap="round" fill="none" strokeDasharray="4 8" className="animate-wave-dots" />
-            {/* Progress line */}
+            {/* Wave background glow */}
+            <path d={wavePath} stroke="rgba(13,33,161,0.04)" strokeWidth="10" strokeLinecap="round" fill="none" />
+            {/* Wave draw animation */}
+            <path data-tl-wave d={wavePath} stroke="rgba(13,33,161,0.15)" strokeWidth="2" strokeLinecap="round" fill="none" strokeDasharray="2000" strokeDashoffset="2000" />
+            {/* Wave dotted overlay */}
+            <path d={wavePath} stroke="rgba(13,33,161,0.25)" strokeWidth="1.5" strokeLinecap="round" fill="none" strokeDasharray="4 8" className="animate-wave-dots" />
+            {/* Progress line (solid brand) */}
             {displayCard !== null && (() => {
               const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
               let d = `M ${pts[0].x} ${pts[0].y}`;
               for (let j = 1; j <= displayCard; j++) {
-                const prev = pts[j - 1], curr = pts[j];
-                const cx = prev.x + (curr.x - prev.x) * 0.5;
-                d += ` C ${cx} ${prev.y}, ${cx} ${curr.y}, ${curr.x} ${curr.y}`;
+                const p = pts[j - 1], c = pts[j];
+                const cx1 = p.x + (c.x - p.x) * 0.4;
+                const cx2 = p.x + (c.x - p.x) * 0.6;
+                d += ` C ${cx1} ${p.y}, ${cx2} ${c.y}, ${c.x} ${c.y}`;
               }
-              return <path d={d} stroke="var(--brand)" strokeWidth="3" strokeLinecap="round" fill="none" style={{ transition: "all 0.4s ease-out" }} />;
+              return <path d={d} stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" fill="none" style={{ transition: "all 0.4s ease-out" }} />;
             })()}
-            {/* SVG dots on the wave */}
-            {nodes.map((n, i) => {
-              const x = dotX(i);
-              const y = dotY(i);
-              const isOpen = displayCard === i;
-              return (
-                <g key={n.title}>
-                  {/* Dot outer glow when active */}
-                  {isOpen && <circle cx={x} cy={y} r="14" fill="rgba(13,33,161,0.08)" />}
-                  {/* Dot */}
-                  <circle
-                    data-tl-dot
-                    cx={x}
-                    cy={y}
-                    r={isOpen ? "8" : "6"}
-                    fill={isOpen ? "var(--brand)" : "var(--background)"}
-                    stroke="var(--brand)"
-                    strokeWidth="2.5"
-                    style={{ cursor: "pointer", transition: "all 0.3s ease-out", filter: isOpen ? "drop-shadow(0 0 6px rgba(13,33,161,0.3))" : "none" }}
-                    onMouseEnter={() => hoverIn(i)}
-                    onMouseLeave={hoverOut}
-                    onClick={() => handleClick(i)}
-                    className="pointer-events-auto"
-                    role="button"
-                    aria-label={`${n.title} — ${n.year}`}
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handleClick(i); }}
-                  />
-                  {/* Year label */}
-                  <text
-                    x={x}
-                    y={i % 2 === 0 ? y - 16 : y + 22}
-                    textAnchor="middle"
-                    className="fill-muted-foreground"
-                    style={{ fontSize: "10px", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", transition: "fill 0.3s ease-out", ...(isOpen ? { fill: "var(--brand)" } : {}) }}
-                  >
-                    {n.year}
-                  </text>
-                </g>
-              );
-            })}
           </svg>
 
-          {/* Connectors: dotted lines from dot to card */}
+          {/* ── HTML dot buttons (better hover than SVG circles) ── */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const y = dotY(i);
-            const above = i % 2 === 0;
             const isOpen = displayCard === i;
-            const cardY = cardTop(i);
-            /* Connector: from dot edge to card edge */
-            const connTop = above ? cardY + 190 : y + 10;
-            const connBottom = above ? y - 10 : cardY;
+            const isAbove = above[i];
+            return (
+              <div key={`dot-${n.title}`} style={{ position: "absolute", left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)", zIndex: 20 }}>
+                {/* Outer ring (active) */}
+                {isOpen && (
+                  <div
+                    className="absolute inset-0 rounded-full bg-brand/8"
+                    style={{ width: DOT_R * 5, height: DOT_R * 5, left: -(DOT_R * 2), top: -(DOT_R * 2), animation: "tlPulse 2s ease-in-out infinite" }}
+                  />
+                )}
+                {/* Button */}
+                <button
+                  data-tl-dot
+                  onMouseEnter={() => hoverIn(i)}
+                  onMouseLeave={hoverOut}
+                  onClick={() => handleClick(i)}
+                  className="relative block rounded-full border-[2.5px] transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                  style={{
+                    width: isOpen ? DOT_R * 2.8 : DOT_R * 2,
+                    height: isOpen ? DOT_R * 2.8 : DOT_R * 2,
+                    backgroundColor: isOpen ? "var(--brand)" : "var(--background)",
+                    borderColor: "var(--brand)",
+                    boxShadow: isOpen ? "0 0 8px rgba(13,33,161,0.25)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    cursor: "pointer",
+                  }}
+                  aria-label={`${n.title} — ${n.year}`}
+                />
+                {/* Year label — positioned on opposite side of card */}
+                <span
+                  className="absolute whitespace-nowrap transition-colors duration-300"
+                  style={{
+                    fontSize: "10px",
+                    fontWeight: 700,
+                    textTransform: "uppercase",
+                    letterSpacing: "0.1em",
+                    color: isOpen ? "var(--brand)" : "hsl(var(--muted-foreground))",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    ...(isAbove ? { top: DOT_R * 2 + 8 } : { bottom: DOT_R * 2 + 8 }),
+                  }}
+                >
+                  {n.year}
+                </span>
+              </div>
+            );
+          })}
+
+          {/* ── Connectors: vertical dotted lines from dot to card ── */}
+          {nodes.map((n, i) => {
+            const x = dotX(i);
+            const dy = dotY(i);
+            const isAbove = above[i];
+            const isOpen = displayCard === i;
+            const ct = cardTop(i);
+
+            /* Connector spans from card edge to dot edge */
+            let connTop: number;
+            let connBottom: number;
+            if (isAbove) {
+              /* Card is above dot: connector from card bottom → dot top */
+              connTop = ct + CARD_H;
+              connBottom = dy - DOT_R - 2;
+            } else {
+              /* Card is below dot: connector from dot bottom → card top */
+              connTop = dy + DOT_R + 2;
+              connBottom = ct;
+            }
             const connH = Math.max(0, connBottom - connTop);
 
             return (
               <div
                 key={`conn-${n.title}`}
                 aria-hidden="true"
-                className="absolute w-px"
+                className="absolute"
                 style={{
                   left: `${x}px`,
                   top: `${connTop}px`,
+                  width: "1px",
                   height: `${connH}px`,
                   transform: "translateX(-50%)",
                   background: isOpen
                     ? "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)"
-                    : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.1) 0, rgba(13,33,161,0.1) 3px, transparent 3px, transparent 7px)",
+                    : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.12) 0, rgba(13,33,161,0.12) 3px, transparent 3px, transparent 7px)",
                   transition: "background 0.3s ease-out",
                 }}
               />
             );
           })}
 
-          {/* Cards — positioned at dot's X, above or below */}
+          {/* ── Cards ── */}
           {nodes.map((n, i) => {
             const x = dotX(i);
+            const isAbove = above[i];
             const isOpen = displayCard === i;
             const Icon = n.icon;
-            const above = i % 2 === 0;
 
             return (
               <div
@@ -344,6 +369,7 @@ export function Timeline() {
                   left: `${x - CARD_W / 2}px`,
                   top: `${cardTop(i)}px`,
                   width: `${CARD_W}px`,
+                  height: `${CARD_H}px`,
                   opacity: isOpen ? 1 : 0,
                   pointerEvents: isOpen ? "auto" : "none",
                   transition: "opacity 0.3s ease-out",
@@ -351,24 +377,25 @@ export function Timeline() {
                 }}
               >
                 <div
-                  className="rounded-2xl border border-border bg-card shadow-xl"
+                  className="h-full rounded-xl border border-border bg-card shadow-lg overflow-hidden flex flex-col"
                   style={{
                     perspective: "800px",
                     transformStyle: "preserve-3d",
                     animation: isOpen && flipping === i ? "tlFlip 0.5s ease-out" : isOpen ? "tlFadeIn 0.3s ease-out" : "none",
                   }}
                 >
-                  {/* Accent connector nub at card edge */}
+                  {/* Accent nub at card edge facing the dot */}
                   <div
                     className="absolute left-1/2 -translate-x-1/2 h-[3px] rounded-full bg-brand transition-all duration-300"
                     style={{
-                      width: isOpen ? "36px" : "0px",
-                      ...(above ? { bottom: "-1px" } : { top: "-1px" }),
+                      width: isOpen ? "32px" : "0px",
+                      ...(isAbove ? { bottom: "-1px" } : { top: "-1px" }),
                     }}
                   />
 
+                  {/* Image */}
                   {n.image && (
-                    <div className="relative w-full overflow-hidden rounded-t-2xl" style={{ aspectRatio: "16/9" }}>
+                    <div className="relative w-full shrink-0" style={{ height: "100px" }}>
                       <Image
                         src={n.image}
                         alt={n.title}
@@ -376,23 +403,20 @@ export function Timeline() {
                         sizes={`${CARD_W}px`}
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                      <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                      <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/35 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
                         <Icon className="w-2.5 h-2.5" />
                         {n.tag}
                       </span>
                     </div>
                   )}
-                  <div className="p-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[9px] font-bold text-brand/60 uppercase tracking-wider">{n.year}</span>
-                      <span className="w-0.5 h-0.5 rounded-full bg-brand/30" />
-                      <span className="text-[9px] font-semibold text-accent-strong uppercase tracking-wider">{n.oneLiner}</span>
-                    </div>
-                    <h3 className="font-display text-sm font-bold text-foreground leading-snug">{n.title}</h3>
-                    <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed line-clamp-3">{n.description}</p>
+
+                  {/* Text */}
+                  <div className="flex-1 p-2.5 flex flex-col min-h-0">
+                    <h3 className="font-display text-[13px] font-bold text-foreground leading-snug">{n.title}</h3>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed line-clamp-3 flex-1">{n.description}</p>
                     {n.href && (
-                      <Link href={n.href} className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline">
+                      <Link href={n.href} className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline shrink-0">
                         <BookOpen className="w-2.5 h-2.5" />{n.hrefLabel}
                       </Link>
                     )}
@@ -406,14 +430,18 @@ export function Timeline() {
 
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes tlFlip {
-          0%   { opacity:0; transform: rotateY(-90deg) scale(0.92); }
-          60%  { opacity:1; transform: rotateY(6deg) scale(1.01); }
+          0%   { opacity:0; transform: rotateY(-90deg) scale(0.95); }
+          60%  { opacity:1; transform: rotateY(5deg) scale(1.01); }
           80%  { transform: rotateY(-2deg) scale(0.995); }
           100% { transform: rotateY(0deg) scale(1); }
         }
         @keyframes tlFadeIn {
           0%   { opacity:0; transform: translateY(6px); }
           100% { opacity:1; transform: translateY(0); }
+        }
+        @keyframes tlPulse {
+          0%, 100% { opacity: 0.5; transform: scale(1); }
+          50%      { opacity: 0.2; transform: scale(1.3); }
         }
       `}} />
     </section>
