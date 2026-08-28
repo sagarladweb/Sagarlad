@@ -122,7 +122,7 @@ export default function ContactPage() {
         <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-6 pt-8 pb-10 sm:pt-14 sm:pb-16">
           {/* Portrait */}
           <div className="lg:col-span-5 relative flex justify-center" data-animate="left">
-            <div className="relative w-full max-w-[380px] mx-auto">
+            <div className="relative w-full max-w-[340px] mx-auto">
               <Image
                 src="/images/section.png"
                 alt="Sagar Lad"
@@ -131,8 +131,9 @@ export default function ContactPage() {
                 priority
                 className="relative z-10 h-auto w-full"
                 style={{
-                  maskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
-                  WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
+                  transform: "scale(1.15) translate(-34px, -19px)",
+                  maskImage: "linear-gradient(to top, transparent 0%, black 18%, black 100%)",
+                  WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 18%, black 100%)",
                 }}
               />
             </div>

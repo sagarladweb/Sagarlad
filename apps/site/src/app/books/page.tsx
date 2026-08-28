@@ -55,7 +55,7 @@ export default async function BooksPage() {
           <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-12 lg:gap-16">
             {/* ── Portrait ── */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
-              <div className="relative w-full max-w-[380px] mx-auto">
+              <div className="relative w-full max-w-[410px] mx-auto">
                 <Image
                   src="/images/section.png"
                   alt="Sagar Lad"
@@ -64,8 +64,9 @@ export default async function BooksPage() {
                   priority
                   className="relative z-10 h-auto w-full"
                   style={{
-                    maskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
-                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
+                    transform: "scale(1.1) translate(-46px, -11px)",
+                    maskImage: "linear-gradient(to top, transparent 0%, black 21%, black 100%)",
+                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 21%, black 100%)",
                   }}
                 />
               </div>
