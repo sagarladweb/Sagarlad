@@ -15,7 +15,7 @@ import {
 type Node = {
   year: string;
   title: string;
-  oneLiner: string;
+  word: string;
   description: string;
   tag: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -28,7 +28,7 @@ const nodes: Node[] = [
   {
     year: "2009",
     title: "School Days",
-    oneLiner: "Where it all started",
+    word: "Foundation",
     description:
       "Growing up in Gujarat, I fell in love with computers. Late nights, broken code, and a stubborn belief that tech could change everything.",
     tag: "Education",
@@ -37,8 +37,8 @@ const nodes: Node[] = [
   },
   {
     year: "2009 – 2013",
-    title: "Engineering College",
-    oneLiner: "Four years of building",
+    title: "Engineering",
+    word: "Growth",
     description:
       "BVM College was where theory met reality. More time in the lab than the classroom — and those habits shaped the engineer I became.",
     tag: "Education",
@@ -48,7 +48,7 @@ const nodes: Node[] = [
   {
     year: "2013",
     title: "Joined TCS",
-    oneLiner: "First job, first flight",
+    word: "Launch",
     description:
       "From a small town in Gujarat to boardrooms in Europe. TCS gave me the world — and I made the most of every opportunity.",
     tag: "Career",
@@ -58,7 +58,7 @@ const nodes: Node[] = [
   {
     year: "2019 – 2020",
     title: "Data Science",
-    oneLiner: "A new way to think",
+    word: "Pivot",
     description:
       "IIIT Bangalore changed how I see problems. Statistics, ML, and a whole new toolkit for solving real-world challenges.",
     tag: "Education",
@@ -68,7 +68,7 @@ const nodes: Node[] = [
   {
     year: "2022 – 2026",
     title: "Six Books",
-    oneLiner: "Words that outlive me",
+    word: "Legacy",
     description:
       "Finance, AI, habits, growth — each book from a place of wanting to help. Not theory from a desk, but lessons from the field.",
     tag: "Author",
@@ -79,8 +79,8 @@ const nodes: Node[] = [
   },
   {
     year: "2025 – 2026",
-    title: "Masters in Gen AI",
-    oneLiner: "Staying ahead of the curve",
+    title: "Gen AI",
+    word: "Mastery",
     description:
       "Purdue University — diving deep into AI systems that are responsible, practical, and built for the real world.",
     tag: "Education",
@@ -90,7 +90,7 @@ const nodes: Node[] = [
   {
     year: "2026",
     title: "TEDx Speaker",
-    oneLiner: "AI on the big stage",
+    word: "Peak",
     description:
       "Taking the TEDx stage to share what years of hands-on experience taught me about AI and decision-making.",
     tag: "Speaker",
@@ -101,31 +101,53 @@ const nodes: Node[] = [
 
 /* ── Geometry ── */
 const TRACK_W = 1200;
-const TRACK_H = 500;
-const PAD = 100; /* side padding so first/last dots aren't at edges */
-const WAVE_CY = 250;
-const WAVE_AMP = 70;
-const CARD_W = 270;
-const CARD_H = 240; /* image 100 + text 100 + paddings ~40 */
-const CARD_GAP = 28; /* gap between dot and card edge */
-const CARD_ABOVE_Y = 12; /* top of above-wave cards */
-const CARD_BELOW_Y = WAVE_CY + WAVE_AMP + CARD_GAP; /* top of below-wave cards */
-const DOT_R = 6;
+const TRACK_H = 480;
+const PAD = 110;
+const WAVE_AMP = 65;
+const CARD_W = 260;
+const CARD_IMG_H = 95;
+const CARD_TEXT_H = 120;
+const CARD_PAD = 16;
+const CARD_H = CARD_IMG_H + CARD_TEXT_H;
+const CARD_GAP = 24;
 
-/* Organic wave pattern: not perfectly alternating.
-   0=up 1=down 2=up 3=up 4=down 5=down 6=up */
-const above = [true, false, true, true, false, false, true];
-const dotY = (i: number) => (above[i] ? WAVE_CY - WAVE_AMP : WAVE_CY + WAVE_AMP);
-const cardTop = (i: number) => (above[i] ? CARD_ABOVE_Y : CARD_BELOW_Y);
+/* Wave center drifts upward from left → right (overall upward flow) */
+const WAVE_CY_L = 290;
+const WAVE_CY_R = 195;
+const waveCenter = (i: number) => WAVE_CY_L + (i / (nodes.length - 1)) * (WAVE_CY_R - WAVE_CY_L);
+
+/* Dot placement: organic, NOT alternating. Overall upward trend.
+   0↓ 1↑ 2↓ 3↑ 4↑ 5↓ 6↑ */
+const dotAbove = [false, true, false, true, true, false, true];
+
 const dotX = (i: number) => PAD + (i / (nodes.length - 1)) * (TRACK_W - PAD * 2);
+const dotY = (i: number) => waveCenter(i) + (dotAbove[i] ? -WAVE_AMP : WAVE_AMP);
 
-/* ── Smooth wave path through all dots ── */
+/* Card always below the dot — no cropping, no overflow */
+const CARD_BELOW_OFFSET = 14;
+const cardTop = (i: number) => dotY(i) + CARD_BELOW_OFFSET;
+
+/* ── Smooth cubic bezier wave path ── */
 function buildWave(): string {
   const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
     const p = pts[i - 1];
     const c = pts[i];
+    const cx1 = p.x + (c.x - p.x) * 0.4;
+    const cx2 = p.x + (c.x - p.x) * 0.6;
+    d += ` C ${cx1} ${p.y}, ${cx2} ${c.y}, ${c.x} ${c.y}`;
+  }
+  return d;
+}
+
+/* ── Progress curve (solid brand line) ── */
+function buildProgress(upTo: number): string {
+  const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let j = 1; j <= upTo; j++) {
+    const p = pts[j - 1];
+    const c = pts[j];
     const cx1 = p.x + (c.x - p.x) * 0.4;
     const cx2 = p.x + (c.x - p.x) * 0.6;
     d += ` C ${cx1} ${p.y}, ${cx2} ${c.y}, ${c.x} ${c.y}`;
@@ -179,18 +201,24 @@ export function Timeline() {
           scrollTrigger: { trigger: el, start: "top 82%" } }
       );
       gsap.fromTo("[data-tl-track]",
-        { opacity: 0, x: 100 },
+        { opacity: 0, x: 80 },
         { opacity: 1, x: 0, duration: 1, ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
       );
       gsap.fromTo("[data-tl-dot]",
         { scale: 0 },
-        { scale: 1, duration: 0.4, stagger: 0.08, ease: "back.out(2.5)", delay: 0.3,
+        { scale: 1, duration: 0.35, stagger: 0.07, ease: "back.out(3)", delay: 0.3,
           scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
       );
       gsap.fromTo("[data-tl-wave]",
         { strokeDashoffset: 2000 },
-        { strokeDashoffset: 0, duration: 2, ease: "power2.inOut", delay: 0.1,
+        { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut", delay: 0.1,
+          scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
+      );
+      /* Active card pop */
+      gsap.fromTo("[data-tl-card]",
+        { scale: 0.95, boxShadow: "0 0 0 rgba(0,0,0,0)" },
+        { scale: 1, boxShadow: "0 8px 30px rgba(0,0,0,0.12)", duration: 0.35, ease: "back.out(2)", stagger: 0.06,
           scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
       );
     }, el);
@@ -225,14 +253,14 @@ export function Timeline() {
       {/* ── Scrollable track — horizontal only ── */}
       <div
         data-tl-track
-        className="overflow-x-auto overflow-y-hidden scrollbar-hide px-4 sm:px-6 pb-4"
+        className="overflow-x-auto overflow-y-hidden scrollbar-hide px-4 sm:px-6 pb-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div
           className="relative mx-auto"
-          style={{ width: `${TRACK_W}px`, height: `${TRACK_H}px`, minWidth: "700px" }}
+          style={{ width: `${TRACK_W}px`, height: `${TRACK_H}px`, minWidth: "680px" }}
         >
-          {/* ── SVG: wave lines only ── */}
+          {/* ── SVG wave lines ── */}
           <svg
             className="absolute inset-0 pointer-events-none"
             width={TRACK_W}
@@ -240,42 +268,38 @@ export function Timeline() {
             viewBox={`0 0 ${TRACK_W} ${TRACK_H}`}
             fill="none"
           >
-            {/* Wave background glow */}
             <path d={wavePath} stroke="rgba(13,33,161,0.04)" strokeWidth="10" strokeLinecap="round" fill="none" />
-            {/* Wave draw animation */}
             <path data-tl-wave d={wavePath} stroke="rgba(13,33,161,0.15)" strokeWidth="2" strokeLinecap="round" fill="none" strokeDasharray="2000" strokeDashoffset="2000" />
-            {/* Wave dotted overlay */}
-            <path d={wavePath} stroke="rgba(13,33,161,0.25)" strokeWidth="1.5" strokeLinecap="round" fill="none" strokeDasharray="4 8" className="animate-wave-dots" />
-            {/* Progress line (solid brand) */}
-            {displayCard !== null && (() => {
-              const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
-              let d = `M ${pts[0].x} ${pts[0].y}`;
-              for (let j = 1; j <= displayCard; j++) {
-                const p = pts[j - 1], c = pts[j];
-                const cx1 = p.x + (c.x - p.x) * 0.4;
-                const cx2 = p.x + (c.x - p.x) * 0.6;
-                d += ` C ${cx1} ${p.y}, ${cx2} ${c.y}, ${c.x} ${c.y}`;
-              }
-              return <path d={d} stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" fill="none" style={{ transition: "all 0.4s ease-out" }} />;
-            })()}
+            <path d={wavePath} stroke="rgba(13,33,161,0.2)" strokeWidth="1.5" strokeLinecap="round" fill="none" strokeDasharray="4 8" className="animate-wave-dots" />
+            {displayCard !== null && (
+              <path d={buildProgress(displayCard)} stroke="var(--brand)" strokeWidth="2.5" strokeLinecap="round" fill="none" style={{ transition: "all 0.4s ease-out" }} />
+            )}
           </svg>
 
-          {/* ── HTML dot buttons (better hover than SVG circles) ── */}
+          {/* ── Dot buttons ── */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const y = dotY(i);
             const isOpen = displayCard === i;
-            const isAbove = above[i];
+            const isTop = dotAbove[i];
+
             return (
-              <div key={`dot-${n.title}`} style={{ position: "absolute", left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)", zIndex: 20 }}>
-                {/* Outer ring (active) */}
+              <div
+                key={`dot-${n.title}`}
+                style={{ position: "absolute", left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)", zIndex: 20 }}
+              >
+                {/* Pulse ring */}
                 {isOpen && (
                   <div
-                    className="absolute inset-0 rounded-full bg-brand/8"
-                    style={{ width: DOT_R * 5, height: DOT_R * 5, left: -(DOT_R * 2), top: -(DOT_R * 2), animation: "tlPulse 2s ease-in-out infinite" }}
+                    className="absolute rounded-full bg-brand/10 pointer-events-none"
+                    style={{
+                      width: 40, height: 40, left: -20, top: -20,
+                      animation: "tlPulse 2s ease-in-out infinite",
+                    }}
                   />
                 )}
-                {/* Button */}
+
+                {/* Dot button — large hit area */}
                 <button
                   data-tl-dot
                   onMouseEnter={() => hoverIn(i)}
@@ -283,27 +307,51 @@ export function Timeline() {
                   onClick={() => handleClick(i)}
                   className="relative block rounded-full border-[2.5px] transition-all duration-300 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
                   style={{
-                    width: isOpen ? DOT_R * 2.8 : DOT_R * 2,
-                    height: isOpen ? DOT_R * 2.8 : DOT_R * 2,
+                    width: isOpen ? 22 : 16,
+                    height: isOpen ? 22 : 16,
                     backgroundColor: isOpen ? "var(--brand)" : "var(--background)",
                     borderColor: "var(--brand)",
-                    boxShadow: isOpen ? "0 0 8px rgba(13,33,161,0.25)" : "0 1px 3px rgba(0,0,0,0.08)",
+                    boxShadow: isOpen
+                      ? "0 0 10px rgba(13,33,161,0.3)"
+                      : "0 1px 4px rgba(0,0,0,0.1)",
                     cursor: "pointer",
                   }}
                   aria-label={`${n.title} — ${n.year}`}
                 />
-                {/* Year label — positioned on opposite side of card */}
+
+                {/* Word label — always on opposite side of dot */}
                 <span
-                  className="absolute whitespace-nowrap transition-colors duration-300"
+                  className="absolute whitespace-nowrap pointer-events-none"
                   style={{
-                    fontSize: "10px",
-                    fontWeight: 700,
+                    fontSize: "11px",
+                    fontWeight: 800,
                     textTransform: "uppercase",
-                    letterSpacing: "0.1em",
+                    letterSpacing: "0.12em",
                     color: isOpen ? "var(--brand)" : "hsl(var(--muted-foreground))",
+                    transition: "color 0.3s ease-out",
                     left: "50%",
                     transform: "translateX(-50%)",
-                    ...(isAbove ? { top: DOT_R * 2 + 8 } : { bottom: DOT_R * 2 + 8 }),
+                    ...(isTop
+                      ? { bottom: 20 }
+                      : { top: 20 }),
+                  }}
+                >
+                  {n.word}
+                </span>
+
+                {/* Year — small, below/above word */}
+                <span
+                  className="absolute whitespace-nowrap pointer-events-none"
+                  style={{
+                    fontSize: "9px",
+                    fontWeight: 600,
+                    color: isOpen ? "var(--brand)" : "hsl(var(--muted-foreground) / 0.6)",
+                    transition: "color 0.3s ease-out",
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    ...(isTop
+                      ? { bottom: 6 }
+                      : { top: 6 }),
                   }}
                 >
                   {n.year}
@@ -312,26 +360,16 @@ export function Timeline() {
             );
           })}
 
-          {/* ── Connectors: vertical dotted lines from dot to card ── */}
+          {/* ── Connector lines: dot → card ── */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const dy = dotY(i);
-            const isAbove = above[i];
-            const isOpen = displayCard === i;
             const ct = cardTop(i);
+            const isOpen = displayCard === i;
 
-            /* Connector spans from card edge to dot edge */
-            let connTop: number;
-            let connBottom: number;
-            if (isAbove) {
-              /* Card is above dot: connector from card bottom → dot top */
-              connTop = ct + CARD_H;
-              connBottom = dy - DOT_R - 2;
-            } else {
-              /* Card is below dot: connector from dot bottom → card top */
-              connTop = dy + DOT_R + 2;
-              connBottom = ct;
-            }
+            /* Always from dot bottom → card top (cards always below dots) */
+            const connTop = dy + 10;
+            const connBottom = ct;
             const connH = Math.max(0, connBottom - connTop);
 
             return (
@@ -347,7 +385,7 @@ export function Timeline() {
                   transform: "translateX(-50%)",
                   background: isOpen
                     ? "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)"
-                    : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.12) 0, rgba(13,33,161,0.12) 3px, transparent 3px, transparent 7px)",
+                    : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.1) 0, rgba(13,33,161,0.1) 3px, transparent 3px, transparent 7px)",
                   transition: "background 0.3s ease-out",
                 }}
               />
@@ -357,19 +395,18 @@ export function Timeline() {
           {/* ── Cards ── */}
           {nodes.map((n, i) => {
             const x = dotX(i);
-            const isAbove = above[i];
             const isOpen = displayCard === i;
             const Icon = n.icon;
 
             return (
               <div
                 key={`card-${n.title}`}
+                data-tl-card
                 className="absolute"
                 style={{
                   left: `${x - CARD_W / 2}px`,
                   top: `${cardTop(i)}px`,
                   width: `${CARD_W}px`,
-                  height: `${CARD_H}px`,
                   opacity: isOpen ? 1 : 0,
                   pointerEvents: isOpen ? "auto" : "none",
                   transition: "opacity 0.3s ease-out",
@@ -377,25 +414,22 @@ export function Timeline() {
                 }}
               >
                 <div
-                  className="h-full rounded-xl border border-border bg-card shadow-lg overflow-hidden flex flex-col"
+                  className="rounded-xl border border-border bg-card shadow-lg overflow-hidden"
                   style={{
                     perspective: "800px",
                     transformStyle: "preserve-3d",
                     animation: isOpen && flipping === i ? "tlFlip 0.5s ease-out" : isOpen ? "tlFadeIn 0.3s ease-out" : "none",
                   }}
                 >
-                  {/* Accent nub at card edge facing the dot */}
+                  {/* Accent nub */}
                   <div
                     className="absolute left-1/2 -translate-x-1/2 h-[3px] rounded-full bg-brand transition-all duration-300"
-                    style={{
-                      width: isOpen ? "32px" : "0px",
-                      ...(isAbove ? { bottom: "-1px" } : { top: "-1px" }),
-                    }}
+                    style={{ width: isOpen ? "32px" : "0px", top: "-1px" }}
                   />
 
                   {/* Image */}
                   {n.image && (
-                    <div className="relative w-full shrink-0" style={{ height: "100px" }}>
+                    <div className="relative w-full" style={{ height: `${CARD_IMG_H}px` }}>
                       <Image
                         src={n.image}
                         alt={n.title}
@@ -403,7 +437,7 @@ export function Timeline() {
                         sizes={`${CARD_W}px`}
                         className="object-cover"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-transparent" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/35 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
                         <Icon className="w-2.5 h-2.5" />
                         {n.tag}
@@ -412,11 +446,16 @@ export function Timeline() {
                   )}
 
                   {/* Text */}
-                  <div className="flex-1 p-2.5 flex flex-col min-h-0">
+                  <div className="p-3" style={{ height: `${CARD_TEXT_H}px` }}>
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <span className="text-[9px] font-bold text-brand/60 uppercase tracking-wider">{n.year}</span>
+                      <span className="w-0.5 h-0.5 rounded-full bg-brand/30" />
+                      <span className="text-[9px] font-semibold text-accent-strong uppercase tracking-wider">{n.word}</span>
+                    </div>
                     <h3 className="font-display text-[13px] font-bold text-foreground leading-snug">{n.title}</h3>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed line-clamp-3 flex-1">{n.description}</p>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed line-clamp-3">{n.description}</p>
                     {n.href && (
-                      <Link href={n.href} className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline shrink-0">
+                      <Link href={n.href} className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline">
                         <BookOpen className="w-2.5 h-2.5" />{n.hrefLabel}
                       </Link>
                     )}
@@ -441,7 +480,7 @@ export function Timeline() {
         }
         @keyframes tlPulse {
           0%, 100% { opacity: 0.5; transform: scale(1); }
-          50%      { opacity: 0.2; transform: scale(1.3); }
+          50%      { opacity: 0.15; transform: scale(1.4); }
         }
       `}} />
     </section>
