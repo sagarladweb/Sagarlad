@@ -28,7 +28,7 @@ const nodes: Node[] = [
   {
     year: "2009",
     title: "School Days",
-    oneLiner: "Where it all began",
+    oneLiner: "Where it all started",
     description:
       "Growing up in Gujarat, I fell in love with computers. Late nights, broken code, and a stubborn belief that tech could change everything.",
     tag: "Education",
@@ -99,6 +99,7 @@ const nodes: Node[] = [
   },
 ];
 
+/* Wave y-positions: alternate above/below center */
 const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
 
 function buildWavePath(width: number, height: number): string {
@@ -111,10 +112,7 @@ function buildWavePath(width: number, height: number): string {
     const prev = pts[i - 1];
     const curr = pts[i];
     const cx1 = prev.x + (curr.x - prev.x) * 0.5;
-    const cy1 = prev.y;
-    const cx2 = prev.x + (curr.x - prev.x) * 0.5;
-    const cy2 = curr.y;
-    d += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${curr.x} ${curr.y}`;
+    d += ` C ${cx1} ${prev.y}, ${cx1} ${curr.y}, ${curr.x} ${curr.y}`;
   }
   return d;
 }
@@ -122,9 +120,11 @@ function buildWavePath(width: number, height: number): string {
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeCard, setActiveCard] = useState<number | null>(null);
+  const [pinnedCard, setPinnedCard] = useState<number | null>(null);
   const [flipping, setFlipping] = useState<number | null>(null);
 
-  /* Desktop: hover shows card temporarily */
+  const displayCard = pinnedCard ?? activeCard;
+
   const hoverIn = useCallback((i: number) => {
     setActiveCard(i);
   }, []);
@@ -133,26 +133,20 @@ export function Timeline() {
     setActiveCard(null);
   }, []);
 
-  /* Click/tap: toggle persistent card (overrides hover) */
-  const [pinnedCard, setPinnedCard] = useState<number | null>(null);
-
   const handleClick = useCallback((i: number) => {
     setPinnedCard((prev) => {
       const next = prev === i ? null : i;
-      if (next !== null) setActiveCard(next);
-      else setActiveCard(null);
-      // Trigger flip animation
       if (next !== null) {
+        setActiveCard(next);
         setFlipping(next);
         setTimeout(() => setFlipping(null), 500);
+      } else {
+        setActiveCard(null);
       }
       return next;
     });
   }, []);
 
-  const displayCard = pinnedCard ?? activeCard;
-
-  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -164,13 +158,14 @@ export function Timeline() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // GSAP animations
+  /* GSAP — entrance from right, wave draw, dot pop */
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
+      /* Heading */
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -184,18 +179,24 @@ export function Timeline() {
         }
       );
 
+      /* Dots track — slide from right */
       gsap.fromTo(
         "[data-tl-track]",
-        { opacity: 0, x: 80 },
+        { opacity: 0, x: 100 },
         {
           opacity: 1,
           x: 0,
           duration: 1,
           ease: "power3.out",
-          scrollTrigger: { trigger: el, start: "top 75%" },
+          scrollTrigger: {
+            trigger: el,
+            start: "top 75%",
+            toggleActions: "play reverse play reset",
+          },
         }
       );
 
+      /* Dots — pop in */
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -205,10 +206,15 @@ export function Timeline() {
           stagger: 0.08,
           ease: "back.out(2.5)",
           delay: 0.3,
-          scrollTrigger: { trigger: el, start: "top 75%" },
+          scrollTrigger: {
+            trigger: el,
+            start: "top 75%",
+            toggleActions: "play reverse play reset",
+          },
         }
       );
 
+      /* Wave path — draw */
       gsap.fromTo(
         "[data-tl-wave]",
         { strokeDashoffset: 2000 },
@@ -217,10 +223,15 @@ export function Timeline() {
           duration: 2,
           ease: "power2.inOut",
           delay: 0.1,
-          scrollTrigger: { trigger: el, start: "top 75%" },
+          scrollTrigger: {
+            trigger: el,
+            start: "top 75%",
+            toggleActions: "play reverse play reset",
+          },
         }
       );
 
+      /* Connectors — grow */
       gsap.fromTo(
         "[data-tl-connector]",
         { scaleY: 0 },
@@ -230,7 +241,11 @@ export function Timeline() {
           stagger: 0.06,
           ease: "power2.out",
           delay: 0.5,
-          scrollTrigger: { trigger: el, start: "top 75%" },
+          scrollTrigger: {
+            trigger: el,
+            start: "top 75%",
+            toggleActions: "play reverse play reset",
+          },
         }
       );
     }, el);
@@ -238,9 +253,9 @@ export function Timeline() {
     return () => ctx.revert();
   }, []);
 
-  const trackWidth = 1100;
-  const trackHeight = 160;
-  const wavePath = buildWavePath(trackWidth, trackHeight);
+  const TRACK_W = 1100;
+  const TRACK_H = 160;
+  const wavePath = buildWavePath(TRACK_W, TRACK_H);
   const cardNode = displayCard !== null ? nodes[displayCard] : null;
   const CardIcon = cardNode?.icon;
 
@@ -265,7 +280,7 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Dots track (scrollable on all screens) ── */}
+      {/* Scrollable dots track — 4 visible, rest on scroll */}
       <div
         data-tl-track
         className="overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-4"
@@ -273,18 +288,30 @@ export function Timeline() {
       >
         <div
           className="relative mx-auto"
-          style={{ width: `${trackWidth}px`, height: `${trackHeight + 60}px`, minWidth: "700px" }}
+          style={{
+            width: `${TRACK_W}px`,
+            height: `${TRACK_H + 50}px`,
+            minWidth: "700px",
+          }}
         >
           {/* SVG wave axis */}
           <svg
             className="absolute inset-0 pointer-events-none"
-            width={trackWidth}
-            height={trackHeight}
-            viewBox={`0 0 ${trackWidth} ${trackHeight}`}
+            width={TRACK_W}
+            height={TRACK_H}
+            viewBox={`0 0 ${TRACK_W} ${TRACK_H}`}
             fill="none"
             style={{ top: "20px" }}
           >
-            <path d={wavePath} stroke="rgba(13,33,161,0.06)" strokeWidth="8" strokeLinecap="round" fill="none" />
+            {/* Thick background track */}
+            <path
+              d={wavePath}
+              stroke="rgba(13,33,161,0.06)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              fill="none"
+            />
+            {/* Animated draw path */}
             <path
               data-tl-wave
               d={wavePath}
@@ -295,6 +322,7 @@ export function Timeline() {
               strokeDasharray="2000"
               strokeDashoffset="2000"
             />
+            {/* Dotted overlay */}
             <path
               d={wavePath}
               stroke="rgba(13,33,161,0.35)"
@@ -304,12 +332,39 @@ export function Timeline() {
               strokeDasharray="4 8"
               className="animate-wave-dots"
             />
+            {/* Progress line — fills as dots are activated */}
+            {displayCard !== null && (
+              <path
+                d={(() => {
+                  /* Build partial path up to the active dot */
+                  const pts = nodes.map((_, i) => ({
+                    x: (i / (nodes.length - 1)) * TRACK_W,
+                    y: (WAVE_Y[i] / 100) * TRACK_H,
+                  }));
+                  let d = `M ${pts[0].x} ${pts[0].y}`;
+                  for (let i = 1; i <= displayCard; i++) {
+                    const prev = pts[i - 1];
+                    const curr = pts[i];
+                    const cx = prev.x + (curr.x - prev.x) * 0.5;
+                    d += ` C ${cx} ${prev.y}, ${cx} ${curr.y}, ${curr.x} ${curr.y}`;
+                  }
+                  return d;
+                })()}
+                stroke="var(--brand)"
+                strokeWidth="3"
+                strokeLinecap="round"
+                fill="none"
+                style={{
+                  transition: "all 0.4s ease-out",
+                }}
+              />
+            )}
           </svg>
 
-          {/* Nodes */}
+          {/* Dots + connectors */}
           {nodes.map((n, i) => {
-            const x = (i / (nodes.length - 1)) * trackWidth;
-            const y = (WAVE_Y[i] / 100) * trackHeight + 20;
+            const x = (i / (nodes.length - 1)) * TRACK_W;
+            const y = (WAVE_Y[i] / 100) * TRACK_H + 20;
             const above = WAVE_Y[i] < 50;
             const isOpen = displayCard === i;
 
@@ -317,9 +372,13 @@ export function Timeline() {
               <div
                 key={n.title}
                 className="absolute"
-                style={{ left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)" }}
+                style={{
+                  left: `${x}px`,
+                  top: `${y}px`,
+                  transform: "translate(-50%, -50%)",
+                }}
               >
-                {/* Connector line */}
+                {/* Connector from dot to card area */}
                 <div
                   data-tl-connector
                   aria-hidden="true"
@@ -336,7 +395,7 @@ export function Timeline() {
                   }}
                 />
 
-                {/* Dot */}
+                {/* Dot button */}
                 <button
                   data-tl-dot
                   onMouseEnter={() => hoverIn(i)}
@@ -377,13 +436,13 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Card area (centered, no inner scroll, flip animation) ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-4">
+      {/* ── Card display area — centered, no scroll, flip animation ── */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-2">
         <div
           className="relative mx-auto"
           style={{
-            maxWidth: "380px",
-            minHeight: displayCard !== null ? "320px" : "0px",
+            maxWidth: "400px",
+            minHeight: displayCard !== null ? "340px" : "0px",
             transition: "min-height 0.3s ease-out",
           }}
         >
@@ -394,7 +453,10 @@ export function Timeline() {
               style={{
                 perspective: "800px",
                 transformStyle: "preserve-3d",
-                animation: flipping === displayCard ? "cardFlip 0.5s ease-out" : "cardFadeIn 0.3s ease-out",
+                animation:
+                  flipping === displayCard
+                    ? "tlCardFlip 0.5s ease-out"
+                    : "tlCardFadeIn 0.3s ease-out",
               }}
             >
               {cardNode.image && (
@@ -403,7 +465,7 @@ export function Timeline() {
                     src={cardNode.image}
                     alt={cardNode.title}
                     fill
-                    sizes="380px"
+                    sizes="400px"
                     className="object-cover"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
@@ -415,12 +477,20 @@ export function Timeline() {
               )}
               <div className="p-5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">{cardNode.year}</span>
+                  <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">
+                    {cardNode.year}
+                  </span>
                   <span className="w-1 h-1 rounded-full bg-brand/30" />
-                  <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">{cardNode.oneLiner}</span>
+                  <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">
+                    {cardNode.oneLiner}
+                  </span>
                 </div>
-                <h3 className="font-display text-lg font-bold text-foreground">{cardNode.title}</h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{cardNode.description}</p>
+                <h3 className="font-display text-lg font-bold text-foreground">
+                  {cardNode.title}
+                </h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                  {cardNode.description}
+                </p>
                 {cardNode.href && (
                   <Link
                     href={cardNode.href}
@@ -436,19 +506,23 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* Flip + fade-in keyframes */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes cardFlip {
-          0% { opacity: 0; transform: rotateY(-90deg) scale(0.9); }
-          60% { opacity: 1; transform: rotateY(8deg) scale(1.02); }
-          80% { transform: rotateY(-3deg) scale(0.99); }
-          100% { transform: rotateY(0deg) scale(1); }
-        }
-        @keyframes cardFadeIn {
-          0% { opacity: 0; transform: translateY(8px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-      `}} />
+      {/* Keyframes */}
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
+          @keyframes tlCardFlip {
+            0%   { opacity: 0; transform: rotateY(-90deg) scale(0.9); }
+            60%  { opacity: 1; transform: rotateY(8deg) scale(1.02); }
+            80%  { transform: rotateY(-3deg) scale(0.99); }
+            100% { transform: rotateY(0deg) scale(1); }
+          }
+          @keyframes tlCardFadeIn {
+            0%   { opacity: 0; transform: translateY(8px); }
+            100% { opacity: 1; transform: translateY(0); }
+          }
+        `,
+        }}
+      />
     </section>
   );
 }
