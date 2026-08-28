@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 export function Modal({
@@ -33,7 +34,7 @@ export function Modal({
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div
       className="fixed inset-0 z-[140] grid place-items-center p-4 sm:p-6"
       role="dialog"
@@ -67,4 +68,9 @@ export function Modal({
       </div>
     </div>
   );
+
+  if (typeof document !== "undefined") {
+    return createPortal(modal, document.body);
+  }
+  return modal;
 }
