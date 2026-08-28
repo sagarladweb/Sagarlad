@@ -54,7 +54,7 @@ export default async function BooksPage() {
         <div className="relative z-20 mx-auto max-w-7xl px-6 sm:px-8 pt-10 pb-14 sm:pt-16 sm:pb-20">
           <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-12 lg:gap-16">
             {/* ── Portrait ── */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
+            <div className="lg:col-span-5 flex justify-center lg:justify-start gs-left" data-animate="left">
               <div className="relative w-full max-w-[410px] mx-auto">
                 <Image
                   src="/images/section.png"
@@ -73,14 +73,14 @@ export default async function BooksPage() {
             </div>
 
             {/* ── Copy + Metrics ── */}
-            <div className="lg:col-span-7 flex flex-col" data-animate-group="up">
-              <div data-animate-item>
+            <div className="lg:col-span-7 flex flex-col gs-group-item" data-animate-group="up">
+              <div data-animate-item className="gs-group-item">
                 <span className="inline-block w-fit text-[11px] font-semibold uppercase tracking-[0.2em] text-brand/60 bg-brand/5 border border-brand/10 rounded-full px-5 py-2">
                   About the book
                 </span>
               </div>
 
-              <div data-animate-item className="mt-7">
+              <div data-animate-item className="mt-7 gs-group-item">
                 <h1 className="font-display text-[2.75rem] sm:text-5xl xl:text-[3.5rem] font-bold leading-[1.05] tracking-tight text-foreground">
                   The MIND UP
                   <br />
@@ -92,14 +92,14 @@ export default async function BooksPage() {
                 </h1>
               </div>
 
-              <div data-animate-item>
+              <div data-animate-item className="gs-group-item">
                 <p className="mt-7 max-w-lg text-[15px] leading-[1.8] text-muted-foreground">
                   One simple shift to stop overthinking, break free from
                   self-doubt and build an unshakable mindset.
                 </p>
               </div>
 
-              <div data-animate-item className="mt-10">
+              <div data-animate-item className="mt-10 gs-group-item">
                 <p className="font-display text-xl font-medium tracking-tight text-foreground">
                   Sagar Lad
                 </p>
@@ -108,7 +108,7 @@ export default async function BooksPage() {
                 </p>
               </div>
 
-              <div data-animate-item className="mt-10 w-full max-w-lg">
+              <div data-animate-item className="mt-10 w-full max-w-lg gs-group-item">
                 <BookHeroMetrics />
               </div>
             </div>
@@ -119,7 +119,7 @@ export default async function BooksPage() {
       {/* -------- The Library -------- */}
       <section className="card-hover border-b border-border bg-card/40">
         <div className="mx-auto max-w-7xl px-4 py-20 sm:px-6 md:py-24">
-          <div className="flex flex-wrap items-end justify-between gap-4" data-animate>
+          <div className="flex flex-wrap items-end justify-between gap-4 gs-hidden" data-animate>
             <div>
               <p className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
                 All books
@@ -141,7 +141,7 @@ export default async function BooksPage() {
 
       {/* -------- Colophon -------- */}
       <section className="bg-background">
-        <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 md:py-24" data-animate>
+        <div className="mx-auto max-w-2xl px-4 py-20 text-center sm:px-6 md:py-24 gs-hidden" data-animate>
           <p className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
             Details
           </p>
