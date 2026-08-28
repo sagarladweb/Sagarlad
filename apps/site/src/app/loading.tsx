@@ -1,28 +1,28 @@
 "use client";
 
-import { Shimmer } from "@/components/ui/Shimmer";
+import { Shimmer, ShimmerCard, ShimmerCircle, ShimmerImage } from "@/components/ui/Shimmer";
 
 export default function HomeLoading() {
   return (
     <div className="min-h-screen bg-background">
-      {/* ── Hero (full-bleed dark, content at bottom) ── */}
+      {/* ── Hero ── */}
       <section className="relative min-h-[calc(100svh+4rem)] bg-foreground overflow-hidden flex flex-col justify-end py-12 sm:py-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
           <div className="max-w-3xl text-center sm:text-left">
-            <Shimmer className="h-8 w-40 rounded-full mb-4 mx-auto sm:mx-0 bg-white/10" />
-            <Shimmer className="h-16 sm:h-20 md:h-24 w-64 sm:w-80 mb-6 mx-auto sm:mx-0 bg-white/10" />
-            <Shimmer className="h-8 sm:h-10 md:h-11 w-56 sm:w-72 mb-8 mx-auto sm:mx-0 bg-white/10" />
-            <Shimmer className="h-5 sm:h-6 w-full max-w-md mb-10 mx-auto sm:mx-0 bg-white/10" />
-            <Shimmer className="h-12 w-56 rounded-full mx-auto sm:mx-0 bg-white/10" />
+            <Shimmer className="h-8 w-44 rounded-full mb-5 mx-auto sm:mx-0 opacity-20" />
+            <Shimmer className="h-16 sm:h-20 md:h-24 w-72 sm:w-96 mb-6 mx-auto sm:mx-0 opacity-20" />
+            <Shimmer className="h-8 sm:h-10 md:h-12 w-60 sm:w-80 mb-8 mx-auto sm:mx-0 opacity-20" />
+            <Shimmer className="h-5 sm:h-6 w-full max-w-md mb-10 mx-auto sm:mx-0 opacity-20" />
+            <Shimmer className="h-12 w-52 rounded-full mx-auto sm:mx-0 opacity-20" />
           </div>
         </div>
       </section>
 
       {/* ── FeaturedOn ── */}
       <section className="py-10 border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-center gap-8 sm:gap-12">
+        <div className="max-w-5xl mx-auto px-6 flex items-center justify-center gap-8 sm:gap-14">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Shimmer key={i} className="h-7 w-20 sm:w-24 rounded" />
+            <Shimmer key={i} className="h-6 sm:h-7 w-16 sm:w-24 rounded" />
           ))}
         </div>
       </section>
@@ -30,14 +30,14 @@ export default function HomeLoading() {
       {/* ── AboutMe ── */}
       <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-5">
             <Shimmer className="h-5 w-28 rounded-full" />
             <Shimmer className="h-9 w-3/4" />
             <Shimmer className="h-4 w-full" />
             <Shimmer className="h-4 w-5/6" />
             <Shimmer className="h-4 w-2/3" />
           </div>
-          <Shimmer className="w-full md:w-72 aspect-square rounded-xl" />
+          <ShimmerImage className="w-full md:w-72 aspect-square" />
         </div>
       </section>
 
@@ -55,30 +55,44 @@ export default function HomeLoading() {
       {/* ── MindUp ── */}
       <section className="py-20 border-t border-border bg-[#FAF9F6]">
         <div className="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
-          <div className="flex-1 space-y-4">
+          <div className="flex-1 space-y-5">
             <Shimmer className="h-5 w-28 rounded-full" />
             <Shimmer className="h-9 w-64" />
             <Shimmer className="h-4 w-full" />
             <Shimmer className="h-4 w-4/5" />
           </div>
-          <Shimmer className="w-64 h-64 rounded-full" />
+          <ShimmerCircle className="w-56 h-56 sm:w-64 sm:h-64" />
+        </div>
+      </section>
+
+      {/* ── MindUpBook (carousel) ── */}
+      <section className="py-16 md:py-24 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="flex gap-5 overflow-hidden">
+            {[1, 2, 3].map((i) => (
+              <ShimmerCard key={i} className="w-72 sm:w-80 h-96 shrink-0" />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* ── BlogPreview ── */}
-      <section className="py-20 border-t border-border">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex items-center gap-4 mb-8">
-            <Shimmer className="h-5 w-24 rounded-full" />
-            <Shimmer className="h-8 w-48" />
+      <section className="py-16 md:py-24 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="text-center sm:text-left">
+            <Shimmer className="h-5 w-20 rounded-full mx-auto sm:mx-0" />
+            <Shimmer className="mt-3 h-8 sm:h-9 w-48 mx-auto sm:mx-0" />
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="rounded-xl border border-border overflow-hidden">
-                <Shimmer className="aspect-square w-full rounded-none" />
-                <div className="p-3 space-y-2">
-                  <Shimmer className="h-4 w-3/4" />
-                  <Shimmer className="h-3 w-full" />
+              <div key={i} className="rounded-2xl border border-border overflow-hidden bg-card">
+                <ShimmerImage className="aspect-[4/3] rounded-none" />
+                <div className="p-6 space-y-3">
+                  <Shimmer className="h-3 w-16 rounded-full" />
+                  <Shimmer className="h-5 w-full" />
+                  <Shimmer className="h-4 w-full" />
+                  <Shimmer className="h-4 w-2/3" />
+                  <Shimmer className="h-3 w-24 mt-4" />
                 </div>
               </div>
             ))}
@@ -87,29 +101,63 @@ export default function HomeLoading() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="py-20 border-t border-border">
-        <div className="max-w-4xl mx-auto px-6 text-center space-y-4">
-          <Shimmer className="h-5 w-28 rounded-full mx-auto" />
-          <Shimmer className="h-8 w-56 mx-auto" />
-          <div className="mt-10 space-y-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="rounded-xl border border-border p-6 space-y-3">
-                <Shimmer className="h-4 w-full" />
-                <Shimmer className="h-4 w-5/6 mx-auto" />
-                <Shimmer className="h-3 w-32 mx-auto rounded-full" />
-              </div>
-            ))}
+      <section className="py-16 md:py-24 border-b border-border bg-card/40">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+          <div className="text-center">
+            <Shimmer className="h-5 w-28 rounded-full mx-auto" />
+            <Shimmer className="mt-3 h-8 sm:h-9 w-52 mx-auto" />
+          </div>
+          <div className="mt-12 flex items-center gap-3">
+            <Shimmer className="shrink-0 h-10 w-10 rounded-full" />
+            <div className="flex-1 rounded-2xl border border-border bg-card p-8 sm:p-12 text-center space-y-4">
+              <Shimmer className="w-10 h-10 rounded-lg mx-auto" />
+              <Shimmer className="h-5 w-full max-w-lg mx-auto" />
+              <Shimmer className="h-5 w-3/4 max-w-md mx-auto" />
+              <Shimmer className="h-4 w-32 mx-auto rounded-full mt-6" />
+              <Shimmer className="h-3 w-24 mx-auto rounded-full" />
+            </div>
+            <Shimmer className="shrink-0 h-10 w-10 rounded-full" />
+          </div>
+        </div>
+      </section>
+
+      {/* ── MentorshipCta ── */}
+      <section className="py-16 md:py-24 border-b border-border bg-muted/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mx-auto max-w-2xl text-center space-y-4">
+            <Shimmer className="h-5 w-32 rounded-full mx-auto" />
+            <Shimmer className="h-8 sm:h-9 w-72 mx-auto" />
+            <Shimmer className="h-4 w-full max-w-md mx-auto" />
+            <Shimmer className="h-4 w-3/4 max-w-sm mx-auto" />
+            <Shimmer className="h-12 w-36 rounded-full mx-auto mt-4" />
           </div>
         </div>
       </section>
 
       {/* ── NewsletterCta ── */}
-      <section className="py-20 border-t border-border">
-        <div className="max-w-2xl mx-auto px-6 text-center space-y-4">
-          <Shimmer className="h-8 w-64 mx-auto" />
-          <Shimmer className="h-4 w-80 max-w-full mx-auto" />
-          <div className="flex justify-center gap-3 mt-6">
-            <Shimmer className="h-11 w-48 rounded-full" />
+      <section className="py-16 md:py-24 border-b border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <div className="mx-auto max-w-2xl overflow-hidden rounded-xl border border-border bg-card shadow-lg">
+            <ShimmerImage className="w-full aspect-[16/10] rounded-none rounded-t-xl" />
+            <div className="px-6 sm:px-12 pt-8 pb-10 sm:pt-10 sm:pb-12 text-center space-y-3">
+              <Shimmer className="h-5 w-28 rounded-full mx-auto" />
+              <Shimmer className="h-8 w-64 mx-auto" />
+              <Shimmer className="h-4 w-80 max-w-full mx-auto" />
+              <Shimmer className="h-4 w-64 mx-auto" />
+              <Shimmer className="h-12 w-full max-w-md rounded-full mx-auto mt-4" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── SagarGallery ── */}
+      <section className="py-16 md:py-24 border-b border-border">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
+          <ShimmerImage className="w-full aspect-[4/3] rounded-2xl" />
+          <div className="mt-6 flex flex-col items-center gap-3 text-center">
+            <Shimmer className="h-7 w-64 mx-auto" />
+            <Shimmer className="h-4 w-56 mx-auto" />
+            <Shimmer className="h-10 w-36 rounded-full mx-auto mt-1" />
           </div>
         </div>
       </section>
