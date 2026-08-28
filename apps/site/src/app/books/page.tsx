@@ -1,10 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import { getPublishedBooks } from "@/lib/content";
 import { SITE, pageMetadata } from "@/lib/site";
 import { BookLibrary } from "@/components/books/BookLibrary";
-import { BookHeroMetrics } from "@/components/books/BookHeroMetrics";
 import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
@@ -35,86 +33,6 @@ export default async function BooksPage() {
           ],
         }}
       />
-
-      {/* -------- Hero -------- */}
-      <header className="relative overflow-hidden border-b border-border bg-background">
-        {/* Subtle warm accent behind portrait */}
-        <div
-          className="absolute z-0"
-          style={{
-            width: "500px",
-            height: "500px",
-            left: "0%",
-            top: "15%",
-            background: "radial-gradient(circle, rgba(255,213,29,0.05) 0%, transparent 70%)",
-            filter: "blur(60px)",
-          }}
-        />
-
-        <div className="relative z-20 mx-auto max-w-7xl px-6 sm:px-8 pt-10 pb-14 sm:pt-16 sm:pb-20">
-          <div className="grid grid-cols-1 items-center lg:grid-cols-12 gap-12 lg:gap-16">
-            {/* ── Portrait ── */}
-            <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
-              <div className="relative w-full max-w-[410px] mx-auto">
-                <Image
-                  src="/images/section.png"
-                  alt="Sagar Lad"
-                  width={800}
-                  height={890}
-                  priority
-                  className="relative z-10 h-auto w-full"
-                  style={{
-                    transform: "scale(1.1) translate(-46px, -11px)",
-                    maskImage: "linear-gradient(to top, transparent 0%, black 21%, black 100%)",
-                    WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 21%, black 100%)",
-                  }}
-                />
-              </div>
-            </div>
-
-            {/* ── Copy + Metrics ── */}
-            <div className="lg:col-span-7 flex flex-col" data-animate-group="up">
-              <div data-animate-item>
-                <span className="inline-block w-fit text-[11px] font-semibold uppercase tracking-[0.2em] text-brand/60 bg-brand/5 border border-brand/10 rounded-full px-5 py-2">
-                  About the book
-                </span>
-              </div>
-
-              <div data-animate-item className="mt-7">
-                <h1 className="font-display text-[2.75rem] sm:text-5xl xl:text-[3.5rem] font-bold leading-[1.05] tracking-tight text-foreground">
-                  The MIND UP
-                  <br />
-                  Theory: Simple
-                  <br />
-                  Shift That Will
-                  <br />
-                  <span className="text-accent">Make You Unshakable.</span>
-                </h1>
-              </div>
-
-              <div data-animate-item>
-                <p className="mt-7 max-w-lg text-[15px] leading-[1.8] text-muted-foreground">
-                  One simple shift to stop overthinking, break free from
-                  self-doubt and build an unshakable mindset.
-                </p>
-              </div>
-
-              <div data-animate-item className="mt-10">
-                <p className="font-display text-xl font-medium tracking-tight text-foreground">
-                  Sagar Lad
-                </p>
-                <p className="mt-1.5 text-[10px] font-medium uppercase tracking-[0.3em] text-muted-foreground/60">
-                  Author · Investor · Public Speaker
-                </p>
-              </div>
-
-              <div data-animate-item className="mt-10 w-full max-w-lg">
-                <BookHeroMetrics />
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
 
       {/* -------- The Library -------- */}
       <section className="card-hover border-b border-border bg-card/40">

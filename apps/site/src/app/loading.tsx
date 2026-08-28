@@ -5,19 +5,24 @@ import { Shimmer } from "@/components/ui/Shimmer";
 export default function HomeLoading() {
   return (
     <div className="min-h-screen bg-background">
-      {/* ── Hero ── */}
-      <section className="relative h-[100svh] bg-white flex flex-col items-center justify-end pb-20 px-6">
-        <Shimmer className="h-5 w-36 rounded-full mb-5" />
-        <Shimmer className="h-11 w-72 max-w-full mb-3" />
-        <Shimmer className="h-6 w-56 max-w-full mb-8" />
-        <Shimmer className="h-11 w-32 rounded-full" />
+      {/* ── Hero (full-bleed dark, content at bottom) ── */}
+      <section className="relative min-h-[calc(100svh+4rem)] bg-foreground overflow-hidden flex flex-col justify-end py-12 sm:py-32">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full">
+          <div className="max-w-3xl text-center sm:text-left">
+            <Shimmer className="h-8 w-40 rounded-full mb-4 mx-auto sm:mx-0 bg-white/10" />
+            <Shimmer className="h-16 sm:h-20 md:h-24 w-64 sm:w-80 mb-6 mx-auto sm:mx-0 bg-white/10" />
+            <Shimmer className="h-8 sm:h-10 md:h-11 w-56 sm:w-72 mb-8 mx-auto sm:mx-0 bg-white/10" />
+            <Shimmer className="h-5 sm:h-6 w-full max-w-md mb-10 mx-auto sm:mx-0 bg-white/10" />
+            <Shimmer className="h-12 w-56 rounded-full mx-auto sm:mx-0 bg-white/10" />
+          </div>
+        </div>
       </section>
 
       {/* ── FeaturedOn ── */}
       <section className="py-10 border-b border-border">
-        <div className="max-w-5xl mx-auto px-6 flex items-center justify-center gap-8">
+        <div className="max-w-5xl mx-auto px-6 flex items-center justify-center gap-8 sm:gap-12">
           {[1, 2, 3, 4, 5].map((i) => (
-            <Shimmer key={i} className="h-7 w-20 rounded" />
+            <Shimmer key={i} className="h-7 w-20 sm:w-24 rounded" />
           ))}
         </div>
       </section>

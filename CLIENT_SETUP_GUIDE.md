@@ -45,7 +45,7 @@ Brevo (free tier - email)
   Newsletter sending (300 emails/day)
 
 Cloudflare (free tier - email forwarding)
-  you@sagarlad.com -> forwards to your Gmail
+  contact@sagarlad.com -> forwards to your Gmail
 
 GitHub (free - code + automation)
   Source code repository
