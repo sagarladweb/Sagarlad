@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
 import { Timeline } from "@/components/about/Timeline";
+import { DevImageTuner } from "@/components/ui/DevImageTuner";
 
 import { METRICS } from "@/lib/metrics";
 
@@ -26,6 +27,13 @@ const pageNav = [
 
 export default function AboutPage() {
   const root = useRef<HTMLDivElement>(null);
+  const [showTuner, setShowTuner] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.location.search.includes("tuner")) {
+      setShowTuner(true);
+    }
+  }, []);
 
   useEffect(() => {
     const el = root.current;
@@ -157,7 +165,7 @@ export default function AboutPage() {
             alt="About Sagar Lad"
             fill
             priority
-            className="object-cover object-[85%_center] sm:object-center"
+            className={`object-cover sm:object-center ${showTuner ? "data-dev-tuner" : "object-[90%_center]"}`}
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
@@ -401,6 +409,8 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
+
+      {showTuner && <DevImageTuner storageKey="about-hero-pos" label="Hero Image Position" />}
     </div>
   );
 }
