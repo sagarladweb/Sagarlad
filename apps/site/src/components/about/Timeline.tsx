@@ -28,9 +28,9 @@ const nodes: Node[] = [
   {
     year: "2009",
     title: "School Days",
-    word: "Foundation",
+    word: "Dreams Begin",
     description:
-      "Growing up in Gujarat, I fell in love with computers. Late nights, broken code, and a stubborn belief that tech could change everything.",
+      "A small town, a second-hand computer, and a kid who believed technology could change the world.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about.webp",
@@ -38,9 +38,9 @@ const nodes: Node[] = [
   {
     year: "2009 – 2013",
     title: "Engineering",
-    word: "Growth",
+    word: "Hustle",
     description:
-      "BVM College was where theory met reality. More time in the lab than the classroom — and those habits shaped the engineer I became.",
+      "Four years in the lab, not the classroom. Building things that broke, fixing them, and building again.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-2.webp",
@@ -48,9 +48,9 @@ const nodes: Node[] = [
   {
     year: "2013",
     title: "Joined TCS",
-    word: "Launch",
+    word: "First Flight",
     description:
-      "From a small town in Gujarat to boardrooms in Europe. TCS gave me the world — and I made the most of every opportunity.",
+      "From Gujarat to the world. First job, first flight, first taste of what was possible.",
     tag: "Career",
     icon: Briefcase,
     image: "/images/profile/about-4.webp",
@@ -58,9 +58,9 @@ const nodes: Node[] = [
   {
     year: "2019 – 2020",
     title: "Data Science",
-    word: "Pivot",
+    word: "Reinvent",
     description:
-      "IIIT Bangalore changed how I see problems. Statistics, ML, and a whole new toolkit for solving real-world challenges.",
+      "When the world stopped, I started learning. IIIT Bangalore opened a door I never knew existed.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-5.webp",
@@ -68,9 +68,9 @@ const nodes: Node[] = [
   {
     year: "2022 – 2026",
     title: "Six Books",
-    word: "Legacy",
+    word: "Giving Back",
     description:
-      "Finance, AI, habits, growth — each book from a place of wanting to help. Not theory from a desk, but lessons from the field.",
+      "Every book written at 2am, fueled by coffee and the hope that someone, somewhere, would find it useful.",
     tag: "Author",
     icon: PenTool,
     image: "/images/books/mindup-front.jpg",
@@ -80,9 +80,9 @@ const nodes: Node[] = [
   {
     year: "2025 – 2026",
     title: "Gen AI",
-    word: "Mastery",
+    word: "Stay Curious",
     description:
-      "Purdue University — diving deep into AI systems that are responsible, practical, and built for the real world.",
+      "Purdue University. Back to being a student. Because the best leaders never stop learning.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/speaking/candid-presentation.webp",
@@ -90,9 +90,9 @@ const nodes: Node[] = [
   {
     year: "2026",
     title: "TEDx Speaker",
-    word: "Peak",
+    word: "Full Circle",
     description:
-      "Taking the TEDx stage to share what years of hands-on experience taught me about AI and decision-making.",
+      "The kid who watched TED talks now stands on the stage. Proof that dreams deferred are not dreams denied.",
     tag: "Speaker",
     icon: Mic,
     image: "/images/heroes/tedx.webp",
@@ -101,31 +101,30 @@ const nodes: Node[] = [
 
 /* ── Geometry ── */
 const TRACK_W = 1200;
-const TRACK_H = 640;
 const PAD = 110;
-const WAVE_AMP = 60;
+const WAVE_AMP = 55;
 const CARD_W = 260;
 const CARD_IMG_H = 80;
-const CARD_TEXT_H = 110;
+const CARD_TEXT_H = 100;
 const CARD_H = CARD_IMG_H + CARD_TEXT_H;
+const CARD_GAP = 20;
 
-/* Wave center: drifts upward from left → right */
-const WAVE_CY_L = 230;
-const WAVE_CY_R = 150;
+/* Wave center drifts upward */
+const WAVE_CY_L = 220;
+const WAVE_CY_R = 140;
 const waveCenter = (i: number) => WAVE_CY_L + (i / (nodes.length - 1)) * (WAVE_CY_R - WAVE_CY_L);
 
-/* Dot placement: organic, overall upward trend.
-   0↓ 1↑ 2↓ 3↑ 4↑ 5↓ 6↑ */
+/* Organic dot placement: 0↓ 1↑ 2↓ 3↑ 4↑ 5↓ 6↑ */
 const dotAbove = [false, true, false, true, true, false, true];
 
 const dotX = (i: number) => PAD + (i / (nodes.length - 1)) * (TRACK_W - PAD * 2);
 const dotY = (i: number) => waveCenter(i) + (dotAbove[i] ? -WAVE_AMP : WAVE_AMP);
-
-/* Cards always below their dot */
-const CARD_GAP = 18;
 const cardTop = (i: number) => dotY(i) + CARD_GAP;
 
-/* ── Smooth cubic bezier wave path ── */
+/* Max card bottom for dynamic section height */
+const MAX_CARD_BOTTOM = Math.max(...nodes.map((_, i) => cardTop(i) + CARD_H));
+
+/* ── Smooth wave path ── */
 function buildWave(): string {
   const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -139,7 +138,6 @@ function buildWave(): string {
   return d;
 }
 
-/* ── Progress curve (solid brand line) ── */
 function buildProgress(upTo: number): string {
   const pts = nodes.map((_, i) => ({ x: dotX(i), y: dotY(i) }));
   let d = `M ${pts[0].x} ${pts[0].y}`;
@@ -170,7 +168,7 @@ export function Timeline() {
       if (next !== null) {
         setActiveCard(next);
         setFlipping(next);
-        setTimeout(() => setFlipping(null), 500);
+        setTimeout(() => setFlipping(null), 600);
       } else {
         setActiveCard(null);
       }
@@ -213,24 +211,16 @@ export function Timeline() {
         { strokeDashoffset: 0, duration: 1.8, ease: "power2.inOut", delay: 0.1,
           scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
       );
-      /* Active card pop */
-      gsap.fromTo("[data-tl-card]",
-        { scale: 0.95, boxShadow: "0 0 0 rgba(0,0,0,0)" },
-        { scale: 1, boxShadow: "0 8px 30px rgba(0,0,0,0.12)", duration: 0.35, ease: "back.out(2)", stagger: 0.06,
-          scrollTrigger: { trigger: el, start: "top 75%", toggleActions: "play reverse play reset" } }
-      );
     }, el);
     return () => ctx.revert();
   }, []);
 
   const wavePath = buildWave();
-  const cardNode = displayCard !== null ? nodes[displayCard] : null;
-  const CardIcon = cardNode?.icon;
 
   return (
     <section
       ref={sectionRef}
-      className="relative py-12 md:py-20 border-b border-border bg-background overflow-hidden"
+      className="relative py-12 md:py-20 border-b border-border bg-background"
       aria-label="Journey timeline"
     >
       {/* Header */}
@@ -248,7 +238,7 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Scrollable track — horizontal only ── */}
+      {/* ── Horizontal scroll track ── */}
       <div
         data-tl-track
         className="overflow-x-auto overflow-y-hidden scrollbar-hide px-4 sm:px-6 pb-2"
@@ -256,14 +246,14 @@ export function Timeline() {
       >
         <div
           className="relative mx-auto"
-          style={{ width: `${TRACK_W}px`, height: `${TRACK_H}px`, minWidth: "680px" }}
+          style={{ width: `${TRACK_W}px`, height: `${MAX_CARD_BOTTOM + 20}px`, minWidth: "680px" }}
         >
-          {/* ── SVG wave lines ── */}
+          {/* SVG wave */}
           <svg
             className="absolute inset-0 pointer-events-none"
             width={TRACK_W}
-            height={TRACK_H}
-            viewBox={`0 0 ${TRACK_W} ${TRACK_H}`}
+            height={MAX_CARD_BOTTOM + 20}
+            viewBox={`0 0 ${TRACK_W} ${MAX_CARD_BOTTOM + 20}`}
             fill="none"
           >
             <path d={wavePath} stroke="rgba(13,33,161,0.04)" strokeWidth="10" strokeLinecap="round" fill="none" />
@@ -274,7 +264,7 @@ export function Timeline() {
             )}
           </svg>
 
-          {/* ── Dot buttons ── */}
+          {/* Dot buttons */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const y = dotY(i);
@@ -286,18 +276,15 @@ export function Timeline() {
                 key={`dot-${n.title}`}
                 style={{ position: "absolute", left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)", zIndex: 20 }}
               >
-                {/* Pulse ring */}
+                {/* Pulse */}
                 {isOpen && (
                   <div
                     className="absolute rounded-full bg-brand/10 pointer-events-none"
-                    style={{
-                      width: 40, height: 40, left: -20, top: -20,
-                      animation: "tlPulse 2s ease-in-out infinite",
-                    }}
+                    style={{ width: 40, height: 40, left: -20, top: -20, animation: "tlPulse 2s ease-in-out infinite" }}
                   />
                 )}
 
-                {/* Dot button — large hit area */}
+                {/* Dot button */}
                 <button
                   data-tl-dot
                   onMouseEnter={() => hoverIn(i)}
@@ -309,29 +296,25 @@ export function Timeline() {
                     height: isOpen ? 22 : 16,
                     backgroundColor: isOpen ? "var(--brand)" : "var(--background)",
                     borderColor: "var(--brand)",
-                    boxShadow: isOpen
-                      ? "0 0 10px rgba(13,33,161,0.3)"
-                      : "0 1px 4px rgba(0,0,0,0.1)",
+                    boxShadow: isOpen ? "0 0 10px rgba(13,33,161,0.3)" : "0 1px 4px rgba(0,0,0,0.1)",
                     cursor: "pointer",
                   }}
                   aria-label={`${n.title} — ${n.year}`}
                 />
 
-                {/* Word label — opposite side of dot from card (above for below-dots, below for above-dots) */}
+                {/* Word label — opposite side from card */}
                 <span
                   className="absolute whitespace-nowrap pointer-events-none"
                   style={{
-                    fontSize: "11px",
+                    fontSize: "10px",
                     fontWeight: 800,
                     textTransform: "uppercase",
-                    letterSpacing: "0.12em",
+                    letterSpacing: "0.1em",
                     color: isOpen ? "var(--brand)" : "hsl(var(--muted-foreground))",
                     transition: "color 0.3s ease-out",
                     left: "50%",
                     transform: "translateX(-50%)",
-                    ...(isTop
-                      ? { top: "auto", bottom: -26 }
-                      : { bottom: "auto", top: -26 }),
+                    ...(isTop ? { top: "auto", bottom: -24 } : { bottom: "auto", top: -24 }),
                   }}
                 >
                   {n.word}
@@ -340,14 +323,12 @@ export function Timeline() {
             );
           })}
 
-          {/* ── Connector lines: dot → card ── */}
+          {/* Connector lines: dot → card */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const dy = dotY(i);
             const ct = cardTop(i);
             const isOpen = displayCard === i;
-
-            /* Dot bottom edge → card top edge */
             const connTop = dy + 9;
             const connBottom = ct;
             const connH = Math.max(0, connBottom - connTop);
@@ -372,7 +353,7 @@ export function Timeline() {
             );
           })}
 
-          {/* ── Cards ── */}
+          {/* Cards */}
           {nodes.map((n, i) => {
             const x = dotX(i);
             const isOpen = displayCard === i;
@@ -381,7 +362,6 @@ export function Timeline() {
             return (
               <div
                 key={`card-${n.title}`}
-                data-tl-card
                 className="absolute"
                 style={{
                   left: `${x - CARD_W / 2}px`,
@@ -391,14 +371,14 @@ export function Timeline() {
                   pointerEvents: isOpen ? "auto" : "none",
                   transition: "opacity 0.3s ease-out",
                   zIndex: isOpen ? 30 : 1,
+                  perspective: "800px",
                 }}
               >
                 <div
                   className="rounded-xl border border-border bg-card shadow-lg overflow-hidden"
                   style={{
-                    perspective: "800px",
                     transformStyle: "preserve-3d",
-                    animation: isOpen && flipping === i ? "tlFlip 0.5s ease-out" : isOpen ? "tlFadeIn 0.3s ease-out" : "none",
+                    animation: isOpen && flipping === i ? "tlFlip3D 0.6s ease-out" : isOpen ? "tlFadeIn 0.3s ease-out" : "none",
                   }}
                 >
                   {/* Accent nub */}
@@ -407,15 +387,16 @@ export function Timeline() {
                     style={{ width: isOpen ? "32px" : "0px", top: "-1px" }}
                   />
 
-                  {/* Image */}
+                  {/* Image — explicit width/height for Next.js */}
                   {n.image && (
-                    <div className="relative w-full" style={{ height: `${CARD_IMG_H}px` }}>
+                    <div className="relative w-full overflow-hidden" style={{ height: `${CARD_IMG_H}px` }}>
                       <Image
                         src={n.image}
                         alt={n.title}
-                        fill
-                        sizes={`${CARD_W}px`}
-                        className="object-cover"
+                        width={CARD_W}
+                        height={CARD_IMG_H}
+                        className="w-full h-full object-cover"
+                        priority={isOpen}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                       <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/35 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
@@ -448,15 +429,15 @@ export function Timeline() {
       </div>
 
       <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes tlFlip {
-          0%   { opacity:0; transform: rotateY(-90deg) scale(0.95); }
-          60%  { opacity:1; transform: rotateY(5deg) scale(1.01); }
-          80%  { transform: rotateY(-2deg) scale(0.995); }
-          100% { transform: rotateY(0deg) scale(1); }
+        @keyframes tlFlip3D {
+          0%   { opacity:0; transform: rotateX(-90deg) scale(0.9); }
+          50%  { opacity:1; transform: rotateX(8deg) scale(1.02); }
+          70%  { transform: rotateX(-3deg) scale(0.99); }
+          100% { transform: rotateX(0deg) scale(1); }
         }
         @keyframes tlFadeIn {
-          0%   { opacity:0; transform: translateY(6px); }
-          100% { opacity:1; transform: translateY(0); }
+          0%   { opacity:0; transform: translateY(8px) scale(0.97); }
+          100% { opacity:1; transform: translateY(0) scale(1); }
         }
         @keyframes tlPulse {
           0%, 100% { opacity: 0.5; transform: scale(1); }
