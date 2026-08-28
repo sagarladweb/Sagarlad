@@ -28,11 +28,11 @@ export type PageData = {
 export function mindupPages(): PageData[] {
   const { title, subtitle, author, front, back, accent } = BOOK_META.mindup;
   return [
-    /* 1 — Front cover */
+    /* 1 — Front cover (uses <img> via HTML for PageFlip compatibility) */
     {
       className: "pf-cover",
-      style: { backgroundImage: `url('${front}')`, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: "#fff" },
-      content: "",
+      style: { backgroundColor: "#fff", position: "relative", overflow: "hidden" },
+      content: `<img src="${front}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" />`,
     },
     /* 2 — Title page */
     {
@@ -47,7 +47,7 @@ export function mindupPages(): PageData[] {
     /* 3 — Copyright */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner" style="justify-content:flex-end;padding-bottom:2rem;">
+      content: `<div class="pf-page-inner pf-center" style="justify-content:flex-end;padding-bottom:2rem;">
         <p style="font-size:0.55rem;color:#9ca3af;text-align:center;line-height:1.8;">
           Copyright &copy; ${author}<br>All rights reserved.<br><br>
           No part of this publication may be reproduced, distributed, or transmitted in any form or by any means.<br><br>
@@ -58,9 +58,9 @@ export function mindupPages(): PageData[] {
     /* 4 — Table of Contents */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <h2 style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1rem;color:#1a1a1a;border-bottom:2px solid #e0e7ff;padding-bottom:0.5rem;">Table of Contents</h2>
-        <ul style="list-style:none;padding:0;margin:0;">
+      content: `<div class="pf-page-inner pf-center">
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:#1a1a1a;border-bottom:2px solid #e0e7ff;padding-bottom:0.5rem;">Table of Contents</h2>
+        <ul style="list-style:none;padding:0;margin:0;width:100%;">
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Introduction</span><span>5</span></li>
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Stop Battling Your Mind</span><span>15</span></li>
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Building Habits</span><span>31</span></li>
@@ -81,15 +81,15 @@ export function mindupPages(): PageData[] {
     /* 6 — Introduction */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <h2 style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;text-align:center;color:#9ca3af;margin-bottom:0.8rem;">Introduction</h2>
-        <p style="font-size:0.85rem;font-style:italic;text-align:center;font-weight:600;color:#1a1a1a;line-height:1.5;margin-bottom:1rem;">
+      content: `<div class="pf-page-inner pf-center">
+        <h2 style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;margin-bottom:0.8rem;">Introduction</h2>
+        <p style="font-size:0.85rem;font-style:italic;font-weight:600;color:#1a1a1a;line-height:1.5;margin-bottom:1rem;text-align:center;">
           &ldquo;What if the problem isn&rsquo;t your life&hellip; but how you&rsquo;re thinking about it?&rdquo;
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           Most people spend their lives fighting their thoughts&mdash;overthinking, resisting, and feeling stuck. We often view our own minds as battlegrounds, constantly struggling to gain control over stress, relationships, and self-doubt.
         </p>
-        <p style="font-size:0.7rem;color:${accent};line-height:1.7;text-align:justify;font-weight:600;">
+        <p style="font-size:0.7rem;color:${accent};line-height:1.7;text-align:center;font-weight:600;">
           But what if the key isn&rsquo;t control&hellip; it&rsquo;s alignment?
         </p>
       </div>`,
@@ -97,14 +97,14 @@ export function mindupPages(): PageData[] {
     /* 7 — Core concept */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+      content: `<div class="pf-page-inner pf-center">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           In <strong>The Mind Up Theory</strong>, I introduce a powerful yet profoundly simple shift that has the potential to transform every facet of your daily experience.
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           This framework is designed to help you fundamentally change how you handle adversity. Instead of being swept away by external circumstances or internal turbulence, you learn to anchor yourself.
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;">
           It is not about pretending everything is fine. It is about equipping yourself with the mental architecture to navigate challenges with grace and resilience.
         </p>
       </div>`,
@@ -112,10 +112,10 @@ export function mindupPages(): PageData[] {
     /* 8 — Benefits */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
+      content: `<div class="pf-page-inner pf-center">
         <h2 style="font-size:0.85rem;font-weight:700;color:#1a1a1a;margin-bottom:0.6rem;">What You Will Discover</h2>
         <p style="font-size:0.65rem;color:#374151;margin-bottom:0.5rem;">Throughout these pages, this book reveals exactly how to:</p>
-        <ul style="padding-left:1rem;margin:0;">
+        <ul style="padding-left:1rem;margin:0;text-align:left;">
           <li style="font-size:0.65rem;color:#374151;line-height:1.6;margin-bottom:0.3rem;"><strong>Stop battling your mind</strong> and start working synergistically with it.</li>
           <li style="font-size:0.65rem;color:#374151;line-height:1.6;margin-bottom:0.3rem;"><strong>Build enduring habits</strong> that strengthen both mental and physical well-being.</li>
           <li style="font-size:0.65rem;color:#374151;line-height:1.6;margin-bottom:0.3rem;"><strong>Improve relationships</strong> through deeper awareness, presence, and clarity.</li>
@@ -128,8 +128,8 @@ export function mindupPages(): PageData[] {
     back
       ? {
           className: "pf-cover",
-          style: { backgroundImage: `url('${back}')`, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: "#fff" },
-          content: "",
+          style: { backgroundColor: "#fff", position: "relative", overflow: "hidden" },
+          content: `<img src="${back}" alt="${title} back cover" style="width:100%;height:100%;object-fit:cover;display:block;" />`,
         }
       : {
           className: "pf-cover",
@@ -152,8 +152,8 @@ export function azurePages(): PageData[] {
     /* 1 — Front cover */
     {
       className: "pf-cover",
-      style: { backgroundImage: `url('${front}')`, backgroundSize: "cover", backgroundPosition: "center", backgroundColor: "#fff" },
-      content: "",
+      style: { backgroundColor: "#fff", position: "relative", overflow: "hidden" },
+      content: `<img src="${front}" alt="${title}" style="width:100%;height:100%;object-fit:cover;display:block;" />`,
     },
     /* 2 — Title page */
     {
@@ -168,7 +168,7 @@ export function azurePages(): PageData[] {
     /* 3 — Copyright */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner" style="justify-content:flex-end;padding-bottom:2rem;">
+      content: `<div class="pf-page-inner pf-center" style="justify-content:flex-end;padding-bottom:2rem;">
         <p style="font-size:0.55rem;color:#9ca3af;text-align:center;line-height:1.8;">
           Copyright &copy; ${author}<br>All rights reserved.<br><br>
           Published Independently.<br>
@@ -179,9 +179,9 @@ export function azurePages(): PageData[] {
     /* 4 — Table of Contents */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <h2 style="font-size:1.1rem;font-weight:700;text-align:center;margin-bottom:1rem;color:${accent};border-bottom:2px solid #bfdbfe;padding-bottom:0.5rem;">Contents</h2>
-        <ul style="list-style:none;padding:0;margin:0;">
+      content: `<div class="pf-page-inner pf-center">
+        <h2 style="font-size:1.1rem;font-weight:700;margin-bottom:1rem;color:${accent};border-bottom:2px solid #bfdbfe;padding-bottom:0.5rem;">Contents</h2>
+        <ul style="list-style:none;padding:0;margin:0;width:100%;">
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Introduction to Generative AI</span><span>5</span></li>
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Azure AI Foundry Overview</span><span>21</span></li>
           <li style="display:flex;justify-content:space-between;border-bottom:1px solid #f3f4f6;padding:0.35rem 0;color:#374151;font-size:0.7rem;"><span>Navigating Prompt Flow</span><span>45</span></li>
@@ -202,12 +202,12 @@ export function azurePages(): PageData[] {
     /* 6 — Introduction */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <h2 style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;text-align:center;color:#9ca3af;margin-bottom:0.8rem;">Introduction</h2>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+      content: `<div class="pf-page-inner pf-center">
+        <h2 style="font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:#9ca3af;margin-bottom:0.8rem;">Introduction</h2>
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           Harness the power of Artificial Intelligence through Microsoft&rsquo;s premier enterprise platform: <strong>Azure AI Foundry</strong>.
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;">
           Azure AI Foundry includes a versatile and incredibly powerful suite of tools designed to cater to the exacting needs of modern developers, data scientists, and forward-thinking organizations aiming to leverage AI for transformative outcomes.
         </p>
       </div>`,
@@ -215,14 +215,14 @@ export function azurePages(): PageData[] {
     /* 7 — Core concept */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+      content: `<div class="pf-page-inner pf-center">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           This book demystifies the Azure AI Foundry ecosystem by offering a comprehensive overview of its foundational concepts, tools, and diverse services.
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;margin-bottom:0.6rem;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;margin-bottom:0.6rem;">
           We begin with a solid overview of generative AI, detailing its architecture, capabilities, and key differences from traditional machine learning. From there, you will journey into practical applications.
         </p>
-        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:justify;">
+        <p style="font-size:0.7rem;color:#374151;line-height:1.7;text-align:center;">
           You will learn how to navigate <em>Azure AI Foundry Prompt Flow</em>, covering initial setup, creation, debugging, and ultimately building intelligent, multi-modal AI applications that are ready for production.
         </p>
       </div>`,
@@ -230,9 +230,9 @@ export function azurePages(): PageData[] {
     /* 8 — Benefits */
     {
       style: { background: "#fdfaf6" },
-      content: `<div class="pf-page-inner">
+      content: `<div class="pf-page-inner pf-center">
         <h2 style="font-size:0.85rem;font-weight:700;color:${accent};margin-bottom:0.6rem;border-bottom:1px solid #bfdbfe;padding-bottom:0.4rem;">What You Will Learn</h2>
-        <ul style="padding-left:1rem;margin:0;">
+        <ul style="padding-left:1rem;margin:0;text-align:left;">
           <li style="font-size:0.6rem;color:#374151;line-height:1.6;margin-bottom:0.25rem;">Get up to speed on the fundamentals of generative AI.</li>
           <li style="font-size:0.6rem;color:#374151;line-height:1.6;margin-bottom:0.25rem;">Understand essential components of Azure AI Foundry, including Prompt Flow and key tools.</li>
           <li style="font-size:0.6rem;color:#374151;line-height:1.6;margin-bottom:0.25rem;">Build and deploy robust multi-modal applications.</li>
@@ -242,7 +242,7 @@ export function azurePages(): PageData[] {
         </ul>
       </div>`,
     },
-    /* 9 — Back cover (designed since no image exists) */
+    /* 9 — Back cover */
     {
       className: "pf-cover",
       style: { background: `linear-gradient(135deg, ${accent}, #0f172a)`, color: "white" },

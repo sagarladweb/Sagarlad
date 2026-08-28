@@ -105,19 +105,22 @@ export default function ContactPage() {
   return (
     <div className="overflow-x-clip">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="overflow-hidden border-b border-border bg-background pt-6 pb-10 sm:pt-10 sm:pb-14">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8">
+      <header className="relative overflow-hidden border-b border-border bg-background pt-6 pb-10 sm:pt-10 sm:pb-14">
+        {/* About-style gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 z-10" />
+        <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-8">
           {/* Portrait */}
           <div className="lg:col-span-5 relative" data-animate="left">
             <div className="relative w-full max-w-[560px] mx-auto">
-              {/* Background: two overlapping soft circles */}
+              {/* Premium textured background */}
               <div
-                className="absolute -left-8 top-1/6 z-0 h-72 w-72 rounded-full blur-3xl"
-                style={{ background: "rgba(13, 33, 161, 0.06)" }}
-              />
-              <div
-                className="absolute -right-6 bottom-1/5 z-0 h-64 w-64 rounded-full blur-3xl"
-                style={{ background: "rgba(255, 213, 29, 0.10)" }}
+                className="absolute inset-0 -m-4 rounded-2xl opacity-30"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 20% 30%, rgba(255,213,29,0.12) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(13,33,161,0.10) 0%, transparent 50%), repeating-conic-gradient(rgba(255,255,255,0.03) 0% 25%, transparent 0% 50%)",
+                  backgroundSize: "100% 100%, 100% 100%, 20px 20px",
+                }}
               />
               <Image
                 src="/images/section.png"
@@ -125,7 +128,7 @@ export default function ContactPage() {
                 width={800}
                 height={890}
                 priority
-                className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.08)]"
+                className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
                 style={{
                   maskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
                   WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 30%, black 100%)",
@@ -136,13 +139,13 @@ export default function ContactPage() {
 
           {/* Copy */}
           <div className="lg:col-span-7 lg:pl-2 text-center lg:text-left" data-animate="right">
-            <span className="btn-premium inline-block rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand">
+            <span className="inline-block rounded-full bg-white/10 backdrop-blur-sm px-4 py-1.5 text-xs font-semibold tracking-wide text-white border border-white/20">
               Say hello
             </span>
-            <h1 className="mt-4 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
-              Let&apos;s <span className="text-brand">connect.</span>
+            <h1 className="mt-4 font-display text-4xl font-bold leading-tight tracking-tight sm:text-5xl text-white">
+              Let&apos;s <span className="text-accent">connect.</span>
             </h1>
-            <p className="mt-4 max-w-xl text-base sm:text-lg text-muted-foreground leading-relaxed">
+            <p className="mt-4 max-w-xl text-base sm:text-lg text-white/70 leading-relaxed">
               Have a question, feedback on a book, or a thought to share? Send a
               message directly to me.
             </p>
@@ -150,10 +153,10 @@ export default function ContactPage() {
               {bullets.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-3 text-sm font-semibold text-foreground"
+                  className="flex items-start gap-3 text-sm font-semibold text-white/90"
                 >
                   <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-brand"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-accent"
                     aria-hidden="true"
                   />
                   {item}

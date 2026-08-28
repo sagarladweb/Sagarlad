@@ -37,7 +37,10 @@ export default async function BooksPage() {
       />
 
       {/* -------- Hero -------- */}
-      <header className="border-b border-border bg-background text-black">
+      <header className="relative overflow-hidden border-b border-border bg-background text-black">
+        {/* About-style gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 z-10" />
         <div
           className="mx-auto max-w-7xl px-6 sm:px-8"
           style={{ paddingTop: 46, paddingBottom: 79 }}
@@ -49,23 +52,13 @@ export default async function BooksPage() {
             {/* ── Image ── */}
             <div className="lg:col-span-5 flex justify-center lg:justify-start" data-animate="left">
               <div className="relative" style={{ width: 533, maxWidth: "100%" }}>
-                {/* Background pattern: subtle diagonal cross-hatch */}
-                <div className="absolute inset-0 overflow-hidden z-0">
-                  <div
-                    className="absolute inset-0 opacity-[0.04]"
-                    style={{
-                      backgroundImage:
-                        "repeating-linear-gradient(45deg, transparent, transparent 14px, #0d21a1 14px, #0d21a1 15px), repeating-linear-gradient(-45deg, transparent, transparent 14px, #0d21a1 14px, #0d21a1 15px)",
-                    }}
-                  />
-                </div>
                 <Image
                   src="/images/section.png"
                   alt="Sagar Lad"
                   width={840}
                   height={960}
                   priority
-                  className="relative z-10 h-auto w-full"
+                  className="relative z-10 h-auto w-full drop-shadow-[0_20px_40px_rgba(0,0,0,0.3)]"
                   style={{
                     transform: "translateX(-53px) translateY(-10px) scale(1.28)",
                     transformOrigin: "center center",
@@ -79,13 +72,13 @@ export default async function BooksPage() {
             {/* ── Text + Metrics ── */}
             <div className="lg:col-span-7 flex flex-col" data-animate-group="up">
               <div data-animate-item>
-                <span className="btn-premium inline-block w-fit text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
+                <span className="inline-block w-fit text-xs font-semibold tracking-wide text-white/80 bg-white/10 border border-white/20 rounded-full px-4 py-1.5 backdrop-blur-sm">
                   About the book
                 </span>
               </div>
 
               <div data-animate-item className="mt-6">
-                <h1 className="font-display text-[2.5rem] font-semibold leading-[1.08] tracking-tight text-foreground sm:text-5xl xl:text-[3.4rem]">
+                <h1 className="font-display text-[2.5rem] font-semibold leading-[1.08] tracking-tight text-white sm:text-5xl xl:text-[3.4rem]">
                   The MIND UP
                   <br />
                   Theory: Simple
@@ -97,17 +90,17 @@ export default async function BooksPage() {
               </div>
 
               <div data-animate-item>
-                <p className="mt-6 max-w-lg text-base font-normal leading-[1.75] text-muted-foreground">
+                <p className="mt-6 max-w-lg text-base font-normal leading-[1.75] text-white/60">
                   One simple shift to stop overthinking, break free from
                   self-doubt and build an unshakable mindset.
                 </p>
               </div>
 
               <div data-animate-item className="mt-8">
-                <p className="font-display text-xl font-medium tracking-tight text-foreground">
+                <p className="font-display text-xl font-medium tracking-tight text-white">
                   Sagar Lad
                 </p>
-                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-muted-foreground">
+                <p className="mt-1 text-[10px] font-medium uppercase tracking-[0.25em] text-white/50">
                   Author · Investor · Public Speaker
                 </p>
               </div>

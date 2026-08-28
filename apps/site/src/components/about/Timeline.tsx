@@ -99,7 +99,7 @@ const nodes: Node[] = [
   },
 ];
 
-/* Wave y-positions for 7 nodes (oscillating around center) */
+/* Wave y-positions for 7 nodes */
 const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
 
 function buildWavePath(width: number, height: number): string {
@@ -122,10 +122,11 @@ function buildWavePath(width: number, height: number): string {
 
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const [openSet, setOpenSet] = useState<Set<number>>(new Set());
+  const [mobileActive, setMobileActive] = useState<number | null>(null);
 
-  const toggle = useCallback((i: number) => {
+  /* Desktop: hover shows, click toggles (multi-open) */
+  const toggleDesktop = useCallback((i: number) => {
     setOpenSet((prev) => {
       const next = new Set(prev);
       if (next.has(i)) next.delete(i);
@@ -134,26 +135,35 @@ export function Timeline() {
     });
   }, []);
 
-  const show = useCallback((i: number) => {
+  const showDesktop = useCallback((i: number) => {
     setOpenSet((prev) => new Set(prev).add(i));
   }, []);
 
-  // Close all on Escape
+  /* Mobile: single-open, click toggles */
+  const toggleMobile = useCallback((i: number) => {
+    setMobileActive((prev) => (prev === i ? null : i));
+  }, []);
+
+  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpenSet(new Set());
+      if (e.key === "Escape") {
+        setOpenSet(new Set());
+        setMobileActive(null);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // GSAP animations
+  // GSAP animations (desktop + mobile)
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
+      // Heading
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -167,6 +177,7 @@ export function Timeline() {
         }
       );
 
+      // Desktop track slide in
       gsap.fromTo(
         "[data-tl-scroll]",
         { opacity: 0, x: 100 },
@@ -180,6 +191,7 @@ export function Timeline() {
         }
       );
 
+      // Desktop dots
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -193,7 +205,7 @@ export function Timeline() {
         }
       );
 
-      // Animate wave path drawing
+      // Desktop wave path draw
       gsap.fromTo(
         "[data-tl-wave-path]",
         { strokeDashoffset: 2000 },
@@ -206,7 +218,7 @@ export function Timeline() {
         }
       );
 
-      // Dotted connector lines animate in
+      // Desktop connectors
       gsap.fromTo(
         "[data-tl-connector]",
         { scaleY: 0 },
@@ -217,6 +229,35 @@ export function Timeline() {
           ease: "power2.out",
           delay: 0.5,
           scrollTrigger: { trigger: el, start: "top 75%" },
+        }
+      );
+
+      // Mobile: stagger cards in from left
+      gsap.utils.toArray<HTMLElement>("[data-tl-mobile-row]").forEach((row, i) => {
+        gsap.fromTo(
+          row,
+          { opacity: 0, x: -30 },
+          {
+            opacity: 1,
+            x: 0,
+            duration: 0.5,
+            ease: "power3.out",
+            delay: i * 0.08,
+            scrollTrigger: { trigger: row, start: "top 90%" },
+          }
+        );
+      });
+
+      // Mobile: draw vertical axis
+      gsap.fromTo(
+        "[data-tl-mobile-axis]",
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          duration: 1,
+          ease: "power2.out",
+          transformOrigin: "top center",
+          scrollTrigger: { trigger: el, start: "top 80%" },
         }
       );
     }, el);
@@ -244,14 +285,13 @@ export function Timeline() {
             The story, in dates
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
-            Hover or tap any dot to read the chapter behind it.
+            Tap any dot to read the chapter behind it.
           </p>
         </div>
       </div>
 
-      {/* ── Desktop: wave timeline with horizontal scroll ── */}
+      {/* ── Desktop: wave timeline ── */}
       <div
-        ref={scrollRef}
         data-tl-scroll
         className="hidden md:block overflow-x-auto scrollbar-hide"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -269,15 +309,7 @@ export function Timeline() {
             fill="none"
             style={{ top: "60px" }}
           >
-            {/* Shadow/glow */}
-            <path
-              d={wavePath}
-              stroke="rgba(13,33,161,0.06)"
-              strokeWidth="8"
-              strokeLinecap="round"
-              fill="none"
-            />
-            {/* Main wave */}
+            <path d={wavePath} stroke="rgba(13,33,161,0.06)" strokeWidth="8" strokeLinecap="round" fill="none" />
             <path
               data-tl-wave-path
               d={wavePath}
@@ -288,7 +320,6 @@ export function Timeline() {
               strokeDasharray="2000"
               strokeDashoffset="2000"
             />
-            {/* Animated dots along the wave */}
             <path
               d={wavePath}
               stroke="rgba(13,33,161,0.35)"
@@ -334,8 +365,8 @@ export function Timeline() {
                 {/* Dot */}
                 <button
                   data-tl-dot
-                  onMouseEnter={() => show(i)}
-                  onClick={() => toggle(i)}
+                  onMouseEnter={() => showDesktop(i)}
+                  onClick={() => toggleDesktop(i)}
                   aria-expanded={isOpen}
                   aria-label={`${n.title} — ${n.year}`}
                   className="relative z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-full"
@@ -389,7 +420,7 @@ export function Timeline() {
                           alt={n.title}
                           fill
                           sizes="210px"
-                          className="object-cover object-right-top sm:object-top"
+                          className="object-cover"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                         <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
@@ -423,54 +454,69 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Mobile: vertical premium minimal timeline ── */}
+      {/* ── Mobile: vertical timeline with single-open, progress line ── */}
       <div className="md:hidden px-4">
-        <div className="relative pl-7">
-          {/* Vertical dotted axis */}
+        <div className="relative pl-8">
+          {/* Vertical axis (animated) */}
           <div
             aria-hidden="true"
-            className="absolute left-[9px] top-0 bottom-0 w-px"
+            data-tl-mobile-axis
+            className="absolute left-[11px] top-0 bottom-0 w-px"
             style={{
               background: "repeating-linear-gradient(to bottom, rgba(13,33,161,0.2) 0, rgba(13,33,161,0.2) 4px, transparent 4px, transparent 8px)",
             }}
           />
 
-          <div className="space-y-1">
+          {/* Progress fill (blue line that grows as cards open) */}
+          <div
+            aria-hidden="true"
+            className="absolute left-[11px] top-0 w-px bg-brand/40 transition-all duration-500 ease-out"
+            style={{
+              height: mobileActive !== null
+                ? `${((mobileActive + 1) / nodes.length) * 100}%`
+                : "0%",
+            }}
+          />
+
+          <div className="space-y-0">
             {nodes.map((n, i) => {
               const Icon = n.icon;
-              const isOpen = openSet.has(i);
+              const isOpen = mobileActive === i;
 
               return (
-                <div key={n.title} className="relative">
+                <div key={n.title} data-tl-mobile-row className="relative">
                   {/* Dot */}
                   <button
                     data-tl-dot
-                    onMouseEnter={() => show(i)}
-                    onClick={() => toggle(i)}
+                    onClick={() => toggleMobile(i)}
                     aria-expanded={isOpen}
                     aria-label={`${n.title} — ${n.year}`}
-                    className="absolute -left-7 top-2.5 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+                    className="absolute -left-8 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+                    style={{ top: "14px" }}
                   >
                     <span
-                      className={`block h-3 w-3 rounded-full border-2 border-brand transition-all duration-300 ${
+                      className={`block h-3.5 w-3.5 rounded-full border-2 transition-all duration-300 ${
                         isOpen
-                          ? "bg-brand scale-125 shadow-[0_0_0_5px_rgba(13,33,161,0.1)]"
-                          : "bg-background"
+                          ? "bg-brand border-brand scale-125 shadow-[0_0_0_5px_rgba(13,33,161,0.12)]"
+                          : "bg-background border-brand/40"
                       }`}
                     />
                   </button>
 
                   {/* Always-visible row */}
                   <button
-                    onClick={() => toggle(i)}
-                    onMouseEnter={() => show(i)}
-                    className="w-full text-left py-2.5 rounded-lg transition-colors duration-200 hover:bg-brand/5"
+                    onClick={() => toggleMobile(i)}
+                    className="w-full text-left py-3 pl-2 rounded-lg transition-colors duration-200 hover:bg-brand/5"
                   >
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold text-brand tabular-nums">
+                      <span
+                        className={`text-[10px] font-bold tabular-nums transition-colors duration-200 ${
+                          isOpen ? "text-brand" : "text-muted-foreground/50"
+                        }`}
+                      >
                         {n.year}
                       </span>
-                      <span className="w-1 h-1 rounded-full bg-brand/30" />
+                      <span className="w-1 h-1 rounded-full bg-brand/20" />
                       <span
                         className={`text-sm font-semibold transition-colors duration-200 ${
                           isOpen ? "text-brand" : "text-foreground"
@@ -479,7 +525,7 @@ export function Timeline() {
                         {n.title}
                       </span>
                     </div>
-                    <span className="block text-[11px] text-muted-foreground/60 mt-0.5 pl-0">
+                    <span className="block text-[11px] text-muted-foreground/50 mt-0.5">
                       {n.oneLiner}
                     </span>
                   </button>
@@ -488,20 +534,20 @@ export function Timeline() {
                   <div
                     className="overflow-hidden transition-all duration-400 ease-out"
                     style={{
-                      maxHeight: isOpen ? "300px" : "0px",
+                      maxHeight: isOpen ? "340px" : "0px",
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
-                    <div className="pb-4 pt-1">
-                      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden ml-1">
+                    <div className="pb-4 pt-1 pl-2">
+                      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
                         {n.image && (
-                          <div className="relative h-28 w-full overflow-hidden">
+                          <div className="relative aspect-[16/9] w-full overflow-hidden">
                             <Image
                               src={n.image}
                               alt={n.title}
                               fill
                               sizes="100vw"
-                              className="object-cover object-right-top"
+                              className="object-cover"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
                             <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">

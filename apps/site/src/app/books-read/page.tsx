@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import { PageHeader } from "@/components/PageHeader";
 import { BookLibrary } from "@/components/books/BookLibrary";
 import { pageMetadata } from "@/lib/site";
 import { getPublishedBooks } from "@/lib/content";
@@ -28,12 +27,23 @@ export default async function BooksReadPage() {
   const books = dbBooks.length > 0 ? dbBooks : FALLBACK_READ_BOOKS;
 
   return (
-    <>
-      <PageHeader
-        eyebrow="Books I read"
-        title="What's on my shelf"
-        subtitle="Books that changed how I think — and the one clear lesson each one left me with."
-      />
+    <div className="overflow-x-clip">
+      {/* Hero — About-style gradient */}
+      <header className="relative overflow-hidden border-b border-border bg-background py-14 md:py-20">
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 z-10" />
+        <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6">
+          <p className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-white/80 border border-white/20 rounded-full px-4 py-1.5 bg-white/10 backdrop-blur-sm">
+            Books I read
+          </p>
+          <h1 className="mt-4 font-display text-4xl md:text-5xl font-bold tracking-tight text-white">
+            What&apos;s on my shelf
+          </h1>
+          <p className="mt-4 max-w-2xl text-white/60 leading-relaxed">
+            Books that changed how I think — and the one clear lesson each one left me with.
+          </p>
+        </div>
+      </header>
 
       <div className="mx-auto max-w-6xl px-4 sm:px-6 py-16">
         {books.length === 0 ? (
@@ -51,6 +61,6 @@ export default async function BooksReadPage() {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 }

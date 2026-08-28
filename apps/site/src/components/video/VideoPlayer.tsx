@@ -53,7 +53,7 @@ export function VideoPlayer({
       >
         {playing ? (
           <iframe
-            src={`${src}?autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3`}
+            src={`${src}${src.includes("?") ? "&" : "?"}autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3`}
             title={title}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
