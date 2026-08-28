@@ -99,7 +99,6 @@ const nodes: Node[] = [
   },
 ];
 
-/* Wave y-positions: alternate above/below center */
 const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
 
 function buildWavePath(width: number, height: number): string {
@@ -111,27 +110,27 @@ function buildWavePath(width: number, height: number): string {
   for (let i = 1; i < pts.length; i++) {
     const prev = pts[i - 1];
     const curr = pts[i];
-    const cx1 = prev.x + (curr.x - prev.x) * 0.5;
-    d += ` C ${cx1} ${prev.y}, ${cx1} ${curr.y}, ${curr.x} ${curr.y}`;
+    const cx = prev.x + (curr.x - prev.x) * 0.5;
+    d += ` C ${cx} ${prev.y}, ${cx} ${curr.y}, ${curr.x} ${curr.y}`;
   }
   return d;
 }
 
+const TRACK_W = 1100;
+const TRACK_H = 160;
+
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
   const [activeCard, setActiveCard] = useState<number | null>(null);
   const [pinnedCard, setPinnedCard] = useState<number | null>(null);
   const [flipping, setFlipping] = useState<number | null>(null);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   const displayCard = pinnedCard ?? activeCard;
 
-  const hoverIn = useCallback((i: number) => {
-    setActiveCard(i);
-  }, []);
-
-  const hoverOut = useCallback(() => {
-    setActiveCard(null);
-  }, []);
+  const hoverIn = useCallback((i: number) => setActiveCard(i), []);
+  const hoverOut = useCallback(() => setActiveCard(null), []);
 
   const handleClick = useCallback((i: number) => {
     setPinnedCard((prev) => {
@@ -147,6 +146,7 @@ export function Timeline() {
     });
   }, []);
 
+  // Escape key
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -158,14 +158,28 @@ export function Timeline() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  /* GSAP — entrance from right, wave draw, dot pop */
+  // Track horizontal scroll to position card below active dot
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    const onScroll = () => setScrollLeft(track.scrollLeft);
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => track.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Card X position: align with the active dot's center, accounting for scroll
+  const cardLeftPx =
+    displayCard !== null
+      ? (displayCard / (nodes.length - 1)) * TRACK_W - scrollLeft
+      : 0;
+
+  // GSAP animations
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      /* Heading */
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -179,7 +193,6 @@ export function Timeline() {
         }
       );
 
-      /* Dots track — slide from right */
       gsap.fromTo(
         "[data-tl-track]",
         { opacity: 0, x: 100 },
@@ -196,7 +209,6 @@ export function Timeline() {
         }
       );
 
-      /* Dots — pop in */
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -214,7 +226,6 @@ export function Timeline() {
         }
       );
 
-      /* Wave path — draw */
       gsap.fromTo(
         "[data-tl-wave]",
         { strokeDashoffset: 2000 },
@@ -231,7 +242,6 @@ export function Timeline() {
         }
       );
 
-      /* Connectors — grow */
       gsap.fromTo(
         "[data-tl-connector]",
         { scaleY: 0 },
@@ -253,8 +263,6 @@ export function Timeline() {
     return () => ctx.revert();
   }, []);
 
-  const TRACK_W = 1100;
-  const TRACK_H = 160;
   const wavePath = buildWavePath(TRACK_W, TRACK_H);
   const cardNode = displayCard !== null ? nodes[displayCard] : null;
   const CardIcon = cardNode?.icon;
@@ -262,11 +270,11 @@ export function Timeline() {
   return (
     <section
       ref={sectionRef}
-      className="relative py-16 md:py-24 border-b border-border bg-background"
+      className="relative py-12 md:py-20 border-b border-border bg-background"
       aria-label="Journey timeline"
     >
       {/* Header */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-8 md:mb-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-6 md:mb-10">
         <div className="text-center" data-tl-heading>
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand border border-brand/20 rounded-full px-4 py-1.5 bg-transparent">
             Where it started
@@ -280,10 +288,11 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* Scrollable dots track — 4 visible, rest on scroll */}
+      {/* Scrollable dots track */}
       <div
+        ref={trackRef}
         data-tl-track
-        className="overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-4"
+        className="overflow-x-auto scrollbar-hide px-4 sm:px-6 pb-2"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         <div
@@ -303,7 +312,6 @@ export function Timeline() {
             fill="none"
             style={{ top: "20px" }}
           >
-            {/* Thick background track */}
             <path
               d={wavePath}
               stroke="rgba(13,33,161,0.06)"
@@ -311,7 +319,6 @@ export function Timeline() {
               strokeLinecap="round"
               fill="none"
             />
-            {/* Animated draw path */}
             <path
               data-tl-wave
               d={wavePath}
@@ -322,7 +329,6 @@ export function Timeline() {
               strokeDasharray="2000"
               strokeDashoffset="2000"
             />
-            {/* Dotted overlay */}
             <path
               d={wavePath}
               stroke="rgba(13,33,161,0.35)"
@@ -332,19 +338,18 @@ export function Timeline() {
               strokeDasharray="4 8"
               className="animate-wave-dots"
             />
-            {/* Progress line — fills as dots are activated */}
+            {/* Progress line up to active dot */}
             {displayCard !== null && (
               <path
                 d={(() => {
-                  /* Build partial path up to the active dot */
                   const pts = nodes.map((_, i) => ({
                     x: (i / (nodes.length - 1)) * TRACK_W,
                     y: (WAVE_Y[i] / 100) * TRACK_H,
                   }));
                   let d = `M ${pts[0].x} ${pts[0].y}`;
-                  for (let i = 1; i <= displayCard; i++) {
-                    const prev = pts[i - 1];
-                    const curr = pts[i];
+                  for (let j = 1; j <= displayCard; j++) {
+                    const prev = pts[j - 1];
+                    const curr = pts[j];
                     const cx = prev.x + (curr.x - prev.x) * 0.5;
                     d += ` C ${cx} ${prev.y}, ${cx} ${curr.y}, ${curr.x} ${curr.y}`;
                   }
@@ -354,9 +359,7 @@ export function Timeline() {
                 strokeWidth="3"
                 strokeLinecap="round"
                 fill="none"
-                style={{
-                  transition: "all 0.4s ease-out",
-                }}
+                style={{ transition: "all 0.4s ease-out" }}
               />
             )}
           </svg>
@@ -378,7 +381,7 @@ export function Timeline() {
                   transform: "translate(-50%, -50%)",
                 }}
               >
-                {/* Connector from dot to card area */}
+                {/* Connector line */}
                 <div
                   data-tl-connector
                   aria-hidden="true"
@@ -436,77 +439,107 @@ export function Timeline() {
         </div>
       </div>
 
-      {/* ── Card display area — centered, no scroll, flip animation ── */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-2">
+      {/* Card area — positioned directly below the active dot */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-1">
+        {/* Vertical connector from track to card */}
+        <div className="relative mx-auto" style={{ maxWidth: "1100px", minWidth: "700px" }}>
+          {displayCard !== null && (
+            <div
+              aria-hidden="true"
+              className="absolute top-0 w-px"
+              style={{
+                left: `${cardLeftPx + TRACK_W / 2}px`,
+                height: "20px",
+                background:
+                  "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)",
+                transition: "left 0.3s ease-out",
+                transform: "translateX(-50%)",
+              }}
+            />
+          )}
+        </div>
+
+        {/* Card — horizontally aligned with dot, centered on card */}
         <div
           className="relative mx-auto"
           style={{
-            maxWidth: "400px",
-            minHeight: displayCard !== null ? "340px" : "0px",
+            maxWidth: "1100px",
+            minWidth: "700px",
+            minHeight: displayCard !== null ? "320px" : "0px",
             transition: "min-height 0.3s ease-out",
           }}
         >
           {cardNode && (
             <div
               key={displayCard}
-              className="rounded-2xl border border-border bg-card shadow-xl overflow-visible"
+              className="absolute"
               style={{
-                perspective: "800px",
-                transformStyle: "preserve-3d",
-                animation:
-                  flipping === displayCard
-                    ? "tlCardFlip 0.5s ease-out"
-                    : "tlCardFadeIn 0.3s ease-out",
+                left: `${cardLeftPx + TRACK_W / 2}px`,
+                transform: "translateX(-50%)",
+                width: "340px",
+                maxWidth: "calc(50vw - 2rem)",
+                transition: "left 0.3s ease-out",
               }}
             >
-              {cardNode.image && (
-                <div className="relative h-44 w-full overflow-hidden rounded-t-2xl">
-                  <Image
-                    src={cardNode.image}
-                    alt={cardNode.title}
-                    fill
-                    sizes="400px"
-                    className="object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-                  <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 border border-white/40 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                    {CardIcon && <CardIcon className="w-3 h-3" />}
-                    {cardNode.tag}
-                  </span>
-                </div>
-              )}
-              <div className="p-5">
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">
-                    {cardNode.year}
-                  </span>
-                  <span className="w-1 h-1 rounded-full bg-brand/30" />
-                  <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">
-                    {cardNode.oneLiner}
-                  </span>
-                </div>
-                <h3 className="font-display text-lg font-bold text-foreground">
-                  {cardNode.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                  {cardNode.description}
-                </p>
-                {cardNode.href && (
-                  <Link
-                    href={cardNode.href}
-                    className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold text-brand hover:underline"
-                  >
-                    <BookOpen className="w-3 h-3" />
-                    {cardNode.hrefLabel}
-                  </Link>
+              <div
+                className="rounded-2xl border border-border bg-card shadow-xl overflow-visible"
+                style={{
+                  perspective: "800px",
+                  transformStyle: "preserve-3d",
+                  animation:
+                    flipping === displayCard
+                      ? "tlCardFlip 0.5s ease-out"
+                      : "tlCardFadeIn 0.3s ease-out",
+                }}
+              >
+                {cardNode.image && (
+                  <div className="relative h-40 w-full overflow-hidden rounded-t-2xl">
+                    <Image
+                      src={cardNode.image}
+                      alt={cardNode.title}
+                      fill
+                      sizes="340px"
+                      className="object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 border border-white/40 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                      {CardIcon && <CardIcon className="w-3 h-3" />}
+                      {cardNode.tag}
+                    </span>
+                  </div>
                 )}
+                <div className="p-4">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">
+                      {cardNode.year}
+                    </span>
+                    <span className="w-1 h-1 rounded-full bg-brand/30" />
+                    <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">
+                      {cardNode.oneLiner}
+                    </span>
+                  </div>
+                  <h3 className="font-display text-base font-bold text-foreground">
+                    {cardNode.title}
+                  </h3>
+                  <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">
+                    {cardNode.description}
+                  </p>
+                  {cardNode.href && (
+                    <Link
+                      href={cardNode.href}
+                      className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand hover:underline"
+                    >
+                      <BookOpen className="w-3 h-3" />
+                      {cardNode.hrefLabel}
+                    </Link>
+                  )}
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Keyframes */}
       <style
         dangerouslySetInnerHTML={{
           __html: `
