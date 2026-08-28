@@ -47,6 +47,11 @@ export default async function EditPostPage({
           featured: post.featured,
           published: post.published,
           scheduledAt: post.scheduledAt?.toISOString() ?? null,
+          sources: ((post.sources as { type: string; url: string; title: string }[] | null) ?? []).map((s) => ({
+            type: s.type as "link" | "video" | "image",
+            url: s.url,
+            title: s.title,
+          })),
         }}
       />
     </div>

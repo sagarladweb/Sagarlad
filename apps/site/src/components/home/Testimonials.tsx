@@ -108,7 +108,7 @@ export function Testimonials() {
   const t = testimonials[index];
 
   return (
-    <section ref={rootRef} className="card-hover py-20 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
+    <section ref={rootRef} className="card-hover py-16 md:py-24 border-b border-border bg-card/40 group/carousel" aria-label="Testimonials">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
         <div className="text-center" data-animate-group>
           <Pill data-animate-item>Testimonials</Pill>

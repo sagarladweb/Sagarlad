@@ -6,12 +6,12 @@ import { ArrowRight } from "lucide-react";
 import { DotPagination } from "@/components/ui/CarouselNav";
 
 const photos = [
-  { src: "/about.webp", alt: "Sagar Lad", className: "object-top" },
-  { src: "/about 2.webp", alt: "Sagar Lad", className: "object-center" },
-  { src: "/about 3.webp", alt: "Sagar Lad", className: "object-center" },
-  { src: "/about 4.webp", alt: "Sagar Lad", className: "object-center" },
-  { src: "/about 5.webp", alt: "Sagar Lad", className: "object-center" },
-  { src: "/about 6.webp", alt: "Sagar Lad", className: "object-top" },
+  { src: "/images/profile/about.webp", alt: "Sagar Lad", className: "object-top" },
+  { src: "/images/profile/about-2.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/images/profile/about-3b.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/images/profile/about-4.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/images/profile/about-5.webp", alt: "Sagar Lad", className: "object-center" },
+  { src: "/images/profile/about-6.webp", alt: "Sagar Lad", className: "object-top" },
 ];
 
 export function SagarGallery() {
@@ -35,7 +35,7 @@ export function SagarGallery() {
   }
 
   return (
-    <section className="border-b border-border bg-background py-14 md:py-16" aria-label="Get to know Sagar">
+    <section className="border-b border-border bg-background py-16 md:py-24" aria-label="Get to know Sagar">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         <div className="relative" data-animate>
           <div

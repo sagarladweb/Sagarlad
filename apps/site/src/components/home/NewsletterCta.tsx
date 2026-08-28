@@ -57,7 +57,7 @@ export function NewsletterCta() {
 
   return (
     <section
-      className="border-b border-border bg-background py-20 md:py-24"
+      className="border-b border-border bg-background py-16 md:py-24"
       aria-label="Subscribe to the newsletter"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
@@ -72,6 +72,7 @@ export function NewsletterCta() {
               src="/blog.webp"
               alt="Blog"
               className="absolute inset-0 w-full h-full object-cover"
+              style={{ transform: "scale(1.04)" }}
             />
             <div className="absolute bottom-0 inset-x-0 p-6 sm:p-8 bg-gradient-to-t from-black/60 to-transparent">
               <SiteLogo light className="h-8 w-auto" />

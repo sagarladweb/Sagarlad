@@ -11,6 +11,8 @@ export const metadata: Metadata = pageMetadata({
   path: "/mentorship",
 });
 
+export const revalidate = 604800;
+
 export default function MentorshipPage() {
   return (
     <div className="bg-background overflow-x-clip">

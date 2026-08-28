@@ -4,13 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
   ChevronDown,
-  BookOpen,
-  User,
-  Mail,
-  BookMarked,
-  Users,
-  Mic,
-  Share2,
 } from "lucide-react";
 import { SOCIAL_ICONS, type IconType } from "@/lib/social-icons";
 import { SiteLogo } from "@/components/SiteLogo";
@@ -21,31 +14,29 @@ const footerCols: {
     label: string;
     href: string;
     external?: boolean;
-    icon: React.ComponentType<{ className?: string }>;
   }[];
 }[] = [
   {
     title: "Explore",
     links: [
-      { label: "Blogs", href: "/blog", icon: BookOpen },
-      { label: "About", href: "/about", icon: User },
-      { label: "Contact", href: "/contact", icon: Mail },
+      { label: "Blogs", href: "/blog" },
+      { label: "About", href: "/about" },
+      { label: "Contact", href: "/contact" },
     ],
   },
   {
     title: "Books",
     links: [
-      { label: "Books", href: "/books", icon: BookOpen },
-      { label: "Books I read", href: "/books-read", icon: BookMarked },
+      { label: "Books", href: "/books" },
+      { label: "Books I read", href: "/books-read" },
     ],
   },
   {
     title: "More",
     links: [
-      { label: "Mentorship", href: "https://topmate.io/sagar_lad", external: true, icon: Users },
-      { label: "Newsletter", href: "/newsletter", icon: Mail },
-      { label: "Speaking", href: "/speaking", icon: Mic },
-      { label: "Socials", href: "/socials", icon: Share2 },
+      { label: "Mentorship", href: "https://topmate.io/sagar_lad", external: true },
+      { label: "Newsletter", href: "/newsletter" },
+      { label: "Speaking", href: "/speaking" },
     ],
   },
 ];
@@ -55,17 +46,17 @@ const LEGAL_LINKS = [
   { label: "Terms", href: "/terms" },
 ];
 
-/* Marquee order: Instagram, YouTube, LinkedIn first, then the rest */
-const MARQUEE_ORDER = ["instagram", "youtube", "linkedin"];
+/* Preferred social order for footer icons */
+const FOOTER_SOCIAL_KEYS = ["instagram", "youtube", "linkedin", "twitter"] as const;
 
-function sortSocialsForMarquee(
+function sortSocials(
   socials: { label: string; href: string; icon: IconType | null; logoUrl: string | null }[]
 ) {
   const preferred: typeof socials = [];
   const rest: typeof socials = [];
   for (const s of socials) {
     const key = s.label.toLowerCase();
-    const match = MARQUEE_ORDER.findIndex((m) => key.includes(m));
+    const match = FOOTER_SOCIAL_KEYS.findIndex((m) => key.includes(m));
     if (match !== -1) {
       preferred[match] = s;
     } else {
@@ -101,8 +92,11 @@ export function Footer() {
     setOpenCol((prev) => (prev === title ? null : title));
   };
 
-  const sortedSocials = sortSocialsForMarquee(socials);
-  const marqueeItems = [...sortedSocials, ...sortedSocials];
+  const sortedSocials = sortSocials(socials);
+  /* Desktop shows only 3 (IG/YT/LI); mobile shows 4 (IG/YT/LI/X) */
+  const desktopSocials = sortedSocials.filter((s) =>
+    ["instagram", "youtube", "linkedin"].some((k) => s.label.toLowerCase().includes(k))
+  );
 
   return (
     <footer className="border-t border-foreground/10 bg-foreground text-background">
@@ -118,15 +112,15 @@ export function Footer() {
               one conversation at a time.
             </p>
 
-            {/* Desktop social icons */}
+            {/* Desktop social icons — 3 static */}
             <div className="mt-5 hidden md:flex items-center gap-2 flex-wrap">
-              {sortedSocials.map((s) =>
+              {desktopSocials.map((s) =>
                 s.logoUrl || s.icon ? (
                   <a
                     key={s.label}
                     href={s.href}
                     aria-label={s.label}
-                    className="p-2.5 rounded-full border border-background/25 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors overflow-hidden"
+                    className="p-2.5 rounded-full border border-background/25 text-background/70 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors overflow-hidden"
                   >
                     {s.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -167,79 +161,75 @@ export function Footer() {
                         isOpen ? "max-h-96 pb-3" : "max-h-0"
                       }`}
                     >
-                      <div className="flex items-center gap-3 pl-1">
+                      <ul className="space-y-2 pl-1">
                         {col.links.map((l) => (
-                          <Link
-                            key={l.href + l.label}
-                            href={l.href}
-                            {...(l.external
-                              ? { target: "_blank", rel: "noopener noreferrer" }
-                              : {})}
-                            aria-label={l.label}
-                            className="p-2.5 rounded-full border border-background/25 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors"
-                          >
-                            <l.icon className="w-4 h-4" />
-                          </Link>
+                          <li key={l.href + l.label}>
+                            <Link
+                              href={l.href}
+                              {...(l.external
+                                ? { target: "_blank", rel: "noopener noreferrer" }
+                                : {})}
+                              className="inline-flex items-center gap-2 text-sm text-background/70 hover:text-background transition-colors"
+                            >
+                              {l.label}
+                            </Link>
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Desktop: 3-column grid — icons only */}
+            {/* Desktop: 3-column grid — icon + text labels */}
             <div className="hidden md:grid grid-cols-3 gap-6">
               {footerCols.map((col) => (
                 <div key={col.title}>
                   <h4 className="text-xs font-semibold uppercase tracking-wider text-background/50 mb-3">
                     {col.title}
                   </h4>
-                  <div className="flex items-center gap-3">
+                  <ul className="space-y-2.5">
                     {col.links.map((l) => (
-                      <Link
-                        key={l.href + l.label}
-                        href={l.href}
-                        {...(l.external
-                          ? { target: "_blank", rel: "noopener noreferrer" }
-                          : {})}
-                        aria-label={l.label}
-                        className="p-2.5 rounded-full border border-background/25 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors"
-                      >
-                        <l.icon className="w-4 h-4" />
-                      </Link>
+                      <li key={l.href + l.label}>
+                        <Link
+                          href={l.href}
+                          {...(l.external
+                            ? { target: "_blank", rel: "noopener noreferrer" }
+                            : {})}
+                          className="inline-flex items-center gap-2 text-sm text-background/70 hover:text-background transition-colors"
+                        >
+                          {l.label}
+                        </Link>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 </div>
               ))}
             </div>
           </div>
         </div>
 
-        {/* Mobile social marquee — all socials, IG/YT/LI first */}
+        {/* Mobile/Tablet social icons — static, 4 icons (IG/YT/LI/X) */}
         {sortedSocials.length > 0 && (
-          <div className="mt-8 md:hidden overflow-hidden">
-            <div className="flex w-max gap-4 animate-marquee hover:[animation-play-state:paused]"
-              style={{ animationDuration: "15s" }}
-            >
-              {marqueeItems.map((s, i) =>
-                s.logoUrl || s.icon ? (
-                  <a
-                    key={`${s.label}-${i}`}
-                    href={s.href}
-                    aria-label={s.label}
-                    className="p-2.5 rounded-full border border-background/25 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors shrink-0 overflow-hidden"
-                  >
-                    {s.logoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={s.logoUrl} alt="" className="h-4 w-4 object-contain" />
-                    ) : s.icon ? (
-                      <s.icon className="w-4 h-4" />
-                    ) : null}
-                  </a>
-                ) : null
-              )}
-            </div>
+          <div className="mt-8 md:hidden flex items-center justify-center gap-4">
+            {sortedSocials.map((s) =>
+              s.logoUrl || s.icon ? (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  aria-label={s.label}
+                  className="p-2.5 rounded-full border border-background/25 text-background/70 hover:bg-accent hover:text-accent-foreground hover:border-accent transition-colors overflow-hidden"
+                >
+                  {s.logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={s.logoUrl} alt="" className="h-4 w-4 object-contain" />
+                  ) : s.icon ? (
+                    <s.icon className="w-4 h-4" />
+                  ) : null}
+                </a>
+              ) : null
+            )}
           </div>
         )}
 

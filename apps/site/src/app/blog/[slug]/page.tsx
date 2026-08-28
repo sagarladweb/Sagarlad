@@ -91,6 +91,15 @@ export default async function PostPage({ params }: Props) {
             url: SITE.url,
           },
           mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
+          citation: Array.isArray(post.sources)
+            ? (post.sources as { type: string; url: string; title: string }[])
+                .filter((s) => s.type === "link" && s.url)
+                .map((s) => ({
+                  "@type": "WebPage",
+                  name: s.title || s.url,
+                  url: s.url,
+                }))
+            : undefined,
         }}
       />
       <JsonLd
@@ -105,7 +114,15 @@ export default async function PostPage({ params }: Props) {
         }}
       />
       <ReadingProgress />
-      <PostArticle post={post} related={relatedPosts} />
+      <PostArticle
+        post={{
+          ...post,
+          sources: Array.isArray(post.sources)
+            ? (post.sources as { type: string; url: string; title: string }[])
+            : null,
+        }}
+        related={relatedPosts}
+      />
     </article>
   );
 }

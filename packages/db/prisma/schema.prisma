@@ -107,6 +107,7 @@ model Post {
   showCover   Boolean    @default(true)
   showAuthorBox Boolean  @default(true)
   footerNote  String?
+  sources     Json?    // [{ type: "link"|"video"|"image", url: string, title: string }]
   deletedAt   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt

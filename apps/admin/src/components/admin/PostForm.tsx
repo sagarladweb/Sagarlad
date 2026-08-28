@@ -18,6 +18,10 @@ import {
   CalendarClock,
   CalendarCheck,
   Trash2,
+  Link2,
+  Video,
+  Image,
+  Plus,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
 import { Dropdown } from "@/components/ui/Dropdown";
@@ -28,6 +32,7 @@ import { enqueue } from "@/lib/offline-queue";
 
 type Category = { id: string; name: string };
 type SaveState = "idle" | "loading" | "saved" | "error";
+type Source = { type: "link" | "video" | "image"; url: string; title: string };
 
 export function PostForm({
   categories,
@@ -45,6 +50,7 @@ export function PostForm({
     featured: boolean;
     published: boolean;
     scheduledAt: string | null;
+    sources?: Source[] | null;
   };
 }) {
   const router = useRouter();
@@ -65,6 +71,7 @@ export function PostForm({
     featured: initial?.featured ?? false,
     published: initial?.published ?? true,
     scheduledAt: initial?.scheduledAt ?? "",
+    sources: initial?.sources ?? [],
   });
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [previewError, setPreviewError] = useState("");
@@ -402,6 +409,7 @@ export function PostForm({
         if (raw) draft = JSON.parse(raw);
       } catch {}
       if (!draft || typeof draft.form !== "object") return null;
+      if (typeof draft.form.sources === "undefined") draft.form.sources = [];
       setForm((f) => ({ ...f, ...draft!.form }));
       if (withPostId && draft.postId) setPostId(draft.postId);
       return draft;
@@ -491,7 +499,8 @@ export function PostForm({
     form.categoryId !== (initial?.categoryId ?? "") ||
     form.featured !== (initial?.featured ?? false) ||
     form.published !== (initial?.published ?? true) ||
-    form.scheduledAt !== (initial?.scheduledAt ?? "");
+    form.scheduledAt !== (initial?.scheduledAt ?? "") ||
+    JSON.stringify(form.sources) !== JSON.stringify(initial?.sources ?? []);
 
   // Intercept browser back/tab closure when changes are unsaved
   useEffect(() => {
@@ -878,6 +887,83 @@ export function PostForm({
                 placeholder="A line or two that shows up on the post card."
                 className={`${input} resize-y`}
               />
+            </div>
+          </div>
+
+          {/* Sources Section */}
+          <div className="rounded-2xl border border-border bg-card card-grad p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <Link2 className="w-4 h-4 text-muted-foreground" />
+              <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground">
+                Sources
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Add references, videos, or images to boost SEO and AI overview ranking.
+            </p>
+            <div className="space-y-2">
+              {(form.sources ?? []).map((src, idx) => (
+                <div key={idx} className="flex items-start gap-2 rounded-xl border border-border bg-background p-2.5">
+                  <span className="mt-1 shrink-0 text-muted-foreground">
+                    {src.type === "link" && <Link2 className="w-3.5 h-3.5" />}
+                    {src.type === "video" && <Video className="w-3.5 h-3.5" />}
+                    {src.type === "image" && <Image className="w-3.5 h-3.5" />}
+                  </span>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <input
+                      value={src.title}
+                      onChange={(e) => {
+                        const next = [...(form.sources ?? [])];
+                        next[idx] = { ...next[idx], title: e.target.value };
+                        setForm((f) => ({ ...f, sources: next }));
+                        autosave();
+                      }}
+                      placeholder="Source title"
+                      className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-accent"
+                    />
+                    <input
+                      value={src.url}
+                      onChange={(e) => {
+                        const next = [...(form.sources ?? [])];
+                        next[idx] = { ...next[idx], url: e.target.value };
+                        setForm((f) => ({ ...f, sources: next }));
+                        autosave();
+                      }}
+                      placeholder="https://..."
+                      className="w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-xs outline-none focus:ring-1 focus:ring-accent"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const next = (form.sources ?? []).filter((_, i) => i !== idx);
+                      setForm((f) => ({ ...f, sources: next }));
+                      autosave();
+                    }}
+                    className="mt-1 shrink-0 p-1 text-muted-foreground hover:text-red-600 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              {(["link", "video", "image"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => {
+                    const next = [...(form.sources ?? []), { type: t, url: "", title: "" }];
+                    setForm((f) => ({ ...f, sources: next }));
+                  }}
+                  className="inline-flex items-center gap-1 rounded-lg border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+                >
+                  <Plus className="w-3 h-3" />
+                  {t === "link" && "Link"}
+                  {t === "video" && "Video"}
+                  {t === "image" && "Image"}
+                </button>
+              ))}
             </div>
           </div>
 

@@ -7,6 +7,29 @@ import { downloadEbook, EBOOK_MIME_TYPES } from "@/lib/storage";
 
 export const runtime = "nodejs";
 
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol !== "https:") return false;
+    const host = parsed.hostname;
+    if (
+      host === "localhost" ||
+      host === "127.0.0.1" ||
+      host === "::1" ||
+      host.startsWith("10.") ||
+      host.startsWith("192.168.") ||
+      host.startsWith("172.") ||
+      host === "169.254.169.254" ||
+      host.endsWith(".internal")
+    ) {
+      return false;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const EXT_BY_TYPE: Record<string, string> = {
   "application/pdf": "pdf",
   "application/epub+zip": "epub",
@@ -129,6 +152,10 @@ export async function POST(
           "X-Content-Type-Options": "nosniff",
         },
       });
+    }
+
+    if (!isSafeUrl(book.buyUrl!)) {
+      return NextResponse.json({ error: "This eBook is not available for download." }, { status: 400 });
     }
 
     const controller = new AbortController();

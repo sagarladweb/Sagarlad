@@ -3,7 +3,7 @@ import Image from "next/image";
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { NewsletterForm } from "@/components/NewsletterForm";
-import { FaYoutube, FaInstagram, FaTelegram } from "react-icons/fa6";
+import { FaYoutube, FaInstagram, FaTelegram } from "@/lib/icons";
 import { SITE, pageMetadata } from "@/lib/site";
 import { JsonLd } from "@/components/JsonLd";
 
@@ -13,6 +13,8 @@ export const metadata: Metadata = pageMetadata({
     "The Sagar Lad Letter — a free weekly email on money, life and everything in between.",
   path: "/newsletter",
 });
+
+export const revalidate = 604800;
 
 export default function NewsletterPage() {
   return (

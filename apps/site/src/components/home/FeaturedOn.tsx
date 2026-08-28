@@ -18,7 +18,7 @@ const PRESS = [
 
 function Logo({ name, src }: { name: string; src: string }) {
   return (
-    <span className="flex h-10 w-24 items-center justify-center sm:h-12 sm:w-28">
+    <span className="flex h-10 w-24 items-center justify-center sm:h-12 sm:w-28 shrink-0">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
@@ -34,29 +34,22 @@ function Logo({ name, src }: { name: string; src: string }) {
 export function FeaturedOn() {
   return (
     <section
-      className="py-14 md:py-16 border-b border-border bg-card/40"
+      className="py-16 md:py-24 border-b border-border bg-card/40"
       aria-label="Featured in the press"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center lg:text-left">
+      <div className="text-center">
         <Pill data-animate="blur">Featured on</Pill>
 
-        {/* Mobile + Tablet — seamless marquee */}
-        <div className="mt-8 lg:hidden marquee-mask overflow-hidden">
+        {/* Marquee on all viewports */}
+        <div className="mt-10 marquee-mask overflow-hidden">
           <div
-            className="flex w-max gap-6 animate-marquee py-2 hover:[animation-play-state:paused]"
+            className="flex w-max gap-10 animate-marquee py-2 hover:[animation-play-state:paused]"
             style={{ animationDuration: "30s" }}
           >
             {[...PRESS, ...PRESS].map((logo, i) => (
               <Logo key={`${logo.name}-${i}`} name={logo.name} src={logo.src} />
             ))}
           </div>
-        </div>
-
-        {/* Desktop — static wrap grid */}
-        <div className="mt-8 hidden lg:flex flex-wrap items-center justify-center gap-x-6 gap-y-6 sm:gap-x-8">
-          {PRESS.map((logo) => (
-            <Logo key={logo.name} name={logo.name} src={logo.src} />
-          ))}
         </div>
       </div>
     </section>

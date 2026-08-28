@@ -12,9 +12,8 @@ const INNER = 106;
 const MID = (OUTER + INNER) / 2;
 const GAP = 1.4;
 const STEP = 360 / MINDUP_PILLARS.length;
-const TRACE_DUR = 1800; // ms per segment trace
+const TRACE_DUR = 1800;
 
-// Real Lucide icons for each pillar
 const PILLAR_ICONS: Record<string, typeof Brain> = {
   M: Brain,
   I: Heart,
@@ -46,7 +45,6 @@ function sectorPath(startDeg: number, endDeg: number): string {
   ].join(" ");
 }
 
-// Trace path: the outer arc of each sector (for the glowing line)
 function traceArc(startDeg: number, endDeg: number): string {
   const s = startDeg + GAP;
   const e = endDeg - GAP;
@@ -61,7 +59,7 @@ type RingProps = {
   activePillar: MindUpPillar | null;
   playing: boolean;
   playIdx: number;
-  playProgress: number; // 0-1 for current segment
+  playProgress: number;
   onHover: (id: string) => void;
   onLeave: () => void;
   onSelect: (id: string) => void;
@@ -88,67 +86,26 @@ function PillarRing({
         <svg viewBox="0 0 400 400" className="h-full w-full" role="img" aria-labelledby="mindup-title">
           <title id="mindup-title">Mind Up Theory — Six Pillars. One Unshakable Life.</title>
 
-          <defs>
-            {/* Glow filter for active tracing */}
-            <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="4" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-            {/* Stronger glow for the trailing particle */}
-            <filter id="glow-strong" x="-50%" y="-50%" width="200%" height="200%">
-              <feGaussianBlur stdDeviation="7" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
-
-          {/* Subtle guide ring */}
-          <circle cx={CX} cy={CY} r={OUTER + 12} fill="none" stroke="#111827" strokeOpacity={0.04} strokeWidth={1} strokeDasharray="2 6" />
-
-          {/* Off-white ring behind segments */}
+          {/* Background ring */}
           <circle cx={CX} cy={CY} r={MID} fill="none" stroke="#FAF9F6" strokeWidth={OUTER - INNER + 2} />
 
-          {/* Background pulsing glow synced to active segment */}
-          {playing && playIdx >= 0 && playIdx < MINDUP_PILLARS.length && (
-            <circle
-              cx={CX}
-              cy={CY}
-              r={MID}
-              fill="none"
-              stroke={MINDUP_PILLARS[playIdx].color}
-              strokeWidth={OUTER - INNER + 8}
-              strokeOpacity={0.12 + playProgress * 0.08}
-              className="mindup-pulse"
-              style={{ transition: "stroke-opacity 0.3s ease" }}
-            />
-          )}
-
-          {/* Base segments */}
+          {/* Segments */}
           {MINDUP_PILLARS.map((p, i) => {
-            const start = -90 - STEP / 2 + i * STEP;
+            const start = 90 - STEP / 2 + i * STEP;
             const isActive = active === p.id;
             const isPlayingDone = playing && i < playIdx;
             const isPlayingActive = playing && i === playIdx;
             const isPlayingPending = playing && i > playIdx;
 
-            // During play: pending segments are dark/glass, active gets full color at end
             let fill = p.color;
             let opacity = 1;
             if (playing) {
               if (isPlayingPending) {
-                fill = "#94a3b8"; // slate-400
-                opacity = 0.25;
+                fill = "#e2e8f0";
+                opacity = 0.4;
               } else if (isPlayingActive) {
-                fill = p.color;
                 opacity = 0.3 + playProgress * 0.7;
               } else {
-                fill = p.color;
                 opacity = 1;
               }
             } else if (active && !isActive) {
@@ -188,9 +145,7 @@ function PillarRing({
                   stroke="#FAF9F6"
                   strokeWidth={2}
                   strokeLinejoin="round"
-                  strokeLinecap="round"
                 />
-                {/* Real Lucide icon */}
                 <foreignObject
                   x={polar(start + STEP / 2, MID)[0] - 14}
                   y={polar(start + STEP / 2, MID)[1] - 14}
@@ -198,20 +153,28 @@ function PillarRing({
                   height={28}
                   aria-hidden="true"
                 >
-                  <div
-                    className="flex h-full w-full items-center justify-center"
-                  >
+                  <div className="flex h-full w-full items-center justify-center">
                     {(() => {
                       const Icon = PILLAR_ICONS[p.id] ?? Brain;
+                      const showIcon = isActive || (playing && (i <= playIdx));
+                      
+                      if (showIcon) {
+                        return (
+                          <Icon
+                            className="h-5 w-5 sm:h-6 sm:w-6"
+                            style={{
+                              color: playing && isPlayingPending ? "#94a3b8" : isActive ? "#1e293b" : "#ffffff",
+                              transition: "color 0.3s ease",
+                            }}
+                            strokeWidth={1.5}
+                          />
+                        );
+                      }
+                      
                       return (
-                        <Icon
-                          className="h-5 w-5 sm:h-6 sm:w-6"
-                          style={{
-                            color: playing && isPlayingPending ? "#64748b" : isActive ? "#1e293b" : p.color,
-                            transition: "color 0.3s ease",
-                          }}
-                          strokeWidth={1.5}
-                        />
+                        <span className="font-display text-xl sm:text-2xl font-bold text-white select-none pointer-events-none">
+                          {p.id}
+                        </span>
                       );
                     })()}
                   </div>
@@ -220,56 +183,25 @@ function PillarRing({
             );
           })}
 
-          {/* Animated glowing trace lines */}
+          {/* Progressive trace lines during play */}
           {playing && MINDUP_PILLARS.map((p, i) => {
-            const start = -90 - STEP / 2 + i * STEP;
+            const start = 90 - STEP / 2 + i * STEP;
             const d = traceArc(start, start + STEP);
             const status = i < playIdx ? "done" : i === playIdx ? "active" : "pending";
-
             if (status === "pending") return null;
 
             return (
-              <g key={`trace-${p.id}`}>
-                {/* Glow layer */}
-                <path
-                  d={d}
-                  fill="none"
-                  stroke={p.color}
-                  strokeWidth={6}
-                  strokeLinecap="round"
-                  strokeDasharray={segArc}
-                  strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
-                  filter="url(#glow-strong)"
-                  opacity={status === "done" ? 0.4 : 0.7}
-                  style={{ transition: status === "done" ? "none" : undefined }}
-                />
-                {/* Core trace line */}
-                <path
-                  d={d}
-                  fill="none"
-                  stroke={p.color}
-                  strokeWidth={3}
-                  strokeLinecap="round"
-                  strokeDasharray={segArc}
-                  strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
-                  opacity={status === "done" ? 0.9 : 1}
-                  style={{ transition: status === "done" ? "none" : undefined }}
-                />
-                {/* Trailing particle dot */}
-                {status === "active" && playProgress > 0.05 && (
-                  <circle
-                    r={5}
-                    fill={p.color}
-                    filter="url(#glow)"
-                    opacity={0.9}
-                    className="mindup-trace-dot"
-                    style={{
-                      offsetPath: `path("${d}")`,
-                      offsetDistance: `${playProgress * 100}%`,
-                    }}
-                  />
-                )}
-              </g>
+              <path
+                key={`trace-${p.id}`}
+                d={d}
+                fill="none"
+                stroke={p.color}
+                strokeWidth={5}
+                strokeLinecap="round"
+                strokeDasharray={segArc}
+                strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
+                opacity={status === "done" ? 0.9 : 1}
+              />
             );
           })}
         </svg>
@@ -355,12 +287,9 @@ export function MindUpPillars() {
     const elapsed = performance.now() - startTimeRef.current;
     const progress = Math.min(elapsed / TRACE_DUR, 1);
     setPlayProgress(progress);
-
     if (progress < 1) {
       rafRef.current = requestAnimationFrame(animateSegment);
     }
-    // When progress reaches 1, the RAF loop stops naturally.
-    // playNext is triggered by its own setTimeout, which fires after TRACE_DUR.
   }, []);
 
   const playNext = useCallback(() => {
@@ -372,7 +301,6 @@ export function MindUpPillars() {
       }, 500);
       return;
     }
-    // Cancel any lingering RAF from previous segment
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
     setActive(MINDUP_PILLARS[i].id);
     setPlayIdx(i);
@@ -393,7 +321,6 @@ export function MindUpPillars() {
     playNext();
   }, [playing, stopPlay, playNext]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -418,20 +345,8 @@ export function MindUpPillars() {
   return (
     <section
       aria-label="Mind Up Theory — Six Pillars"
-      className="relative overflow-hidden bg-[#FAF9F6] py-28 md:py-36 border-b border-[#e2e8f0]/40"
+      className="relative overflow-hidden bg-[#FAF9F6] py-16 md:py-24 border-b border-[#e2e8f0]/40"
     >
-      {/* Background pulse synced to active segment */}
-      {playing && playIdx >= 0 && playIdx < MINDUP_PILLARS.length && (
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[600px] w-[600px] rounded-full blur-[140px] mindup-bg-pulse"
-          style={{
-            background: MINDUP_PILLARS[playIdx].color,
-            opacity: 0.04 + playProgress * 0.04,
-          }}
-        />
-      )}
-
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         {/* Mobile / tablet */}
         <div className="text-center lg:hidden" data-animate="blur">
@@ -448,7 +363,7 @@ export function MindUpPillars() {
           <p className="mt-3 text-sm text-[#94a3b8]">By: Sagar Lad</p>
         </div>
 
-        {/* Desktop: info panel (left) + ring (right) */}
+        {/* Desktop */}
         <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24" data-animate="blur">
           <div className="lg:min-h-[280px]">
             <Pill>The Mind Up Theory</Pill>

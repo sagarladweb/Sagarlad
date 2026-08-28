@@ -4,7 +4,7 @@ import { Pill } from "@/components/ui/Pill";
 export function MentorshipCta() {
   return (
     <section
-      className="py-20 md:py-24 border-b border-border bg-muted/30"
+      className="py-16 md:py-24 border-b border-border bg-muted/30"
       aria-label="Mentorship"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

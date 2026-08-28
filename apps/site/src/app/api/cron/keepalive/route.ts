@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma, dbSafe } from "@/lib/db";
+import { timingSafeCompare } from "@/lib/crypto";
 
 export const runtime = "nodejs";
 
@@ -8,8 +9,8 @@ export const runtime = "nodejs";
 // prevent that. Returns 200 even when the DB is cold-starting so the caller
 // never treats a slow wake-up as a failure.
 export async function GET(req: Request) {
-  const secret = req.headers.get("authorization")?.replace("Bearer ", "");
-  if (!process.env.CRON_SECRET || secret !== process.env.CRON_SECRET) {
+  const secret = req.headers.get("authorization")?.replace("Bearer ", "") ?? "";
+  if (!process.env.CRON_SECRET || !timingSafeCompare(secret, process.env.CRON_SECRET)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

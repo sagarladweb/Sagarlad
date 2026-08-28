@@ -1,35 +1,9 @@
 import { NextResponse } from "next/server";
 import { unstable_cache } from "next/cache";
 import { prisma } from "@/lib/db";
+import { FALLBACK_CATEGORIES } from "@/lib/content";
 
 export const runtime = "nodejs";
-
-// Static mirror of prisma/seed.ts categories so the nav menu still works
-// when Supabase free tier pauses the DB.
-const FALLBACK_CATEGORIES = [
-  "Life Lessons",
-  "Money",
-  "Books",
-  "Productivity",
-  "Startups",
-  "Anxiety",
-  "Confidence",
-  "Habits",
-  "Happiness",
-  "Health",
-  "Relationship",
-  "Motivation",
-  "Technology",
-  "Career",
-  "Soft Skills",
-  "Mindset",
-  "Communication",
-  "Emotional Intelligence",
-].map((name) => ({
-  id: `fallback-${name.toLowerCase().replace(/ /g, "-")}`,
-  name,
-  slug: name.toLowerCase().replace(/ /g, "-"),
-}));
 
 const getCategories = unstable_cache(
   () =>

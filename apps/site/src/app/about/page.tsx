@@ -213,65 +213,46 @@ export default function AboutPage() {
   return (
     <div ref={root} className="bg-background overflow-x-clip">
       {/* ---------- Visual Hero ---------- */}
-      <section className="relative overflow-hidden border-b border-border pt-12 pb-20 md:pt-16 md:pb-28">
-        <div className="pointer-events-none absolute -top-40 right-10 h-96 w-96 rounded-full bg-accent/10 blur-[120px]" aria-hidden="true" />
+      <section className="relative -mt-16 min-h-[calc(100svh+4rem)] border-b border-border bg-foreground text-background overflow-hidden">
+        <div className="absolute inset-0" aria-hidden="true">
+          <Image
+            src="/about me hero.webp"
+            alt="About Sagar Lad"
+            fill
+            priority
+            className="object-cover object-center"
+            sizes="100vw"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40" />
+        </div>
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            <div className="order-2 lg:order-none lg:col-span-7 space-y-6 text-center lg:text-left">
-              <span
-                data-reveal
-                className="btn-premium inline-flex items-center rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand"
-              >
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 min-h-[100svh] flex flex-col justify-end py-12 sm:py-32">
+          <div className="max-w-3xl text-center sm:text-left mt-auto" style={{ display: "grid", gap: "0" }}>
+            <div data-reveal className="mb-4">
+              <span className="inline-block text-[11px] sm:text-xs font-semibold uppercase tracking-[0.25em] text-white/70 border border-white/20 rounded-full px-5 py-1.5">
                 The full story
               </span>
-              <h1
-                data-reveal
-                className="font-display text-4xl sm:text-5xl md:text-6xl font-bold leading-[1.05] tracking-tight text-foreground"
-              >
-                A story of almost nothing,{" "}
-                <span className="btn-premium inline-block bg-accent text-black px-3 py-0.5">and everything.</span>
-              </h1>
-              <p
-                data-reveal
-                className="text-base sm:text-lg text-muted-foreground leading-relaxed max-w-xl"
-              >
-                Data &amp; AI Architect by profession, TEDx Speaker, and
-                published author of 6+ books. Founder of the MIND UP Framework —
-                a system for thinking clearly and acting intentionally.
-              </p>
-              <p
-                data-reveal
-                className="mt-4 border-l-2 border-accent pl-4 font-display text-base sm:text-lg font-semibold leading-snug text-foreground text-center lg:text-left"
-              >
-                People don&apos;t make poor choices — they make the best choices
-                they can with the information they have.
-              </p>
-              <div data-reveal className="mt-2 inline-block">
-                <SiteLogo className="h-12 w-auto logo-black" />
-              </div>
             </div>
+            
+            <h1 data-reveal className="mb-6 font-display text-4xl sm:text-5xl md:text-7xl font-bold leading-[1.05] tracking-tight text-white">
+              A story of almost nothing,{" "}
+              <span className="text-accent">and everything.</span>
+            </h1>
 
-            {/* Visual Portrait */}
-            <div data-reveal className="order-1 lg:order-none lg:col-span-5 relative">
-              <div className="relative max-w-md mx-auto">
-                <div aria-hidden="true" className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/20 to-brand-light/10 blur-2xl opacity-75" />
-                <figure className="card-hover relative aspect-[3/4] rounded-xl overflow-hidden border border-border shadow-2xl bg-card">
-                  <Image
-                    src="/images/profile/about-3.webp"
-                    alt="Sagar Lad"
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 40vw"
-                    className="object-cover object-top"
-                    priority
-                  />
-                  <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
-                  <figcaption className="absolute bottom-0 inset-x-0 p-6 text-white">
-                    <p className="font-display text-xl font-bold">Sagar Lad</p>
-                    <p className="text-xs text-white/80">Author · Investor · Public Speaker</p>
-                  </figcaption>
-                </figure>
-              </div>
+            <p data-reveal className="mb-8 text-base sm:text-lg text-white/75 leading-relaxed max-w-xl">
+              Data &amp; AI Architect by profession, TEDx Speaker, and
+              published author of 6+ books. Founder of the MIND UP Framework —
+              a system for thinking clearly and acting intentionally.
+            </p>
+
+            <p data-reveal className="mb-10 border-l-2 border-accent pl-4 font-display text-base sm:text-lg font-semibold leading-snug text-white/90 text-left max-w-xl mx-auto sm:mx-0">
+              People don&apos;t make poor choices — they make the best choices
+              they can with the information they have.
+            </p>
+
+            <div data-reveal className="mt-2">
+              <SiteLogo light className="h-12 w-auto mx-auto sm:mx-0" />
             </div>
           </div>
         </div>
@@ -357,7 +338,7 @@ export default function AboutPage() {
       </section>
 
       {/* ---------- Rules I live by ---------- */}
-      <section className="py-24 md:py-32 border-b border-border bg-background">
+      <section className="py-16 md:py-24 border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 text-center">
           <p data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
             My philosophy

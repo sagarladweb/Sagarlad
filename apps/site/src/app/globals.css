@@ -75,6 +75,13 @@ html {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Override smooth scroll on mobile — it breaks GSAP ScrollTrigger on touch */
+@media (max-width: 768px) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
 /* Apple-like focus feel */
 *:focus-visible {
   outline: 2px solid var(--accent);
@@ -1062,4 +1069,41 @@ nav a:not([class*="rounded-full"]) {
 
 .logo-black {
   filter: grayscale(1) brightness(0) contrast(1.2);
+}
+
+/* ── St.PageFlip book pages ────────────────────────────────────────── */
+.book-page-wrapper {
+  background-color: white;
+  overflow: hidden;
+}
+.book-page-wrapper > .pf-page {
+  width: 100%;
+  height: 100%;
+}
+.pf-page {
+  background-color: #fdfaf6;
+  color: #333;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+  font-family: 'Merriweather', serif;
+}
+
+.pf-page-inner {
+  padding: 2rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  position: relative;
+}
+
+.pf-center {
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.pf-cover {
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  border-radius: 2px;
 }

@@ -28,6 +28,8 @@ export const metadata: Metadata = pageMetadata({
   ogImage: "/images/heroes/speaking.webp",
 });
 
+export const revalidate = 604800;
+
 // Trust-ladder ordering: hook → see him speak (video) → who has trusted him
 // (stages) → credentials → what the room gets (delivery) → how it works
 // (process + booking) → proof from organizers (testimonials) → ask.
@@ -248,7 +250,7 @@ export default function SpeakingPage() {
             {/* Large feature — left, spans 2 rows on desktop */}
             <div className="sm:col-span-2 lg:col-span-7 lg:row-span-2 rounded-xl overflow-hidden relative group min-h-[280px] sm:min-h-[400px] lg:min-h-0">
               <Image
-                src="/images/speaking/main full width image.webp"
+                src="/images/speaking/main-full-width.webp"
                 alt="Sagar Lad delivering a keynote"
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
@@ -272,7 +274,7 @@ export default function SpeakingPage() {
             {/* Bottom right */}
             <div className="sm:col-span-1 lg:col-span-5 rounded-xl overflow-hidden relative group aspect-[4/3] min-h-[200px]">
               <Image
-                src="/images/speaking/candid speaking.webp"
+                src="/images/speaking/candid-speaking.webp"
                 alt="Sagar Lad speaking"
                 fill
                 className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
@@ -284,8 +286,8 @@ export default function SpeakingPage() {
             {/* Bottom row — 3 equal cards on desktop */}
             <div className="sm:col-span-2 lg:col-span-12 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
               {[
-                { src: "/images/speaking/candid presetation.webp", alt: "Sagar Lad presenting" },
-                { src: "/images/speaking/too close.webp", alt: "Sagar Lad portrait" },
+                { src: "/images/speaking/candid-presentation.webp", alt: "Sagar Lad presenting" },
+                { src: "/images/speaking/too-close.webp", alt: "Sagar Lad portrait" },
                 { src: "/images/heroes/tedx.webp", alt: "Sagar Lad at TEDx" },
               ].map((img) => (
                 <div

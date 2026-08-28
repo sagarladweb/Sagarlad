@@ -62,4 +62,15 @@ export const adminPostSchema = z.object({
   showCover: z.boolean().optional(),
   showAuthorBox: z.boolean().optional(),
   footerNote: z.string().trim().max(300).optional().or(z.literal("")),
+  sources: z
+    .array(
+      z.object({
+        type: z.enum(["link", "video", "image"]),
+        url: z.string().trim().max(500),
+        title: z.string().trim().max(200),
+      })
+    )
+    .max(20)
+    .optional()
+    .or(z.literal("")),
 });

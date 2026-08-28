@@ -24,7 +24,7 @@ const CACHE_TTL = process.env.NODE_ENV === "development" ? 60 : 604800;
 
 // Supabase free-tier pauses the DB after inactivity; every content fetcher
 // returns an empty fallback instead of crashing the page.
-const FALLBACK_CATEGORIES = [
+export const FALLBACK_CATEGORIES = [
   { name: "Life Lessons", slug: "life-lessons" },
   { name: "Money", slug: "money" },
   { name: "Books", slug: "books" },
@@ -251,11 +251,21 @@ export const getFeaturedPosts = unstable_cache(
     try {
       return await prisma.post.findMany({
         where,
-        include: { category: true },
+        select: {
+          id: true,
+          slug: true,
+          title: true,
+          coverImage: true,
+          publishedAt: true,
+          excerpt: true,
+          content: true,
+          category: { select: { id: true, name: true, slug: true } },
+        },
         orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
         take,
       });
-    } catch {
+    } catch (err) {
+      console.warn("[content] getFeaturedPosts failed:", (err as Error).message);
       return [];
     }
   },

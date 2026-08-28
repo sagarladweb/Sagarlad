@@ -1,15 +1,15 @@
 # Sagar Lad
 
-> Author, investor and educator. I write about money, career, life and awareness.
+> Author, investor, and educator. I write about data engineering, cloud architecture, career growth, and mindset.
 
-Sagar Lad is a personal website and blog where the author shares practical frameworks on money, work, relationships and wellness. The site includes a blog with articles, books written by the author, videos, mentoring and a newsletter.
+Sagar Lad is a personal website and blog where the author shares practical frameworks on data engineering, cloud architecture, career growth, investing, and mindset. The site includes a blog with articles, books written by the author, videos, mentoring, and a newsletter.
 
 ## Key topics
 
-- Money & investing — budgeting, wealth building, net worth, financial awareness
-- Career & life — failure, purpose, productivity, morning routines
-- Entrepreneurship — startups, quitting jobs, building businesses
-- Awareness & mindset — the foundation for everything else
+- Data & Cloud — Azure, Databricks, data engineering, modern data architecture
+- Career & Growth — failure, purpose, productivity, morning routines
+- Mindset & Awareness — the MIND UP framework, emotional alignment, resilience
+- Investing & Finance — wealth building, financial awareness
 
 ## Pages
 
@@ -21,18 +21,15 @@ Sagar Lad is a personal website and blog where the author shares practical frame
 - Videos: /videos
 - Newsletter: /newsletter
 - Contact: /contact
+- Speaking: /speaking
+- Mentorship: /mentorship
 - Privacy Policy: /privacy
 - Terms: /terms
 
 ## Books
 
-- Do Epic Shit — /books
-- Get Epic Shit Done — /books
-- Make Epic Money — /books
-- Build an Epic Career — /books
-- Beyond the Syllabus — /books
-- Do Epic Shit Journal — /books
-- Winning People — /books
+- MIND UP — mindset and execution playbook
+- Azure data engineering titles — available on Amazon
 
 ## Point of contact
 
@@ -41,7 +38,7 @@ Sagar Lad is a personal website and blog where the author shares practical frame
 
 ## Social
 
-- YouTube, Instagram, X/Twitter, LinkedIn, Telegram, Podcast (links on the website footer)
+- YouTube, Instagram, X/Twitter, LinkedIn (links on the website footer)
 
 ## Rules
 

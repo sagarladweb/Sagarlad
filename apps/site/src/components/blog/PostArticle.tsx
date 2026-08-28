@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, CalendarDays, Clock, Eye } from "lucide-react";
+import { ArrowLeft, CalendarDays, Clock, Eye, Link2, Video, Image as ImageIcon } from "lucide-react";
 import { SITE, formatDate, readingTime } from "@/lib/site";
 import { SanitizedContent } from "@/components/SanitizedContent";
 import { ShareButtons } from "@/components/blog/ShareButtons";
@@ -18,6 +18,7 @@ type PostWithRelations = {
   showAuthorBox: boolean;
   publishedAt: Date;
   views?: number;
+  sources?: { type: string; url: string; title: string }[] | null;
   category?: { name: string; slug?: string } | null;
   author?: { name: string | null } | null;
 };
@@ -149,6 +150,37 @@ export function PostArticle({
       {post.footerNote && (
         <div className="mt-8 rounded-lg border border-border bg-muted/40 p-5 text-sm leading-relaxed text-muted-foreground">
           {post.footerNote}
+        </div>
+      )}
+
+      {post.sources && post.sources.length > 0 && (
+        <div className="mt-8 rounded-lg border border-border bg-muted/40 p-5">
+          <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted-foreground mb-3">
+            Sources & References
+          </h3>
+          <ul className="space-y-2">
+            {post.sources.map((src, i) => (
+              <li key={i} className="flex items-start gap-2 text-sm">
+                <span className="mt-0.5 shrink-0 text-muted-foreground">
+                  {src.type === "link" && <Link2 className="w-3.5 h-3.5" />}
+                  {src.type === "video" && <Video className="w-3.5 h-3.5" />}
+                  {src.type === "image" && <ImageIcon className="w-3.5 h-3.5" />}
+                </span>
+                {src.url ? (
+                  <a
+                    href={src.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-foreground hover:text-brand hover:underline underline-offset-2 transition-colors"
+                  >
+                    {src.title || src.url}
+                  </a>
+                ) : (
+                  <span className="text-foreground">{src.title}</span>
+                )}
+              </li>
+            ))}
+          </ul>
         </div>
       )}
 

@@ -21,7 +21,7 @@ import {
   Mail,
   ChevronDown,
 } from "lucide-react";
-import { FaInstagram, FaLinkedinIn } from "react-icons/fa6";
+import { FaInstagram, FaLinkedinIn } from "@/lib/icons";
 
 const HEADER_SOCIALS = ["instagram", "linkedin"];
 
@@ -145,7 +145,7 @@ function HeaderSocials({ light = false }: HeaderSocialsProps) {
           aria-label={SOCIAL_ICONS[s.key].label}
           className={`p-2 rounded-full transition-colors duration-500 ${
             light
-              ? "text-white/80 hover:text-white hover:bg-white/15"
+              ? "text-white hover:text-white hover:bg-white/15"
               : "text-muted-foreground hover:text-accent-strong hover:bg-muted"
           }`}
         >
@@ -275,9 +275,9 @@ export function Navbar() {
     () => false
   );
 
-  // Over the dark full-screen hero (home + speaking), before scroll & with the
+  // Over the dark full-screen hero (home + speaking + about), before scroll & with the
   // mobile menu closed, the transparent bar needs light text to stay readable.
-  const heroLight = (pathname === "/" || pathname === "/speaking") && !scrolled && !open;
+  const heroLight = (pathname === "/" || pathname === "/speaking" || pathname === "/about") && !scrolled && !open;
 
   if (prevPathname !== pathname) {
     setPrevPathname(pathname);

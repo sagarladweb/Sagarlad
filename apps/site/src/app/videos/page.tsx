@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
-import { FaYoutube, FaInstagram } from "react-icons/fa6";
+import { FaYoutube, FaInstagram } from "@/lib/icons";
 import { SITE, pageMetadata } from "@/lib/site";
 import { getPublishedVideos } from "@/lib/content";
 import { VideoFeed } from "@/components/video/VideoFeed";

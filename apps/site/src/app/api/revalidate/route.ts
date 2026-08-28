@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { revalidatePath, revalidateTag } from "next/cache";
-import crypto from "node:crypto";
+import { timingSafeCompare } from "@/lib/crypto";
 
 export const runtime = "nodejs";
 
@@ -25,11 +25,6 @@ const PATHS = [
 // categories/videos/books/quotes would otherwise stay stale for up to a week.
 const TAGS = ["content", "categories", "videos", "books", "quotes", "socials"];
 
-function constantTimeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(a), Buffer.from(b));
-}
-
 export async function POST(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
@@ -37,7 +32,7 @@ export async function POST(req: Request) {
   }
 
   const token = req.headers.get("x-revalidate-secret") ?? "";
-  if (!constantTimeCompare(token, secret)) {
+  if (!timingSafeCompare(token, secret)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

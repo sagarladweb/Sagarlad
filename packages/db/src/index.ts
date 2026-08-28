@@ -23,7 +23,15 @@ function createClient() {
   const ssl: boolean | ConnectionOptions = config.ssl ? true : { rejectUnauthorized: false };
 
   const max = Math.min(Math.max(parseInt(process.env.DATABASE_POOL_MAX ?? "5", 10) || 5, 1), 10);
-  const pool = new pg.Pool({ connectionString, ssl, max });
+  const pool = new pg.Pool({
+    connectionString,
+    ssl,
+    max,
+    connectionTimeoutMillis: 5000,
+    idleTimeoutMillis: 10000,
+    query_timeout: 10000,
+    statement_timeout: 10000,
+  });
   pool.on("error", (err) => {
     console.error("[db] idle pool error:", err.message);
   });

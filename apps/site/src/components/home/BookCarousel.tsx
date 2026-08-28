@@ -1,13 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { ShoppingBag, ChevronLeft, ChevronRight } from "lucide-react";
+import { ShoppingBag, ChevronLeft, ChevronRight, ChevronUp } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
-import { BookViewer } from "@/components/books/BookViewer";
+import { type BookId } from "@/components/books/BookPages";
 import { DotPagination } from "@/components/ui/CarouselNav";
 import { BookStats } from "./BookStats";
 import { Pill } from "@/components/ui/Pill";
+
+const BookViewer = dynamic(
+  () => import("@/components/books/BookViewer").then((m) => m.BookViewer),
+  { ssr: false }
+);
 
 export type BookCarouselBook = {
   id: string;
@@ -39,6 +45,10 @@ function getLocalCover(title: string): { front: string; back?: string } | null {
     if (lower.includes(key)) return val;
   }
   return null;
+}
+
+function getBookId(title: string): BookId {
+  return /foundry|azure/i.test(title) ? "azure" : "mindup";
 }
 
 export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
@@ -108,7 +118,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
 
   const cover = getLocalCover(book.title);
   const frontSrc = cover?.front ?? book.imageUrl ?? "";
-  const backSrc = cover?.back;
+  const bookId = getBookId(book.title);
 
   return (
     <div
@@ -120,13 +130,14 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
       aria-label="Featured books"
     >
       <BookViewer
-        book={{ ...book, imageUrl: frontSrc || book.imageUrl }}
+        bookId={bookId}
+        buyUrl={book.buyUrl}
         open={viewerOpen}
         onClose={() => setViewerOpen(false)}
       />
 
       {/* Section Header */}
-      <div className="mb-12 md:mb-16" data-animate>
+      <div className="mb-12 md:mb-16 text-center md:text-left" data-animate>
         <Pill>The Library</Pill>
         <h2 className="mt-6 font-display text-3xl md:text-4xl font-bold text-[#1e293b]">
           Featured books
@@ -156,7 +167,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
         {/* Book slide */}
         <div key={book.id} className="book-slide-enter">
           <article className="flex flex-col md:flex-row items-center gap-10 md:gap-16 lg:gap-20">
-            {/* 3D Book Cover */}
+            {/* Book Cover */}
             <div
               className="w-full md:w-2/5 lg:w-2/5 shrink-0 flex justify-center"
               style={{ perspective: "1200px" }}
@@ -172,99 +183,50 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
                 aria-label={`Open preview of ${book.title}`}
                 className="relative cursor-pointer z-30 pointer-events-auto group/book"
               >
-                {/* 3D Book wrapper — crossfade on hover when back cover exists */}
-                <div className="relative w-[200px] sm:w-[240px] md:w-full aspect-[3/4]">
-                  {/* Front cover */}
+                {frontSrc ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img
+                    src={frontSrc}
+                    alt={book.title}
+                    className="w-[200px] sm:w-[240px] md:w-[280px] lg:w-[300px] h-auto object-contain rounded-lg shadow-lg"
+                  />
+                ) : (
                   <div
-                    className={`absolute inset-0 rounded-r-md overflow-hidden z-20 ${backSrc ? "book-front" : "book-3d-hover"}`}
-                    style={!backSrc ? { transform: "rotateY(-6deg)" } : undefined}
+                    className="w-[200px] sm:w-[240px] md:w-[280px] lg:w-[300px] aspect-[3/4] rounded-lg flex flex-col"
+                    style={{
+                      background: "linear-gradient(160deg, #0d21a1 0%, #1a3ab8 35%, #0d21a1 65%, #091780 100%)",
+                    }}
                   >
-                    {frontSrc ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={frontSrc}
-                        alt={book.title}
-                        className="absolute inset-0 w-full h-full object-cover rounded-r-md"
-                      />
-                    ) : (
-                      <div
-                        className="absolute inset-0 rounded-r-md flex flex-col"
-                        style={{
-                          background: "linear-gradient(160deg, #0d21a1 0%, #1a3ab8 35%, #0d21a1 65%, #091780 100%)",
-                        }}
-                      >
-                        <div className="w-full h-1 bg-gradient-to-r from-transparent via-[#ffd51d] to-transparent" />
-                        <div className="flex-1 flex flex-col items-center justify-between p-6 sm:p-8 text-center">
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
-                            {book.author ?? "Sagar Lad"}
+                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-[#ffd51d] to-transparent" />
+                    <div className="flex-1 flex flex-col items-center justify-between p-6 sm:p-8 text-center">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-white/50">
+                        {book.author ?? "Sagar Lad"}
+                      </p>
+                      <div className="my-auto">
+                        <div className="w-10 h-[1px] bg-white/20 mx-auto mb-5" />
+                        <h3 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight tracking-tight">
+                          {book.title}
+                        </h3>
+                        {book.tagline && (
+                          <p className="mt-3 text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-[#ffd51d]">
+                            {book.tagline}
                           </p>
-                          <div className="my-auto">
-                            <div className="w-10 h-[1px] bg-white/20 mx-auto mb-5" />
-                            <h3 className="font-display text-xl sm:text-2xl md:text-3xl font-extrabold text-white leading-tight tracking-tight">
-                              {book.title}
-                            </h3>
-                            {book.tagline && (
-                              <p className="mt-3 text-[10px] sm:text-xs font-medium uppercase tracking-[0.2em] text-[#ffd51d]">
-                                {book.tagline}
-                              </p>
-                            )}
-                            <div className="w-10 h-[1px] bg-white/20 mx-auto mt-5" />
-                          </div>
-                          <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/30">
-                            Official Edition
-                          </p>
-                        </div>
-                        <div className="w-full h-1 bg-gradient-to-r from-transparent via-[#ffd51d] to-transparent" />
+                        )}
+                        <div className="w-10 h-[1px] bg-white/20 mx-auto mt-5" />
                       </div>
-                    )}
-                  </div>
-
-                  {/* Back cover (only for books that have one) */}
-                  {backSrc && (
-                    <div className="absolute inset-0 rounded-r-md overflow-hidden z-10 book-back">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={backSrc}
-                        alt={`${book.title} — back cover`}
-                        className="absolute inset-0 w-full h-full object-cover rounded-r-md"
-                      />
+                      <p className="text-[9px] font-bold uppercase tracking-[0.35em] text-white/30">
+                        Official Edition
+                      </p>
                     </div>
-                  )}
+                    <div className="w-full h-1 bg-gradient-to-r from-transparent via-[#ffd51d] to-transparent" />
+                  </div>
+                )}
 
-                  {/* Spine — left edge */}
-                  <div
-                    className="absolute left-0 top-0 bottom-0 w-[18px] rounded-l-sm z-30"
-                    style={{
-                      background:
-                        "linear-gradient(to right, #091780 0%, #0d21a1 40%, #1a3ab8 70%, transparent 100%)",
-                    }}
-                  />
-
-                  {/* Paper pages — right edge */}
-                  <div
-                    className="absolute right-0 top-[3%] bottom-[3%] w-[6px] z-30"
-                    style={{
-                      background:
-                        "repeating-linear-gradient(to bottom, #faf9f6 0px, #faf9f6 2px, #e8e6e1 2px, #e8e6e1 3px)",
-                      borderRadius: "0 2px 2px 0",
-                      boxShadow: "2px 0 6px rgba(0,0,0,0.12)",
-                    }}
-                  />
-
-                  {/* Multi-layer depth shadow */}
-                  <div
-                    className="absolute inset-0 rounded-r-md z-0"
-                    style={{
-                      boxShadow:
-                        "8px 8px 20px rgba(0,0,0,0.22), 12px 12px 40px rgba(0,0,0,0.12), 20px 20px 60px rgba(0,0,0,0.08), inset -1px 0 0 rgba(255,255,255,0.1)",
-                    }}
-                  />
-                </div>
-
-                {/* Hover hint */}
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover/book:opacity-100 transition-opacity duration-300 pointer-events-none">
-                  <span className="text-[11px] font-medium text-[#94a3b8] whitespace-nowrap">
-                    {backSrc ? "Hover to flip · Click to preview" : "Click to preview"}
+                {/* Static hint with upward icon animation */}
+                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center opacity-80 group-hover/book:opacity-100 transition-opacity">
+                  <ChevronUp className="w-4 h-4 text-[#1e293b] animate-bounce" />
+                  <span className="text-[11px] font-bold text-[#1e293b] whitespace-nowrap">
+                    Click to preview
                   </span>
                 </div>
               </button>

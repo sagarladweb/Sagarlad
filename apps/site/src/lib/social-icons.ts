@@ -9,8 +9,8 @@ import {
   FaTelegram,
   FaMedium,
   FaPodcast,
-} from "react-icons/fa6";
-import { SiSessionize } from "react-icons/si";
+  SiSessionize,
+} from "./icons";
 
 export type IconType = ComponentType<SVGProps<SVGSVGElement>>;
 

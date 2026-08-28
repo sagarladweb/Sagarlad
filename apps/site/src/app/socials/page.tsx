@@ -10,6 +10,8 @@ export const metadata: Metadata = pageMetadata({
   path: "/socials",
 });
 
+export const revalidate = 604800;
+
 export default async function SocialsPage() {
   const socials = await getSiteSocials();
 

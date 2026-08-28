@@ -10,7 +10,7 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
-import { FaYoutube, FaInstagram, FaLinkedinIn } from "react-icons/fa6";
+import { FaYoutube, FaInstagram, FaLinkedinIn } from "@/lib/icons";
 import { validateContact, sanitizeText } from "@/lib/client-validators";
 
 const initial = {

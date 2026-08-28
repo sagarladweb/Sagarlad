@@ -1,18 +1,28 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import type { Post, Category } from "@sagarlad/db";
 import { formatDate, readingTime, postCover } from "@/lib/site";
 import { Pill } from "@/components/ui/Pill";
+
+type FeaturedPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string | null;
+  content: string;
+  coverImage: string | null;
+  publishedAt: Date;
+  category: { id: string; name: string; slug: string } | null;
+};
 
 export function BlogPreview({
   posts,
 }: {
-  posts: (Post & { category: Category | null })[];
+  posts: FeaturedPost[];
 }) {
   return (
-    <section className="py-20 md:py-24 border-b border-border">
+    <section className="py-16 md:py-24 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4" data-animate-group>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left" data-animate-group>
           <div data-animate-item>
             <Pill>The Blog</Pill>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold">

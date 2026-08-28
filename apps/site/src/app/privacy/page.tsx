@@ -8,6 +8,8 @@ export const metadata: Metadata = pageMetadata({
   path: "/privacy",
 });
 
+export const revalidate = 604800;
+
 export default function PrivacyPage() {
   return (
     <>

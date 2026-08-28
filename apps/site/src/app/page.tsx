@@ -3,7 +3,6 @@ import { getSiteSocials } from "@/lib/social-links";
 import { getCategories, getFeaturedPosts } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 import dynamic from "next/dynamic";
-import type { Post, Category } from "@sagarlad/db";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";

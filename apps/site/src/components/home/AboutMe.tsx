@@ -116,7 +116,7 @@ export function AboutMe() {
   return (
     <section
       ref={root}
-      className="relative overflow-hidden border-b border-border bg-background py-20 md:py-24"
+      className="relative overflow-hidden border-b border-border bg-background py-16 md:py-24"
       aria-label="About Sagar Lad"
     >
       <div
@@ -133,7 +133,7 @@ export function AboutMe() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-16 items-center">
           {/* Visual — first on mobile, left on desktop */}
           <div data-story-visual className="lg:col-span-5 order-2 lg:order-1 relative">
             <div className="relative max-w-md mx-auto lg:mx-0">
@@ -188,7 +188,7 @@ export function AboutMe() {
             </p>
 
             {/* Stats matrix */}
-            <div className="mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
+            <div className="mt-6 md:mt-10 grid grid-cols-2 sm:grid-cols-4 gap-6">
               {stats.map((s) => (
                 <div
                   key={s.label}
@@ -210,7 +210,7 @@ export function AboutMe() {
             </div>
 
             {/* Footer Action */}
-            <div className="mt-10 text-center sm:text-left">
+            <div className="mt-6 md:mt-10 text-center sm:text-left">
               <Link
                 href="/about"
                 className="btn-premium inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-8 py-3 text-sm font-semibold"

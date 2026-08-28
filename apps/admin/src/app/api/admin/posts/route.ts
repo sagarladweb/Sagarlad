@@ -81,6 +81,9 @@ export async function POST(request: Request) {
         showCover: parsed.data.showCover ?? true,
         showAuthorBox: parsed.data.showAuthorBox ?? true,
         footerNote: parsed.data.footerNote || null,
+        sources: Array.isArray(parsed.data.sources) && parsed.data.sources.length > 0
+          ? parsed.data.sources
+          : undefined,
       },
     });
 
@@ -140,6 +143,9 @@ export async function PUT(request: Request) {
         showCover: parsed.data.showCover ?? true,
         showAuthorBox: parsed.data.showAuthorBox ?? true,
         footerNote: parsed.data.footerNote || null,
+        sources: Array.isArray(parsed.data.sources) && parsed.data.sources.length > 0
+          ? parsed.data.sources
+          : undefined,
       },
     });
 

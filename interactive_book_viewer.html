@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Book Library</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/page-flip/dist/js/page-flip.browser.min.js"></script>
+
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827;
+            background-image: radial-gradient(circle at 50% 0%, #374151 0%, #111827 70%);
+            overflow-x: hidden;
+        }
+
+        .book-wrapper {
+            display: none; /* Hidden by default, toggled via JS */
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: calc(100vh - 160px);
+            padding: 10px;
+            perspective: 1200px;
+        }
+
+        .page {
+            background-color: #fdfaf6; /* Warm paper color */
+            color: #333;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.03); /* Subtle page texture */
+            overflow: hidden;
+            font-family: 'Merriweather', serif;
+        }
+
+        .page-cover {
+            background-color: #1a1a1a;
+        }
+
+        .page-cover-front {
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .page-cover-back {
+            background-color: #2d3748;
+            color: white;
+            background-image: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+        }
+
+        .page-content {
+            padding: 2.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+        }
+
+        .page-text {
+            font-size: 0.95rem;
+            line-height: 1.8;
+            color: #2d3748;
+        }
+
+        /* Responsive typography for smaller screens */
+        @media (max-width: 640px) {
+            .page-content { padding: 1.5rem; }
+            .page-text { font-size: 0.85rem; line-height: 1.6; }
+        }
+
+        .page-number {
+            text-align: center;
+            font-size: 0.75rem;
+            color: #9ca3af;
+            font-family: 'Inter', sans-serif;
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        /* Page edge styling to simulate paper stack */
+        .page.-left { 
+            border-right: 1px solid rgba(0,0,0,0.1); 
+            border-radius: 4px 0 0 4px;
+        }
+        .page.-right { 
+            border-left: 1px solid rgba(0,0,0,0.1); 
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .page.page-cover { 
+            box-shadow: 0 0 15px rgba(0,0,0,0.4); 
+            border-radius: 2px;
+        }
+    </style>
+</head>
+<body class="min-h-screen text-white flex flex-col">
+
+    <header class="w-full bg-gray-900 bg-opacity-80 backdrop-blur-md border-b border-gray-700 p-4 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-xl font-semibold tracking-wide text-gray-100">
+                <span class="text-indigo-400">Library:</span> Sagar Lad
+            </h1>
+            <div class="flex space-x-3 bg-gray-800 p-1 rounded-lg">
+                <button id="btn-book1" onclick="switchBook('book1')" class="tab-btn px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 bg-indigo-600 text-white shadow-md">
+                    The MIND UP Theory
+                </button>
+                <button id="btn-book2" onclick="switchBook('book2')" class="tab-btn px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 bg-transparent text-gray-400 hover:text-white hover:bg-gray-700">
+                    Azure AI Foundry
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex flex-col relative w-full items-center justify-center">
+        
+        <!-- BOOK 1: The MIND UP Theory -->
+        <div id="book1-wrapper" class="book-wrapper w-full max-w-5xl mx-auto">
+            <div id="book1" class="shadow-2xl">
+                <!-- Page 1: Front Cover -->
+                <div class="page page-cover page-cover-front" data-density="hard" style="background-image: url('https://m.media-amazon.com/images/I/71gL0N14MgL._SL1500_.jpg'); background-position: center;">
+                </div>
+                
+                <!-- Page 2: Inside Front Cover -->
+                <div class="page page-cover" data-density="hard">
+                    <div class="page-content bg-gray-900"></div>
+                </div>
+                
+                <!-- Page 3: Title Page -->
+                <div class="page">
+                    <div class="page-content text-center justify-center items-center">
+                        <div class="my-auto">
+                            <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">The MIND UP Theory</h1>
+                            <p class="text-lg sm:text-xl italic text-gray-600 mb-10">Simple Shift That Will Make You Unshakable</p>
+                            <div class="w-16 h-1 bg-indigo-500 mx-auto mb-8"></div>
+                            <p class="font-bold text-xl text-gray-800">Sagar Lad</p>
+                        </div>
+                        <div class="page-number">1</div>
+                    </div>
+                </div>
+                
+                <!-- Page 4: Copyright -->
+                <div class="page">
+                    <div class="page-content justify-end pb-12">
+                        <p class="text-xs text-gray-500 text-center leading-relaxed">
+                            Copyright © Sagar Lad<br>
+                            All rights reserved.<br><br>
+                            No part of this publication may be reproduced, distributed, or transmitted in any form or by any means.<br><br>
+                            Independently Published.
+                        </p>
+                        <div class="page-number">2</div>
+                    </div>
+                </div>
+
+                <!-- Page 5: Table of Contents -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-2xl font-bold mb-8 text-center text-gray-900 border-b-2 border-indigo-200 pb-4">Table of Contents</h2>
+                        <div class="page-text flex-grow">
+                            <ul class="space-y-4 text-gray-800">
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Introduction</span> <span>5</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Stop Battling Your Mind</span> <span>15</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Building Habits</span> <span>31</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Improving Relationships</span> <span>55</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Breaking Limiting Patterns</span> <span>79</span></li>
+                            </ul>
+                        </div>
+                        <div class="page-number">3</div>
+                    </div>
+                </div>
+                
+                <!-- Page 6: Quote Page -->
+                <div class="page">
+                    <div class="page-content justify-center items-center">
+                        <div class="text-center px-8">
+                            <p class="text-xl italic text-gray-600 leading-relaxed">
+                                "This isn't about becoming perfect.<br>It's about becoming unshakable."
+                            </p>
+                        </div>
+                        <div class="page-number">4</div>
+                    </div>
+                </div>
+
+                <!-- Page 7: Introduction -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-sm font-bold mb-8 text-center uppercase tracking-widest text-gray-400">Introduction</h2>
+                        <div class="page-text flex-grow">
+                            <p class="mb-6 text-xl italic text-center font-semibold text-gray-900 leading-snug">
+                                "What if the problem isn’t your life… but how you’re thinking about it?"
+                            </p>
+                            <p class="mb-4 text-justify">
+                                Most people spend their lives fighting their thoughts—overthinking, resisting, and feeling stuck. We often view our own minds as battlegrounds, constantly struggling to gain control over stress, relationships, and self-doubt.
+                            </p>
+                            <p class="mb-4 text-justify font-semibold text-indigo-700">
+                                But what if the key isn’t control… it’s alignment?
+                            </p>
+                        </div>
+                        <div class="page-number">5</div>
+                    </div>
+                </div>
+                
+                <!-- Page 8: Core Concept -->
+                <div class="page">
+                    <div class="page-content">
+                        <div class="page-text flex-grow mt-4">
+                            <p class="mb-5 text-justify">
+                                In <strong>The Mind Up Theory</strong>, I introduce a powerful yet profoundly simple shift that has the potential to transform every facet of your daily experience.
+                            </p>
+                            <p class="mb-5 text-justify">
+                                This framework is designed to help you fundamentally change how you handle adversity. Instead of being swept away by external circumstances or internal turbulence, you learn to anchor yourself.
+                            </p>
+                            <p class="text-justify">
+                                It is not about pretending everything is fine. It is about equipping yourself with the mental architecture to navigate challenges with grace and resilience.
+                            </p>
+                        </div>
+                        <div class="page-number">6</div>
+                    </div>
+                </div>
+                
+                <!-- Page 9: Benefits -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-lg font-bold mb-6 text-gray-900">What You Will Discover</h2>
+                        <div class="page-text flex-grow">
+                            <p class="mb-4">Throughout these pages, this book reveals exactly how to:</p>
+                            <ul class="list-disc pl-5 space-y-4 text-gray-700">
+                                <li><strong>Stop battling your mind</strong> and start working synergistically with it.</li>
+                                <li><strong>Build enduring habits</strong> that strengthen both mental and physical well-being.</li>
+                                <li><strong>Improve relationships</strong> through deeper awareness, presence, and clarity.</li>
+                                <li><strong>Break limiting patterns</strong> to finally unlock your true potential.</li>
+                                <li><strong>Make small, consistent shifts</strong> that inevitably lead to lasting success.</li>
+                            </ul>
+                        </div>
+                        <div class="page-number">7</div>
+                    </div>
+                </div>
+                
+                <!-- Page 10: Conclusion -->
+                <div class="page">
+                    <div class="page-content">
+                        <div class="page-text flex-grow mt-6">
+                            <p class="mb-6 text-justify">
+                                Through practical insights and real-life applications, <em>The Mind Up Theory</em> provides a roadmap. It shows you how to reset, refocus, and rise—no matter what unexpected obstacles life throws your way.
+                            </p>
+                            <div class="p-6 bg-gray-50 border-l-4 border-indigo-500 my-8">
+                                <p class="font-semibold text-center italic text-lg text-gray-800">
+                                    "This isn’t about becoming perfect. It’s about becoming unshakable."
+                                </p>
+                            </div>
+                            <p class="text-center font-bold text-gray-900 mt-8 uppercase tracking-wide">
+                                Are you ready to shift your mind… and change your life?
+                            </p>
+                        </div>
+                        <div class="page-number">8</div>
+                    </div>
+                </div>
+                
+                <!-- Page 9: Inside Back Cover -->
+                <div class="page page-cover" data-density="hard">
+                    <div class="page-content bg-gray-900"></div>
+                </div>
+                
+                <!-- Page 10: Back Cover -->
+                <div class="page page-cover page-cover-back" data-density="hard">
+                    <div class="page-content flex flex-col justify-center items-center text-center p-8">
+                        <div class="my-auto w-full">
+                            <h2 class="text-2xl font-bold mb-2 text-white">The MIND UP Theory</h2>
+                            <p class="text-sm text-gray-300 italic mb-8">Shift Your Perspective.</p>
+                            <p class="text-sm text-gray-400 text-justify mb-8 px-4">
+                                "Sagar Lad provides an essential toolkit for modern living. A refreshing take on mental resilience that is actually actionable."
+                            </p>
+                            <p class="text-xs text-gray-500 uppercase tracking-widest">Self Help / Personal Growth</p>
+                        </div>
+                        
+                        <div class="mt-auto pt-8 flex justify-end w-full">
+                            <!-- Barcode Placeholder -->
+                            <div class="w-28 h-12 bg-white flex flex-col justify-between p-1 rounded-sm shadow-sm">
+                                <div class="w-full h-full" style="background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px, #000 4px, #000 7px, #fff 7px, #fff 9px);"></div>
+                                <div class="text-[8px] text-black text-center mt-1 font-mono">ISBN 978-X-XXXX-XXXX-X</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOOK 2: Azure AI Foundry -->
+        <div id="book2-wrapper" class="book-wrapper w-full max-w-5xl mx-auto">
+            <div id="book2" class="shadow-2xl">
+                <!-- Page 1: Front Cover -->
+                <div class="page page-cover page-cover-front" data-density="hard" style="background-image: url('https://m.media-amazon.com/images/I/61-GkP8Fs9L._SL1254_.jpg'); background-size: cover; background-color: #fff; background-position: center;">
+                </div>
+                
+                <!-- Page 2: Inside Front Cover -->
+                <div class="page page-cover" data-density="hard">
+                    <div class="page-content bg-gray-100"></div>
+                </div>
+                
+                <!-- Page 3: Title Page -->
+                <div class="page">
+                    <div class="page-content text-center justify-center items-center">
+                        <div class="my-auto">
+                            <h1 class="text-3xl sm:text-4xl font-bold mb-4 text-blue-900 leading-tight">Level Up with Azure AI Foundry</h1>
+                            <p class="text-md sm:text-lg text-gray-700 mb-10 px-4">Understanding Innovative AI Development on Azure</p>
+                            <div class="w-16 h-1 bg-blue-500 mx-auto mb-8"></div>
+                            <p class="font-bold text-xl text-gray-800">Sagar Lad</p>
+                        </div>
+                        <div class="page-number">1</div>
+                    </div>
+                </div>
+                
+                <!-- Page 4: Copyright -->
+                <div class="page">
+                    <div class="page-content justify-end pb-12">
+                        <p class="text-xs text-gray-500 text-center leading-relaxed">
+                            Copyright © Sagar Lad<br>
+                            All rights reserved.<br><br>
+                            Published Independently.<br>
+                            Trademarks: Microsoft, Azure, and AI Foundry are trademarks of the Microsoft group of companies.
+                        </p>
+                        <div class="page-number">2</div>
+                    </div>
+                </div>
+
+                <!-- Page 5: Table of Contents -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-2xl font-bold mb-6 text-center text-blue-900 border-b-2 border-blue-200 pb-4">Contents</h2>
+                        <div class="page-text flex-grow text-sm">
+                            <ul class="space-y-4 text-gray-800">
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Introduction to Generative AI</span> <span>5</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Azure AI Foundry Overview</span> <span>21</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Navigating Prompt Flow</span> <span>45</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Multi-Modal AI Applications</span> <span>73</span></li>
+                                <li class="flex justify-between border-b border-gray-100 pb-1"><span>Responsible AI & Governance</span> <span>99</span></li>
+                            </ul>
+                        </div>
+                        <div class="page-number">3</div>
+                    </div>
+                </div>
+                
+                <!-- Page 6: Quote Page -->
+                <div class="page">
+                    <div class="page-content justify-center items-center">
+                        <div class="text-center px-8">
+                            <p class="text-lg italic text-blue-800 leading-relaxed font-semibold">
+                                "The future of software is intelligent.<br>Are you ready to build it?"
+                            </p>
+                        </div>
+                        <div class="page-number">4</div>
+                    </div>
+                </div>
+
+                <!-- Page 7: Introduction -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-sm font-bold mb-8 text-center uppercase tracking-widest text-gray-400">Introduction</h2>
+                        <div class="page-text flex-grow">
+                            <p class="mb-5 text-justify">
+                                Harness the power of Artificial Intelligence through Microsoft’s premier enterprise platform: <strong>Azure AI Foundry</strong>.
+                            </p>
+                            <p class="mb-5 text-justify">
+                                Azure AI Foundry includes a versatile and incredibly powerful suite of tools designed to cater to the exacting needs of modern developers, data scientists, and forward-thinking organizations aiming to leverage AI for transformative outcomes.
+                            </p>
+                        </div>
+                        <div class="page-number">5</div>
+                    </div>
+                </div>
+                
+                <!-- Page 8: Core Concept -->
+                <div class="page">
+                    <div class="page-content">
+                        <div class="page-text flex-grow mt-4">
+                            <p class="mb-4 text-justify">
+                                This book demystifies the Azure AI Foundry ecosystem by offering a comprehensive overview of its foundational concepts, tools, and diverse services.
+                            </p>
+                            <p class="mb-4 text-justify">
+                                We begin with a solid overview of generative AI, detailing its architecture, capabilities, and key differences from traditional machine learning. From there, you will journey into practical applications.
+                            </p>
+                            <p class="text-justify">
+                                You will learn how to navigate <em>Azure AI Foundry Prompt Flow</em>, covering initial setup, creation, debugging, and ultimately building intelligent, multi-modal AI applications that are ready for production.
+                            </p>
+                        </div>
+                        <div class="page-number">6</div>
+                    </div>
+                </div>
+                
+                <!-- Page 9: Benefits -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-lg font-bold mb-4 text-blue-900 border-b pb-2 border-blue-200">What You Will Learn</h2>
+                        <div class="page-text flex-grow">
+                            <ul class="list-disc pl-5 space-y-3 text-gray-700 text-sm">
+                                <li>Get up to speed on the absolute fundamentals of generative AI.</li>
+                                <li>Understand essential components of Azure AI Foundry, including Prompt Flow and key tools for intelligent applications.</li>
+                                <li>Build and deploy robust multi-modal applications.</li>
+                                <li>Integrate cutting-edge AI capabilities into your existing systems and enterprise workflows.</li>
+                                <li>Know the latest trends and innovations driving cutting-edge solutions across various industries.</li>
+                                <li>Manage crucial security, ethics, and responsible governance of your AI applications.</li>
+                            </ul>
+                        </div>
+                        <div class="page-number">7</div>
+                    </div>
+                </div>
+                
+                <!-- Page 10: Conclusion -->
+                <div class="page">
+                    <div class="page-content">
+                        <h2 class="text-lg font-bold mb-4 text-blue-900">Who This Book Is For</h2>
+                        <div class="page-text flex-grow mt-2">
+                            <p class="mb-6 text-justify">
+                                This comprehensive guide is tailored specifically for:
+                            </p>
+                            <div class="grid grid-cols-2 gap-4 mb-6">
+                                <div class="bg-blue-50 p-3 rounded shadow-sm text-center">
+                                    <span class="block font-bold text-blue-800">Data Professionals</span>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded shadow-sm text-center">
+                                    <span class="block font-bold text-blue-800">AI Enthusiasts</span>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded shadow-sm text-center">
+                                    <span class="block font-bold text-blue-800">Enterprise Leaders</span>
+                                </div>
+                                <div class="bg-blue-50 p-3 rounded shadow-sm text-center">
+                                    <span class="block font-bold text-blue-800">Data Scientists</span>
+                                </div>
+                            </div>
+                            <p class="text-justify text-sm italic">
+                                After reading this book, you will understand how to utilize Azure’s AI tools to create impactful solutions that drive efficiency and enhance decision-making.
+                            </p>
+                        </div>
+                        <div class="page-number">8</div>
+                    </div>
+                </div>
+                
+                <!-- Page 9: Inside Back Cover -->
+                <div class="page page-cover" data-density="hard">
+                    <div class="page-content bg-gray-100"></div>
+                </div>
+                
+                <!-- Page 10: Back Cover -->
+                <div class="page page-cover page-cover-back" data-density="hard" style="background-image: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);">
+                    <div class="page-content flex flex-col justify-center items-center text-center p-8">
+                        <div class="my-auto w-full">
+                            <h2 class="text-xl font-bold mb-2 text-white">Azure AI Foundry</h2>
+                            <p class="text-sm text-blue-300 mb-6">The Definitive Guide for Developers</p>
+                            <div class="w-full bg-blue-900 bg-opacity-50 p-4 rounded-lg mb-8 text-left border border-blue-700">
+                                <p class="text-xs text-gray-300 leading-relaxed">
+                                    "A masterclass in demystifying Microsoft's powerful AI toolset. Essential reading for any organization looking to scale their AI initiatives safely and effectively."
+                                </p>
+                            </div>
+                            <p class="text-xs text-gray-400 uppercase tracking-widest">Technology / Cloud Computing</p>
+                        </div>
+                        
+                        <div class="mt-auto pt-8 flex justify-end w-full">
+                            <!-- Barcode Placeholder -->
+                            <div class="w-28 h-12 bg-white flex flex-col justify-between p-1 rounded-sm shadow-sm">
+                                <div class="w-full h-full" style="background: repeating-linear-gradient(90deg, #000, #000 1px, #fff 1px, #fff 3px, #000 3px, #000 6px, #fff 6px, #fff 8px);"></div>
+                                <div class="text-[8px] text-black text-center mt-1 font-mono">ISBN 978-X-XXXX-XXXX-Y</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="absolute bottom-6 left-0 right-0 text-center pointer-events-none">
+            <p class="text-gray-400 text-sm animate-pulse bg-gray-900 bg-opacity-60 inline-block px-4 py-2 rounded-full backdrop-blur-sm">
+                <span class="mr-2">🖱️</span> Click, drag corners, or use <strong>Arrow Keys</strong> to flip pages
+            </p>
+        </div>
+
+    </main>
+
+    <script>
+        /* 
+         * Logic to handle the realistic 3D book animation using St.PageFlip
+         * It dynamically initializes the book when selected to ensure accurate
+         * dimensions and responsive behavior across all devices.
+         */
+        
+        let book1Instance = null;
+        let book2Instance = null;
+
+        // Shared configuration for the book mechanics
+        const flipConfig = {
+            width: 420,             // Base page width
+            height: 600,            // Base page height
+            size: "stretch",        // Stretches to fit the container
+            minWidth: 300,
+            maxWidth: 1000,
+            minHeight: 400,
+            maxHeight: 1200,
+            maxShadowOpacity: 0.4,  // Realistic shadow intensity
+            showCover: true,
+            mobileScrollSupport: false, 
+            usePortrait: true       // CRITICAL: Switches to 1-page layout on mobile
+        };
+
+        function initBook(id) {
+            const el = document.getElementById(id);
+            const instance = new St.PageFlip(el, flipConfig);
+            
+            // Load pages from the DOM elements
+            instance.loadFromHTML(el.querySelectorAll('.page'));
+            
+            // Add a slight delay to trigger a visual opening effect (optional)
+            setTimeout(() => {
+                // If we want it to auto-open to page 1, we could call instance.flip(1)
+            }, 500);
+
+            return instance;
+        }
+
+        function switchBook(bookId) {
+            // 1. Update UI Button States
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'shadow-md');
+                btn.classList.add('bg-transparent', 'text-gray-400');
+            });
+            
+            const activeBtn = document.getElementById('btn-' + bookId);
+            if (activeBtn) {
+                activeBtn.classList.remove('bg-transparent', 'text-gray-400');
+                activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-md');
+            }
+
+            // 2. Hide all book wrappers
+            document.querySelectorAll('.book-wrapper').forEach(wrapper => {
+                wrapper.style.display = 'none';
+            });
+
+            // 3. Show selected book wrapper
+            const wrapper = document.getElementById(bookId + '-wrapper');
+            if (wrapper) {
+                wrapper.style.display = 'flex';
+            }
+
+            // 4. Initialize the St.PageFlip instance if it hasn't been created yet.
+            // We initialize it *after* setting display:flex so it calculates dimensions correctly.
+            if (bookId === 'book1' && !book1Instance) {
+                book1Instance = initBook('book1');
+            } else if (bookId === 'book2' && !book2Instance) {
+                book2Instance = initBook('book2');
+            }
+        }
+
+        // Initialize Book 1 when the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Small timeout ensures fonts/CSS are loaded before dimension calculations
+            setTimeout(() => {
+                switchBook('book1');
+            }, 100);
+        });
+
+        document.addEventListener('keydown', (e) => {
+            let activeInstance = null;
+            const book1Wrapper = document.getElementById('book1-wrapper');
+            
+            // Determine which book is currently visible
+            if (book1Wrapper && book1Wrapper.style.display !== 'none') {
+                activeInstance = book1Instance;
+            } else {
+                activeInstance = book2Instance;
+            }
+
+            // Trigger flips based on arrow keys
+            if (activeInstance) {
+                if (e.key === 'ArrowRight') {
+                    activeInstance.flipNext();
+                } else if (e.key === 'ArrowLeft') {
+                    activeInstance.flipPrev();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

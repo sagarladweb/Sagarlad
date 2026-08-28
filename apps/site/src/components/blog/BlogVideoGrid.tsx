@@ -1,11 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import DOMPurify from "dompurify";
+import { useEffect, useMemo, useState, lazy, Suspense } from "react";
 import { X, Play } from "lucide-react";
-import { FaYoutube, FaInstagram } from "react-icons/fa6";
+import { FaYoutube, FaInstagram } from "@/lib/icons";
 import { youtubeId, youtubeEmbedUrl, youtubeWatchUrl, youtubeThumb } from "@/lib/youtube";
 import { instagramEmbedUrl, isInstagramUrl } from "@/lib/instagram";
+
+let dompurifyPromise: Promise<typeof import("dompurify")> | null = null;
+function getDOMPurify() {
+  if (!dompurifyPromise) {
+    dompurifyPromise = import("dompurify");
+  }
+  return dompurifyPromise;
+}
 
 type Video = {
   id: string;
@@ -64,17 +71,28 @@ export function BlogVideoGrid({
   masonry?: boolean;
 }) {
   const [playing, setPlaying] = useState<Video | null>(null);
+  const [sanitizedContent, setSanitizedContent] = useState<string | null>(null);
 
   const close = () => setPlaying(null);
 
   useEffect(() => {
-    if (!playing) return;
+    if (!playing) {
+      setSanitizedContent(null);
+      return;
+    }
     window.scrollTo(0, 0);
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") close();
     };
     document.addEventListener("keydown", onKey);
+
+    if (playing.content) {
+      getDOMPurify().then((mod) => {
+        setSanitizedContent(mod.default.sanitize(playing.content!));
+      });
+    }
+
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
@@ -214,10 +232,10 @@ export function BlogVideoGrid({
             allowFullScreen
           />
         </div>
-        {playing.content && (
+        {playing.content && sanitizedContent && (
           <div
             className="mt-3 sm:mt-4 rounded-lg bg-white p-4 sm:p-5 text-sm text-neutral-800 leading-relaxed max-h-[35vh] sm:max-h-[40vh] overflow-y-auto prose prose-sm prose-neutral max-w-none [&_p]:my-3 [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-bold [&_a]:text-blue-600 [&_a]:underline [&_strong]:font-bold [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:list-decimal [&_ol]:pl-5"
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(playing.content) }}
+            dangerouslySetInnerHTML={{ __html: sanitizedContent }}
           />
         )}
       </div>
