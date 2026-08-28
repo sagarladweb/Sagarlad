@@ -105,53 +105,31 @@ export default function ContactPage() {
   return (
     <div className="overflow-x-clip">
       {/* ── Hero ─────────────────────────────────────────────── */}
-      <header className="relative overflow-hidden border-b border-border bg-[#0A1930]">
-        {/* Portrait glow — cool blue, contrasts with warm skin/clothing */}
+      <header className="relative overflow-hidden border-b border-border bg-background">
+        {/* Subtle warm accent behind portrait */}
         <div
           className="absolute z-0"
           style={{
-            width: "600px",
-            height: "600px",
-            left: "5%",
-            top: "10%",
-            background: "radial-gradient(circle, rgba(13,33,161,0.12) 0%, transparent 70%)",
+            width: "500px",
+            height: "500px",
+            left: "0%",
+            top: "15%",
+            background: "radial-gradient(circle, rgba(255,213,29,0.06) 0%, transparent 70%)",
             filter: "blur(60px)",
           }}
         />
-        {/* Accent warmth — subtle gold, NOT behind portrait */}
-        <div
-          className="absolute z-0"
-          style={{
-            width: "400px",
-            height: "400px",
-            right: "5%",
-            top: "40%",
-            background: "radial-gradient(circle, rgba(255,213,29,0.06) 0%, transparent 70%)",
-            filter: "blur(50px)",
-          }}
-        />
-        {/* Bottom edge fade */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0A1930] z-10" />
 
-        <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-6 pt-8 pb-12 sm:pt-14 sm:pb-20">
+        <div className="relative z-20 mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-4 sm:px-6 lg:grid-cols-12 lg:gap-6 pt-8 pb-10 sm:pt-14 sm:pb-16">
           {/* Portrait */}
           <div className="lg:col-span-5 relative flex justify-center" data-animate="left">
-            <div className="relative w-full max-w-[420px]">
-              {/* Soft blue halo behind portrait */}
-              <div
-                className="absolute -inset-10 rounded-full opacity-50"
-                style={{
-                  background: "radial-gradient(ellipse, rgba(13,33,161,0.15) 0%, transparent 65%)",
-                  filter: "blur(25px)",
-                }}
-              />
+            <div className="relative w-full max-w-[380px] mx-auto">
               <Image
                 src="/images/section.png"
                 alt="Sagar Lad"
                 width={800}
                 height={890}
                 priority
-                className="relative z-10 h-auto w-full drop-shadow-[0_25px_50px_rgba(0,0,0,0.5)]"
+                className="relative z-10 h-auto w-full"
                 style={{
                   maskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
                   WebkitMaskImage: "linear-gradient(to top, transparent 0%, black 20%, black 100%)",
@@ -162,14 +140,14 @@ export default function ContactPage() {
 
           {/* Copy */}
           <div className="lg:col-span-7 lg:pl-6 text-center lg:text-left" data-animate="right">
-            <span className="inline-block rounded-full bg-white/[0.06] backdrop-blur-sm px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/60 border border-white/[0.08]">
+            <span className="inline-block rounded-full bg-brand/5 px-5 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand/60 border border-brand/10">
               Get in touch
             </span>
-            <h1 className="mt-6 font-display text-[2.75rem] sm:text-6xl font-bold leading-[1.05] tracking-tight text-white">
+            <h1 className="mt-6 font-display text-[2.75rem] sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-foreground">
               Let&apos;s{" "}
               <span className="text-accent">connect.</span>
             </h1>
-            <p className="mt-6 max-w-md text-[15px] sm:text-base text-white/45 leading-[1.8]">
+            <p className="mt-6 max-w-md text-[15px] sm:text-base text-muted-foreground leading-[1.8]">
               Have a question, feedback on a book, or a thought to share?
               I read every message.
             </p>
@@ -177,10 +155,10 @@ export default function ContactPage() {
               {bullets.map((item) => (
                 <li
                   key={item}
-                  className="flex items-start gap-3 text-sm font-medium text-white/65"
+                  className="flex items-start gap-3 text-sm font-medium text-foreground/70"
                 >
                   <CheckCircle2
-                    className="mt-0.5 h-4 w-4 shrink-0 text-accent/70"
+                    className="mt-0.5 h-4 w-4 shrink-0 text-brand"
                     aria-hidden="true"
                   />
                   {item}
