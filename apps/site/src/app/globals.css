@@ -1107,3 +1107,9 @@ nav a:not([class*="rounded-full"]) {
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
   border-radius: 2px;
 }
+
+/* ── Loading skeleton shimmer ─────────────────────────────────────── */
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

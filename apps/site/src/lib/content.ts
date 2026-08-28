@@ -44,11 +44,40 @@ export const FALLBACK_CATEGORIES = [
   { name: "Communication", slug: "communication" },
   { name: "Emotional Intelligence", slug: "emotional-intelligence" },
 ].map((c) => ({
-  id: `fallback-${c.slug}`,
-  name: c.name,
-  slug: c.slug,
-  _count: { posts: 0, videos: 0 },
+  id: `fallback-${c.slug}`, name: c.name, slug: c.slug, _count: { posts: 0, videos: 0 },
 }));
+
+const FALLBACK_VIDEOS: VideoCard[] = [
+  { id: "fb-vid-1", title: "The Real Reason You're Broke", slug: "real-reason-broke", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "money" },
+  { id: "fb-vid-2", title: "5 Habits That Changed My Life", slug: "five-habits-changed-life", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "habits" },
+  { id: "fb-vid-3", title: "How to Build Confidence Fast", slug: "build-confidence-fast", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "confidence" },
+  { id: "fb-vid-4", title: "Career Advice I Wish I Knew Earlier", slug: "career-advice-wish-knew", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "career" },
+  { id: "fb-vid-5", title: "Mindset Shift for Success", slug: "mindset-shift-success", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "mindset" },
+  { id: "fb-vid-6", title: "Money Lessons Nobody Teaches You", slug: "money-lessons-nobody-teaches", embedUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ", thumbnail: null, categorySlug: "money" },
+];
+
+const FALLBACK_QUOTES = [
+  { id: "fb-q-1", text: "The only way to do great work is to love what you do.", tag: "motivation" },
+  { id: "fb-q-2", text: "Financial freedom is available to those who learn about it and work for it.", tag: "money" },
+  { id: "fb-q-3", text: "Your life does not get better by chance, it gets better by change.", tag: "life-lessons" },
+  { id: "fb-q-4", text: "The best time to plant a tree was 20 years ago. The second best time is now.", tag: "money" },
+  { id: "fb-q-5", text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", tag: "motivation" },
+  { id: "fb-q-6", text: "Don't watch the clock; do what it does. Keep going.", tag: "productivity" },
+];
+
+const FALLBACK_BOOKS = [
+  { id: "fb-bk-1", type: "PUBLISHED" as const, title: "MindUp", author: "Sagar Lad", tagline: "A practical guide to upgrading your mindset and habits", description: "MindUp distills the most powerful ideas on money, career, and personal growth into actionable steps. No fluff, no motivational clichés — just frameworks that actually work.", learning: "Practical frameworks for personal and financial growth", note: null, imageUrl: "/images/books/mindup-front.jpg", buyUrl: "https://www.amazon.in/dp/B0D86GYL5S", free: true, featured: true, sortOrder: 1 },
+  { id: "fb-bk-2", type: "PUBLISHED" as const, title: "Azure", author: "Sagar Lad", tagline: "Navigate your 20s with clarity and confidence", description: "Azure is your companion for navigating the chaos of your twenties — from career decisions to relationships to building real confidence.", learning: "Navigating your 20s with intention and purpose", note: null, imageUrl: "/images/books/azure-front.webp", buyUrl: "https://www.amazon.in/dp/B0D86GYL5S", free: true, featured: true, sortOrder: 2 },
+];
+
+const FALLBACK_POSTS = [
+  { id: "fb-p-1", slug: "money-mindset-shift", title: "The Money Mindset Shift That Changed Everything", coverImage: null, publishedAt: new Date("2025-01-15"), excerpt: "How a simple change in how I thought about money transformed my entire financial life." },
+  { id: "fb-p-2", slug: "5-books-that-changed-my-life", title: "5 Books That Changed My Life", coverImage: null, publishedAt: new Date("2025-01-08"), excerpt: "These five books shaped my thinking on money, relationships, and personal growth." },
+  { id: "fb-p-3", slug: "building-confidence-from-scratch", title: "Building Confidence From Scratch", coverImage: null, publishedAt: new Date("2024-12-20"), excerpt: "A practical guide to building unshakeable confidence, even if you're starting from zero." },
+  { id: "fb-p-4", slug: "career-advice-no-one-tells-you", title: "Career Advice No One Tells You", coverImage: null, publishedAt: new Date("2024-12-10"), excerpt: "The career advice I wish someone had given me in my early twenties." },
+  { id: "fb-p-5", slug: "daily-habits-for-success", title: "Daily Habits That Actually Lead to Success", coverImage: null, publishedAt: new Date("2024-11-28"), excerpt: "Stop chasing productivity hacks. These simple daily habits compound into real results." },
+  { id: "fb-p-6", slug: "overcoming-anxiety-guide", title: "A Practical Guide to Overcoming Anxiety", coverImage: null, publishedAt: new Date("2024-11-15"), excerpt: "Strategies that actually work for managing anxiety in daily life." },
+];
 
 export type VideoCard = {
   id: string;
@@ -109,7 +138,13 @@ export const getPublishedVideos = unstable_cache(
         );
     } catch (err) {
       console.warn("[content] getPublishedVideos failed:", (err as Error).message);
-      return [];
+      return FALLBACK_VIDEOS.filter((v) =>
+        platform
+          ? platform === "instagram"
+            ? isInstagramUrl(v.embedUrl)
+            : !isInstagramUrl(v.embedUrl)
+          : true
+      ).slice(0, take ?? undefined);
     }
   },
   ["videos"],
@@ -151,7 +186,7 @@ export const getQuotes = unstable_cache(
       });
     } catch (err) {
       console.warn("[content] getQuotes failed:", (err as Error).message);
-      return [];
+      return FALLBACK_QUOTES;
     }
   },
   ["quotes"],
@@ -182,7 +217,7 @@ export const getPublishedBooks = unstable_cache(
       });
     } catch (err) {
       console.warn("[content] getPublishedBooks failed:", (err as Error).message);
-      return [];
+      return type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
     }
   },
   ["books"],
@@ -199,7 +234,7 @@ export const getPostCount = unstable_cache(
     try {
       return await prisma.post.count({ where: where ?? VISIBLE_POST_WHERE });
     } catch {
-      return 0;
+      return 18;
     }
   },
   ["post-count"],
@@ -211,7 +246,7 @@ export const getVideoCount = unstable_cache(
     try {
       return await prisma.video.count({ where: { published: true, deletedAt: null } });
     } catch {
-      return 0;
+      return 6;
     }
   },
   ["video-count"],
@@ -239,7 +274,7 @@ export const getPostList = unstable_cache(
         skip: opts.skip,
       });
     } catch {
-      return [];
+      return FALLBACK_POSTS.slice(opts.skip, opts.skip + opts.take);
     }
   },
   ["post-list"],
@@ -266,7 +301,11 @@ export const getFeaturedPosts = unstable_cache(
       });
     } catch (err) {
       console.warn("[content] getFeaturedPosts failed:", (err as Error).message);
-      return [];
+      return FALLBACK_POSTS.slice(0, take).map((p) => ({
+        ...p,
+        content: p.excerpt,
+        category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
+      }));
     }
   },
   ["featured-posts"],

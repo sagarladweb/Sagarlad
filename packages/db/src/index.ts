@@ -27,10 +27,10 @@ function createClient() {
     connectionString,
     ssl,
     max,
-    connectionTimeoutMillis: 5000,
+    connectionTimeoutMillis: 3000,
     idleTimeoutMillis: 10000,
-    query_timeout: 10000,
-    statement_timeout: 10000,
+    query_timeout: 8000,
+    statement_timeout: 8000,
   });
   pool.on("error", (err) => {
     console.error("[db] idle pool error:", err.message);
