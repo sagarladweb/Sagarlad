@@ -37,10 +37,20 @@ export default async function BooksPage() {
       />
 
       {/* -------- Hero -------- */}
-      <header className="relative overflow-hidden border-b border-border bg-background text-black">
-        {/* About-style gradient overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 z-10" />
+      <header className="relative overflow-hidden border-b border-border text-black">
+        {/* Deep brand navy base */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1930] via-[#0d21a1] to-[#0A1930] z-0" />
+        {/* Diagonal accent wash */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-accent/15 via-transparent to-transparent z-10" />
+        {/* Bottom fade for depth */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 z-10" />
+        {/* Subtle grid texture */}
+        <div
+          className="absolute inset-0 opacity-[0.03] z-10"
+          style={{
+            backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px), repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.5) 40px, rgba(255,255,255,0.5) 41px)",
+          }}
+        />
         <div
           className="mx-auto max-w-7xl px-6 sm:px-8"
           style={{ paddingTop: 46, paddingBottom: 79 }}

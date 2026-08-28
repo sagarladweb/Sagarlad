@@ -28,18 +28,27 @@ export default async function BooksReadPage() {
 
   return (
     <div className="overflow-x-clip">
-      {/* Hero — About-style gradient */}
-      <header className="relative overflow-hidden border-b border-border bg-background py-14 md:py-20">
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10 z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/40 z-10" />
+      {/* Hero — Brand color gradient */}
+      <header className="relative overflow-hidden border-b border-border py-16 md:py-24">
+        {/* Brand navy gradient overlays */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1930] via-[#0d21a1]/90 to-[#0A1930] z-0" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#0d21a1]/80 via-transparent to-accent/10 z-10" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 z-10" />
+        {/* Subtle mesh texture */}
+        <div
+          className="absolute inset-0 opacity-[0.04] z-10"
+          style={{
+            backgroundImage: "repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.5) 20px, rgba(255,255,255,0.5) 21px), repeating-linear-gradient(-45deg, transparent, transparent 20px, rgba(255,255,255,0.5) 20px, rgba(255,255,255,0.5) 21px)",
+          }}
+        />
         <div className="relative z-20 mx-auto max-w-7xl px-4 sm:px-6">
-          <p className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-white/80 border border-white/20 rounded-full px-4 py-1.5 bg-white/10 backdrop-blur-sm">
+          <p className="inline-block text-xs font-semibold uppercase tracking-[0.2em] text-accent/90 border border-accent/30 rounded-full px-4 py-1.5 bg-accent/10 backdrop-blur-sm">
             Books I read
           </p>
-          <h1 className="mt-4 font-display text-4xl md:text-5xl font-bold tracking-tight text-white">
+          <h1 className="mt-5 font-display text-4xl md:text-5xl font-bold tracking-tight text-white">
             What&apos;s on my shelf
           </h1>
-          <p className="mt-4 max-w-2xl text-white/60 leading-relaxed">
+          <p className="mt-4 max-w-2xl text-white/60 leading-relaxed text-lg">
             Books that changed how I think — and the one clear lesson each one left me with.
           </p>
         </div>
