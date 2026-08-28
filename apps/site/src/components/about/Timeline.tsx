@@ -4,15 +4,17 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
-import { GraduationCap, Briefcase, Mic, PenTool } from "lucide-react";
+import { GraduationCap, Briefcase, Mic, PenTool, BookOpen } from "lucide-react";
 
 type TimelineNode = {
   year: string;
   title: string;
+  oneLiner: string;
   description: string;
   tag: string;
   icon: React.ComponentType<{ className?: string }>;
   image?: string;
+  imageAlt?: string;
   href?: string;
   hrefLabel?: string;
 };
@@ -21,8 +23,9 @@ const nodes: TimelineNode[] = [
   {
     year: "2009",
     title: "School Education",
+    oneLiner: "The dream begins",
     description:
-      "Years of relentless effort pay off — I earn my place at a top university for computer engineering.",
+      "Years of relentless effort in a small town in Gujarat pay off — earning a place at a top university for computer engineering. A kid from a modest home dares to dream.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about.webp",
@@ -30,17 +33,19 @@ const nodes: TimelineNode[] = [
   {
     year: "2009 – 2013",
     title: "B.E. Computer Engineering",
+    oneLiner: "Building the foundation",
     description:
-      "BVM College — the foundation of my technical career begins in earnest.",
+      "BVM College, Gujarat — four years of deep technical learning, late-night coding sessions, and the discipline that would shape a career in data and AI.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-2.webp",
   },
   {
     year: "2013",
-    title: "TCS",
+    title: "TCS — Career Begins",
+    oneLiner: "From India to Europe",
     description:
-      "My professional journey begins — and soon takes me to Europe.",
+      "Joining Tata Consultancy Services marks the start of a professional journey that soon takes me across continents — working with CXOs, leading data transformations across Europe.",
     tag: "Career",
     icon: Briefcase,
     image: "/images/profile/about-4.webp",
@@ -48,8 +53,9 @@ const nodes: TimelineNode[] = [
   {
     year: "2019 – 2020",
     title: "PG in Data Science",
+    oneLiner: "Reshaping how I think",
     description:
-      "IIIT Bangalore — the year that reshaped how I think, learn, and solve problems.",
+      "IIIT Bangalore — the year that changed everything. Statistical thinking, machine learning, and a whole new lens on solving real-world problems.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-5.webp",
@@ -57,28 +63,31 @@ const nodes: TimelineNode[] = [
   {
     year: "2022 – 2026",
     title: "Six Books Published",
+    oneLiner: "Writing alongside a career",
     description:
-      "First book in February 2022, sixth in March 2026 — writing alongside a full career.",
+      "First book in February 2022, sixth in March 2026. Finance, AI, habits, self-growth — each book a chapter of what I learned the hard way, so others don't have to.",
     tag: "Author",
     icon: PenTool,
     image: "/images/books/mindup-front.jpg",
     href: "/books",
-    hrefLabel: "View books",
+    hrefLabel: "View all books",
   },
   {
     year: "2025 – 2026",
     title: "Masters in Gen AI",
+    oneLiner: "Sharpening the frontier",
     description:
-      "Purdue University — sharpening the frontier, artificial intelligence done right.",
+      "Purdue University — diving deep into artificial intelligence at the frontier. Learning to build AI systems that are responsible, practical, and genuinely useful.",
     tag: "Education",
     icon: GraduationCap,
-    image: "/images/profile/about-5.webp",
+    image: "/images/speaking/candid-presentation.webp",
   },
   {
     year: "2026",
     title: "First TEDx Speech",
+    oneLiner: "AI on the big stage",
     description:
-      "Give a speech on AI to the TEDx stage.",
+      "Taking the TEDx stage to talk about AI — translating years of hands-on experience into a message that reaches beyond the tech community.",
     tag: "Speaker",
     icon: Mic,
     image: "/images/heroes/tedx.webp",
@@ -89,13 +98,14 @@ export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState<number | null>(null);
+  const hasAutoScrolled = useRef(false);
 
   const toggle = useCallback(
     (i: number) => setActive((prev) => (prev === i ? null : i)),
     []
   );
 
-  // Close on outside click
+  // Close on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActive(null);
@@ -104,7 +114,7 @@ export function Timeline() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
-  // Horizontal grab-to-drag
+  // Horizontal grab-to-drag — NO pointer capture so dots still get clicks
   useEffect(() => {
     const track = trackRef.current;
     if (!track) return;
@@ -112,25 +122,28 @@ export function Timeline() {
     let isDown = false;
     let startX = 0;
     let scrollLeft = 0;
+    let didDrag = false;
 
     const onPointerDown = (e: PointerEvent) => {
-      // Don't interfere with card clicks
-      if ((e.target as HTMLElement).closest("[data-tl-card]")) return;
+      // Only start drag from the track background, not from dots or cards
+      const target = e.target as HTMLElement;
+      if (target.closest("button") || target.closest("[data-tl-card]") || target.closest("a")) return;
       isDown = true;
+      didDrag = false;
       startX = e.pageX - track.offsetLeft;
       scrollLeft = track.scrollLeft;
       track.style.cursor = "grabbing";
-      track.setPointerCapture(e.pointerId);
     };
-    const onPointerUp = (e: PointerEvent) => {
+    const onPointerUp = () => {
       isDown = false;
       track.style.cursor = "grab";
-      track.releasePointerCapture(e.pointerId);
     };
     const onPointerMove = (e: PointerEvent) => {
       if (!isDown) return;
       const x = e.pageX - track.offsetLeft;
-      track.scrollLeft = scrollLeft - (x - startX) * 1.5;
+      const dx = x - startX;
+      if (Math.abs(dx) > 3) didDrag = true;
+      track.scrollLeft = scrollLeft - dx * 1.5;
     };
 
     track.addEventListener("pointerdown", onPointerDown);
@@ -146,13 +159,15 @@ export function Timeline() {
     };
   }, []);
 
-  // GSAP reveal
+  // GSAP reveal + auto-scroll + auto-open first card
   useEffect(() => {
     const el = sectionRef.current;
-    if (!el) return;
+    const track = trackRef.current;
+    if (!el || !track) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
+      // Heading
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 36, filter: "blur(4px)" },
@@ -166,6 +181,7 @@ export function Timeline() {
         }
       );
 
+      // Dots pop in
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -174,10 +190,11 @@ export function Timeline() {
           duration: 0.5,
           stagger: 0.08,
           ease: "back.out(2)",
-          scrollTrigger: { trigger: trackRef.current, start: "top 85%" },
+          scrollTrigger: { trigger: track, start: "top 85%" },
         }
       );
 
+      // Axis line draws
       gsap.fromTo(
         "[data-tl-line]",
         { scaleX: 0 },
@@ -185,13 +202,62 @@ export function Timeline() {
           scaleX: 1,
           duration: 1.2,
           ease: "power2.out",
-          scrollTrigger: { trigger: trackRef.current, start: "top 80%" },
+          scrollTrigger: { trigger: track, start: "top 80%" },
         }
       );
+
+      // Auto-scroll: when section enters viewport, smoothly scroll track to center first card, then open it
+      ScrollTrigger.create({
+        trigger: el,
+        start: "top 60%",
+        once: true,
+        onEnter: () => {
+          if (hasAutoScrolled.current) return;
+          hasAutoScrolled.current = true;
+
+          // Scroll track so first node is centered
+          const firstDot = track.querySelector("[data-tl-dot]") as HTMLElement | null;
+          if (firstDot) {
+            const dotRect = firstDot.getBoundingClientRect();
+            const trackRect = track.getBoundingClientRect();
+            const offset = dotRect.left - trackRect.left - trackRect.width / 2 + dotRect.width / 2;
+
+            gsap.to(track, {
+              scrollLeft: track.scrollLeft + offset,
+              duration: 1,
+              ease: "power2.inOut",
+              delay: 0.6,
+              onComplete: () => {
+                // Open first card after scroll settles
+                setActive(0);
+              },
+            });
+          }
+        },
+      });
     }, el);
 
     return () => ctx.revert();
   }, []);
+
+  // Scroll active card into view when active changes
+  useEffect(() => {
+    const track = trackRef.current;
+    if (active === null || !track) return;
+
+    const dots = track.querySelectorAll("[data-tl-dot]");
+    const dot = dots[active] as HTMLElement | undefined;
+    if (!dot) return;
+
+    const dotRect = dot.getBoundingClientRect();
+    const trackRect = track.getBoundingClientRect();
+
+    // If dot is out of view, scroll it into center
+    if (dotRect.left < trackRect.left + 40 || dotRect.right > trackRect.right - 40) {
+      const offset = dotRect.left - trackRect.left - trackRect.width / 2 + dotRect.width / 2;
+      track.scrollTo({ left: track.scrollLeft + offset, behavior: "smooth" });
+    }
+  }, [active]);
 
   return (
     <section
@@ -210,7 +276,7 @@ export function Timeline() {
           </h2>
           <p className="mt-4 text-muted-foreground max-w-xl mx-auto text-sm sm:text-base leading-relaxed">
             Education, career, books, and the first talk — every milestone that
-            made today possible.
+            made today possible. Tap a dot to explore.
           </p>
         </div>
       </div>
@@ -236,7 +302,7 @@ export function Timeline() {
           {/* Nodes */}
           <div
             className="relative flex items-start"
-            style={{ minHeight: "440px" }}
+            style={{ minHeight: "460px" }}
           >
             {nodes.map((n, i) => {
               const Icon = n.icon;
@@ -255,23 +321,32 @@ export function Timeline() {
                     onClick={() => toggle(i)}
                     aria-expanded={isOpen}
                     aria-label={`${n.title} — ${n.year}`}
-                    className="absolute left-1/2 -translate-x-1/2 z-20 h-4 w-4 rounded-full border-[2.5px] border-brand bg-background transition-all duration-300 hover:scale-150 hover:shadow-[0_0_0_8px_rgba(13,33,161,0.12)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2"
+                    className={`absolute left-1/2 -translate-x-1/2 z-20 h-4 w-4 rounded-full border-[2.5px] border-brand transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 ${
+                      isOpen
+                        ? "bg-brand scale-150 shadow-[0_0_0_8px_rgba(13,33,161,0.15)]"
+                        : "bg-background hover:scale-125 hover:shadow-[0_0_0_6px_rgba(13,33,161,0.1)]"
+                    }`}
                     style={{ top: "174px" }}
                   />
 
-                  {/* Year label — always visible */}
+                  {/* One-liner — always visible below year */}
                   <div
                     className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none"
-                    style={{
-                      top: above ? "140px" : "198px",
-                    }}
+                    style={{ top: above ? "126px" : "198px" }}
                   >
                     <span
-                      className={`text-xs font-bold uppercase tracking-wider transition-colors duration-300 ${
-                        isOpen ? "text-brand" : "text-muted-foreground"
+                      className={`block text-[11px] font-semibold uppercase tracking-wider transition-colors duration-300 ${
+                        isOpen ? "text-brand" : "text-muted-foreground/70"
                       }`}
                     >
                       {n.year}
+                    </span>
+                    <span
+                      className={`block mt-1 text-xs font-medium transition-colors duration-300 ${
+                        isOpen ? "text-foreground" : "text-muted-foreground/50"
+                      }`}
+                    >
+                      {n.oneLiner}
                     </span>
                   </div>
 
@@ -291,27 +366,28 @@ export function Timeline() {
                   {/* Card */}
                   <div
                     data-tl-card
-                    className={`absolute left-1/2 -translate-x-1/2 w-[260px] transition-all duration-500 ease-out z-30 ${
+                    className={`absolute left-1/2 -translate-x-1/2 w-[260px] sm:w-[280px] z-30 ${
                       isOpen
                         ? "opacity-100 scale-100 pointer-events-auto"
                         : "opacity-0 scale-95 pointer-events-none"
                     }`}
                     style={{
+                      transition: "opacity 0.4s ease-out, transform 0.4s ease-out",
                       [above ? "bottom" : "top"]: "228px",
                     }}
                   >
                     <div className="rounded-2xl border border-white/25 bg-white/80 dark:bg-white/[0.08] backdrop-blur-2xl shadow-[0_8px_40px_rgba(0,0,0,0.12)] overflow-hidden">
                       {/* Image */}
                       {n.image && (
-                        <div className="relative h-40 w-full overflow-hidden">
+                        <div className="relative h-36 sm:h-40 w-full overflow-hidden">
                           <Image
                             src={n.image}
-                            alt={n.title}
+                            alt={n.imageAlt ?? n.title}
                             fill
-                            sizes="260px"
-                            className="object-cover object-top transition-transform duration-700 hover:scale-110"
+                            sizes="(max-width: 640px) 280px, 280px"
+                            className="object-cover object-right-top sm:object-top transition-transform duration-700 hover:scale-110"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
                           {/* Tag badge on image */}
                           <span className="absolute top-3 left-3 inline-flex items-center gap-1 rounded-full bg-white/90 dark:bg-black/60 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-brand">
                             <Icon className="w-3 h-3" />
@@ -320,7 +396,19 @@ export function Timeline() {
                         </div>
                       )}
 
+                      {/* Fallback visual when no image — icon hero */}
+                      {!n.image && (
+                        <div className="relative h-24 w-full bg-gradient-to-br from-brand/10 via-brand/5 to-transparent flex items-center justify-center">
+                          <div className="w-14 h-14 rounded-2xl bg-brand/10 grid place-items-center text-brand">
+                            <Icon className="w-7 h-7" />
+                          </div>
+                        </div>
+                      )}
+
                       <div className="p-4">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-brand/60 mb-1">
+                          {n.year}
+                        </p>
                         <h3 className="font-display text-sm font-bold leading-snug text-foreground">
                           {n.title}
                         </h3>
@@ -330,10 +418,11 @@ export function Timeline() {
                         {n.href && (
                           <Link
                             href={n.href}
-                            className="mt-3 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
+                            className="mt-3 inline-flex items-center gap-1.5 text-[11px] font-semibold text-brand hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {n.hrefLabel ?? "Learn more"} →
+                            <BookOpen className="w-3 h-3" />
+                            {n.hrefLabel ?? "Learn more"}
                           </Link>
                         )}
                       </div>
