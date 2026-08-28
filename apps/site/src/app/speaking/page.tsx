@@ -301,10 +301,10 @@ export default function SpeakingPage() {
         </div>
       </section>
 
-      {/* Stages & Credentials — visually rich unified grid section */}
+      {/* Stages & Credentials — visual-first animated cards */}
       <section className="border-b border-border bg-background py-20 md:py-24" aria-label="Stages and Credentials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 space-y-16">
-          {/* Events Hosted — divided list */}
+          {/* Events Hosted — visual cards */}
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
               <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where I've spoken</span>
@@ -313,30 +313,34 @@ export default function SpeakingPage() {
                 Keynotes delivered across regional tech groups, academic institutions, and international summits.
               </p>
             </div>
-            <div className="card-hover rounded-lg border border-border divide-y divide-border overflow-hidden bg-card">
+            <div
+              data-animate-group
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
               {eventsHosted.map((e, i) => {
                 const Icon = e.icon;
                 return (
                   <div
                     key={e.title}
-                    className="group flex items-center gap-4 sm:gap-6 px-6 sm:px-8 py-5 transition-colors hover:bg-muted/40"
+                    data-animate-item
+                    className="group relative rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-brand-light/60 hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] hover:-translate-y-1"
                   >
-                    <span className="w-8 shrink-0 font-display text-lg sm:text-xl font-extrabold text-muted-foreground/35 tabular-nums">
+                    {/* Accent gradient on top */}
+                    <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-brand/0 via-brand/20 to-brand/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    {/* Number badge */}
+                    <span className="absolute top-4 right-4 text-[10px] font-bold tabular-nums text-muted-foreground/30">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-accent/10 text-accent-strong transition-colors group-hover:bg-accent group-hover:text-accent-foreground">
-                      <Icon className="w-4 h-4" />
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <h3 className="font-display text-base sm:text-lg font-bold leading-snug group-hover:text-accent-strong transition-colors">
-                        {e.title}
-                      </h3>
-                      <p className="mt-0.5 text-xs text-muted-foreground">{e.role}</p>
-                      <span className="mt-1.5 inline-flex rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground sm:hidden">
-                        {e.place}
-                      </span>
+                    {/* Icon */}
+                    <div className="w-12 h-12 rounded-lg bg-brand/10 text-brand grid place-items-center mb-4 transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:scale-110">
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <span className="hidden sm:inline-flex shrink-0 rounded-full bg-muted px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                    {/* Content */}
+                    <h3 className="font-display text-base font-bold leading-snug text-foreground group-hover:text-accent-strong transition-colors">
+                      {e.title}
+                    </h3>
+                    <p className="mt-1 text-xs text-muted-foreground">{e.role}</p>
+                    <span className="mt-3 inline-flex rounded-full bg-brand/8 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-brand">
                       {e.place}
                     </span>
                   </div>
@@ -345,7 +349,7 @@ export default function SpeakingPage() {
             </div>
           </div>
 
-          {/* Memberships & Certifications — 2-col hairline grid */}
+          {/* Memberships & Certifications — visual cards */}
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
               <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Background</span>
@@ -354,24 +358,32 @@ export default function SpeakingPage() {
                 Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
               </p>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border">
+            <div
+              data-animate-group
+              className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+            >
               {memberships.map((m) => {
                 const Icon = m.icon;
                 return (
                   <div
                     key={m.title}
-                    className="card-hover group bg-card p-6 sm:p-7 flex flex-col justify-between min-h-[150px] transition-colors hover:bg-muted/40"
+                    data-animate-item
+                    className="group relative flex items-start gap-4 rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-accent/40 hover:shadow-[0_8px_30px_rgba(255,213,29,0.06)] hover:-translate-y-1"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <Icon className="w-5 h-5 text-accent-strong" />
-                      <span className="btn-premium inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
-                        <CheckCircle2 className="w-3 h-3" /> Verified
-                      </span>
+                    {/* Icon */}
+                    <div className="shrink-0 w-12 h-12 rounded-lg bg-accent/10 text-accent-strong grid place-items-center transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:scale-110">
+                      <Icon className="w-5 h-5" />
                     </div>
-                    <div className="mt-8">
-                      <h3 className="font-display text-base font-bold leading-snug group-hover:text-accent-strong transition-colors">
-                        {m.title}
-                      </h3>
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <h3 className="font-display text-base font-bold leading-snug text-foreground group-hover:text-accent-strong transition-colors">
+                          {m.title}
+                        </h3>
+                        <span className="btn-premium inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-accent-strong shrink-0">
+                          <CheckCircle2 className="w-2.5 h-2.5" /> Verified
+                        </span>
+                      </div>
                       <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{m.desc}</p>
                     </div>
                   </div>

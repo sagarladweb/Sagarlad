@@ -51,6 +51,53 @@ export default function AboutPage() {
           }
         );
       });
+
+      // Runner race cards — staggered slide-in + count-up
+      const runnerCards = gsap.utils.toArray<HTMLElement>("[data-runner-card]");
+      if (runnerCards.length) {
+        gsap.fromTo(
+          runnerCards,
+          { opacity: 0, x: 40, scale: 0.95 },
+          {
+            opacity: 1,
+            x: 0,
+            scale: 1,
+            duration: 0.6,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: "[data-runner-cards]",
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+        // Count-up for the race counts
+        runnerCards.forEach((card) => {
+          const countEl = card.querySelector<HTMLElement>(".runner-count");
+          const target = Number(card.dataset.count);
+          if (!countEl || !target) return;
+          gsap.fromTo(
+            { val: 0 },
+            { val: target },
+            {
+              val: target,
+              duration: 1.2,
+              ease: "power2.out",
+              delay: 0.3,
+              scrollTrigger: {
+                trigger: card,
+                start: "top 85%",
+                toggleActions: "play none none none",
+              },
+              onUpdate(this: gsap.core.Tween) {
+                const v = Math.round(this.vars.val as number);
+                countEl.textContent = `×${v}`;
+              },
+            }
+          );
+        });
+      }
     }, el);
 
     // ScrollTrigger measured positions before fonts/images settled, which on
@@ -329,39 +376,46 @@ export default function AboutPage() {
           </div>
 
           {/* Race cards — horizontal scroll on mobile, grid on desktop */}
-          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+          <div
+            data-runner-cards
+            className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0"
+          >
             {[
               {
                 icon: Medal,
                 race: "TCS Amsterdam Half Marathon",
                 distance: "21 km",
-                count: "×3",
+                count: 3,
+                label: "×3",
               },
               {
                 icon: Trophy,
                 race: "TCS Amsterdam Marathon",
                 distance: "8 km",
-                count: "×2",
+                count: 2,
+                label: "×2",
               },
               {
                 icon: Trophy,
                 race: "Amsterdam DAM to DAM",
                 distance: "16 km",
-                count: "×2",
+                count: 2,
+                label: "×2",
               },
-            ].map((r) => {
+            ].map((r, i) => {
               const Icon = r.icon;
               return (
                 <div
                   key={r.race}
-                  data-reveal
+                  data-runner-card
+                  data-count={r.count}
                   className="snap-center shrink-0 w-[200px] md:w-auto rounded-xl border border-border bg-background p-5 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
                 >
                   <div className="mx-auto w-10 h-10 rounded-lg bg-brand-light/15 grid place-items-center text-brand">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <p className="mt-3 font-display text-2xl font-extrabold text-accent-strong">
-                    {r.count}
+                  <p className="mt-3 font-display text-2xl font-extrabold text-accent-strong runner-count">
+                    {r.label}
                   </p>
                   <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
                     {r.race}
