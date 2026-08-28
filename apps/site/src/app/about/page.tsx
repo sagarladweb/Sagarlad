@@ -161,11 +161,13 @@ export default function AboutPage() {
       <section className="relative -mt-16 min-h-[calc(100svh+4rem)] border-b border-border bg-foreground text-background overflow-hidden">
         <div className="absolute inset-0" aria-hidden="true">
           <Image
+            id="about-hero-img"
             src="/about me hero.webp"
             alt="About Sagar Lad"
             fill
             priority
-            className={`object-cover sm:object-center ${showTuner ? "data-dev-tuner" : "object-[90%_center]"}`}
+            className="object-cover sm:object-center"
+            style={showTuner ? undefined : { objectPosition: "90% center" }}
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
@@ -410,7 +412,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      {showTuner && <DevImageTuner storageKey="about-hero-pos" label="Hero Image Position" />}
+      {showTuner && <DevImageTuner storageKey="about-hero-pos" label="Hero Image Position" targetSelector="#about-hero-img" />}
     </div>
   );
 }
