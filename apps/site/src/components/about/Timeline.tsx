@@ -30,7 +30,7 @@ const nodes: Node[] = [
     title: "School Days",
     oneLiner: "Where it all began",
     description:
-      "Growing up in Gujarat, I fell in love with computers. Late nights, broken code, and a stubborn belief that tech could change everything — that belief never left.",
+      "Growing up in Gujarat, I fell in love with computers. Late nights, broken code, and a stubborn belief that tech could change everything.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about.webp",
@@ -40,14 +40,14 @@ const nodes: Node[] = [
     title: "Engineering College",
     oneLiner: "Four years of building",
     description:
-      "BVM College was where theory met reality. I spent more time in the lab than the classroom — and those habits shaped the engineer I became.",
+      "BVM College was where theory met reality. More time in the lab than the classroom — and those habits shaped the engineer I became.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-2.webp",
   },
   {
     year: "2013",
-    title: " Joined TCS",
+    title: "Joined TCS",
     oneLiner: "First job, first flight",
     description:
       "From a small town in Gujarat to boardrooms in Europe. TCS gave me the world — and I made the most of every opportunity.",
@@ -60,7 +60,7 @@ const nodes: Node[] = [
     title: "Data Science",
     oneLiner: "A new way to think",
     description:
-      "IIIT Bangalore changed how I see problems. Statistics, ML, and a whole new toolkit for solving real-world challenges with data.",
+      "IIIT Bangalore changed how I see problems. Statistics, ML, and a whole new toolkit for solving real-world challenges.",
     tag: "Education",
     icon: GraduationCap,
     image: "/images/profile/about-5.webp",
@@ -70,7 +70,7 @@ const nodes: Node[] = [
     title: "Six Books",
     oneLiner: "Words that outlive me",
     description:
-      "Finance, AI, habits, growth — each book came from a place of wanting to help. Not theory from a desk, but lessons from the field.",
+      "Finance, AI, habits, growth — each book from a place of wanting to help. Not theory from a desk, but lessons from the field.",
     tag: "Author",
     icon: PenTool,
     image: "/images/books/mindup-front.jpg",
@@ -99,20 +99,49 @@ const nodes: Node[] = [
   },
 ];
 
+/* Wave y-positions for 7 nodes (oscillating around center) */
+const WAVE_Y = [42, 58, 42, 58, 42, 58, 42];
+
+function buildWavePath(width: number, height: number): string {
+  const pts = nodes.map((_, i) => ({
+    x: (i / (nodes.length - 1)) * width,
+    y: (WAVE_Y[i] / 100) * height,
+  }));
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const prev = pts[i - 1];
+    const curr = pts[i];
+    const cx1 = prev.x + (curr.x - prev.x) * 0.5;
+    const cy1 = prev.y;
+    const cx2 = prev.x + (curr.x - prev.x) * 0.5;
+    const cy2 = curr.y;
+    d += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${curr.x} ${curr.y}`;
+  }
+  return d;
+}
+
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState<number | null>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [openSet, setOpenSet] = useState<Set<number>>(new Set());
 
-  const toggle = useCallback(
-    (i: number) => setActive((prev) => (prev === i ? null : i)),
-    []
-  );
+  const toggle = useCallback((i: number) => {
+    setOpenSet((prev) => {
+      const next = new Set(prev);
+      if (next.has(i)) next.delete(i);
+      else next.add(i);
+      return next;
+    });
+  }, []);
 
-  // Close on Escape
+  const show = useCallback((i: number) => {
+    setOpenSet((prev) => new Set(prev).add(i));
+  }, []);
+
+  // Close all on Escape
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setActive(null);
+      if (e.key === "Escape") setOpenSet(new Set());
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -125,7 +154,6 @@ export function Timeline() {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      // Heading
       gsap.fromTo(
         "[data-tl-heading]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -139,23 +167,19 @@ export function Timeline() {
         }
       );
 
-      // Entire track slides in from right
       gsap.fromTo(
-        "[data-tl-track]",
-        { opacity: 0, x: 150 },
+        "[data-tl-scroll]",
+        { opacity: 0, x: 100 },
         {
           opacity: 1,
           x: 0,
           duration: 1,
           ease: "power3.out",
           scrollTrigger: { trigger: el, start: "top 75%" },
-          onComplete: () => {
-            setActive(0);
-          },
+          onComplete: () => setOpenSet(new Set([0])),
         }
       );
 
-      // Dots pop in with stagger
       gsap.fromTo(
         "[data-tl-dot]",
         { scale: 0 },
@@ -169,15 +193,29 @@ export function Timeline() {
         }
       );
 
-      // Axis line draws
+      // Animate wave path drawing
       gsap.fromTo(
-        "[data-tl-line]",
-        { scaleX: 0 },
+        "[data-tl-wave-path]",
+        { strokeDashoffset: 2000 },
         {
-          scaleX: 1,
-          duration: 1.2,
+          strokeDashoffset: 0,
+          duration: 2,
+          ease: "power2.inOut",
+          delay: 0.1,
+          scrollTrigger: { trigger: el, start: "top 75%" },
+        }
+      );
+
+      // Dotted connector lines animate in
+      gsap.fromTo(
+        "[data-tl-connector]",
+        { scaleY: 0 },
+        {
+          scaleY: 1,
+          duration: 0.5,
+          stagger: 0.06,
           ease: "power2.out",
-          delay: 0.15,
+          delay: 0.5,
           scrollTrigger: { trigger: el, start: "top 75%" },
         }
       );
@@ -186,268 +224,306 @@ export function Timeline() {
     return () => ctx.revert();
   }, []);
 
+  const trackWidth = 1100;
+  const trackHeight = 180;
+  const wavePath = buildWavePath(trackWidth, trackHeight);
+
   return (
     <section
       ref={sectionRef}
-      className="relative py-16 md:py-24 border-b border-border bg-background"
+      className="relative py-16 md:py-24 border-b border-border bg-background overflow-hidden"
       aria-label="Journey timeline"
     >
       {/* Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 mb-10 md:mb-14">
         <div className="text-center" data-tl-heading>
           <span className="inline-block text-[11px] font-semibold uppercase tracking-[0.2em] text-brand border border-brand/20 rounded-full px-4 py-1.5 bg-transparent">
-            Where it started
+            Where it started &amp; key moments
           </span>
           <h2 className="mt-4 font-display text-3xl sm:text-4xl md:text-5xl font-bold leading-tight tracking-tight">
             The story, in dates
           </h2>
           <p className="mt-3 text-muted-foreground max-w-lg mx-auto text-sm sm:text-base">
-            Tap any dot to read the chapter behind it.
+            Hover or tap any dot to read the chapter behind it.
           </p>
         </div>
       </div>
 
-      {/* ── Desktop: horizontal static layout ── */}
+      {/* ── Desktop: wave timeline with horizontal scroll ── */}
       <div
-        ref={trackRef}
-        data-tl-track
-        className="hidden md:block max-w-6xl mx-auto px-6"
+        ref={scrollRef}
+        data-tl-scroll
+        className="hidden md:block overflow-x-auto scrollbar-hide"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        <div className="relative" style={{ height: "440px" }}>
-          {/* Axis line */}
-          <div
-            aria-hidden="true"
-            data-tl-line
-            className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand/25 to-transparent origin-left"
-            style={{ top: "50%" }}
-          />
+        <div
+          className="relative mx-auto"
+          style={{ width: `${trackWidth}px`, height: `${trackHeight + 280}px`, minWidth: "900px" }}
+        >
+          {/* SVG wave axis */}
+          <svg
+            className="absolute inset-0 pointer-events-none"
+            width={trackWidth}
+            height={trackHeight}
+            viewBox={`0 0 ${trackWidth} ${trackHeight}`}
+            fill="none"
+            style={{ top: "60px" }}
+          >
+            {/* Shadow/glow */}
+            <path
+              d={wavePath}
+              stroke="rgba(13,33,161,0.06)"
+              strokeWidth="8"
+              strokeLinecap="round"
+              fill="none"
+            />
+            {/* Main wave */}
+            <path
+              data-tl-wave-path
+              d={wavePath}
+              stroke="rgba(13,33,161,0.2)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+              strokeDasharray="2000"
+              strokeDashoffset="2000"
+            />
+            {/* Animated dots along the wave */}
+            <path
+              d={wavePath}
+              stroke="rgba(13,33,161,0.35)"
+              strokeWidth="2"
+              strokeLinecap="round"
+              fill="none"
+              strokeDasharray="4 8"
+              className="animate-wave-dots"
+            />
+          </svg>
 
           {/* Nodes */}
-          <div className="absolute inset-0 flex justify-between">
-            {nodes.map((n, i) => {
-              const Icon = n.icon;
-              const above = i % 2 === 0;
-              const isOpen = active === i;
+          {nodes.map((n, i) => {
+            const Icon = n.icon;
+            const isOpen = openSet.has(i);
+            const x = (i / (nodes.length - 1)) * trackWidth;
+            const y = (WAVE_Y[i] / 100) * trackHeight + 60;
+            const above = WAVE_Y[i] < 50;
 
-              return (
+            return (
+              <div
+                key={n.title}
+                className="absolute"
+                style={{ left: `${x}px`, top: `${y}px`, transform: "translate(-50%, -50%)" }}
+              >
+                {/* Connector line (dotted) */}
                 <div
-                  key={n.title}
-                  className="relative flex flex-col items-center"
-                  style={{ width: "130px" }}
+                  data-tl-connector
+                  aria-hidden="true"
+                  className="absolute left-1/2 -translate-x-1/2 w-px"
+                  style={{
+                    height: isOpen ? "56px" : "28px",
+                    top: above ? undefined : "12px",
+                    bottom: above ? "12px" : undefined,
+                    background: isOpen
+                      ? "repeating-linear-gradient(to bottom, var(--brand) 0, var(--brand) 3px, transparent 3px, transparent 7px)"
+                      : "repeating-linear-gradient(to bottom, rgba(13,33,161,0.15) 0, rgba(13,33,161,0.15) 3px, transparent 3px, transparent 7px)",
+                    transformOrigin: above ? "bottom center" : "top center",
+                    transition: "height 0.3s ease-out",
+                  }}
+                />
+
+                {/* Dot */}
+                <button
+                  data-tl-dot
+                  onMouseEnter={() => show(i)}
+                  onClick={() => toggle(i)}
+                  aria-expanded={isOpen}
+                  aria-label={`${n.title} — ${n.year}`}
+                  className="relative z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-full"
                 >
-                  {/* Year + one-liner */}
-                  <div
-                    className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none z-10"
-                    style={{
-                      top: above ? "calc(50% - 140px)" : "calc(50% + 20px)",
-                    }}
-                  >
-                    <span
-                      className={`text-[11px] font-bold uppercase tracking-wider transition-colors duration-300 ${
-                        isOpen ? "text-brand" : "text-muted-foreground"
-                      }`}
-                    >
-                      {n.year}
-                    </span>
-                    <span
-                      className={`block mt-0.5 text-[11px] font-medium leading-tight max-w-[120px] mx-auto transition-colors duration-300 ${
-                        isOpen ? "text-foreground" : "text-muted-foreground/60"
-                      }`}
-                    >
-                      {n.oneLiner}
-                    </span>
-                  </div>
-
-                  {/* Connector line */}
-                  <div
-                    aria-hidden="true"
-                    className="absolute left-1/2 -translate-x-px w-px transition-all duration-300"
-                    style={{
-                      height: isOpen ? "48px" : "24px",
-                      top: above ? "calc(50% - 48px)" : "calc(50%)",
-                      background: isOpen
-                        ? "var(--brand)"
-                        : "rgba(13,33,161,0.12)",
-                    }}
+                  <span
+                    className={`block h-4 w-4 rounded-full border-[2.5px] border-brand transition-all duration-300 ${
+                      isOpen
+                        ? "bg-brand scale-150 shadow-[0_0_0_8px_rgba(13,33,161,0.12)]"
+                        : "bg-background hover:scale-125 hover:shadow-[0_0_0_6px_rgba(13,33,161,0.08)]"
+                    }`}
                   />
+                </button>
 
-                  {/* Dot */}
-                  <button
-                    data-tl-dot
-                    onClick={() => toggle(i)}
-                    aria-expanded={isOpen}
-                    aria-label={`${n.title} — ${n.year}`}
-                    className="absolute left-1/2 -translate-x-1/2 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 rounded-full"
-                    style={{ top: "calc(50% - 8px)" }}
+                {/* Year label */}
+                <div
+                  className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none z-10 whitespace-nowrap"
+                  style={{
+                    top: above ? "calc(100% + 8px)" : undefined,
+                    bottom: above ? undefined : "calc(100% + 8px)",
+                  }}
+                >
+                  <span
+                    className={`text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 ${
+                      isOpen ? "text-brand" : "text-muted-foreground"
+                    }`}
                   >
-                    <span
-                      className={`block h-4 w-4 rounded-full border-[2.5px] border-brand transition-all duration-300 ${
-                        isOpen
-                          ? "bg-brand scale-150 shadow-[0_0_0_8px_rgba(13,33,161,0.12)]"
-                          : "bg-background hover:scale-125 hover:shadow-[0_0_0_6px_rgba(13,33,161,0.08)]"
-                      }`}
-                    />
-                  </button>
+                    {n.year}
+                  </span>
+                </div>
 
-                  {/* Card */}
-                  <div
-                    data-tl-card
-                    className="absolute left-1/2 z-30"
-                    style={{
-                      top: above ? undefined : "calc(50% + 72px)",
-                      bottom: above ? "calc(50% + 72px)" : undefined,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      width: "220px",
-                      opacity: isOpen ? 1 : 0,
-                      pointerEvents: isOpen ? "auto" : "none",
-                      transition:
-                        "opacity 0.35s ease-out, transform 0.35s ease-out",
-                    }}
-                  >
-                    <div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
-                      {n.image && (
-                        <div className="relative h-28 w-full overflow-hidden">
-                          <Image
-                            src={n.image}
-                            alt={n.title}
-                            fill
-                            sizes="220px"
-                            className="object-cover object-right-top sm:object-top"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                          <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                            <Icon className="w-2.5 h-2.5" />
-                            {n.tag}
-                          </span>
-                        </div>
-                      )}
-                      <div className="p-3.5">
-                        <h3 className="font-display text-[13px] font-bold leading-snug text-foreground">
-                          {n.title}
-                        </h3>
-                        <p className="mt-1 text-[11px] text-muted-foreground leading-relaxed">
-                          {n.description}
-                        </p>
-                        {n.href && (
-                          <Link
-                            href={n.href}
-                            className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
-                          >
-                            <BookOpen className="w-3 h-3" />
-                            {n.hrefLabel}
-                          </Link>
-                        )}
+                {/* Card */}
+                <div
+                  data-tl-card
+                  className="absolute left-1/2 z-30"
+                  style={{
+                    top: above ? undefined : "calc(100% + 30px)",
+                    bottom: above ? "calc(100% + 30px)" : undefined,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    width: "210px",
+                    opacity: isOpen ? 1 : 0,
+                    pointerEvents: isOpen ? "auto" : "none",
+                    transition: "opacity 0.3s ease-out",
+                  }}
+                >
+                  <div className="rounded-xl border border-border bg-card shadow-lg overflow-hidden">
+                    {n.image && (
+                      <div className="relative h-24 w-full overflow-hidden">
+                        <Image
+                          src={n.image}
+                          alt={n.title}
+                          fill
+                          sizes="210px"
+                          className="object-cover object-right-top sm:object-top"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                        <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                          <Icon className="w-2 h-2" />
+                          {n.tag}
+                        </span>
                       </div>
+                    )}
+                    <div className="p-3">
+                      <h3 className="font-display text-[12px] font-bold leading-snug text-foreground">
+                        {n.title}
+                      </h3>
+                      <p className="mt-1 text-[10px] text-muted-foreground leading-relaxed">
+                        {n.description}
+                      </p>
+                      {n.href && (
+                        <Link
+                          href={n.href}
+                          className="mt-1.5 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
+                        >
+                          <BookOpen className="w-2.5 h-2.5" />
+                          {n.hrefLabel}
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      {/* ── Mobile: vertical timeline ── */}
-      <div className="md:hidden px-5">
-        <div className="relative pl-8">
-          {/* Vertical axis */}
+      {/* ── Mobile: vertical premium minimal timeline ── */}
+      <div className="md:hidden px-4">
+        <div className="relative pl-7">
+          {/* Vertical dotted axis */}
           <div
             aria-hidden="true"
-            className="absolute left-[11px] top-0 bottom-0 w-px bg-gradient-to-b from-brand/30 via-brand/15 to-transparent"
+            className="absolute left-[9px] top-0 bottom-0 w-px"
+            style={{
+              background: "repeating-linear-gradient(to bottom, rgba(13,33,161,0.2) 0, rgba(13,33,161,0.2) 4px, transparent 4px, transparent 8px)",
+            }}
           />
 
-          <div className="space-y-6">
+          <div className="space-y-1">
             {nodes.map((n, i) => {
               const Icon = n.icon;
-              const isOpen = active === i;
+              const isOpen = openSet.has(i);
 
               return (
                 <div key={n.title} className="relative">
                   {/* Dot */}
                   <button
                     data-tl-dot
+                    onMouseEnter={() => show(i)}
                     onClick={() => toggle(i)}
                     aria-expanded={isOpen}
                     aria-label={`${n.title} — ${n.year}`}
-                    className="absolute -left-8 top-3 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
+                    className="absolute -left-7 top-2.5 z-20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-full"
                   >
                     <span
-                      className={`block h-3.5 w-3.5 rounded-full border-2 border-brand transition-all duration-300 ${
+                      className={`block h-3 w-3 rounded-full border-2 border-brand transition-all duration-300 ${
                         isOpen
-                          ? "bg-brand scale-125 shadow-[0_0_0_6px_rgba(13,33,161,0.12)]"
+                          ? "bg-brand scale-125 shadow-[0_0_0_5px_rgba(13,33,161,0.1)]"
                           : "bg-background"
                       }`}
                     />
                   </button>
 
-                  {/* Year */}
-                  <span
-                    className={`block text-[10px] font-bold uppercase tracking-wider mb-1 transition-colors duration-300 ${
-                      isOpen ? "text-brand" : "text-muted-foreground/60"
-                    }`}
-                  >
-                    {n.year}
-                  </span>
-
-                  {/* Always-visible teaser */}
+                  {/* Always-visible row */}
                   <button
                     onClick={() => toggle(i)}
-                    className="w-full text-left"
+                    onMouseEnter={() => show(i)}
+                    className="w-full text-left py-2.5 rounded-lg transition-colors duration-200 hover:bg-brand/5"
                   >
-                    <span
-                      className={`block text-sm font-semibold transition-colors duration-300 ${
-                        isOpen ? "text-brand" : "text-foreground"
-                      }`}
-                    >
-                      {n.title}
-                    </span>
-                    <span className="block text-xs text-muted-foreground/60 mt-0.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold text-brand tabular-nums">
+                        {n.year}
+                      </span>
+                      <span className="w-1 h-1 rounded-full bg-brand/30" />
+                      <span
+                        className={`text-sm font-semibold transition-colors duration-200 ${
+                          isOpen ? "text-brand" : "text-foreground"
+                        }`}
+                      >
+                        {n.title}
+                      </span>
+                    </div>
+                    <span className="block text-[11px] text-muted-foreground/60 mt-0.5 pl-0">
                       {n.oneLiner}
                     </span>
                   </button>
 
-                  {/* Card */}
+                  {/* Expandable card */}
                   <div
-                    data-tl-card
-                    className="mt-2 overflow-hidden"
+                    className="overflow-hidden transition-all duration-400 ease-out"
                     style={{
-                      maxHeight: isOpen ? "400px" : "0px",
+                      maxHeight: isOpen ? "300px" : "0px",
                       opacity: isOpen ? 1 : 0,
-                      transition:
-                        "max-height 0.4s ease-out, opacity 0.3s ease-out",
                     }}
                   >
-                    <div className="rounded-xl border border-border bg-card shadow-md overflow-hidden">
-                      {n.image && (
-                        <div className="relative h-32 w-full overflow-hidden">
-                          <Image
-                            src={n.image}
-                            alt={n.title}
-                            fill
-                            sizes="(max-width: 640px) 100vw, 220px"
-                            className="object-cover object-right-top"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                          <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                            <Icon className="w-2.5 h-2.5" />
-                            {n.tag}
-                          </span>
-                        </div>
-                      )}
-                      <div className="p-3.5">
-                        <p className="text-[11px] text-muted-foreground leading-relaxed">
-                          {n.description}
-                        </p>
-                        {n.href && (
-                          <Link
-                            href={n.href}
-                            className="mt-2 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline"
-                          >
-                            <BookOpen className="w-3 h-3" />
-                            {n.hrefLabel}
-                          </Link>
+                    <div className="pb-4 pt-1">
+                      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden ml-1">
+                        {n.image && (
+                          <div className="relative h-28 w-full overflow-hidden">
+                            <Image
+                              src={n.image}
+                              alt={n.title}
+                              fill
+                              sizes="100vw"
+                              className="object-cover object-right-top"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+                            <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/40 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                              <Icon className="w-2 h-2" />
+                              {n.tag}
+                            </span>
+                          </div>
                         )}
+                        <div className="p-3">
+                          <p className="text-[11px] text-muted-foreground leading-relaxed">
+                            {n.description}
+                          </p>
+                          {n.href && (
+                            <Link
+                              href={n.href}
+                              className="mt-2 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline"
+                            >
+                              <BookOpen className="w-2.5 h-2.5" />
+                              {n.hrefLabel}
+                            </Link>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>

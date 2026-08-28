@@ -1,13 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
 import { Timeline } from "@/components/about/Timeline";
-import { DevImageTuner } from "@/components/ui/DevImageTuner";
 
 import { METRICS } from "@/lib/metrics";
 
@@ -27,13 +26,6 @@ const pageNav = [
 
 export default function AboutPage() {
   const root = useRef<HTMLDivElement>(null);
-  const [showTuner, setShowTuner] = useState(false);
-
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.location.search.includes("tuner")) {
-      setShowTuner(true);
-    }
-  }, []);
 
   useEffect(() => {
     const el = root.current;
@@ -161,13 +153,11 @@ export default function AboutPage() {
       <section className="relative -mt-16 min-h-[calc(100svh+4rem)] border-b border-border bg-foreground text-background overflow-hidden">
         <div className="absolute inset-0" aria-hidden="true">
           <Image
-            id="about-hero-img"
             src="/about me hero.webp"
             alt="About Sagar Lad"
             fill
             priority
-            className="object-cover sm:object-center"
-            style={showTuner ? undefined : { objectPosition: "90% center" }}
+            className="object-cover object-[63%_50%] sm:object-center"
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-black/10" />
@@ -316,71 +306,70 @@ export default function AboutPage() {
       </div>
 
       {/* ---------- Runner for Life ---------- */}
-      <section id="running" className="card-hover scroll-mt-32 py-20 md:py-28 border-b border-border bg-card/30">
+      <section id="running" className="card-hover scroll-mt-32 py-16 md:py-28 border-b border-border bg-card/30">
         <div className="mx-auto max-w-7xl px-4 sm:px-6">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-            <div className="lg:col-span-5 text-center lg:text-left">
-              <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Off the clock</span>
-              <h2 data-reveal className="mt-2 font-display text-3xl sm:text-4xl font-bold">
-                Runner for life
-              </h2>
-              <p data-reveal className="mt-4 text-muted-foreground leading-relaxed">
-                MIND UP isn&apos;t just something I write about — I live it. Running
-                is where I practice the discipline I preach: one step at a time,
-                showing up again and again, until the distance becomes part of you.
-              </p>
-              <div data-reveal className="mt-6 flex items-start gap-3 text-sm text-muted-foreground leading-relaxed">
-                <Footprints className="w-5 h-5 text-accent-strong shrink-0 mt-0.5" />
-                <span>
-                  Seven races across three distances — every medal a reminder
-                  that consistency beats intensity.
-                </span>
-              </div>
+          {/* Header — center on mobile, left on desktop */}
+          <div className="text-center lg:text-left mb-10 md:mb-14">
+            <span data-reveal className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Off the clock</span>
+            <h2 data-reveal className="mt-3 font-display text-3xl sm:text-4xl font-bold">
+              Runner for life
+            </h2>
+            <p data-reveal className="mt-4 text-muted-foreground leading-relaxed max-w-xl mx-auto lg:mx-0">
+              MIND UP isn&apos;t just something I write about — I live it. Running
+              is where I practice the discipline I preach: one step at a time,
+              showing up again and again, until the distance becomes part of you.
+            </p>
+            <div data-reveal className="mt-5 flex items-start gap-3 text-sm text-muted-foreground leading-relaxed justify-center lg:justify-start">
+              <Footprints className="w-5 h-5 text-accent-strong shrink-0 mt-0.5" />
+              <span>
+                Seven races across three distances — every medal a reminder
+                that consistency beats intensity.
+              </span>
             </div>
-            <div className="lg:col-span-7">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                {[
-                  {
-                    icon: Medal,
-                    race: "TCS Amsterdam Half Marathon",
-                    distance: "21 km",
-                    count: "×3",
-                  },
-                  {
-                    icon: Trophy,
-                    race: "TCS Amsterdam Marathon",
-                    distance: "8 km",
-                    count: "×2",
-                  },
-                  {
-                    icon: Trophy,
-                    race: "Amsterdam DAM to DAM",
-                    distance: "16 km",
-                    count: "×2",
-                  },
-                ].map((r) => {
-                  const Icon = r.icon;
-                  return (
-                    <div
-                      key={r.race}
-                      data-reveal
-                      className="rounded-lg border border-border bg-background p-6 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
-                    >
-                      <div className="mx-auto w-12 h-12 rounded-md bg-brand-light/15 grid place-items-center text-brand">
-                        <Icon className="w-6 h-6" />
-                      </div>
-                      <p className="mt-4 font-display text-3xl font-extrabold text-accent-strong">
-                        {r.count}
-                      </p>
-                      <p className="mt-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                        {r.race}
-                      </p>
-                      <p className="mt-1 text-sm font-bold">{r.distance}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+          </div>
+
+          {/* Race cards — horizontal scroll on mobile, grid on desktop */}
+          <div className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 snap-x snap-mandatory md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+            {[
+              {
+                icon: Medal,
+                race: "TCS Amsterdam Half Marathon",
+                distance: "21 km",
+                count: "×3",
+              },
+              {
+                icon: Trophy,
+                race: "TCS Amsterdam Marathon",
+                distance: "8 km",
+                count: "×2",
+              },
+              {
+                icon: Trophy,
+                race: "Amsterdam DAM to DAM",
+                distance: "16 km",
+                count: "×2",
+              },
+            ].map((r) => {
+              const Icon = r.icon;
+              return (
+                <div
+                  key={r.race}
+                  data-reveal
+                  className="snap-center shrink-0 w-[200px] md:w-auto rounded-xl border border-border bg-background p-5 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
+                >
+                  <div className="mx-auto w-10 h-10 rounded-lg bg-brand-light/15 grid place-items-center text-brand">
+                    <Icon className="w-5 h-5" />
+                  </div>
+                  <p className="mt-3 font-display text-2xl font-extrabold text-accent-strong">
+                    {r.count}
+                  </p>
+                  <p className="mt-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground leading-tight">
+                    {r.race}
+                  </p>
+                  <p className="mt-1 text-sm font-bold">{r.distance}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -411,8 +400,6 @@ export default function AboutPage() {
           </div>
         </div>
       </section>
-
-      {showTuner && <DevImageTuner storageKey="about-hero-pos" label="Hero Image Position" targetSelector="#about-hero-img" />}
     </div>
   );
 }

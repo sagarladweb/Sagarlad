@@ -1116,3 +1116,21 @@ nav a:not([class*="rounded-full"]) {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+/* ── Wave timeline dots animation ─────────────────────────────────── */
+@keyframes wave-dots {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -24; }
+}
+.animate-wave-dots {
+  animation: wave-dots 1.2s linear infinite;
+}
+
+/* ── Scrollbar hide utility ───────────────────────────────────────── */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
