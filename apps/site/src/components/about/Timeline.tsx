@@ -154,7 +154,7 @@ function buildProgress(upTo: number): string {
 export function Timeline() {
   const sectionRef = useRef<HTMLElement>(null);
   const [activeCard, setActiveCard] = useState<number | null>(null);
-  const [pinnedCard, setPinnedCard] = useState<number | null>(null);
+  const [pinnedCard, setPinnedCard] = useState<number | null>(0);
   const [flipping, setFlipping] = useState<number | null>(null);
 
   const displayCard = pinnedCard ?? activeCard;
@@ -182,6 +182,15 @@ export function Timeline() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  /* Flip first card after GSAP entrance finishes (~2.2s) */
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setFlipping(0);
+      setTimeout(() => setFlipping(null), 600);
+    }, 2200);
+    return () => clearTimeout(t);
   }, []);
 
   /* GSAP */
