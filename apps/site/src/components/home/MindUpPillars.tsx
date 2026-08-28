@@ -25,7 +25,9 @@ const PILLAR_ICONS: Record<string, typeof Brain> = {
 
 const polar = (angleDeg: number, radius: number): [number, number] => {
   const rad = ((angleDeg - 90) * Math.PI) / 180;
-  return [CX + radius * Math.cos(rad), CY + radius * Math.sin(rad)];
+  const x = Math.round((CX + radius * Math.cos(rad)) * 1e6) / 1e6;
+  const y = Math.round((CY + radius * Math.sin(rad)) * 1e6) / 1e6;
+  return [x, y];
 };
 
 function sectorPath(startDeg: number, endDeg: number): string {
@@ -91,7 +93,7 @@ function PillarRing({
 
           {/* Segments */}
           {MINDUP_PILLARS.map((p, i) => {
-            const start = 90 - STEP / 2 + i * STEP;
+            const start = 240 + i * STEP;
             const isActive = active === p.id;
             const isPlayingDone = playing && i < playIdx;
             const isPlayingActive = playing && i === playIdx;
@@ -163,7 +165,7 @@ function PillarRing({
                           <Icon
                             className="h-5 w-5 sm:h-6 sm:w-6"
                             style={{
-                              color: playing && isPlayingPending ? "#94a3b8" : isActive ? "#1e293b" : "#ffffff",
+                              color: playing && isPlayingPending ? "#94a3b8" : isActive ? "#1e293b" : p.color,
                               transition: "color 0.3s ease",
                             }}
                             strokeWidth={1.5}
@@ -185,7 +187,7 @@ function PillarRing({
 
           {/* Progressive trace lines during play */}
           {playing && MINDUP_PILLARS.map((p, i) => {
-            const start = 90 - STEP / 2 + i * STEP;
+            const start = 240 + i * STEP;
             const d = traceArc(start, start + STEP);
             const status = i < playIdx ? "done" : i === playIdx ? "active" : "pending";
             if (status === "pending") return null;
@@ -196,11 +198,11 @@ function PillarRing({
                 d={d}
                 fill="none"
                 stroke={p.color}
-                strokeWidth={5}
+                strokeWidth={3}
                 strokeLinecap="round"
                 strokeDasharray={segArc}
                 strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
-                opacity={status === "done" ? 0.9 : 1}
+                opacity={status === "done" ? 0.8 : 1}
               />
             );
           })}

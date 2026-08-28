@@ -1113,3 +1113,33 @@ nav a:not([class*="rounded-full"]) {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(100%); }
 }
+
+/* ── Scroll animation initial state ──────────────────────────────── */
+/* Server and client both render these via CSS, so no hydration mismatch.
+   GSAP overrides with inline styles after hydration. */
+[data-animate] {
+  opacity: 0;
+}
+[data-animate="blur"] {
+  filter: blur(12px);
+}
+[data-animate="zoom"] {
+  transform: scale(0.92);
+  filter: blur(4px);
+}
+[data-animate="left"] {
+  transform: translateX(-60px);
+  filter: blur(4px);
+}
+[data-animate="right"] {
+  transform: translateX(60px);
+  filter: blur(4px);
+}
+[data-animate="image"] {
+  transform: scale(1.08);
+}
+[data-animate-group] [data-animate-item] {
+  opacity: 0;
+  transform: translateY(40px);
+  filter: blur(3px);
+}
