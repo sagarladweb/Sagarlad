@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
-import { SocialLinks } from "@/components/SocialLinks";
 import { SiteLogo } from "@/components/SiteLogo";
 
 import { METRICS } from "@/lib/metrics";
@@ -550,9 +549,6 @@ export default function AboutPage() {
             >
               Book for a talk
             </Link>
-          </div>
-          <div data-reveal className="pt-6 flex justify-center">
-            <SocialLinks />
           </div>
         </div>
       </section>

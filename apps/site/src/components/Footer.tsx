@@ -93,7 +93,7 @@ export function Footer() {
   };
 
   const sortedSocials = sortSocials(socials);
-  /* Desktop shows only 3 (IG/YT/LI); mobile shows 4 (IG/YT/LI/X) */
+  /* Both desktop and mobile show the same 3 icons: IG/YT/LI */
   const desktopSocials = sortedSocials.filter((s) =>
     ["instagram", "youtube", "linkedin"].some((k) => s.label.toLowerCase().includes(k))
   );
@@ -210,10 +210,10 @@ export function Footer() {
           </div>
         </div>
 
-        {/* Mobile/Tablet social icons — static, 4 icons (IG/YT/LI/X) */}
-        {sortedSocials.length > 0 && (
+        {/* Mobile/Tablet social icons — same 3 as desktop (IG/YT/LI) */}
+        {desktopSocials.length > 0 && (
           <div className="mt-8 md:hidden flex items-center justify-center gap-4">
-            {sortedSocials.map((s) =>
+            {desktopSocials.map((s) =>
               s.logoUrl || s.icon ? (
                 <a
                   key={s.label}

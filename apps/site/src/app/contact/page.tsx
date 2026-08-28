@@ -10,7 +10,6 @@ import {
   MapPin,
   Clock,
 } from "lucide-react";
-import { FaYoutube, FaInstagram, FaLinkedinIn } from "@/lib/icons";
 import { validateContact, sanitizeText } from "@/lib/client-validators";
 
 const initial = {
@@ -395,40 +394,6 @@ export default function ContactPage() {
               </ul>
             </div>
           </aside>
-        </div>
-      </section>
-
-      {/* ── Social Links ────────────────────────────────────── */}
-      <section className="card-hover py-10 border-t border-border bg-card/40" data-animate>
-        <div className="flex flex-col items-center gap-5">
-          <p className="btn-premium text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">
-            Connect
-          </p>
-          <div className="flex items-center justify-center gap-4">
-            {[
-              { label: "YouTube", Icon: FaYoutube, href: "https://youtube.com/@sagarlad" },
-              { label: "Instagram", Icon: FaInstagram, href: "https://instagram.com/sagarlad" },
-              { label: "LinkedIn", Icon: FaLinkedinIn, href: "https://linkedin.com/in/sagarlad" },
-              { label: "Medium", Icon: null, href: "https://medium.com/@sagarlad" },
-            ].map((item) => (
-              <a
-                key={item.label}
-                href={item.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={item.label}
-                className="group flex h-11 w-11 items-center justify-center rounded-full border border-border bg-background transition-all duration-300 hover:border-brand-light/60 hover:shadow-md hover:scale-110"
-              >
-                {item.Icon ? (
-                  <item.Icon className="h-5 w-5 text-muted-foreground group-hover:text-brand transition-colors" />
-                ) : (
-                  <span className="text-muted-foreground group-hover:text-brand transition-colors text-base font-bold">
-                    M
-                  </span>
-                )}
-              </a>
-            ))}
-          </div>
         </div>
       </section>
     </div>

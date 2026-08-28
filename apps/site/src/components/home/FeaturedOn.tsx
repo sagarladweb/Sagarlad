@@ -34,16 +34,16 @@ function Logo({ name, src }: { name: string; src: string }) {
 export function FeaturedOn() {
   return (
     <section
-      className="py-16 md:py-24 border-b border-border bg-card/40"
+      className="py-8 md:py-12 border-b border-border bg-card/40"
       aria-label="Featured in the press"
     >
       <div className="text-center">
         <Pill data-animate="blur">Featured on</Pill>
 
         {/* Marquee on all viewports */}
-        <div className="mt-10 marquee-mask overflow-hidden">
+        <div className="mt-6 marquee-mask overflow-hidden">
           <div
-            className="flex w-max gap-10 animate-marquee py-2 hover:[animation-play-state:paused]"
+            className="flex w-max gap-10 animate-marquee py-1 hover:[animation-play-state:paused]"
             style={{ animationDuration: "30s" }}
           >
             {[...PRESS, ...PRESS].map((logo, i) => (
