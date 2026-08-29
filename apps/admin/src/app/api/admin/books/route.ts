@@ -22,6 +22,7 @@ const bookSchema = z.object({
   featured: z.boolean().optional(),
   published: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
+  currentlyReading: z.boolean().optional(),
 });
 
 export async function GET() {

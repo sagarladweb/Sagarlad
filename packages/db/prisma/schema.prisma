@@ -229,23 +229,24 @@ model ContactRequest {
 // ---------------------------------------------------------------------------
 
 model Book {
-  id          String   @id @default(cuid())
-  type        String   @default("PUBLISHED") // PUBLISHED | READ | EBOOK
-  title       String
-  author      String? // READ: book author
-  tagline     String?
-  description String?
-  learning    String? // READ: the one lesson left by the book
-  note        String? // READ: short personal note
-  imageUrl    String?
-  buyUrl      String?
-  fileKey     String? // EBOOK: private storage path, never exposed to client
-  free        Boolean  @default(false) // EBOOK: free vs premium
-  featured    Boolean  @default(false)
-  published   Boolean  @default(true)
-  sortOrder   Int      @default(0)
-  deletedAt   DateTime?
-  createdAt   DateTime @default(now())
+  id              String   @id @default(cuid())
+  type            String   @default("PUBLISHED") // PUBLISHED | READ | EBOOK
+  title           String
+  author          String? // READ: book author
+  tagline         String?
+  description     String?
+  learning        String? // READ: the one lesson left by the book
+  note            String? // READ: short personal note
+  imageUrl        String?
+  buyUrl          String?
+  fileKey         String? // EBOOK: private storage path, never exposed to client
+  free            Boolean  @default(false) // EBOOK: free vs premium
+  featured        Boolean  @default(false)
+  published       Boolean  @default(true)
+  sortOrder       Int      @default(0)
+  currentlyReading Boolean @default(false) // READ: mark as currently reading
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
 
   @@index([deletedAt, published, type, featured, sortOrder])
   @@index([type, published, sortOrder])

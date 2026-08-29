@@ -17,6 +17,7 @@ type BookItem = {
   imageUrl: string | null;
   buyUrl: string | null;
   free: boolean;
+  currentlyReading?: boolean;
 };
 
 type Variant = "published" | "read" | "ebook";
@@ -176,6 +177,11 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                 <h3 className="font-display text-lg font-bold leading-snug transition-colors group-hover:text-accent-strong">
                   {book.title}
                 </h3>
+                {variant === "read" && book.currentlyReading && (
+                  <span className="inline-block mt-1.5 text-[9px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                    Currently Reading
+                  </span>
+                )}
               </button>
 
               {(book.description || book.learning) && (
@@ -311,6 +317,11 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
                 </p>
               )}
               <h2 className="mt-2 font-display text-2xl font-bold leading-snug">{active.title}</h2>
+              {variant === "read" && active.currentlyReading && (
+                <span className="inline-block mt-1 text-[10px] font-bold uppercase tracking-wider text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-2.5 py-0.5">
+                  Currently Reading
+                </span>
+              )}
 
               <div className="mt-4 space-y-3 text-sm leading-relaxed text-muted-foreground">
                 {variant === "read" && active.learning && (

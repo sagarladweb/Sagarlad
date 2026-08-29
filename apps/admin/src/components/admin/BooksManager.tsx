@@ -34,6 +34,7 @@ type Book = {
   featured: boolean;
   published: boolean;
   sortOrder: number;
+  currentlyReading: boolean;
 };
 
 type BookForm = {
@@ -51,6 +52,7 @@ type BookForm = {
   featured: boolean;
   published: boolean;
   sortOrder: number;
+  currentlyReading: boolean;
 };
 
 const empty: BookForm = {
@@ -68,6 +70,7 @@ const empty: BookForm = {
   featured: false,
   published: true,
   sortOrder: 0,
+  currentlyReading: false,
 };
 
 const TABS: { value: BookType | "ALL"; label: string }[] = [
@@ -199,6 +202,7 @@ export function BooksManager() {
       featured: b.featured,
       published: b.published,
       sortOrder: b.sortOrder,
+      currentlyReading: b.currentlyReading,
     });
     setEditingId(b.id);
   }
@@ -232,6 +236,7 @@ export function BooksManager() {
       featured: savedType !== "READ" ? editing.featured : false,
       published: editing.published,
       sortOrder: Number(editing.sortOrder || 0),
+      currentlyReading: savedType === "READ" ? editing.currentlyReading : false,
     };
     const res = await fetch("/api/admin/books", {
       method: editingId ? "PUT" : "POST",
@@ -372,6 +377,20 @@ export function BooksManager() {
                   className={inputCls}
                   placeholder="Author name"
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1.5">Reading status</label>
+                <select
+                  value={editing.currentlyReading ? "reading" : "completed"}
+                  onChange={(e) => setEditing({ ...editing, currentlyReading: e.target.value === "reading" })}
+                  className={`${inputCls} cursor-pointer`}
+                >
+                  <option value="completed">Completed</option>
+                  <option value="reading">Currently reading</option>
+                </select>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  &quot;Currently reading&quot; books show a special indicator on the website.
+                </p>
               </div>
               <div>
                 <div className="flex items-center justify-between mb-1.5">
@@ -596,6 +615,11 @@ export function BooksManager() {
                   {b.type === "EBOOK" && (
                     <span className="rounded-full bg-blue-100 text-blue-700 px-2 py-0.5">
                       {b.free ? "Free" : "Premium"}
+                    </span>
+                  )}
+                  {b.type === "READ" && b.currentlyReading && (
+                    <span className="rounded-full bg-amber-100 text-amber-700 px-2 py-0.5">
+                      Currently Reading
                     </span>
                   )}
                 </div>
