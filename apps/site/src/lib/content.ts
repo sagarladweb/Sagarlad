@@ -219,7 +219,7 @@ export const getPublishedBooks = unstable_cache(
       return type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
     }
   },
-  ["books"],
+  (type) => ["books", type ?? "all"],
   { revalidate: CACHE_TTL, tags: ["content", "books"] }
 );
 
