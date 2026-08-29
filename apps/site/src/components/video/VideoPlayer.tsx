@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ExternalLink } from "lucide-react";
 import { aspectClass, type VideoPlatform } from "@/lib/video";
+import { youtubeEmbedUrl } from "@/lib/youtube";
 import { instagramWatchUrl } from "@/lib/instagram";
 
 /**
@@ -29,6 +30,8 @@ export function VideoPlayer({
   const [playing, setPlaying] = useState(false);
   const square = platform === "instagram";
   const watchUrl = platform === "instagram" ? instagramWatchUrl(src) : null;
+  // Normalize YouTube URLs to embed format (youtu.be → youtube.com/embed)
+  const embedSrc = platform === "youtube" ? (youtubeEmbedUrl(src) ?? src) : src;
   const boxRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export function VideoPlayer({
       >
         {playing ? (
           <iframe
-            src={`${src}${src.includes("?") ? "&" : "?"}autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3`}
+            src={`${embedSrc}${embedSrc.includes("?") ? "&" : "?"}autoplay=1&rel=0&modestbranding=1&playsinline=1&iv_load_policy=3`}
             title={title}
             className="w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

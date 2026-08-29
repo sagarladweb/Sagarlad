@@ -123,25 +123,29 @@ const FAQS = [
 ];
 
 function TestimonialCard({ t }: { t: { name: string; role: string; stars: number; quote: string } }) {
+  const initials = t.name.split(" ").map((n) => n[0]).join("");
   return (
-    <div className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] shrink-0 flex flex-col justify-between p-5 sm:p-6 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40">
-      <div>
-        <div className="flex gap-0.5 mb-3">
-          {Array.from({ length: t.stars }).map((_, i) => (
-            <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />
-          ))}
-        </div>
-        <blockquote className="font-display text-[13px] sm:text-sm font-medium leading-relaxed text-foreground/80 line-clamp-5">
-          &ldquo;{t.quote}&rdquo;
-        </blockquote>
+    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40">
+      <div className="flex gap-0.5 mb-2.5">
+        {Array.from({ length: t.stars }).map((_, i) => (
+          <Star key={i} className="w-3 h-3 fill-accent text-accent" />
+        ))}
       </div>
-      <div className="pt-3 border-t border-border">
-        <p className="font-display text-sm font-bold text-foreground">
-          {t.name}
-        </p>
-        <p className="mt-0.5 text-[11px] text-muted-foreground">
-          {t.role}
-        </p>
+      <blockquote className="font-display text-[12px] sm:text-[13px] font-medium leading-relaxed text-foreground/80 line-clamp-4 flex-1">
+        &ldquo;{t.quote}&rdquo;
+      </blockquote>
+      <div className="mt-3 pt-3 border-t border-border flex items-center gap-2.5">
+        <div className="w-8 h-8 rounded-full bg-brand/10 text-brand text-[11px] font-bold grid place-items-center shrink-0">
+          {initials}
+        </div>
+        <div className="min-w-0">
+          <p className="font-display text-xs font-bold text-foreground truncate">
+            {t.name}
+          </p>
+          <p className="text-[10px] text-muted-foreground truncate">
+            {t.role}
+          </p>
+        </div>
       </div>
     </div>
   );
