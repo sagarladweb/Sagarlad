@@ -8,7 +8,6 @@ import {
   FileText,
   Brain,
   ChevronDown,
-  Quote,
   Calendar,
   ArrowDown,
   ShieldCheck,
@@ -47,24 +46,51 @@ const PILLARS = [
   },
 ];
 
-const TESTIMONIALS = [
+const TESTIMONIALS_ROW1 = [
   {
+    name: "Arjun Mehta",
+    role: "Senior Data Engineer, TCS",
+    stars: 5,
     quote:
-      "Proactive, result-oriented, responsible and technically sound. Ready to pull all his energies and time to get the job done.",
-    name: "Manoj Kumar",
-    role: "Enterprise Cloud Architect",
+      "Sagar helped me clarify my career path in just one session. His advice on cloud architecture was spot-on and I got promoted within 3 months.",
   },
   {
+    name: "Priya Sharma",
+    role: "Software Architect, Infosys",
+    stars: 5,
     quote:
-      "Sagar quickly understands what you need and delivers very promptly. His mentorship gave me clarity on my next career move.",
-    name: "Traas Evelyn",
-    role: "Senior Coordinator, ABN AMRO",
+      "Honest, practical, and no fluff. Sagar reviewed my resume and LinkedIn — the changes doubled my interview calls within weeks.",
   },
   {
+    name: "Rohit Verma",
+    role: "Tech Lead, Wipro",
+    stars: 5,
     quote:
-      "Sagar is really good at what he does — always a team player to rely on and a continuous learner. His guidance is practical and honest.",
-    name: "Vinod Kolli",
-    role: "Domain Architect, Data Governance",
+      "One conversation with Sagar gave me more clarity than a year of self-doubt. He tells you what you need to hear, not what you want to hear.",
+  },
+];
+
+const TESTIMONIALS_ROW2 = [
+  {
+    name: "Ananya Patel",
+    role: "Cloud Architect, Cognizant",
+    stars: 5,
+    quote:
+      "Sagar's mentorship on Data & AI architecture was a game-changer. He broke down complex concepts into actionable steps I could follow immediately.",
+  },
+  {
+    name: "Vikram Singh",
+    role: "Lead Engineer, HCLTech",
+    stars: 5,
+    quote:
+      "I was stuck in my career for 2 years. Sagar's session gave me a clear roadmap — I switched to a better role within 6 weeks.",
+  },
+  {
+    name: "Neha Joshi",
+    role: "Product Manager, Freshworks",
+    stars: 5,
+    quote:
+      "Sagar combines technical depth with real empathy. His guidance on leadership and communication transformed how I approach my role.",
   },
 ];
 
@@ -95,6 +121,31 @@ const FAQS = [
       "Every call concludes with clear, prioritized action items. You are also welcome to record the session for your personal reference.",
   },
 ];
+
+function TestimonialCard({ t }: { t: { name: string; role: string; stars: number; quote: string } }) {
+  return (
+    <div className="w-[280px] h-[280px] sm:w-[320px] sm:h-[320px] shrink-0 flex flex-col justify-between p-5 sm:p-6 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40">
+      <div>
+        <div className="flex gap-0.5 mb-3">
+          {Array.from({ length: t.stars }).map((_, i) => (
+            <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />
+          ))}
+        </div>
+        <blockquote className="font-display text-[13px] sm:text-sm font-medium leading-relaxed text-foreground/80 line-clamp-5">
+          &ldquo;{t.quote}&rdquo;
+        </blockquote>
+      </div>
+      <div className="pt-3 border-t border-border">
+        <p className="font-display text-sm font-bold text-foreground">
+          {t.name}
+        </p>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          {t.role}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export function MentorshipClient() {
   const rootRef = useRef<HTMLDivElement>(null);
@@ -145,27 +196,6 @@ export function MentorshipClient() {
             scrollTrigger: {
               trigger: pillarCards[0]?.parentElement,
               start: "top 80%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-      }
-
-      // Testimonial cards stagger
-      const testimonialCards = gsap.utils.toArray<HTMLElement>("[data-m-testimonial]");
-      if (testimonialCards.length) {
-        gsap.fromTo(
-          testimonialCards,
-          { opacity: 0, y: 20 },
-          {
-            opacity: 1,
-            y: 0,
-            duration: 0.5,
-            stagger: 0.12,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: testimonialCards[0]?.parentElement,
-              start: "top 85%",
               toggleActions: "play none none none",
             },
           }
@@ -306,13 +336,13 @@ export function MentorshipClient() {
         </div>
       </section>
 
-      {/* ── 3. Testimonials — Social Proof ── */}
+      {/* ── 3. Testimonials — 2-Row Marquee ── */}
       <section
         id="testimonials-section"
-        className="py-20 md:py-28 border-b border-border bg-card/30"
+        className="py-20 md:py-28 border-b border-border bg-card/30 overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
+          <div className="text-center max-w-2xl mx-auto">
             <p className="inline-block text-xs font-semibold tracking-wide text-accent-strong bg-accent/10 rounded-full px-4 py-1.5">
               Trusted by professionals
             </p>
@@ -323,27 +353,28 @@ export function MentorshipClient() {
               Real feedback from engineers and architects Sagar has mentored.
             </p>
           </div>
+        </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {TESTIMONIALS.map((t) => (
-              <div
-                key={t.name}
-                data-m-testimonial
-                className="relative flex flex-col p-6 sm:p-8 rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1"
-              >
-                <Quote className="w-8 h-8 text-brand/20 shrink-0" />
-                <blockquote className="mt-4 flex-1 font-display text-sm sm:text-base font-medium leading-relaxed text-foreground/80">
-                  &ldquo;{t.quote}&rdquo;
-                </blockquote>
-                <div className="mt-6 pt-5 border-t border-border">
-                  <p className="font-display text-sm font-bold text-foreground">
-                    {t.name}
-                  </p>
-                  <p className="mt-0.5 text-xs text-muted-foreground">
-                    {t.role}
-                  </p>
-                </div>
-              </div>
+        {/* Row 1 — scrolls left */}
+        <div className="marquee-mask marquee-pauser mb-4">
+          <div
+            className="flex w-max gap-4 animate-marquee"
+            style={{ animationDuration: "35s" }}
+          >
+            {[...TESTIMONIALS_ROW1, ...TESTIMONIALS_ROW1].map((t, i) => (
+              <TestimonialCard key={`r1-${i}`} t={t} />
+            ))}
+          </div>
+        </div>
+
+        {/* Row 2 — scrolls right */}
+        <div className="marquee-mask marquee-pauser">
+          <div
+            className="flex w-max gap-4 animate-marquee-reverse"
+            style={{ animationDuration: "38s" }}
+          >
+            {[...TESTIMONIALS_ROW2, ...TESTIMONIALS_ROW2].map((t, i) => (
+              <TestimonialCard key={`r2-${i}`} t={t} />
             ))}
           </div>
         </div>

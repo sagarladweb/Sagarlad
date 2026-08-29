@@ -616,7 +616,8 @@ h6 {
   animation: marquee 40s linear infinite;
   will-change: transform;
 }
-.marquee-pauser:hover .animate-marquee {
+.marquee-pauser:hover .animate-marquee,
+.marquee-pauser:hover .animate-marquee-reverse {
   animation-play-state: paused !important;
 }
 
