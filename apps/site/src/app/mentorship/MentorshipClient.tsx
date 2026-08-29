@@ -8,10 +8,11 @@ import {
   FileText,
   Brain,
   ChevronDown,
-  Star,
+  Quote,
   Calendar,
   ArrowDown,
   ShieldCheck,
+  Star,
 } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
@@ -43,6 +44,27 @@ const PILLARS = [
     description:
       "Actionable advice to make better career decisions and grow faster.",
     highlight: "Grow Faster",
+  },
+];
+
+const TESTIMONIALS = [
+  {
+    quote:
+      "Proactive, result-oriented, responsible and technically sound. Ready to pull all his energies and time to get the job done.",
+    name: "Manoj Kumar",
+    role: "Enterprise Cloud Architect",
+  },
+  {
+    quote:
+      "Sagar quickly understands what you need and delivers very promptly. His mentorship gave me clarity on my next career move.",
+    name: "Traas Evelyn",
+    role: "Senior Coordinator, ABN AMRO",
+  },
+  {
+    quote:
+      "Sagar is really good at what he does — always a team player to rely on and a continuous learner. His guidance is practical and honest.",
+    name: "Vinod Kolli",
+    role: "Domain Architect, Data Governance",
   },
 ];
 
@@ -82,8 +104,8 @@ export function MentorshipClient() {
     setOpenFaq(openFaq === index ? null : index);
   };
 
-  const scrollToBooking = () => {
-    document.getElementById("booking-section")?.scrollIntoView({ behavior: "smooth" });
+  const scrollTo = (id: string) => {
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
   // GSAP animations
@@ -129,7 +151,28 @@ export function MentorshipClient() {
         );
       }
 
-      // Open spots section
+      // Testimonial cards stagger
+      const testimonialCards = gsap.utils.toArray<HTMLElement>("[data-m-testimonial]");
+      if (testimonialCards.length) {
+        gsap.fromTo(
+          testimonialCards,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.5,
+            stagger: 0.12,
+            ease: "power3.out",
+            scrollTrigger: {
+              trigger: testimonialCards[0]?.parentElement,
+              start: "top 85%",
+              toggleActions: "play none none none",
+            },
+          }
+        );
+      }
+
+      // CTA section
       gsap.fromTo(
         "[data-m-cta]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -178,7 +221,7 @@ export function MentorshipClient() {
             {/* Copy */}
             <div className="flex-1 text-center md:text-left">
               <div data-m-hero className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand bg-brand/5 border border-brand/10 rounded-full px-4 py-1.5">
-            Career &amp; Personal Development Coach
+                1:1 Career &amp; Personal Development Coach
               </div>
               <h1 data-m-hero className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
                 Accelerate Your Career
@@ -188,15 +231,23 @@ export function MentorshipClient() {
               <p data-m-hero className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl">
                 Direct, 1-on-1 mentorship on Data, Cloud &amp; AI Architecture, career momentum, resume teardowns, and intentional execution. Plain, practical advice — from your friend Sagar.
               </p>
-              <div data-m-hero className="mt-6">
+              <div data-m-hero className="mt-6 flex flex-wrap items-center gap-3 justify-center md:justify-start">
                 <button
                   type="button"
-                  onClick={scrollToBooking}
+                  onClick={() => scrollTo("booking-section")}
                   className="inline-flex items-center gap-2.5 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform cursor-pointer"
                 >
                   <Calendar className="w-4 h-4" />
-                  Book 1:1 Session Below
+                  Book 1:1 Session
                   <ArrowDown className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTo("testimonials-section")}
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors cursor-pointer"
+                >
+                  <Star className="w-3.5 h-3.5" />
+                  Read what others say
                 </button>
               </div>
             </div>
@@ -206,14 +257,6 @@ export function MentorshipClient() {
 
       {/* ── 2. What You Get — 4 Pillars ── */}
       <section className="relative py-20 md:py-28 border-b border-border overflow-hidden">
-        {/* Subtle radial glow */}
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 h-[500px] w-[700px] rounded-full opacity-50 blur-3xl"
-          style={{
-            background: "radial-gradient(circle, rgba(255,213,29,0.06), transparent 65%)",
-          }}
-        />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
             <p className="inline-block text-xs font-semibold tracking-wide text-accent-strong bg-accent/10 rounded-full px-4 py-1.5">
@@ -236,7 +279,6 @@ export function MentorshipClient() {
                   data-m-pillar
                   className="group relative flex flex-col sm:flex-row gap-5 p-6 sm:p-8 rounded-xl border border-border bg-card transition-all duration-300 hover:border-brand-light/50 hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] hover:-translate-y-1"
                 >
-                  {/* Accent bar on hover */}
                   <div
                     aria-hidden="true"
                     className="absolute left-0 top-6 bottom-6 w-[3px] rounded-full bg-accent/0 group-hover:bg-accent transition-colors duration-300"
@@ -264,20 +306,54 @@ export function MentorshipClient() {
         </div>
       </section>
 
-      {/* ── 3. Open Spots — CTA ── */}
+      {/* ── 3. Testimonials — Social Proof ── */}
+      <section
+        id="testimonials-section"
+        className="py-20 md:py-28 border-b border-border bg-card/30"
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+            <p className="inline-block text-xs font-semibold tracking-wide text-accent-strong bg-accent/10 rounded-full px-4 py-1.5">
+              Trusted by professionals
+            </p>
+            <h2 className="mt-3 font-display text-3xl sm:text-4xl font-bold tracking-tight text-foreground">
+              What People Say
+            </h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground">
+              Real feedback from engineers and architects Sagar has mentored.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+            {TESTIMONIALS.map((t) => (
+              <div
+                key={t.name}
+                data-m-testimonial
+                className="relative flex flex-col p-6 sm:p-8 rounded-xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:-translate-y-1"
+              >
+                <Quote className="w-8 h-8 text-brand/20 shrink-0" />
+                <blockquote className="mt-4 flex-1 font-display text-sm sm:text-base font-medium leading-relaxed text-foreground/80">
+                  &ldquo;{t.quote}&rdquo;
+                </blockquote>
+                <div className="mt-6 pt-5 border-t border-border">
+                  <p className="font-display text-sm font-bold text-foreground">
+                    {t.name}
+                  </p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    {t.role}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── 4. Booking CTA ── */}
       <section
         id="booking-section"
-        className="relative py-20 md:py-28 border-b border-border overflow-hidden"
+        className="relative py-20 md:py-28 border-b border-border overflow-hidden bg-background"
       >
-        {/* Gradient bg — matches About hero style */}
-        <div className="absolute inset-0 bg-gradient-to-br from-brand/5 via-transparent to-accent/5" />
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute inset-0"
-          style={{
-            background: "radial-gradient(ellipse 60% 50% at 50% 50%, rgba(255,213,29,0.04), transparent)",
-          }}
-        />
         <div data-m-cta className="relative max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <p className="inline-flex items-center gap-1.5 text-xs font-semibold tracking-wide text-accent-strong bg-accent/10 rounded-full px-4 py-1.5 mb-6">
             Open spots
@@ -294,7 +370,7 @@ export function MentorshipClient() {
               href="https://topmate.io/sagar_lad"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 rounded-full bg-accent text-black px-8 py-4 text-sm font-bold shadow-lg hover:scale-[1.03] transition-transform"
+              className="inline-flex items-center gap-2.5 rounded-full bg-accent text-accent-foreground px-8 py-4 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform"
             >
               <Calendar className="w-4 h-4" />
               Book on Topmate
@@ -307,7 +383,7 @@ export function MentorshipClient() {
         </div>
       </section>
 
-      {/* ── 4. FAQ ── */}
+      {/* ── 5. FAQ — Premium Collapsible ── */}
       <section className="py-20 md:py-24 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
@@ -319,54 +395,58 @@ export function MentorshipClient() {
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-3">
             {FAQS.map((faq, idx) => {
               const isOpen = openFaq === idx;
               return (
                 <div
                   key={faq.question}
-                  className={`rounded-xl border transition-all duration-200 ${
+                  className={`rounded-xl border transition-all duration-300 ${
                     isOpen
-                      ? "border-brand-light/40 bg-card shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-                      : "border-border/60 bg-transparent hover:border-border hover:bg-card/40"
+                      ? "border-brand/20 bg-card shadow-[0_2px_12px_rgba(13,33,161,0.06)]"
+                      : "border-border bg-transparent hover:border-border hover:bg-card/50"
                   }`}
                 >
                   <button
                     type="button"
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex items-center gap-4 px-5 py-4 sm:px-6 sm:py-5 text-left cursor-pointer"
+                    className="w-full flex items-center gap-4 px-5 py-4 sm:px-6 sm:py-5 text-left cursor-pointer group"
+                    aria-expanded={isOpen}
                   >
                     <span
-                      className={`shrink-0 flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold transition-colors duration-200 ${
+                      className={`flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold transition-all duration-300 ${
                         isOpen
-                          ? "bg-accent text-accent-foreground"
-                          : "bg-muted text-muted-foreground"
+                          ? "bg-accent text-accent-foreground scale-110"
+                          : "bg-muted text-muted-foreground group-hover:bg-muted/80"
                       }`}
                     >
                       {idx + 1}
                     </span>
                     <span
                       className={`flex-1 font-display text-sm sm:text-base font-semibold transition-colors duration-200 ${
-                        isOpen ? "text-foreground" : "text-foreground/80"
+                        isOpen ? "text-foreground" : "text-foreground/70 group-hover:text-foreground"
                       }`}
                     >
                       {faq.question}
                     </span>
                     <ChevronDown
-                      className={`w-4 h-4 shrink-0 text-muted-foreground transition-transform duration-200 ${
-                        isOpen ? "rotate-180 text-accent-strong" : ""
+                      className={`w-4 h-4 shrink-0 transition-all duration-300 ${
+                        isOpen
+                          ? "rotate-180 text-accent"
+                          : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     />
                   </button>
 
                   <div
-                    className="overflow-hidden transition-all duration-250 ease-in-out"
+                    className="overflow-hidden transition-all duration-300 ease-in-out"
                     style={{
                       maxHeight: isOpen ? "200px" : "0px",
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
                     <div className="px-5 sm:px-6 pb-5 pl-[3.25rem] sm:pl-[3.75rem]">
+                      <div className="h-px bg-border mb-4" />
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {faq.answer}
                       </p>
