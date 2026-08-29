@@ -191,37 +191,33 @@ export const getQuotes = unstable_cache(
   { revalidate: CACHE_TTL, tags: ["content", "quotes"] }
 );
 
-export const getPublishedBooks = unstable_cache(
-  async (type?: "PUBLISHED" | "READ" | "EBOOK") => {
-    try {
-      return await prisma.book.findMany({
-        where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
-        orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
-        select: {
-          id: true,
-          type: true,
-          title: true,
-          author: true,
-          tagline: true,
-          description: true,
-          learning: true,
-          note: true,
-          imageUrl: true,
-          buyUrl: true,
-          free: true,
-          featured: true,
-          sortOrder: true,
-          currentlyReading: true,
-        },
-      });
-    } catch (err) {
-      console.warn("[content] getPublishedBooks failed:", (err as Error).message);
-      return type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
-    }
-  },
-  (type) => ["books", type ?? "all"],
-  { revalidate: CACHE_TTL, tags: ["content", "books"] }
-);
+export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
+  try {
+    return await prisma.book.findMany({
+      where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
+      orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
+      select: {
+        id: true,
+        type: true,
+        title: true,
+        author: true,
+        tagline: true,
+        description: true,
+        learning: true,
+        note: true,
+        imageUrl: true,
+        buyUrl: true,
+        free: true,
+        featured: true,
+        sortOrder: true,
+        currentlyReading: true,
+      },
+    });
+  } catch (err) {
+    console.warn("[content] getPublishedBooks failed:", (err as Error).message);
+    return type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
+  }
+}
 
 // ── Blog listing helpers ──────────────────────────────────────────────
 // Wrapped in unstable_cache so the blog listing page doesn't hit the DB

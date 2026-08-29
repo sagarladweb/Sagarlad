@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/books-read",
 });
 
-export const revalidate = 604800;
+export const revalidate = 3600;
 
 const FALLBACK_READ_BOOKS = [
   { id: "fb-bk-r1", type: "READ", title: "Atomic Habits", author: "James Clear", tagline: "Tiny changes, remarkable results", description: "A practical guide to building good habits and breaking bad ones. Clear breaks down the science of habit formation into four simple laws.", learning: "Systems matter more than goals — design your environment for success", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 1, currentlyReading: false },
