@@ -103,9 +103,9 @@ const nodes: Node[] = [
 const TRACK_W = 1200;
 const PAD = 110;
 const WAVE_AMP = 55;
-const CARD_W = 260;
-const CARD_IMG_H = 80;
-const CARD_TEXT_H = 100;
+const CARD_W = 300;
+const CARD_IMG_H = 160;
+const CARD_TEXT_H = 130;
 const CARD_H = CARD_IMG_H + CARD_TEXT_H;
 const CARD_GAP = 20;
 
@@ -408,25 +408,25 @@ export function Timeline() {
                         priority={isOpen}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-                      <span className="absolute top-2 left-2 inline-flex items-center gap-1 border border-white/35 rounded-full px-2 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
-                        <Icon className="w-2.5 h-2.5" />
+                      <span className="absolute top-2.5 left-2.5 inline-flex items-center gap-1 border border-white/35 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white backdrop-blur-sm bg-white/10">
+                        <Icon className="w-3 h-3" />
                         {n.tag}
                       </span>
                     </div>
                   )}
 
                   {/* Text */}
-                  <div className="p-3" style={{ height: `${CARD_TEXT_H}px` }}>
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-[9px] font-bold text-brand/60 uppercase tracking-wider">{n.year}</span>
+                  <div className="p-4" style={{ height: `${CARD_TEXT_H}px` }}>
+                    <div className="flex items-center gap-1.5 mb-1.5">
+                      <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">{n.year}</span>
                       <span className="w-0.5 h-0.5 rounded-full bg-brand/30" />
-                      <span className="text-[9px] font-semibold text-accent-strong uppercase tracking-wider">{n.word}</span>
+                      <span className="text-[10px] font-semibold text-accent-strong uppercase tracking-wider">{n.word}</span>
                     </div>
-                    <h3 className="font-display text-[13px] font-bold text-foreground leading-snug">{n.title}</h3>
-                    <p className="mt-0.5 text-[11px] text-muted-foreground leading-relaxed line-clamp-3">{n.description}</p>
+                    <h3 className="font-display text-sm font-bold text-foreground leading-snug">{n.title}</h3>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed line-clamp-3">{n.description}</p>
                     {n.href && (
-                      <Link href={n.href} className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-brand hover:underline">
-                        <BookOpen className="w-2.5 h-2.5" />{n.hrefLabel}
+                      <Link href={n.href} className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-semibold text-brand hover:underline">
+                        <BookOpen className="w-3 h-3" />{n.hrefLabel}
                       </Link>
                     )}
                   </div>
