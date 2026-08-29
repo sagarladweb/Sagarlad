@@ -154,17 +154,12 @@ export function MentorshipClient() {
   return (
     <div ref={rootRef} className="min-h-screen bg-background text-foreground">
       {/* ── 1. Profile Hero ── */}
-      <section className="relative overflow-hidden border-b border-border">
-        {/* Deep brand navy gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-[#0A1930] via-[#0d21a1] to-[#0A1930] z-0" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-accent/12 via-transparent to-transparent z-10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/15 z-10" />
-
+      <section className="relative overflow-hidden border-b border-border bg-background">
         <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
             {/* Avatar */}
             <div data-m-hero className="relative shrink-0">
-              <div className="relative h-36 w-36 sm:h-48 sm:w-48 rounded-full overflow-hidden border-2 border-white/25 shadow-2xl">
+              <div className="relative h-36 w-36 sm:h-48 sm:w-48 rounded-full overflow-hidden border-2 border-border shadow-lg">
                 <Image
                   src="/images/profile/about.webp"
                   alt="Sagar Lad"
@@ -174,7 +169,7 @@ export function MentorshipClient() {
                   priority
                 />
               </div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-accent/90 text-black px-3 py-1 text-[10px] font-bold shadow-lg backdrop-blur-sm">
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-3 py-1 text-[10px] font-bold shadow-sm">
                 <ShieldCheck className="w-3 h-3" />
                 Verified Mentor
               </div>
@@ -182,22 +177,22 @@ export function MentorshipClient() {
 
             {/* Copy */}
             <div className="flex-1 text-center md:text-left">
-              <div data-m-hero className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent border border-accent/30 rounded-full px-4 py-1.5 bg-accent/10 backdrop-blur-sm">
-                1:1 Career &amp; Personal Development Coach
+              <div data-m-hero className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand bg-brand/5 border border-brand/10 rounded-full px-4 py-1.5">
+            Career &amp; Personal Development Coach
               </div>
-              <h1 data-m-hero className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white leading-[1.15]">
+              <h1 data-m-hero className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
                 Accelerate Your Career
                 <br />
                 with <span className="text-accent">Sagar Lad</span>
               </h1>
-              <p data-m-hero className="mt-4 text-base sm:text-lg leading-relaxed text-white/70 max-w-2xl">
+              <p data-m-hero className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl">
                 Direct, 1-on-1 mentorship on Data, Cloud &amp; AI Architecture, career momentum, resume teardowns, and intentional execution. Plain, practical advice — from your friend Sagar.
               </p>
               <div data-m-hero className="mt-6">
                 <button
                   type="button"
                   onClick={scrollToBooking}
-                  className="inline-flex items-center gap-2.5 rounded-full bg-accent text-black px-7 py-3.5 text-sm font-bold shadow-xl hover:scale-[1.03] transition-transform cursor-pointer"
+                  className="inline-flex items-center gap-2.5 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform cursor-pointer"
                 >
                   <Calendar className="w-4 h-4" />
                   Book 1:1 Session Below
