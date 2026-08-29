@@ -27,6 +27,7 @@ function createClient() {
     connectionString,
     ssl,
     max,
+    family: 4,
     connectionTimeoutMillis: 3000,
     idleTimeoutMillis: 10000,
     query_timeout: 8000,
