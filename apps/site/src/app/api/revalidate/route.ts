@@ -13,6 +13,8 @@ const PATHS = [
   "/blog",
   "/blog/[slug]",
   "/books",
+  "/books-read",
+  "/ebooks",
   "/videos",
   "/videos/[slug]",
   "/quotes",

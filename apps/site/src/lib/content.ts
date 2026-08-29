@@ -193,7 +193,7 @@ export const getQuotes = unstable_cache(
 
 export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
   try {
-    return await prisma.book.findMany({
+    const books = await prisma.book.findMany({
       where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: {
@@ -213,9 +213,13 @@ export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
         currentlyReading: true,
       },
     });
+    console.log(`[content] getPublishedBooks(${type ?? "all"}): DB returned ${books.length} books`);
+    return books;
   } catch (err) {
-    console.warn("[content] getPublishedBooks failed:", (err as Error).message);
-    return type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
+    console.warn("[content] getPublishedBooks FAILED:", (err as Error).message, (err as Error).stack?.split("\n")[1]);
+    const fb = type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
+    console.warn(`[content] returning ${fb.length} fallback books`);
+    return fb;
   }
 }
 
