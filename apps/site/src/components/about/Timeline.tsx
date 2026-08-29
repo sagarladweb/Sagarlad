@@ -105,8 +105,6 @@ const PAD = 110;
 const WAVE_AMP = 55;
 const CARD_W = 300;
 const CARD_IMG_H = 160;
-const CARD_TEXT_H = 130;
-const CARD_H = CARD_IMG_H + CARD_TEXT_H;
 const CARD_GAP = 20;
 
 /* Wave center drifts upward */
@@ -121,8 +119,9 @@ const dotX = (i: number) => PAD + (i / (nodes.length - 1)) * (TRACK_W - PAD * 2)
 const dotY = (i: number) => waveCenter(i) + (dotAbove[i] ? -WAVE_AMP : WAVE_AMP);
 const cardTop = (i: number) => dotY(i) + CARD_GAP;
 
-/* Max card bottom for dynamic section height */
-const MAX_CARD_BOTTOM = Math.max(...nodes.map((_, i) => cardTop(i) + CARD_H));
+/* Max card bottom for dynamic section height — estimate ~290px per card */
+const CARD_H_EST = CARD_IMG_H + 140;
+const MAX_CARD_BOTTOM = Math.max(...nodes.map((_, i) => cardTop(i) + CARD_H_EST));
 
 /* ── Smooth wave path ── */
 function buildWave(): string {
@@ -416,7 +415,7 @@ export function Timeline() {
                   )}
 
                   {/* Text */}
-                  <div className="p-4" style={{ height: `${CARD_TEXT_H}px` }}>
+                  <div className="p-4">
                     <div className="flex items-center gap-1.5 mb-1.5">
                       <span className="text-[10px] font-bold text-brand/60 uppercase tracking-wider">{n.year}</span>
                       <span className="w-0.5 h-0.5 rounded-full bg-brand/30" />
