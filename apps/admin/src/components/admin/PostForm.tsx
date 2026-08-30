@@ -51,6 +51,8 @@ export function PostForm({
     published: boolean;
     scheduledAt: string | null;
     sources?: Source[] | null;
+    views?: number;
+    likes?: number;
   };
 }) {
   const router = useRouter();
@@ -72,6 +74,8 @@ export function PostForm({
     published: initial?.published ?? true,
     scheduledAt: initial?.scheduledAt ?? "",
     sources: initial?.sources ?? [],
+    views: initial?.views ?? 0,
+    likes: initial?.likes ?? 0,
   });
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [previewError, setPreviewError] = useState("");
@@ -500,7 +504,9 @@ export function PostForm({
     form.featured !== (initial?.featured ?? false) ||
     form.published !== (initial?.published ?? true) ||
     form.scheduledAt !== (initial?.scheduledAt ?? "") ||
-    JSON.stringify(form.sources) !== JSON.stringify(initial?.sources ?? []);
+    JSON.stringify(form.sources) !== JSON.stringify(initial?.sources ?? []) ||
+    form.views !== (initial?.views ?? 0) ||
+    form.likes !== (initial?.likes ?? 0);
 
   // Intercept browser back/tab closure when changes are unsaved
   useEffect(() => {
@@ -989,6 +995,30 @@ export function PostForm({
                 </p>
               </div>
             </div>
+            {initial && (
+              <div className="grid grid-cols-2 gap-3 pt-2 border-t border-border">
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Views</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.views}
+                    onChange={(e) => setForm((f) => ({ ...f, views: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-accent tabular-nums"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-muted-foreground">Likes</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={form.likes}
+                    onChange={(e) => setForm((f) => ({ ...f, likes: Math.max(0, parseInt(e.target.value) || 0) }))}
+                    className="mt-1 w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm outline-none focus:ring-1 focus:ring-accent tabular-nums"
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </aside>
 </div>

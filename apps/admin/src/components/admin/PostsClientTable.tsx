@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Search, Trash2, Eye, ExternalLink, ChevronLeft, ChevronRight, CalendarClock, Play } from "lucide-react";
+import { Plus, Pencil, Search, Trash2, Eye, Heart, ExternalLink, ChevronLeft, ChevronRight, CalendarClock, Play } from "lucide-react";
 import { showToast } from "@/components/admin/Toast";
 import { showConfirm } from "@/components/admin/ConfirmDialog";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -17,6 +17,7 @@ type PostItem = {
   published: boolean;
   scheduledAt: Date | string | null;
   views: number;
+  likes: number;
   category: { name: string } | null;
 };
 
@@ -198,6 +199,7 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
                 <th className="px-4 py-3 font-semibold">Category</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Views</th>
+                <th className="px-4 py-3 font-semibold">Likes</th>
                 <th className="px-4 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
@@ -223,6 +225,12 @@ export function PostsClientTable({ initialPosts }: { initialPosts: PostItem[] })
                     <span className="inline-flex items-center gap-1">
                       <Eye className="w-3 h-3" />
                       {p.views.toLocaleString()}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-muted-foreground">
+                    <span className="inline-flex items-center gap-1">
+                      <Heart className="w-3 h-3" />
+                      {p.likes.toLocaleString()}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">

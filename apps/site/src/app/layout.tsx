@@ -4,6 +4,7 @@ import "./globals.css";
 import { SiteFrame } from "@/components/SiteFrame";
 import { SITE } from "@/lib/site";
 import { heartbeat } from "@/lib/heartbeat";
+import { getActiveAnnouncement } from "@/lib/content";
 
 // Self-hosted fonts — never depend on Google Fonts being reachable at build
 // or serve time, so CSS always loads. Files in src/app/fonts/.
@@ -100,6 +101,8 @@ export default async function RootLayout({
   // posts. Runs once per 60s. Zero external dependencies.
   heartbeat();
 
+  const announcement = await getActiveAnnouncement();
+
   return (
     <html
       lang="en"
@@ -112,7 +115,7 @@ export default async function RootLayout({
         <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body className="min-h-full flex flex-col bg-background text-foreground">
-        <SiteFrame>{children}</SiteFrame>
+        <SiteFrame announcement={announcement}>{children}</SiteFrame>
       </body>
     </html>
   );

@@ -4,9 +4,23 @@ import { ArrowLeft, CalendarDays, Clock, Eye, Link2, Video, Image as ImageIcon }
 import { SITE, formatDate, readingTime } from "@/lib/site";
 import { SanitizedContent } from "@/components/SanitizedContent";
 import { ShareButtons } from "@/components/blog/ShareButtons";
+import { LikeButton } from "@/components/blog/LikeButton";
 import { CommentsSection } from "@/components/blog/CommentsSection";
 
+/** Deterministic daily micro-growth: 0-2 extra views per day, seeded by postId + date. */
+function dailyBonus(postId: string): number {
+  const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  let h = 0x811c9dc5;
+  const seed = postId + today;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h % 3; // 0, 1, or 2
+}
+
 type PostWithRelations = {
+  id: string;
   title: string;
   slug: string;
   excerpt: string | null;
@@ -18,6 +32,7 @@ type PostWithRelations = {
   showAuthorBox: boolean;
   publishedAt: Date;
   views?: number;
+  likes?: number;
   sources?: { type: string; url: string; title: string }[] | null;
   category?: { name: string; slug?: string } | null;
   author?: { name: string | null } | null;
@@ -117,7 +132,7 @@ export function PostArticle({
             </span>
             {typeof post.views === "number" && post.views > 0 && (
               <span className="inline-flex items-center gap-1.5">
-                <Eye className="w-4 h-4" /> {post.views.toLocaleString()} views
+                <Eye className="w-4 h-4" /> {(post.views + dailyBonus(post.id)).toLocaleString()} views
               </span>
             )}
           </div>
@@ -142,7 +157,8 @@ export function PostArticle({
       </div>
 
       {showShare && (
-        <div className="mt-12">
+        <div className="mt-12 flex flex-wrap items-center gap-3">
+          <LikeButton slug={post.slug} initialLikes={post.likes ?? 0} />
           <ShareButtons title={post.title} slug={post.slug} url={`${SITE.url}/blog/${post.slug}`} />
         </div>
       )}

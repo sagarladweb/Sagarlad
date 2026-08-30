@@ -14,6 +14,7 @@ export async function revalidatePublic(): Promise<boolean> {
   // pickers) so a post write refreshes admin-side data immediately.
   revalidateTag("socials", "max");
   revalidateTag("content", "max");
+  revalidateTag("announcements", "max");
 
   let rawUrl = (process.env.SITE_URL ?? "https://sagarlad.com").trim().replace(/\/$/, "");
   if (!/^https?:\/\//i.test(rawUrl)) {

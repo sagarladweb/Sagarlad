@@ -20,6 +20,7 @@ const LIST_SELECT = {
   scheduledAt: true,
   updatedAt: true,
   views: true,
+  likes: true,
   category: { select: { id: true, name: true, slug: true } },
 } as const;
 
@@ -84,6 +85,8 @@ export async function POST(request: Request) {
         sources: Array.isArray(parsed.data.sources) && parsed.data.sources.length > 0
           ? parsed.data.sources
           : undefined,
+        views: parsed.data.views ?? 0,
+        likes: parsed.data.likes ?? 0,
       },
     });
 
@@ -146,6 +149,8 @@ export async function PUT(request: Request) {
         sources: Array.isArray(parsed.data.sources) && parsed.data.sources.length > 0
           ? parsed.data.sources
           : undefined,
+        ...(typeof parsed.data.views === "number" ? { views: parsed.data.views } : {}),
+        ...(typeof parsed.data.likes === "number" ? { likes: parsed.data.likes } : {}),
       },
     });
 

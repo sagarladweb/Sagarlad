@@ -73,4 +73,6 @@ export const adminPostSchema = z.object({
     .max(20)
     .optional()
     .or(z.literal("")),
+  views: z.number().int().min(0).optional(),
+  likes: z.number().int().min(0).optional(),
 });

@@ -139,9 +139,9 @@ export function getDashboardStats() {
     prisma.post.findMany({
       orderBy: { updatedAt: "desc" },
       take: 5,
-      select: { title: true, slug: true, published: true, views: true },
+      select: { title: true, slug: true, published: true, views: true, likes: true },
     }),
-    prisma.post.aggregate({ _sum: { views: true } }),
+    prisma.post.aggregate({ _sum: { views: true, likes: true } }),
   ]);
 }
 

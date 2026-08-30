@@ -1,11 +1,14 @@
 import { SITE, VISIBLE_POST_WHERE } from "@/lib/site";
 import { getSiteSocials } from "@/lib/social-links";
-import { getCategories, getFeaturedPosts } from "@/lib/content";
+import { getCategories, getFeaturedPosts, getActiveAnnouncement } from "@/lib/content";
+import { prisma } from "@/lib/db";
 import { JsonLd } from "@/components/JsonLd";
 import dynamic from "next/dynamic";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";
+import { AnnouncementSection } from "@/components/home/AnnouncementSection";
+import { AnnouncementPopup } from "@/components/home/AnnouncementPopup";
 
 const AboutMe = dynamic(() => import("@/components/home/AboutMe").then((m) => m.AboutMe));
 const TopicsGrid = dynamic(() => import("@/components/home/TopicsGrid").then((m) => m.TopicsGrid));
@@ -19,11 +22,23 @@ const SagarGallery = dynamic(() => import("@/components/home/SagarGallery").then
 
 export const revalidate = 604800;
 
-export default async function HomePage() {
-  const [posts, socials, allCategories] = await Promise.all([
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ announce_preview?: string; id?: string }>;
+}) {
+  const params = await searchParams;
+  const previewMode = params.announce_preview;
+
+  const fetchAnnouncement = params.id
+    ? prisma.announcement.findUnique({ where: { id: params.id } }).catch(() => null)
+    : getActiveAnnouncement();
+
+  const [posts, socials, allCategories, announcement] = await Promise.all([
     getFeaturedPosts(VISIBLE_POST_WHERE, 4),
     getSiteSocials(),
     getCategories(),
+    fetchAnnouncement,
   ]);
 
   const topicsWithViews = allCategories
@@ -35,6 +50,33 @@ export default async function HomePage() {
     }))
     .sort((a, b) => b.postCount - a.postCount)
     .slice(0, 10);
+
+  if (previewMode === "section") {
+    return (
+      <div className="min-h-screen bg-background">
+        {announcement && <AnnouncementSection announcement={announcement} />}
+      </div>
+    );
+  }
+
+  if (previewMode === "all") {
+    return (
+      <>
+        <Hero />
+        <FeaturedOn />
+        <AboutMe />
+        <TopicsGrid topics={topicsWithViews} />
+        <MindUp />
+        <MindUpBook />
+        <BlogPreview posts={posts} />
+        <Testimonials />
+        <MentorshipCta />
+        <NewsletterCta />
+        <SagarGallery />
+        {announcement && <AnnouncementSection announcement={announcement} />}
+      </>
+    );
+  }
 
   return (
     <>
@@ -75,6 +117,8 @@ export default async function HomePage() {
       <MentorshipCta />
       <NewsletterCta />
       <SagarGallery />
+      {announcement && <AnnouncementSection announcement={announcement} />}
+      {announcement && <AnnouncementPopup announcement={announcement} />}
     </>
   );
 }

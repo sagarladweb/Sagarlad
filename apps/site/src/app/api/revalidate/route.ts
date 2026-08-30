@@ -25,7 +25,7 @@ const PATHS = [
 // Tags on the unstable_cache helpers in src/lib/content.ts. revalidatePath
 // refreshes ISR page caches but does NOT invalidate unstable_cache data, so
 // categories/videos/books/quotes would otherwise stay stale for up to a week.
-const TAGS = ["content", "categories", "videos", "books", "quotes", "socials"];
+const TAGS = ["content", "categories", "videos", "books", "quotes", "socials", "announcements"];
 
 export async function POST(req: Request) {
   const secret = process.env.CRON_SECRET;

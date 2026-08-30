@@ -20,7 +20,7 @@ export function NewsletterPopup() {
 
   useEffect(() => {
     if (dismissed) return;
-    const t = setTimeout(() => setVisible(true), 8000);
+    const t = setTimeout(() => setVisible(true), 14000);
     return () => clearTimeout(t);
   }, []);
 

@@ -154,6 +154,28 @@ h6 {
   }
 }
 
+/* ---------- Skeleton token system ---------- */
+.sk-item {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+  border-radius: var(--radius-md);
+}
+.sk-item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+  animation: skeleton-sweep 1.4s ease-in-out infinite;
+}
+.sk-circle { border-radius: 9999px; }
+.sk-card  { border-radius: var(--radius-xl); }
+.sk-full  { border-radius: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .sk-item::after { animation: none; }
+}
+
 /* ---------- Reusable prose styles for sanitized TipTap/HTML content ---------- */
 .tip-content {
   font-size: 1.0625rem;

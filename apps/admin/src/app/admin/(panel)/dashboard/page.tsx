@@ -48,7 +48,7 @@ function Sparkline({ values }: { values: number[] }) {
 export default async function DashboardPage() {
   if (PHASE_1) redirect("/admin/posts");
 
-  let recentPosts: { title: string; slug: string; published: boolean; views: number }[] = [];
+  let recentPosts: { title: string; slug: string; published: boolean; views: number; likes: number }[] = [];
   let published = 0;
   let drafts = 0;
   let scheduled = 0;
@@ -241,6 +241,7 @@ export default async function DashboardPage() {
                   <th className="px-4 py-3">Title</th>
                   <th className="px-4 py-3">Status</th>
                   <th className="px-4 py-3">Views</th>
+                  <th className="px-4 py-3">Likes</th>
                   <th className="px-4 py-3">Edit</th>
                 </tr>
               </thead>
@@ -250,6 +251,7 @@ export default async function DashboardPage() {
                     <td className="px-4 py-3 font-medium">{p.title}</td>
                     <td className="px-4 py-3"><PublishedBadge published={p.published} /></td>
                     <td className="px-4 py-3 tabular-nums">{p.views}</td>
+                    <td className="px-4 py-3 tabular-nums">{p.likes}</td>
                     <td className="px-4 py-3">
                       <Link href={`/admin/posts/${encodeURIComponent(p.slug)}/edit`} className="text-accent font-medium hover:underline">
                         Edit

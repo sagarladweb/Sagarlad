@@ -7,7 +7,7 @@ export function RssBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 16000);
+    const t = setTimeout(() => setShow(true), 22000);
     return () => clearTimeout(t);
   }, []);
 

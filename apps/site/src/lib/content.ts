@@ -69,12 +69,12 @@ const FALLBACK_BOOKS = [
 ];
 
 const FALLBACK_POSTS = [
-  { id: "fb-p-1", slug: "money-mindset-shift", title: "The Money Mindset Shift That Changed Everything", coverImage: null, publishedAt: new Date("2025-01-15"), excerpt: "How a simple change in how I thought about money transformed my entire financial life." },
-  { id: "fb-p-2", slug: "5-books-that-changed-my-life", title: "5 Books That Changed My Life", coverImage: null, publishedAt: new Date("2025-01-08"), excerpt: "These five books shaped my thinking on money, relationships, and personal growth." },
-  { id: "fb-p-3", slug: "building-confidence-from-scratch", title: "Building Confidence From Scratch", coverImage: null, publishedAt: new Date("2024-12-20"), excerpt: "A practical guide to building unshakeable confidence, even if you're starting from zero." },
-  { id: "fb-p-4", slug: "career-advice-no-one-tells-you", title: "Career Advice No One Tells You", coverImage: null, publishedAt: new Date("2024-12-10"), excerpt: "The career advice I wish someone had given me in my early twenties." },
-  { id: "fb-p-5", slug: "daily-habits-for-success", title: "Daily Habits That Actually Lead to Success", coverImage: null, publishedAt: new Date("2024-11-28"), excerpt: "Stop chasing productivity hacks. These simple daily habits compound into real results." },
-  { id: "fb-p-6", slug: "overcoming-anxiety-guide", title: "A Practical Guide to Overcoming Anxiety", coverImage: null, publishedAt: new Date("2024-11-15"), excerpt: "Strategies that actually work for managing anxiety in daily life." },
+  { id: "fb-p-1", slug: "money-mindset-shift", title: "The Money Mindset Shift That Changed Everything", coverImage: null, publishedAt: new Date("2025-01-15"), excerpt: "How a simple change in how I thought about money transformed my entire financial life.", views: 0, likes: 0 },
+  { id: "fb-p-2", slug: "5-books-that-changed-my-life", title: "5 Books That Changed My Life", coverImage: null, publishedAt: new Date("2025-01-08"), excerpt: "These five books shaped my thinking on money, relationships, and personal growth.", views: 0, likes: 0 },
+  { id: "fb-p-3", slug: "building-confidence-from-scratch", title: "Building Confidence From Scratch", coverImage: null, publishedAt: new Date("2024-12-20"), excerpt: "A practical guide to building unshakeable confidence, even if you're starting from zero.", views: 0, likes: 0 },
+  { id: "fb-p-4", slug: "career-advice-no-one-tells-you", title: "Career Advice No One Tells You", coverImage: null, publishedAt: new Date("2024-12-10"), excerpt: "The career advice I wish someone had given me in my early twenties.", views: 0, likes: 0 },
+  { id: "fb-p-5", slug: "daily-habits-for-success", title: "Daily Habits That Actually Lead to Success", coverImage: null, publishedAt: new Date("2024-11-28"), excerpt: "Stop chasing productivity hacks. These simple daily habits compound into real results.", views: 0, likes: 0 },
+  { id: "fb-p-6", slug: "overcoming-anxiety-guide", title: "A Practical Guide to Overcoming Anxiety", coverImage: null, publishedAt: new Date("2024-11-15"), excerpt: "Strategies that actually work for managing anxiety in daily life.", views: 0, likes: 0 },
 ];
 
 export type VideoCard = {
@@ -267,6 +267,8 @@ export const getPostList = unstable_cache(
           coverImage: true,
           publishedAt: true,
           excerpt: true,
+          views: true,
+          likes: true,
         },
         orderBy: { publishedAt: "desc" },
         take: opts.take,
@@ -340,4 +342,20 @@ export const getRelatedPosts = unstable_cache(
   },
   ["related-posts"],
   { revalidate: CACHE_TTL, tags: ["content", "posts"] }
+);
+
+// Active announcement for the homepage banner / popup.
+export const getActiveAnnouncement = unstable_cache(
+  async () => {
+    try {
+      return await prisma.announcement.findFirst({
+        where: { active: true },
+        orderBy: { createdAt: "desc" },
+      });
+    } catch {
+      return null;
+    }
+  },
+  ["active-announcement"],
+  { revalidate: CACHE_TTL, tags: ["content", "announcements"] }
 );

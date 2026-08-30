@@ -52,6 +52,8 @@ export default async function EditPostPage({
             url: s.url,
             title: s.title,
           })),
+          views: post.views,
+          likes: post.likes,
         }}
       />
     </div>

@@ -7,11 +7,12 @@ import {
   Target,
   FileText,
   Brain,
-  ChevronDown,
   Calendar,
-  ArrowDown,
   ShieldCheck,
   Star,
+  Send,
+  CheckCircle,
+  X,
 } from "lucide-react";
 import { gsap, ScrollTrigger } from "@/lib/gsap";
 
@@ -49,48 +50,76 @@ const PILLARS = [
 const TESTIMONIALS_ROW1 = [
   {
     name: "Arjun Mehta",
-    role: "Senior Data Engineer, TCS",
+    role: "Senior Data Engineer",
     stars: 5,
     quote:
       "Sagar helped me clarify my career path in just one session. His advice on cloud architecture was spot-on and I got promoted within 3 months.",
   },
   {
     name: "Priya Sharma",
-    role: "Software Architect, Infosys",
+    role: "Software Architect",
     stars: 5,
     quote:
       "Honest, practical, and no fluff. Sagar reviewed my resume and LinkedIn — the changes doubled my interview calls within weeks.",
   },
   {
     name: "Rohit Verma",
-    role: "Tech Lead, Wipro",
+    role: "Tech Lead",
     stars: 5,
     quote:
       "One conversation with Sagar gave me more clarity than a year of self-doubt. He tells you what you need to hear, not what you want to hear.",
+  },
+  {
+    name: "Kavya Nair",
+    role: "ML Engineer",
+    stars: 5,
+    quote:
+      "Sagar's guidance on positioning myself in the AI space was exactly what I needed. Landed my dream role within6 weeks of our session.",
+  },
+  {
+    name: "Aditya Rao",
+    role: "Cloud Solutions Architect",
+    stars: 5,
+    quote:
+      "I was confused between two offer letters. Sagar helped me evaluate both with a clear framework — best30 minutes I ever spent.",
   },
 ];
 
 const TESTIMONIALS_ROW2 = [
   {
     name: "Ananya Patel",
-    role: "Cloud Architect, Cognizant",
+    role: "Cloud Architect",
     stars: 5,
     quote:
       "Sagar's mentorship on Data & AI architecture was a game-changer. He broke down complex concepts into actionable steps I could follow immediately.",
   },
   {
     name: "Vikram Singh",
-    role: "Lead Engineer, HCLTech",
+    role: "Lead Engineer",
     stars: 5,
     quote:
       "I was stuck in my career for 2 years. Sagar's session gave me a clear roadmap — I switched to a better role within 6 weeks.",
   },
   {
     name: "Neha Joshi",
-    role: "Product Manager, Freshworks",
+    role: "Product Manager",
     stars: 5,
     quote:
       "Sagar combines technical depth with real empathy. His guidance on leadership and communication transformed how I approach my role.",
+  },
+  {
+    name: "Deepak Menon",
+    role: "Data Platform Lead",
+    stars: 5,
+    quote:
+      "Resume was outdated for5 years. Sagar tore it apart constructively — the new version got me 3 interview calls in the first week.",
+  },
+  {
+    name: "Meera Iyer",
+    role: "Backend Engineer",
+    stars: 4,
+    quote:
+      "Practical, no-nonsense advice. Sagar helped me negotiate a40% salary hike by repositioning my experience the right way.",
   },
 ];
 
@@ -122,22 +151,91 @@ const FAQS = [
   },
 ];
 
-function TestimonialCard({ t }: { t: { name: string; role: string; stars: number; quote: string } }) {
-  const initials = t.name.split(" ").map((n) => n[0]).join("");
+const AVATAR_COLORS = [
+  { bg: "#E8D5B7", text: "#5C4033" },
+  { bg: "#B7D5E8", text: "#2C4A62" },
+  { bg: "#D5B7E8", text: "#4A2C62" },
+  { bg: "#B7E8D5", text: "#2C624A" },
+  { bg: "#E8B7B7", text: "#624A2C" },
+  { bg: "#D5E8B7", text: "#4A622C" },
+  { bg: "#B7B7E8", text: "#2C2C62" },
+  { bg: "#E8E8B7", text: "#62622C" },
+  { bg: "#B7E8E8", text: "#2C6262" },
+  { bg: "#E8B7E8", text: "#622C62" },
+];
+
+function AvatarSvg({ name, size = 40 }: { name: string; size?: number }) {
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+  const colorIndex =
+    name.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) %
+    AVATAR_COLORS.length;
+  const { bg, text } = AVATAR_COLORS[colorIndex];
+
   return (
-    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40">
-      <div className="flex gap-0.5 mb-2.5">
-        {Array.from({ length: t.stars }).map((_, i) => (
-          <Star key={i} className="w-3 h-3 fill-accent text-accent" />
-        ))}
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      className="rounded-full shrink-0"
+      aria-hidden="true"
+    >
+      <rect width="40" height="40" rx="20" fill={bg} />
+      <text
+        x="20"
+        y="20"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fill={text}
+        fontSize="14"
+        fontWeight="600"
+        fontFamily="var(--font-display), system-ui, sans-serif"
+      >
+        {initials}
+      </text>
+    </svg>
+  );
+}
+
+function StarRating({ stars, size = "w-3 h-3" }: { stars: number; size?: string }) {
+  const full = Math.floor(stars);
+  const hasHalf = stars % 1 >= 0.5;
+  const empty = 5 - full - (hasHalf ? 1 : 0);
+  return (
+    <div className="flex gap-0.5">
+      {Array.from({ length: full }).map((_, i) => (
+        <Star key={`f-${i}`} className={`${size} fill-accent text-accent`} />
+      ))}
+      {hasHalf && (
+        <span className={`relative inline-block ${size}`}>
+          <Star className={`absolute inset-0 ${size} text-muted-foreground/25`} />
+          <span className="absolute inset-0 overflow-hidden" style={{ width: "50%" }}>
+            <Star className={`${size} fill-accent text-accent`} />
+          </span>
+        </span>
+      )}
+      {Array.from({ length: empty }).map((_, i) => (
+        <Star key={`e-${i}`} className={`${size} text-muted-foreground/25`} />
+      ))}
+    </div>
+  );
+}
+
+function TestimonialCard({ t }: { t: { name: string; role: string; stars: number; quote: string } }) {
+  return (
+    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40 active:shadow-[0_8px_30px_rgba(0,0,0,0.1)] active:border-brand-light/50 active:scale-[0.98]">
+      <div className="mb-2.5">
+        <StarRating stars={t.stars} />
       </div>
       <blockquote className="font-display text-[12px] sm:text-[13px] font-medium leading-relaxed text-foreground/80 line-clamp-4 flex-1">
         &ldquo;{t.quote}&rdquo;
       </blockquote>
       <div className="mt-3 pt-3 border-t border-border flex items-center gap-2.5">
-        <div className="w-8 h-8 rounded-full bg-brand/10 text-brand text-[11px] font-bold grid place-items-center shrink-0">
-          {initials}
-        </div>
+        <AvatarSvg name={t.name} size={32} />
         <div className="min-w-0">
           <p className="font-display text-xs font-bold text-foreground truncate">
             {t.name}
@@ -151,9 +249,206 @@ function TestimonialCard({ t }: { t: { name: string; role: string; stars: number
   );
 }
 
+function ReviewForm({ onClose }: { onClose?: () => void }) {
+  const [name, setName] = useState("");
+  const [review, setReview] = useState("");
+  const [rating, setRating] = useState(0);
+  const [hovered, setHovered] = useState(0);
+  const [submitted, setSubmitted] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim() || !review.trim() || rating === 0) return;
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="rounded-2xl border border-border bg-card p-8 text-center space-y-3">
+        <CheckCircle className="w-10 h-10 text-green-500 mx-auto" />
+        <p className="font-display text-lg font-bold text-foreground">Thank you!</p>
+        <p className="text-sm text-muted-foreground">
+          Your review has been submitted and will appear after moderation.
+        </p>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="mt-4 inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors cursor-pointer"
+          >
+            Close
+          </button>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      className="rounded-2xl border border-border bg-card p-5 sm:p-6 space-y-4"
+    >
+      <div className="space-y-1.5">
+        <p className="font-display text-lg font-bold text-foreground">
+          Share Your Experience
+        </p>
+        <p className="text-xs text-muted-foreground">
+          Your feedback helps others find the right guidance.
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="reviewer-name" className="text-xs font-semibold text-foreground/70">
+          Your Name
+        </label>
+        <input
+          id="reviewer-name"
+          type="text"
+          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="e.g. Rahul Kumar"
+          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-shadow"
+        />
+      </div>
+
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-foreground/70">
+          Rating
+        </label>
+        <div className="flex gap-0.5">
+          {[1, 2, 3, 4, 5].map((s) => (
+            <div key={s} className="relative flex">
+              {/* Left half — .5 */}
+              <button
+                type="button"
+                onClick={() => setRating(s - 0.5)}
+                onMouseEnter={() => setHovered(s - 0.5)}
+                onMouseLeave={() => setHovered(0)}
+                className="relative w-4 h-5 sm:w-5 sm:h-6 cursor-pointer overflow-hidden"
+              >
+                <Star className={`absolute inset-0 w-5 h-6 sm:w-6 sm:h-7 transition-colors ${
+                  (hovered || rating) >= s - 0.5
+                    ? "fill-accent text-accent"
+                    : "text-muted-foreground/25"
+                }`} />
+              </button>
+              {/* Right half — full */}
+              <button
+                type="button"
+                onClick={() => setRating(s)}
+                onMouseEnter={() => setHovered(s)}
+                onMouseLeave={() => setHovered(0)}
+                className="relative w-4 h-5 sm:w-5 sm:h-6 cursor-pointer overflow-hidden -ml-4 sm:-ml-5"
+              >
+                <Star className={`absolute inset-0 w-5 h-6 sm:w-6 sm:h-7 transition-colors ${
+                  (hovered || rating) >= s
+                    ? "fill-accent text-accent"
+                    : "text-muted-foreground/25"
+                }`} />
+              </button>
+            </div>
+          ))}
+          {(hovered || rating) > 0 && (
+            <span className="ml-2 text-xs text-muted-foreground self-center tabular-nums">
+              {hovered || rating}
+            </span>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <label htmlFor="review-text" className="text-xs font-semibold text-foreground/70">
+          Your Review
+        </label>
+        <textarea
+          id="review-text"
+          required
+          rows={3}
+          value={review}
+          onChange={(e) => setReview(e.target.value)}
+          placeholder="How did the mentorship help you?"
+          className="w-full rounded-xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-accent/40 transition-shadow resize-none"
+        />
+      </div>
+
+      <div className="flex items-center gap-3">
+        <button
+          type="submit"
+          disabled={!name.trim() || !review.trim() || rating === 0}
+          className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-6 py-3 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:scale-100 cursor-pointer"
+        >
+          <Send className="w-3.5 h-3.5" />
+          Submit Review
+        </button>
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors cursor-pointer"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+    </form>
+  );
+}
+
+function ReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) {
+  useEffect(() => {
+    if (!open) return;
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtml = html.style.overflow;
+    const prevBody = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      html.style.overflow = prevHtml;
+      body.style.overflow = prevBody;
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [open, onClose]);
+
+  if (!open) return null;
+
+  return (
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden p-4 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Write a review"
+    >
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      {/* Panel — centered in viewport */}
+      <div className="relative w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl">
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 z-10 p-2 rounded-full bg-background/80 hover:bg-background transition-colors cursor-pointer"
+          aria-label="Close"
+        >
+          <X className="w-4 h-4 text-muted-foreground" />
+        </button>
+        <div className="p-5 sm:p-6">
+          <ReviewForm onClose={onClose} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function MentorshipClient() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [reviewOpen, setReviewOpen] = useState(false);
 
   const toggleFaq = (index: number) => {
     setOpenFaq(openFaq === index ? null : index);
@@ -163,14 +458,12 @@ export function MentorshipClient() {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // GSAP animations
   useEffect(() => {
     const el = rootRef.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     const ctx = gsap.context(() => {
-      // Hero entrance
       gsap.fromTo(
         "[data-m-hero]",
         { opacity: 0, y: 40, filter: "blur(4px)" },
@@ -184,7 +477,6 @@ export function MentorshipClient() {
         }
       );
 
-      // Pillar cards stagger
       const pillarCards = gsap.utils.toArray<HTMLElement>("[data-m-pillar]");
       if (pillarCards.length) {
         gsap.fromTo(
@@ -206,7 +498,6 @@ export function MentorshipClient() {
         );
       }
 
-      // CTA section
       gsap.fromTo(
         "[data-m-cta]",
         { opacity: 0, y: 30, filter: "blur(3px)" },
@@ -234,8 +525,7 @@ export function MentorshipClient() {
       <section className="relative overflow-hidden border-b border-border bg-background">
         <div className="relative z-20 max-w-6xl mx-auto px-4 sm:px-6 py-16 sm:py-24 md:py-32">
           <div className="flex flex-col md:flex-row items-center gap-8 md:gap-14">
-            {/* Avatar */}
-            <div data-m-hero className="relative shrink-0">
+            <div data-m-hero className="relative shrink-0 pb-3">
               <div className="relative h-36 w-36 sm:h-48 sm:w-48 rounded-full overflow-hidden border-2 border-border shadow-lg">
                 <Image
                   src="/images/profile/about.webp"
@@ -252,10 +542,9 @@ export function MentorshipClient() {
               </div>
             </div>
 
-            {/* Copy */}
             <div className="flex-1 text-center md:text-left">
               <div data-m-hero className="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-brand bg-brand/5 border border-brand/10 rounded-full px-4 py-1.5">
-                1:1 Career &amp; Personal Development Coach
+              Personal Development Coach
               </div>
               <h1 data-m-hero className="mt-4 font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-foreground leading-[1.15]">
                 Accelerate Your Career
@@ -265,23 +554,22 @@ export function MentorshipClient() {
               <p data-m-hero className="mt-4 text-base sm:text-lg leading-relaxed text-muted-foreground max-w-2xl">
                 Direct, 1-on-1 mentorship on Data, Cloud &amp; AI Architecture, career momentum, resume teardowns, and intentional execution. Plain, practical advice — from your friend Sagar.
               </p>
-              <div data-m-hero className="mt-6 flex flex-wrap items-center gap-3 justify-center md:justify-start">
-                <button
-                  type="button"
-                  onClick={() => scrollTo("booking-section")}
-                  className="inline-flex items-center gap-2.5 rounded-full bg-accent text-accent-foreground px-7 py-3.5 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform cursor-pointer"
-                >
-                  <Calendar className="w-4 h-4" />
-                  Book 1:1 Session
-                  <ArrowDown className="w-4 h-4" />
-                </button>
+              <div data-m-hero className="mt-6 flex items-stretch gap-3 justify-center md:justify-start">
                 <button
                   type="button"
                   onClick={() => scrollTo("testimonials-section")}
-                  className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors cursor-pointer"
+                  className="flex-1 md:flex-none inline-flex items-center justify-center gap-2 rounded-full border border-border bg-card px-5 py-3.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:border-foreground/20 transition-colors cursor-pointer"
                 >
                   <Star className="w-3.5 h-3.5" />
-                  Read what others say
+                  What others say
+                </button>
+                <button
+                  type="button"
+                  onClick={() => scrollTo("booking-section")}
+                  className="flex-1 md:flex-none inline-flex items-center justify-center gap-2.5 rounded-full bg-accent text-accent-foreground px-6 py-3.5 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform cursor-pointer"
+                >
+                  <Calendar className="w-4 h-4" />
+                  Book Session
                 </button>
               </div>
             </div>
@@ -304,32 +592,34 @@ export function MentorshipClient() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
-            {PILLARS.map((p) => {
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            {PILLARS.map((p, i) => {
               const Icon = p.icon;
               return (
                 <div
                   key={p.title}
                   data-m-pillar
-                  className="group relative flex flex-col sm:flex-row gap-5 p-6 sm:p-8 rounded-xl border border-border bg-card transition-all duration-300 hover:border-brand-light/50 hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] hover:-translate-y-1"
+                  className="group relative flex items-start gap-5 rounded-2xl bg-card border border-border p-6 sm:p-7 transition-all duration-400 hover:border-brand/30 hover:shadow-[0_8px_40px_-12px_rgba(13,33,161,0.1)]"
                 >
-                  <div
-                    aria-hidden="true"
-                    className="absolute left-0 top-6 bottom-6 w-[3px] rounded-full bg-accent/0 group-hover:bg-accent transition-colors duration-300"
-                  />
-                  <div className="shrink-0 w-14 h-14 rounded-xl bg-brand/10 text-brand grid place-items-center transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:scale-110">
-                    <Icon className="w-6 h-6" />
+                  {/* left accent bar */}
+                  <div className="absolute left-0 top-6 bottom-6 w-[3px] rounded-full bg-brand/0 group-hover:bg-brand transition-all duration-400" />
+
+                  {/* number */}
+                  <span className="absolute right-5 top-4 text-[11px] font-bold tracking-widest text-brand/10 transition-colors duration-400 group-hover:text-brand/25">
+                    0{i + 1}
+                  </span>
+
+                  {/* icon */}
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-brand/8 border border-brand/10 grid place-items-center transition-all duration-400 group-hover:bg-brand group-hover:border-brand group-hover:shadow-[0_4px_20px_rgba(13,33,161,0.2)]">
+                    <Icon className="w-5 h-5 text-brand transition-all duration-400 group-hover:text-white group-hover:scale-110" />
                   </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2.5">
-                      <h3 className="font-display text-lg font-bold text-foreground group-hover:text-accent-strong transition-colors">
-                        {p.title}
-                      </h3>
-                      <span className="hidden sm:inline text-[10px] font-bold uppercase tracking-wider text-accent-strong bg-accent/10 px-2.5 py-0.5 rounded-full shrink-0">
-                        {p.highlight}
-                      </span>
-                    </div>
-                    <p className="text-xs sm:text-sm leading-relaxed text-muted-foreground">
+
+                  {/* content */}
+                  <div className="flex-1 min-w-0 space-y-1.5 pt-0.5">
+                    <h3 className="font-display text-base sm:text-lg font-bold text-foreground transition-colors duration-300 group-hover:text-brand">
+                      {p.title}
+                    </h3>
+                    <p className="text-[13px] sm:text-sm leading-relaxed text-muted-foreground">
                       {p.description}
                     </p>
                   </div>
@@ -345,7 +635,7 @@ export function MentorshipClient() {
         id="testimonials-section"
         className="py-20 md:py-28 border-b border-border bg-card/30 overflow-hidden"
       >
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 mb-12 sm:mb-16 relative">
           <div className="text-center max-w-2xl mx-auto">
             <p className="inline-block text-xs font-semibold tracking-wide text-accent-strong bg-accent/10 rounded-full px-4 py-1.5">
               Trusted by professionals
@@ -357,13 +647,21 @@ export function MentorshipClient() {
               Real feedback from engineers and architects Sagar has mentored.
             </p>
           </div>
+          {/* Desktop — top right */}
+          <button
+            type="button"
+            onClick={() => setReviewOpen(true)}
+            className="hidden md:block absolute top-0 right-0 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-lg border border-border px-3 py-1.5"
+          >
+            Write a Review
+          </button>
         </div>
 
-        {/* Row 1 — scrolls left */}
+        {/* Row 1 — scrolls left, starts mid-scroll */}
         <div className="marquee-mask marquee-pauser mb-4">
           <div
             className="flex w-max gap-4 animate-marquee"
-            style={{ animationDuration: "35s" }}
+            style={{ animationDuration: "40s", animationDelay: "-12s" }}
           >
             {[...TESTIMONIALS_ROW1, ...TESTIMONIALS_ROW1].map((t, i) => (
               <TestimonialCard key={`r1-${i}`} t={t} />
@@ -371,18 +669,31 @@ export function MentorshipClient() {
           </div>
         </div>
 
-        {/* Row 2 — scrolls right */}
+        {/* Row 2 — scrolls right, starts mid-scroll */}
         <div className="marquee-mask marquee-pauser">
           <div
             className="flex w-max gap-4 animate-marquee-reverse"
-            style={{ animationDuration: "38s" }}
+            style={{ animationDuration: "44s", animationDelay: "-18s" }}
           >
             {[...TESTIMONIALS_ROW2, ...TESTIMONIALS_ROW2].map((t, i) => (
               <TestimonialCard key={`r2-${i}`} t={t} />
             ))}
           </div>
         </div>
+
+        {/* Mobile — bottom center */}
+        <div className="md:hidden max-w-xl mx-auto px-4 sm:px-6 mt-12 text-center">
+          <button
+            type="button"
+            onClick={() => setReviewOpen(true)}
+            className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors cursor-pointer rounded-lg border border-border px-3 py-1.5"
+          >
+            Write a Review
+          </button>
+        </div>
       </section>
+
+      <ReviewModal open={reviewOpen} onClose={() => setReviewOpen(false)} />
 
       {/* ── 4. Booking CTA ── */}
       <section
@@ -418,7 +729,7 @@ export function MentorshipClient() {
         </div>
       </section>
 
-      {/* ── 5. FAQ — Premium Collapsible ── */}
+      {/* ── 5. FAQ — Minimal ── */}
       <section className="py-20 md:py-24 bg-background">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
@@ -430,47 +741,25 @@ export function MentorshipClient() {
             </p>
           </div>
 
-          <div className="space-y-3">
+          <div className="divide-y divide-border border-t border-border">
             {FAQS.map((faq, idx) => {
               const isOpen = openFaq === idx;
               return (
-                <div
-                  key={faq.question}
-                  className={`rounded-xl border transition-all duration-300 ${
-                    isOpen
-                      ? "border-brand/20 bg-card shadow-[0_2px_12px_rgba(13,33,161,0.06)]"
-                      : "border-border bg-transparent hover:border-border hover:bg-card/50"
-                  }`}
-                >
+                <div key={faq.question}>
                   <button
                     type="button"
                     onClick={() => toggleFaq(idx)}
-                    className="w-full flex items-center gap-4 px-5 py-4 sm:px-6 sm:py-5 text-left cursor-pointer group"
+                    className="w-full flex items-center justify-between gap-4 py-5 text-left cursor-pointer"
                     aria-expanded={isOpen}
                   >
-                    <span
-                      className={`flex items-center justify-center w-7 h-7 rounded-lg text-xs font-bold transition-all duration-300 ${
-                        isOpen
-                          ? "bg-accent text-accent-foreground scale-110"
-                          : "bg-muted text-muted-foreground group-hover:bg-muted/80"
-                      }`}
-                    >
-                      {idx + 1}
-                    </span>
-                    <span
-                      className={`flex-1 font-display text-sm sm:text-base font-semibold transition-colors duration-200 ${
-                        isOpen ? "text-foreground" : "text-foreground/70 group-hover:text-foreground"
-                      }`}
-                    >
+                    <span className="font-display text-sm sm:text-base font-medium text-foreground/80">
                       {faq.question}
                     </span>
-                    <ChevronDown
-                      className={`w-4 h-4 shrink-0 transition-all duration-300 ${
-                        isOpen
-                          ? "rotate-180 text-accent"
-                          : "text-muted-foreground group-hover:text-foreground"
-                      }`}
-                    />
+                    <span className={`shrink-0 flex items-center justify-center w-7 h-7 rounded-full border transition-all duration-200 ${
+                      isOpen ? "border-accent/40 bg-accent/10 rotate-45" : "border-border text-muted-foreground"
+                    }`}>
+                      <span className="text-lg leading-none font-light">+</span>
+                    </span>
                   </button>
 
                   <div
@@ -480,12 +769,9 @@ export function MentorshipClient() {
                       opacity: isOpen ? 1 : 0,
                     }}
                   >
-                    <div className="px-5 sm:px-6 pb-5 pl-[3.25rem] sm:pl-[3.75rem]">
-                      <div className="h-px bg-border mb-4" />
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {faq.answer}
-                      </p>
-                    </div>
+                    <p className="text-sm text-muted-foreground leading-relaxed pb-5">
+                      {faq.answer}
+                    </p>
                   </div>
                 </div>
               );

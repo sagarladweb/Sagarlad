@@ -25,6 +25,7 @@ async function getPosts() {
       published: true,
       scheduledAt: true,
       views: true,
+      likes: true,
       category: { select: { name: true } },
     },
     orderBy: { updatedAt: "desc" },

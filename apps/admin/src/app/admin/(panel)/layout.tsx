@@ -9,6 +9,7 @@ import {
   Mail,
   Layers,
   ShieldOff,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 import { auth, signOut } from "@/lib/auth";
@@ -26,6 +27,7 @@ const nav: { label: string; href: string; icon: LucideIcon; phase: number }[] = 
   { label: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard, phase: 2 },
   { label: "Posts", href: "/admin/posts", icon: FileText, phase: 1 },
   { label: "Content", href: "/admin/content", icon: Layers, phase: 2 },
+  { label: "Announcement", href: "/admin/announcement", icon: Megaphone, phase: 2 },
   { label: "Newsletter", href: "/admin/newsletter", icon: Mail, phase: 2 },
   { label: "Social", href: "/admin/social", icon: Share2, phase: 2 },
   { label: "Community", href: "/admin/moderation", icon: MessagesSquare, phase: 2 },

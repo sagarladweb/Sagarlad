@@ -8,7 +8,6 @@ import {
   Award,
   Calendar,
   CheckCircle2,
-  Quote,
   Cloud,
   GraduationCap,
   BadgeCheck,
@@ -18,6 +17,8 @@ import {
 import { SITE, pageMetadata } from "@/lib/site";
 import { VideoPlayer } from "@/components/video/VideoPlayer";
 import { GalleryCarousel } from "@/components/speaking/GalleryCarousel";
+import { SpeakingTestimonials } from "@/components/speaking/SpeakingTestimonials";
+import { AimFramework } from "@/components/speaking/AimFramework";
 import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
@@ -108,24 +109,6 @@ const processSteps = [
   },
 ];
 
-const testimonials = [
-  {
-    quote:
-      "Sagar could go deep on engineering and still keep a packed room on their feet. His session scored highest in our post-event survey.",
-    attribution: "Summit organizer · Scottish Summit",
-  },
-  {
-    quote:
-      "He didn't just give a talk — our students left with a framework they started using the same week. Exactly why we booked him.",
-    attribution: "University event lead",
-  },
-  {
-    quote:
-      "From the prep call to the final Q&A it was effortless. He read the room perfectly and adapted on the fly.",
-    attribution: "Community meetup host",
-  },
-];
-
 export default function SpeakingPage() {
   return (
     <div className="bg-background overflow-x-clip">
@@ -178,33 +161,24 @@ export default function SpeakingPage() {
       </section>
 
       {/* TEDx Spotlight — the strongest proof, right after the hook */}
-      <section className="card-hover relative py-20 md:py-28 border-b border-border bg-card/60 overflow-hidden" aria-label="Sagar's TEDx talk">
+      <section className="relative py-20 md:py-28 border-b border-border bg-card/60 overflow-hidden" aria-label="Sagar's TEDx talk">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center">
             <div className="lg:col-span-5 text-center lg:text-left" data-animate="left">
               <span className="btn-premium inline-flex items-center justify-center lg:justify-start rounded-full bg-brand-light/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-brand">
                 Watch
               </span>
-              <h2 className="mt-4 font-display text-3xl sm:text-4xl font-bold leading-tight text-accent-strong">
-                The AI talk he gives on every stage
-              </h2>
-              <p className="mt-4 text-muted-foreground leading-relaxed">
-                From TEDx to AI keynotes, Sagar turns artificial intelligence
-                into something a room can actually use — cutting through the hype
-                to the decisions leaders, teams, and students face today.
-              </p>
-              <ul className="mt-6 space-y-3 text-sm">
-                {[
-                  "AI without the hype — what's real, what's noise",
-                  "Leading with AI without losing the human touch",
-                  "A practical playbook you can apply the same day",
-                ].map((point) => (
-                  <li key={point} className="flex items-start gap-3 text-foreground/80">
-                    <CheckCircle2 className="w-4 h-4 mt-0.5 text-accent-strong shrink-0" />
-                    <span>{point}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-6">
+                <p className="font-display text-lg sm:text-xl font-bold text-accent-strong">
+                  Stop chasing AI. Start A.I.M.ing.
+                </p>
+                <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                  A simple way to stop worrying about AI and actually start using it — at your own pace, in your own way.
+                </p>
+                <div className="mt-6">
+                  <AimFramework />
+                </div>
+              </div>
             </div>
             <div className="lg:col-span-7" data-animate="right">
               <VideoPlayer
@@ -307,10 +281,10 @@ export default function SpeakingPage() {
           {/* Events Hosted — visual cards */}
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
-              <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where I've spoken</span>
-              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Stages he&apos;s graced</h2>
+              <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Where I&apos;ve spoken</span>
+              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">On stage, around the world</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Keynotes delivered across regional tech groups, academic institutions, and international summits.
+                From local meetups to international summits — here are some of the rooms I&apos;ve had the privilege to speak in.
               </p>
             </div>
             <div
@@ -353,9 +327,9 @@ export default function SpeakingPage() {
           <div data-animate>
             <div className="max-w-2xl mb-10 text-center sm:text-left mx-auto sm:mx-0">
               <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Background</span>
-              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Certifications &amp; Memberships</h2>
+              <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Certified &amp; connected</h2>
               <p className="mt-2 text-muted-foreground text-sm leading-relaxed">
-                Trained in public speaking, certified in enterprise AI, and actively serving global technical communities.
+                Backed by real training, real certifications, and active roles in global tech communities.
               </p>
             </div>
             <div
@@ -399,9 +373,9 @@ export default function SpeakingPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="max-w-2xl text-center sm:text-left mx-auto sm:mx-0" data-animate>
             <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">How it works</span>
-            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">A calm, three-step process</h2>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Three simple steps</h2>
             <p className="mt-3 text-muted-foreground leading-relaxed">
-              No last-minute scrambles. Every engagement follows the same rhythm, so you know exactly what to expect.
+              No confusion, no last-minute surprises. Here&apos;s exactly how we&apos;ll work together from start to finish.
             </p>
           </div>
 
@@ -441,9 +415,9 @@ export default function SpeakingPage() {
                 </div>
               </div>
               <div className="relative flex-1 text-center md:text-left space-y-3">
-                <h3 className="font-display text-xl sm:text-2xl font-bold">Ready to book Sagar for your next event?</h3>
+                <h3 className="font-display text-xl sm:text-2xl font-bold">Want Sagar at your next event?</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  Invite Sagar Lad to speak at your conference, company, university, podcast, or event.
+                  Whether it&apos;s a conference, team offsite, university talk, or podcast — let&apos;s make it happen.
                 </p>
                 <Link
                   href="/speaking/contact"
@@ -457,30 +431,17 @@ export default function SpeakingPage() {
         </div>
       </section>
 
-      {/* Organizer voices — final proof before the ask */}
+      {/* Organizer voices — marquee on mobile, grid on desktop */}
       <section className="py-20 md:py-28 bg-background" aria-label="What organizers say">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="max-w-2xl mx-auto text-center" data-animate>
+          <div className="max-w-2xl mx-auto text-center mb-12 sm:mb-16" data-animate>
             <span className="btn-premium inline-block text-xs font-semibold tracking-wide text-brand bg-brand-light/10 rounded-full px-4 py-1.5">Kind words</span>
-            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">Rooms Remember It</h2>
+            <h2 className="mt-2 font-display text-3xl sm:text-4xl font-bold text-accent-strong">What people say</h2>
+            <p className="mt-3 text-sm sm:text-base text-muted-foreground">
+              Honest feedback from organizers and attendees who&apos;ve experienced the talks firsthand.
+            </p>
           </div>
-          <div className="mt-12 grid grid-cols-1 lg:grid-cols-12 gap-5" data-animate-group>
-            {testimonials.map((t, i) => (
-              <blockquote
-                key={t.quote}
-                className={`rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md ${
-                  i === 0 ? "lg:col-span-6 lg:row-span-2" : "lg:col-span-6"
-                }`}
-                data-animate-item
-              >
-                <Quote className="w-6 h-6 text-accent-strong" aria-hidden="true" />
-                <p className={`text-foreground/85 leading-relaxed ${i === 0 ? "text-lg" : "text-sm"}`}>{t.quote}</p>
-                <footer className="border-t border-border pt-4 text-xs font-semibold text-muted-foreground">
-                  {t.attribution}
-                </footer>
-              </blockquote>
-            ))}
-          </div>
+          <SpeakingTestimonials />
         </div>
       </section>
 

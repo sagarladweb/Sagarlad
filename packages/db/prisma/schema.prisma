@@ -117,6 +117,7 @@ model Post {
   category    Category?  @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   comments    Comment[]
   views       Int        @default(0)
+  likes       Int        @default(0)
 
   @@index([deletedAt, published, publishedAt])
   @@index([categoryId])
@@ -310,4 +311,27 @@ model RateLimitEntry {
   updatedAt DateTime @updatedAt
 
   @@index([resetAt])
+}
+
+// ---------------------------------------------------------------------------
+// Announcement — admin-controlled banner / popup on the homepage
+// ---------------------------------------------------------------------------
+
+model Announcement {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String?
+  buttonText  String?
+  buttonLink  String?
+  barText     String?
+  barLink     String?
+  barStyle    String    @default("scrolling")
+  barSpeed    Int       @default(30)
+  active      Boolean   @default(false)
+  eventDate   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([active])
 }

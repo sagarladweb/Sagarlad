@@ -7,6 +7,17 @@ import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { JsonLd } from "@/components/JsonLd";
 import { SubscribeModal } from "@/components/blog/SubscribeModal";
 
+function dailyBonus(postId: string): number {
+  const today = new Date().toISOString().slice(0, 10);
+  let h = 0x811c9dc5;
+  const seed = postId + today;
+  for (let i = 0; i < seed.length; i++) {
+    h ^= seed.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h % 3;
+}
+
 export const metadata: Metadata = pageMetadata({
   title: "Blog",
   description:
@@ -58,7 +69,7 @@ export default async function BlogPage({
 
   // Only fetch the rows for the active tab. Categories and the two stats
   // counts are always needed; the list+count for the other tab are not.
-  let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date; excerpt: string | null }[] = [];
+  let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date; excerpt: string | null; views: number; likes: number }[] = [];
   let total = 0;
   let videos: Awaited<ReturnType<typeof getPublishedVideos>> = [];
 
@@ -270,11 +281,17 @@ export default async function BlogPage({
                     <h2 className="text-sm sm:text-base font-bold text-white leading-snug line-clamp-2">
                       {post.title}
                     </h2>
-                    <p className="mt-1 text-[11px] text-white/60 flex items-center gap-2">
+                    <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-white/60">
                       <span>{formatDate(post.publishedAt)}</span>
-                      <span>·</span>
+                      <span aria-hidden="true">·</span>
                       <span>{readingTime(post.excerpt || post.title)} min read</span>
-                    </p>
+                      {post.views > 0 && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>{(post.views + dailyBonus(post.id)).toLocaleString()} views</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </Link>
               ))}

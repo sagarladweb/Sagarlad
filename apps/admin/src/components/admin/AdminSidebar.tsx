@@ -13,6 +13,7 @@ import {
   LogOut,
   Layers,
   Settings,
+  Megaphone,
   type LucideIcon,
 } from "lucide-react";
 import { CommunityBadge } from "./CommunityBadge";
@@ -21,6 +22,7 @@ const ICONS: Record<string, LucideIcon> = {
   "/admin/dashboard": LayoutDashboard,
   "/admin/posts": FileText,
   "/admin/content": Layers,
+  "/admin/announcement": Megaphone,
   "/admin/newsletter": Mail,
   "/admin/social": Share2,
   "/admin/moderation": MessagesSquare,
