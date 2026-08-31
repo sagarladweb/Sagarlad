@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { SITE } from "@/lib/site";
 import { isInstagramUrl } from "@/lib/instagram";
 
@@ -131,65 +131,82 @@ export const getPublishedBooks = unstable_cache(
 // PUBLIC newsletter signups, which never pass through admin write revalidation.
 // A cached dashboard would show stale numbers until a TTL expired.
 export function getDashboardStats() {
-  return Promise.all([
-    prisma.post.count({ where: { published: true } }),
-    prisma.post.count({ where: { published: false } }),
-    prisma.post.count({ where: { scheduledAt: { not: null }, published: false } }),
-    prisma.newsletterSubscriber.count(),
-    prisma.post.findMany({
-      orderBy: { updatedAt: "desc" },
-      take: 5,
-      select: { title: true, slug: true, published: true, views: true, likes: true },
-    }),
-    prisma.post.aggregate({ _sum: { views: true, likes: true } }),
-  ]);
+  return dbSafe(
+    () =>
+      Promise.all([
+        prisma.post.count({ where: { published: true } }),
+        prisma.post.count({ where: { published: false } }),
+        prisma.post.count({ where: { scheduledAt: { not: null }, published: false } }),
+        prisma.newsletterSubscriber.count(),
+        prisma.post.findMany({
+          orderBy: { updatedAt: "desc" },
+          take: 5,
+          select: { title: true, slug: true, published: true, views: true, likes: true },
+        }),
+        prisma.post.aggregate({ _sum: { views: true, likes: true } }),
+      ]),
+    [0, 0, 0, 0, [], { _sum: { views: 0, likes: 0 } }] as never
+  );
 }
 
 // Extra dashboard widgets: newsletter health, content inventory and a recent
 // admin-activity feed. Kept separate from getDashboardStats so the KPI page
 // can stay fast — these are optional panels.
 export function getDashboardExtras() {
-  return Promise.all([
-    prisma.newsletterSubscriber.count({ where: { unsubscribed: false } }),
-    prisma.newsletterCampaign.findFirst({
-      where: { draft: false },
-      orderBy: { createdAt: "desc" },
-      select: {
-        subject: true,
-        createdAt: true,
-        _count: { select: { deliveries: true } },
-      },
-    }),
-    prisma.newsletterDelivery.count({ where: { status: "QUEUED" } }),
-    prisma.book.count({ where: { published: true } }),
-    prisma.video.count({ where: { published: true, deletedAt: null } }),
-    prisma.quote.count(),
-    prisma.comment.count({ where: { approved: false } }),
-    prisma.auditLogEntry.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 10,
-      select: { action: true, createdAt: true },
-    }),
-  ]).then(
-    ([
-      activeSubs,
-      lastCampaign,
-      queued,
-      books,
-      videos,
-      quotes,
-      pendingComments,
-      activity,
-    ]) => ({
-      activeSubs,
-      lastCampaign,
-      queued,
-      books,
-      videos,
-      quotes,
-      pendingComments,
-      activity,
-    })
+  return dbSafe(
+    () =>
+      Promise.all([
+        prisma.newsletterSubscriber.count({ where: { unsubscribed: false } }),
+        prisma.newsletterCampaign.findFirst({
+          where: { draft: false },
+          orderBy: { createdAt: "desc" },
+          select: {
+            subject: true,
+            createdAt: true,
+            _count: { select: { deliveries: true } },
+          },
+        }),
+        prisma.newsletterDelivery.count({ where: { status: "QUEUED" } }),
+        prisma.book.count({ where: { published: true } }),
+        prisma.video.count({ where: { published: true, deletedAt: null } }),
+        prisma.quote.count(),
+        prisma.comment.count({ where: { approved: false } }),
+        prisma.auditLogEntry.findMany({
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          select: { action: true, createdAt: true },
+        }),
+      ]).then(
+        ([
+          activeSubs,
+          lastCampaign,
+          queued,
+          books,
+          videos,
+          quotes,
+          pendingComments,
+          activity,
+        ]) => ({
+          activeSubs,
+          lastCampaign,
+          queued,
+          books,
+          videos,
+          quotes,
+          pendingComments,
+          activity,
+        })
+      ),
+    {
+      activeSubs: 0,
+      lastCampaign: null,
+      queued: 0,
+      books: 0,
+      videos: 0,
+      quotes: 0,
+      pendingComments: 0,
+      activity: [],
+    }
   );
 }
 

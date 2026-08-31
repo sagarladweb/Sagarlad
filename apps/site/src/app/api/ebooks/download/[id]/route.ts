@@ -82,10 +82,12 @@ export async function POST(
       );
     }
 
-    const book = await dbSafe(
-      () => prisma.book.findUnique({ where: { id } }),
-      null
-    );
+    let book;
+    try {
+      book = await prisma.book.findUnique({ where: { id } });
+    } catch {
+      return NextResponse.json({ error: "DB error" }, { status: 500 });
+    }
     if (!book || !book.published || book.type !== "EBOOK") {
       return NextResponse.json({ error: "This eBook is not available for download." }, { status: 404 });
     }

@@ -73,24 +73,21 @@ export async function POST(request: Request) {
     const clientIp = getClientIp(request);
     const userAgent = request.headers.get("user-agent") || null;
 
-    const comment = await dbSafe(
-      () =>
-        prisma.comment.create({
-          data: {
-            name: stripTags(parsed.data.name),
-            email: parsed.data.email ? stripTags(parsed.data.email) : null,
-            content: stripTags(parsed.data.content),
-            ip: clientIp || null,
-            userAgent: userAgent || null,
-            postId: post.id,
-            clientToken: parsed.data.clientToken || null,
-            approved: false,
-          },
-        }),
-      null
-    );
-
-    if (!comment) {
+    let comment;
+    try {
+      comment = await prisma.comment.create({
+        data: {
+          name: stripTags(parsed.data.name),
+          email: parsed.data.email ? stripTags(parsed.data.email) : null,
+          content: stripTags(parsed.data.content),
+          ip: clientIp || null,
+          userAgent: userAgent || null,
+          postId: post.id,
+          clientToken: parsed.data.clientToken || null,
+          approved: false,
+        },
+      });
+    } catch {
       return NextResponse.json({ error: "Failed to submit comment" }, { status: 503 });
     }
 

@@ -793,6 +793,15 @@ li.is-active [data-dot] {
   animation: slide-in-up 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes bounce-up {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-6px) scale(1.05); }
+}
+
+.animate-bounce-up {
+  animation: bounce-up 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
 @keyframes shine {
   from {
     transform: translateX(-100%);

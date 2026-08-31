@@ -8,6 +8,20 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
+// When the DB is unreachable, skip queries for 20s instead of waiting
+// for each one to timeout individually. This makes login take ~1.5s
+// instead of 6+ seconds when Supabase is paused.
+const DB_DOWN_COOLDOWN_MS = 20_000;
+let dbDownUntil = 0;
+
+export function isDbDown(): boolean {
+  return Date.now() < dbDownUntil;
+}
+
+export function markDbDown() {
+  dbDownUntil = Date.now() + DB_DOWN_COOLDOWN_MS;
+}
+
 function createClient() {
   const url = process.env.DATABASE_URL || "";
   if (!url) {
@@ -28,10 +42,10 @@ function createClient() {
     ssl,
     max,
     family: 4,
-    connectionTimeoutMillis: 3000,
+    connectionTimeoutMillis: 1500,
     idleTimeoutMillis: 10000,
-    query_timeout: 8000,
-    statement_timeout: 8000,
+    query_timeout: 5000,
+    statement_timeout: 5000,
   });
   pool.on("error", (err) => {
     console.error("[db] idle pool error:", err.message);
@@ -77,10 +91,12 @@ function isConnectionError(err: unknown): boolean {
 }
 
 export async function dbSafe<T>(query: () => Promise<T>, fallback: T): Promise<T> {
+  if (isDbDown()) return fallback;
   try {
     return await query();
   } catch (err) {
     if (!isConnectionError(err)) throw err;
+    markDbDown();
     console.warn("[db] connection error, using fallback:", (err as Error).message);
     return fallback;
   }

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma, dbSafe } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { newsletterSchema } from "@/lib/validations";
 import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
@@ -24,26 +24,25 @@ export async function POST(request: Request) {
       );
     }
 
-    const existing = await dbSafe(
-      () => prisma.newsletterSubscriber.findUnique({ where: { email: parsed.data.email } }),
-      null
-    );
+    let existing;
+    try {
+      existing = await prisma.newsletterSubscriber.findUnique({ where: { email: parsed.data.email } });
+    } catch {
+      return NextResponse.json({ error: "DB error" }, { status: 503 });
+    }
 
     if (existing) {
       if (existing.unsubscribed) {
-        const updated = await dbSafe(
-          () =>
-            prisma.newsletterSubscriber.update({
-              where: { id: existing.id },
-              data: {
-                unsubscribed: false,
-                name: parsed.data.name || existing.name,
-                acceptedTerms: parsed.data.acceptedTerms ?? existing.acceptedTerms,
-              },
-            }),
-          null
-        );
-        if (!updated) {
+        try {
+          await prisma.newsletterSubscriber.update({
+            where: { id: existing.id },
+            data: {
+              unsubscribed: false,
+              name: parsed.data.name || existing.name,
+              acceptedTerms: parsed.data.acceptedTerms ?? existing.acceptedTerms,
+            },
+          });
+        } catch {
           return NextResponse.json({ error: "Failed to resubscribe" }, { status: 503 });
         }
         return NextResponse.json({ ok: true }, { status: 201 });
@@ -54,19 +53,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const created = await dbSafe(
-      () =>
-        prisma.newsletterSubscriber.create({
-          data: {
-            email: parsed.data.email,
-            name: parsed.data.name || null,
-            acceptedTerms: parsed.data.acceptedTerms ?? false,
-          },
-        }),
-      null
-    );
-
-    if (!created) {
+    try {
+      await prisma.newsletterSubscriber.create({
+        data: {
+          email: parsed.data.email,
+          name: parsed.data.name || null,
+          acceptedTerms: parsed.data.acceptedTerms ?? false,
+        },
+      });
+    } catch {
       return NextResponse.json({ error: "Failed to subscribe" }, { status: 503 });
     }
 

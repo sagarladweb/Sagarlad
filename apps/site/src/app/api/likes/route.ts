@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma, dbSafe } from "@/lib/db";
+import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -22,14 +22,15 @@ export async function POST(request: Request) {
     const safeSlug = postSlug.replace(/[^a-z0-9-]/g, "").slice(0, 200);
     const safeToken = clientToken.replace(/[^a-zA-Z0-9]/g, "").slice(0, 64);
 
-    const post = await dbSafe(
-      () =>
-        prisma.post.findUnique({
-          where: { slug: safeSlug },
-          select: { id: true, likes: true },
-        }),
-      null
-    );
+    let post;
+    try {
+      post = await prisma.post.findUnique({
+        where: { slug: safeSlug },
+        select: { id: true, likes: true },
+      });
+    } catch {
+      return NextResponse.json({ error: "DB error" }, { status: 500 });
+    }
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -47,18 +48,19 @@ export async function POST(request: Request) {
         ? Math.max(0, post.likes + 1)
         : Math.max(0, post.likes - 1);
 
-    const updated = await dbSafe(
-      () =>
-        prisma.post.update({
-          where: { id: post.id },
-          data: { likes: newLikes },
-          select: { likes: true },
-        }),
-      null
-    );
+    let updated;
+    try {
+      updated = await prisma.post.update({
+        where: { id: post.id },
+        data: { likes: newLikes },
+        select: { likes: true },
+      });
+    } catch {
+      return NextResponse.json({ likes: post.likes, liked: action === "unlike" }, { status: 500 });
+    }
 
     return NextResponse.json({
-      likes: updated?.likes ?? newLikes,
+      likes: updated.likes,
       liked: action === "like",
     });
   } catch {

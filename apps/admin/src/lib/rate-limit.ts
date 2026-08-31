@@ -70,6 +70,7 @@ export function getClientIp(request: Request): string {
 // ---------------------------------------------------------------------------
 
 import { prisma } from "@/lib/db";
+import { isDbDown, markDbDown } from "@sagarlad/db";
 
 const LOGIN_MAX = 3;
 const LOGIN_WINDOW_MS = 30 * 60_000;
@@ -83,6 +84,10 @@ export async function loginThrottleStatus(
   retryAfter: number;
   remaining: number;
 }> {
+  // If DB is known down, skip the audit query entirely — fail open.
+  if (isDbDown()) {
+    return { locked: false, retryAfter: 0, remaining: LOGIN_MAX };
+  }
   try {
     const since = new Date(Date.now() - LOGIN_WINDOW_MS);
     const emailKey = email.toLowerCase();
@@ -114,6 +119,7 @@ export async function loginThrottleStatus(
   } catch (err) {
     // If the audit DB is unreachable, don't block login on the throttle check
     // — fail open so the user isn't locked out by a transient DB issue.
+    markDbDown();
     console.warn("[rate-limit] loginThrottleStatus failed, allowing attempt:", (err as Error).message);
     return { locked: false, retryAfter: 0, remaining: LOGIN_MAX };
   }

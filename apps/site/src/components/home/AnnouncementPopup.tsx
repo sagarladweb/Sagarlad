@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { X, ExternalLink } from "lucide-react";
+import { X } from "lucide-react";
 
 type AnnouncementData = {
   id: string;
@@ -23,7 +23,6 @@ export function AnnouncementPopup({
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    // Don't show if dismissed in this session
     if (sessionStorage.getItem(DISMISS_KEY) === announcement.id) return;
     const timer = setTimeout(() => setOpen(true), 6000);
     return () => clearTimeout(timer);
@@ -45,14 +44,12 @@ export function AnnouncementPopup({
       aria-modal="true"
       aria-label="Announcement"
     >
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-background/60 backdrop-blur-sm"
         onClick={dismiss}
       />
 
-      {/* Panel */}
-      <div className="relative w-full max-w-md rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+      <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
         <button
           type="button"
           onClick={dismiss}
@@ -67,19 +64,16 @@ export function AnnouncementPopup({
           <img
             src={imageUrl}
             alt={title}
-            className="w-full h-36 object-cover"
+            className="w-full h-32 object-cover"
           />
         )}
 
-        <div className="p-5 space-y-3">
-          <span className="inline-flex items-center rounded-full bg-accent/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-accent-strong">
-            New Event
-          </span>
-          <h3 className="font-display text-lg font-bold text-foreground leading-snug">
+        <div className="p-4 space-y-2">
+          <h3 className="font-display text-base font-bold text-foreground leading-snug">
             {title}
           </h3>
           {description && (
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3">
+            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
               {description}
             </p>
           )}
@@ -87,10 +81,9 @@ export function AnnouncementPopup({
             <Link
               href={buttonLink}
               onClick={dismiss}
-              className="inline-flex items-center gap-2 rounded-full bg-accent text-accent-foreground px-5 py-2.5 text-sm font-bold shadow-sm hover:scale-[1.03] transition-transform mt-1"
+              className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold hover:scale-[1.03] transition-transform"
             >
               {buttonText}
-              <ExternalLink className="w-3.5 h-3.5" />
             </Link>
           )}
         </div>

@@ -3,6 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { compare, hash } from "bcryptjs";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { isDbDown, markDbDown } from "@sagarlad/db";
 import { verifyTotp, matchRecoveryCode, consumeRecoveryCode } from "@/lib/totp";
 import { logAudit } from "@/lib/audit";
 import {
@@ -32,6 +33,17 @@ function getIp(authRequest: { headers?: Headers } | undefined) {
   const xff = authRequest?.headers?.get("x-forwarded-for");
   const ip = xff ? xff.split(",")[0].trim() : "unknown";
   return ip.length > 64 ? ip.slice(0, 64) : ip;
+}
+
+// Cache the bcrypt hash of the env admin password so we don't recompute
+// it on every login when DB is down (bcrypt with 12 rounds takes ~2s).
+let envAdminHashCache: string | null = null;
+async function getEnvAdminHash(): Promise<string> {
+  if (envAdminHashCache) return envAdminHashCache;
+  const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
+  if (!envAdminPass) return "";
+  envAdminHashCache = await hash(envAdminPass, 12);
+  return envAdminHashCache;
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -99,39 +111,81 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           twoFactorRecovery: string | null;
         } | null = null;
         let valid = false;
+        let dbDown = false;
 
-        try {
-          user = await prisma.user.findUnique({ where: { email } });
-          valid =
-            Boolean(user?.passwordHash) &&
-            (await compare(password, user?.passwordHash ?? ""));
+        // Environment admin credentials (used as fallback when DB is down).
+        const envAdminEmail = (process.env.ADMIN_EMAIL ?? "")
+          .replace(/['"]/g, "")
+          .trim()
+          .toLowerCase();
+        const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
 
-          // Environment bootstrap:
-          // If DB auth fails and user doesn't exist, create from env credentials.
-          // No plaintext comparison — password is hashed via bcrypt before storage.
-          const envAdminEmail = (process.env.ADMIN_EMAIL ?? "")
-            .replace(/['"]/g, "")
-            .trim()
-            .toLowerCase();
-          const envAdminPass = process.env.ADMIN_PASSWORD?.replace(/['"]/g, "").trim();
+        // If DB is known down, skip all DB queries and go straight to env fallback.
+        if (isDbDown()) {
+          dbDown = true;
+        } else {
+          try {
+            user = await prisma.user.findUnique({ where: { email } });
+            valid =
+              Boolean(user?.passwordHash) &&
+              (await compare(password, user?.passwordHash ?? ""));
 
-          if (!valid && envAdminPass && email === envAdminEmail && !user) {
-            const passwordHash = await hash(envAdminPass, 12);
-            user = await prisma.user.upsert({
-              where: { email },
-              update: { passwordHash, role: "ADMIN" },
-              create: {
-                email,
-                name: "Sagar Lad",
-                passwordHash,
-                role: "ADMIN",
-              },
-            });
-            valid = await compare(password, user.passwordHash!);
+            // Environment bootstrap:
+            // If DB auth fails and user doesn't exist, create from env credentials.
+            // No plaintext comparison — password is hashed via bcrypt before storage.
+            if (!valid && envAdminPass && email === envAdminEmail && !user) {
+              const passwordHash = await getEnvAdminHash();
+              user = await prisma.user.upsert({
+                where: { email },
+                update: { passwordHash, role: "ADMIN" },
+                create: {
+                  email,
+                  name: "Sagar Lad",
+                  passwordHash,
+                  role: "ADMIN",
+                },
+              });
+              valid = await compare(password, user.passwordHash!);
+            }
+          } catch (err) {
+            markDbDown();
+            console.warn("[auth] DB lookup failed during login:", (err as Error).message);
+            dbDown = true;
           }
-        } catch (err) {
-          console.error("[auth] DB lookup failed during login:", err);
-          throw new DatabaseUnavailableError();
+        }
+
+        // Fallback: if DB is unreachable but env credentials match, allow login
+        // without DB interaction. This keeps the admin panel usable during
+        // Supabase free-tier pauses or transient outages.
+        if (dbDown && !valid && envAdminPass && email === envAdminEmail) {
+          const envHash = await getEnvAdminHash();
+          valid = await compare(password, envHash);
+          if (valid) {
+            user = {
+              id: "env-bootstrap",
+              name: "Sagar Lad",
+              email: envAdminEmail,
+              image: null,
+              role: "ADMIN",
+              passwordHash: envHash,
+              twoFactorEnabled: false,
+              twoFactorSecret: null,
+              twoFactorRecovery: null,
+            };
+            // Try to persist the user in the DB for next time (fire-and-forget).
+            prisma.user
+              .upsert({
+                where: { email: envAdminEmail },
+                update: { passwordHash: envHash, role: "ADMIN" },
+                create: {
+                  email: envAdminEmail,
+                  name: "Sagar Lad",
+                  passwordHash: envHash,
+                  role: "ADMIN",
+                },
+              })
+              .catch(() => {});
+          }
         }
 
         if (!user || !user.passwordHash || !valid) {
@@ -167,13 +221,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           }
         }
 
-        await prisma.user
-          .update({
-            where: { id: user.id },
-            data: { lastLoginAt: new Date(), lastLoginIp: ip },
-          })
-          .catch(() => {});
-        await logAudit("LOGIN_OK", { userId: user.id, ip });
+        // Fire-and-forget: don't await these when DB is down — they'd block
+        // the response for 1.5s each waiting for a connection timeout.
+        if (!isDbDown()) {
+          prisma.user
+            .update({
+              where: { id: user.id },
+              data: { lastLoginAt: new Date(), lastLoginIp: ip },
+            })
+            .catch(() => {});
+          logAudit("LOGIN_OK", { userId: user.id, ip });
+        }
 
         return {
           id: user.id,
@@ -208,20 +266,23 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // cleanly sent back to sign in instead of failing mid-edit. If the DB
         // is transiently unreachable, keep the existing session rather than
         // logging the user out.
-        try {
-          const user = await prisma.user.findUnique({
-            where: { id: token.id as string },
-            select: { id: true, role: true, name: true, email: true, image: true },
-          });
-          if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
-          // Enrich with fresh DB data (role could have changed since JWT was issued).
-          session.user.id = user.id;
-          session.user.role = user.role;
-          session.user.name = user.name;
-          session.user.email = user.email;
-          session.user.image = user.image;
-        } catch (err) {
-          console.warn("[auth] session DB lookup failed, keeping existing session:", (err as Error).message);
+        if (!isDbDown()) {
+          try {
+            const user = await prisma.user.findUnique({
+              where: { id: token.id as string },
+              select: { id: true, role: true, name: true, email: true, image: true },
+            });
+            if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
+            // Enrich with fresh DB data (role could have changed since JWT was issued).
+            session.user.id = user.id;
+            session.user.role = user.role;
+            session.user.name = user.name;
+            session.user.email = user.email;
+            session.user.image = user.image;
+          } catch (err) {
+            markDbDown();
+            console.warn("[auth] session DB lookup failed, keeping existing session:", (err as Error).message);
+          }
         }
       }
       return session;

@@ -24,6 +24,7 @@ import { youtubeId, youtubeThumb, youtubeWatchUrl } from "@/lib/youtube";
 import { PostPreview, PreviewPending } from "@/components/admin/PostPreview";
 import { ContentEmbed, type EmbedData } from "@/components/admin/ContentEmbed";
 import { EmbedPicker } from "@/components/admin/EmbedPicker";
+import { SlashCommandMenu } from "@/components/admin/SlashCommandMenu";
 import {
   Bold,
   Italic,
@@ -1195,6 +1196,7 @@ export function TipTapEditor({
     dataAlign: string;
     dataWidth: string;
   } | null>(null);
+  const [slashState, setSlashState] = useState<{ active: boolean; query: string; position: { top: number; left: number } }>({ active: false, query: "", position: { top: 0, left: 0 } });
   // Viewport coords of the selected media node, used to float the layout bar
   // right above it. coordsAtPos returns viewport-relative coords, so a
   // position:fixed bar stays glued to the node while scrolling.
@@ -1380,6 +1382,58 @@ export function TipTapEditor({
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [editor, linkOpen]);
+
+  // Slash command: detect "/" typed at start of a new line or after whitespace
+  useEffect(() => {
+    if (!editor) return undefined;
+    const handler = (e: KeyboardEvent) => {
+      if (slashState.active) {
+        if (e.key === "Backspace") {
+          const { from } = editor.state.selection;
+          const textBefore = editor.state.doc.textBetween(Math.max(0, from - 1), from, " ");
+          if (textBefore === "/") {
+            setSlashState({ active: false, query: "", position: { top: 0, left: 0 } });
+          }
+        }
+        return;
+      }
+      if (e.key === "/" && !e.ctrlKey && !e.metaKey) {
+        const { from } = editor.state.selection;
+        const textBefore = from > 0 ? editor.state.doc.textBetween(Math.max(0, from - 1), from, " ") : " ";
+        // Activate at start of doc, start of paragraph (empty textBefore), or after whitespace
+        if (from === 0 || !textBefore || textBefore === " " || textBefore === "\n") {
+          const coords = editor.view.coordsAtPos(from);
+          setSlashState({ active: true, query: "", position: { top: coords.bottom + 8, left: coords.left } });
+        }
+      }
+    };
+    document.addEventListener("keydown", handler, true);
+    return () => document.removeEventListener("keydown", handler, true);
+  }, [editor, slashState.active]);
+
+  // Update slash command query on text input while active
+  useEffect(() => {
+    if (!editor || !slashState.active) return undefined;
+    const handler = () => {
+      const { from } = editor.state.selection;
+      // Find the "/" that started the command
+      const slice = editor.state.doc.textBetween(Math.max(0, from - 20), from, " ");
+      const slashIdx = slice.lastIndexOf("/");
+      if (slashIdx === -1) {
+        setSlashState({ active: false, query: "", position: { top: 0, left: 0 } });
+        return;
+      }
+      const query = slice.slice(slashIdx + 1);
+      // If query contains a space, the user probably didn't mean a slash command
+      if (query.includes(" ")) {
+        setSlashState({ active: false, query: "", position: { top: 0, left: 0 } });
+      } else {
+        setSlashState((prev) => ({ ...prev, query }));
+      }
+    };
+    editor.on("transaction", handler);
+    return () => { editor.off("transaction", handler); };
+  }, [editor, slashState.active]);
 
   // Viewport rect of the selected media node. The image's own DOM rect is more
   // accurate than coordsAtPos (which can measure line-height for floats), and
@@ -1809,6 +1863,14 @@ export function TipTapEditor({
             />
           )}
           {floatingToolbar}
+          {slashState.active && editor && (
+            <SlashCommandMenu
+              editor={editor}
+              query={slashState.query}
+              position={slashState.position}
+              onClose={() => setSlashState({ active: false, query: "", position: { top: 0, left: 0 } })}
+            />
+          )}
           {mediaType && selPos && (
             <div
               role="button"

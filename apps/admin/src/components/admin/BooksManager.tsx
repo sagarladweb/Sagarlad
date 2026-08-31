@@ -344,17 +344,17 @@ export function BooksManager() {
           className="space-y-4"
         >
           <div className="flex items-center justify-end">
-            <select
+            <Dropdown
+              id="book-type"
+              label="Book type"
               value={editing.type}
-              onChange={(e) =>
-                setEditing({ ...editing, type: e.target.value as BookType })
-              }
-              className="rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:ring-2 focus:ring-accent"
-            >
-              <option value="PUBLISHED">Books I Published</option>
-              <option value="READ">Books I Read</option>
-              <option value="EBOOK">E-books</option>
-            </select>
+              onChange={(v) => setEditing({ ...editing, type: v as BookType })}
+              options={[
+                { value: "PUBLISHED", label: "Books I Published" },
+                { value: "READ", label: "Books I Read" },
+                { value: "EBOOK", label: "E-books" },
+              ]}
+            />
           </div>
 
           <div>
@@ -380,14 +380,16 @@ export function BooksManager() {
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1.5">Reading status</label>
-                <select
+                <Dropdown
+                  id="book-reading-status"
+                  label="Reading status"
                   value={editing.currentlyReading ? "reading" : "completed"}
-                  onChange={(e) => setEditing({ ...editing, currentlyReading: e.target.value === "reading" })}
-                  className={`${inputCls} cursor-pointer`}
-                >
-                  <option value="completed">Completed</option>
-                  <option value="reading">Currently reading</option>
-                </select>
+                  onChange={(v) => setEditing({ ...editing, currentlyReading: v === "reading" })}
+                  options={[
+                    { value: "completed", label: "Completed" },
+                    { value: "reading", label: "Currently reading" },
+                  ]}
+                />
                 <p className="mt-1 text-xs text-muted-foreground">
                   &quot;Currently reading&quot; books show a special indicator on the website.
                 </p>

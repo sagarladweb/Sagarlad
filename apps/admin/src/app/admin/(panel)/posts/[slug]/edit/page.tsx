@@ -12,10 +12,17 @@ export default async function EditPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [post, categories] = await Promise.all([
-    prisma.post.findUnique({ where: { slug } }),
-    prisma.category.findMany({ orderBy: { name: "asc" } }),
-  ]);
+
+  let post: Awaited<ReturnType<typeof prisma.post.findUnique>> = null;
+  let categories: Awaited<ReturnType<typeof prisma.category.findMany>> = [];
+  try {
+    [post, categories] = await Promise.all([
+      prisma.post.findUnique({ where: { slug } }),
+      prisma.category.findMany({ orderBy: { name: "asc" } }),
+    ]);
+  } catch (err) {
+    console.warn("[admin edit-post] DB query failed:", (err as Error).message);
+  }
 
   if (!post) notFound();
 

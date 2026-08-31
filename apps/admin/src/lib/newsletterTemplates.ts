@@ -58,6 +58,27 @@ export const TEMPLATES: {
   { id: "minimal", name: "Minimal", tagline: "Airy, quiet, focused on the words", swatch: "#e8e6e1" },
 ];
 
+// Default newsletter template — pre-filled so the composer opens with a
+// starting structure instead of a blank page. Edit freely; this is just
+// the initial state for new newsletters.
+export const defaultNewsletter: NewsletterContent = {
+  template: "letter",
+  accent: "#ffd51d",
+  preheader: "",
+  greeting: "Hi there,",
+  intro: "Welcome to this week's edition of The Sagar Lad Letter. Here's what I've been thinking about...",
+  sections: [
+    {
+      heading: "This Week's Idea",
+      body: "Start writing your main insight here. What's the one thing your readers should take away?\n\nExplain the concept, share a story, or break down a framework. Keep it practical and actionable.",
+    },
+  ],
+  quote: null,
+  cta: { label: "Read more on the blog", url: "https://sagarlad.com/blog" },
+  signoff: "Warm regards,\nSagar",
+  socials: [],
+};
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")

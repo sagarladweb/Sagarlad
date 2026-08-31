@@ -445,18 +445,14 @@ export function VideosManager() {
 
           <div>
             <label className="block text-sm font-medium mb-1.5">Category</label>
-            <select
+            <Dropdown
+              id="video-category"
+              label="Category"
               value={editing.categoryId}
-              onChange={(e) => setEditing({ ...editing, categoryId: e.target.value })}
-              className={inputCls}
-            >
-              <option value="">No category</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
+              onChange={(v) => setEditing({ ...editing, categoryId: v })}
+              placeholder="No category"
+              options={categories.map((c) => ({ value: c.id, label: c.name }))}
+            />
           </div>
 
           <LivePreview

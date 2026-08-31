@@ -10,8 +10,6 @@ import {
   CheckCircle2,
   Cloud,
   GraduationCap,
-  BadgeCheck,
-  Trophy,
   HeartHandshake,
 } from "lucide-react";
 import { SITE, pageMetadata } from "@/lib/site";
@@ -38,44 +36,7 @@ export const revalidate = 604800;
 // event organizers; testimonials sit last so the final impression before the
 // booking ask is other people vouching for the result.
 
-const eventsHosted = [
-  {
-    title: "Scottish Summit",
-    place: "Scotland",
-    role: "Tech conference",
-    icon: Cloud,
-  },
-  {
-    title: "Azure Wales Group",
-    place: "Wales",
-    role: "Community meetup",
-    icon: Globe,
-  },
-  {
-    title: "Indian Institute of Chemical Engineers",
-    place: "Centre of Excellence",
-    role: "Academic",
-    icon: GraduationCap,
-  },
-  {
-    title: "Azure Summit",
-    place: "Global",
-    role: "International summit",
-    icon: Award,
-  },
-];
-
 const memberships = [
-  {
-    title: "Microsoft Certified Trainer",
-    desc: "Certified to deliver Azure, AI & data training",
-    icon: BadgeCheck,
-  },
-  {
-    title: "C# Corner MVP",
-    desc: "Recognized community leader & contributor",
-    icon: Trophy,
-  },
   {
     title: "Toastmasters",
     desc: "Trained in communication & leadership",
@@ -291,7 +252,12 @@ export default function SpeakingPage() {
               data-animate-group
               className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4"
             >
-              {eventsHosted.map((e, i) => {
+              {[
+                { title: "Scottish Summit", place: "Scotland", role: "Tech conference", icon: Cloud },
+                { title: "Azure Wales Group", place: "Wales", role: "Community meetup", icon: Globe },
+                { title: "Indian Institute of Chemical Engineers", place: "Centre of Excellence", role: "Academic", icon: GraduationCap },
+                { title: "Azure Summit", place: "Global", role: "International summit", icon: Award },
+              ].map((e, i) => {
                 const Icon = e.icon;
                 return (
                   <div
@@ -299,17 +265,13 @@ export default function SpeakingPage() {
                     data-animate-item
                     className="group relative rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-brand-light/60 hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] hover:-translate-y-1"
                   >
-                    {/* Accent gradient on top */}
                     <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-brand/0 via-brand/20 to-brand/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    {/* Number badge */}
                     <span className="absolute top-4 right-4 text-[10px] font-bold tabular-nums text-muted-foreground/30">
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    {/* Icon */}
                     <div className="w-12 h-12 rounded-lg bg-brand/10 text-brand grid place-items-center mb-4 transition-all duration-300 group-hover:bg-brand group-hover:text-white group-hover:scale-110">
                       <Icon className="w-5 h-5" />
                     </div>
-                    {/* Content */}
                     <h3 className="font-display text-base font-bold leading-snug text-foreground group-hover:text-accent-strong transition-colors">
                       {e.title}
                     </h3>

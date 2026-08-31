@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma, dbSafe } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -21,29 +21,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const post = await dbSafe(
-      () =>
-        prisma.post.findUnique({
-          where: { slug: postSlug },
-          select: { id: true, views: true },
-        }),
-      null
-    );
+    let post;
+    try {
+      post = await prisma.post.findUnique({
+        where: { slug: postSlug },
+        select: { id: true, views: true },
+      });
+    } catch {
+      return NextResponse.json({ error: "DB error" }, { status: 500 });
+    }
     if (!post) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
 
-    const updated = await dbSafe(
-      () =>
-        prisma.post.update({
-          where: { id: post.id },
-          data: { views: { increment: 1 } },
-          select: { views: true },
-        }),
-      null
-    );
-
-    if (!updated) {
+    let updated;
+    try {
+      updated = await prisma.post.update({
+        where: { id: post.id },
+        data: { views: { increment: 1 } },
+        select: { views: true },
+      });
+    } catch {
       return NextResponse.json({ views: post.views + 1 });
     }
 

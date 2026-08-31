@@ -722,8 +722,14 @@ export function MentorshipClient() {
               Book on Topmate
             </a>
             <p className="mt-4 text-xs text-muted-foreground">
-              Instant calendar invite · Google Meet link · Free 15-min intro call
-              available
+              Book a Free Chat with Sagar
+              <br />
+              <span className="inline-flex items-center gap-1 animate-bounce-up">
+                available
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-foreground">
+                  <path d="M5 8V2M5 2L2 5M5 2L8 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </span>
             </p>
           </div>
         </div>

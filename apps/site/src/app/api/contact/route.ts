@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma, dbSafe } from "@/lib/db";
+import { prisma } from "@/lib/db";
 import { contactSchema } from "@/lib/validations";
 import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
@@ -24,24 +24,20 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await dbSafe(
-      () =>
-        prisma.contactRequest.create({
-          data: {
-            firstName: parsed.data.firstName,
-            lastName: parsed.data.lastName || null,
-            email: parsed.data.email,
-            phone: parsed.data.phone || null,
-            organization: parsed.data.organization,
-            eventDate: parsed.data.eventDate || null,
-            message: parsed.data.message || null,
-            type: parsed.data.type,
-          },
-        }),
-      null
-    );
-
-    if (!result) {
+    try {
+      await prisma.contactRequest.create({
+        data: {
+          firstName: parsed.data.firstName,
+          lastName: parsed.data.lastName || null,
+          email: parsed.data.email,
+          phone: parsed.data.phone || null,
+          organization: parsed.data.organization,
+          eventDate: parsed.data.eventDate || null,
+          message: parsed.data.message || null,
+          type: parsed.data.type,
+        },
+      });
+    } catch {
       return NextResponse.json({ error: "Failed to submit enquiry" }, { status: 503 });
     }
 
