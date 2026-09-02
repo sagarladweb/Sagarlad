@@ -90,7 +90,7 @@ export function SiteFrame({
         <AnnouncementBar
           text={barText}
           link={barLink}
-          style={effectiveAnnouncement?.barStyle || "scrolling"}
+          barStyle={effectiveAnnouncement?.barStyle || "scrolling"}
           speed={effectiveAnnouncement?.barSpeed || 30}
           bgColor={effectiveAnnouncement?.barBgColor}
           textColor={effectiveAnnouncement?.barColor}

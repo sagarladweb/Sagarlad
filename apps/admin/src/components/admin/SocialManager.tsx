@@ -240,11 +240,12 @@ export function SocialManager() {
             return (
               <li
                 key={s.id}
-                className={`group relative flex flex-col gap-3 rounded-2xl border bg-card card-grad p-4 transition-all ${
+                className={`group relative flex flex-col gap-3 rounded-2xl border bg-card social-grad p-4 transition-all ${
                   s.active
                     ? "border-border hover:shadow-lg"
                     : "border-dashed opacity-50 hover:opacity-75"
                 }`}
+                style={{ "--social-color": s.color || meta?.color || "var(--brand-light)" } as React.CSSProperties}
               >
                 <div className="flex items-start justify-between">
                   <span

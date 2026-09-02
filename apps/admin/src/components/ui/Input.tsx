@@ -1,5 +1,5 @@
 export const inputCls =
-  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent w-full transition-shadow duration-150";
+  "rounded-xl border border-border bg-background px-4 py-2.5 text-sm outline-none focus:ring-2 focus:ring-accent/40 focus:border-accent w-full transition-all duration-200 ease-[var(--ease-smooth)] placeholder:text-muted-foreground/60";
 
 export function Input({
   label,
@@ -19,7 +19,7 @@ export function Input({
         </label>
       )}
       <input
-        className={`${inputCls} ${error ? "ring-2 ring-red-500/50" : ""} ${className}`}
+        className={`${inputCls} ${error ? "ring-2 ring-red-500/50 border-red-500/50" : ""} ${className}`}
         {...props}
       />
       {error && (
@@ -49,7 +49,7 @@ export function Textarea({
         </label>
       )}
       <textarea
-        className={`${inputCls} resize-y ${error ? "ring-2 ring-red-500/50" : ""} ${className}`}
+        className={`${inputCls} resize-y ${error ? "ring-2 ring-red-500/50 border-red-500/50" : ""} ${className}`}
         {...props}
       />
       {error && (

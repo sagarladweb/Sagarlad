@@ -268,10 +268,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // logging the user out.
         if (!isDbDown()) {
           try {
-            const user = await prisma.user.findUnique({
+            // Try by id first; fall back to email for env-bootstrap JWTs
+            // (which hardcode id "env-bootstrap" that doesn't exist in DB).
+            let user = await prisma.user.findUnique({
               where: { id: token.id as string },
               select: { id: true, role: true, name: true, email: true, image: true },
             });
+            if (!user && session.user.email) {
+              user = await prisma.user.findUnique({
+                where: { email: session.user.email },
+                select: { id: true, role: true, name: true, email: true, image: true },
+              });
+            }
             if (!user) return null as never; // drops the session -> auth() returns null -> clean re-login
             // Enrich with fresh DB data (role could have changed since JWT was issued).
             session.user.id = user.id;

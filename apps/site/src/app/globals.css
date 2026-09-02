@@ -621,6 +621,25 @@ h6 {
   }
 }
 
+/* Announcement bar marquee — CSS-class-driven, no inline style animation */
+.nl-marquee {
+  display: flex;
+  white-space: nowrap;
+  width: max-content;
+  animation: marquee-right-to-left var(--marquee-duration, 2s) linear infinite;
+}
+.nl-marquee-text {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+@media (min-width: 640px) {
+  .nl-marquee-text {
+    font-size: 0.875rem;
+  }
+}
+
 .animate-marquee {
   animation: marquee 40s linear infinite;
   will-change: transform;
@@ -1171,6 +1190,62 @@ nav a:not([class*="rounded-full"]) {
 }
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* ── GSAP initial hidden state via CSS ────────────────────────────
+   Both server and client render these, so no hydration mismatch.
+   GSAP clears them via clearProps before applying its own fromTo. */
+[data-animate] {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(40px);
+}
+[data-animate="left"] {
+  transform: translateX(-60px);
+}
+[data-animate="right"] {
+  transform: translateX(60px);
+}
+[data-animate="zoom"] {
+  transform: scale(0.92);
+}
+[data-animate="blur"] {
+  filter: blur(12px);
+  transform: none;
+}
+[data-animate="image"] {
+  filter: none;
+  transform: scale(1.08);
+}
+[data-animate-item] {
+  opacity: 0;
+  filter: blur(3px);
+  transform: translateY(40px);
+}
+
+/* Mentorship page GSAP elements */
+[data-m-hero],
+[data-m-pillar],
+[data-m-cta] {
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(40px);
+}
+[data-m-pillar] {
+  filter: blur(0px);
+  transform: translateY(30px) scale(0.97);
+}
+[data-m-cta] {
+  filter: blur(3px);
+}
+
+/* When GSAP is ready, it clears CSS and takes over */
+.gsap-ready [data-animate],
+.gsap-ready [data-animate-item],
+.gsap-ready [data-m-hero],
+.gsap-ready [data-m-pillar],
+.gsap-ready [data-m-cta] {
+  filter: none;
 }
 
 @keyframes marquee {

@@ -24,11 +24,17 @@ export function ScrollAnimations() {
     // Double rAF: ensures GSAP runs after React hydration + browser paint
     rafId = requestAnimationFrame(() => {
       rafId = requestAnimationFrame(() => {
+        // Clear CSS initial hidden state — GSAP takes over from here
+        document.body.classList.add("gsap-ready");
+
         ctx = gsap.context(() => {
           // ── Individual reveals ──────────────────────────────────────
           gsap.utils.toArray<HTMLElement>("[data-animate]").forEach((item) => {
             const variant = item.dataset.animate ?? "up";
             const delay = parseFloat(item.dataset.delay ?? "0");
+
+            // Clear CSS animation/opacity/transform/filter
+            gsap.set(item, { clearProps: "all" });
 
             const from: gsap.TweenVars = (() => {
               switch (variant) {
@@ -100,6 +106,9 @@ export function ScrollAnimations() {
               const variant = group.dataset.animate ?? "up";
               const fromY = variant === "zoom" ? 20 : 40;
 
+              // Clear CSS initial state from group items
+              items.forEach((el) => gsap.set(el, { clearProps: "all" }));
+
               gsap.fromTo(
                 items,
                 {
@@ -147,6 +156,7 @@ export function ScrollAnimations() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      document.body.classList.remove("gsap-ready");
       ctx?.revert();
     };
   }, [ready, pathname]);

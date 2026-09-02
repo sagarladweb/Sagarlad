@@ -24,7 +24,11 @@ export async function GET() {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    // Fall back to email lookup for env-bootstrap JWTs
+    let user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user && session.user.email) {
+      user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    }
     return NextResponse.json({
       enabled: Boolean(user?.twoFactorEnabled),
     });
@@ -37,7 +41,6 @@ export async function GET() {
 export async function POST(request: Request) {
   const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const userId = session.user.id as string;
 
   const body = await request.json().catch(() => null);
   const parsed = actionSchema.safeParse(body);
@@ -47,8 +50,13 @@ export async function POST(request: Request) {
   const { action, secret, token } = parsed.data;
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: userId } });
+    // Fall back to email lookup for env-bootstrap JWTs
+    let user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user && session.user.email) {
+      user = await prisma.user.findUnique({ where: { email: session.user.email } });
+    }
     if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    const userId = user.id;
 
     if (action === "setup") {
       if (user.twoFactorEnabled) {

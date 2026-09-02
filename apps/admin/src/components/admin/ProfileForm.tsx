@@ -142,8 +142,20 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       const res = await fetch("/api/admin/upload", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
-      setImage(data.url);
-      showToast("Photo uploaded & updated");
+      const imageUrl = data.url as string;
+      setImage(imageUrl);
+      // Persist to DB immediately so the avatar survives navigation
+      const saveRes = await fetch("/api/admin/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "profile", name, image: imageUrl }),
+      });
+      if (!saveRes.ok) {
+        const err = await saveRes.json().catch(() => null);
+        throw new Error(err?.error ?? "Upload saved but profile update failed");
+      }
+      showToast("Photo uploaded & saved");
+      router.refresh();
     } catch (err) {
       showToast("Upload failed", err instanceof Error ? err.message : undefined, "error");
     } finally {
@@ -162,8 +174,20 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
-      setImage(data.url);
-      showToast("Pasted photo uploaded & updated");
+      const imageUrl = data.url as string;
+      setImage(imageUrl);
+      // Persist to DB immediately
+      const saveRes = await fetch("/api/admin/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "profile", name, image: imageUrl }),
+      });
+      if (!saveRes.ok) {
+        const err = await saveRes.json().catch(() => null);
+        throw new Error(err?.error ?? "Upload saved but profile update failed");
+      }
+      showToast("Pasted photo uploaded & saved");
+      router.refresh();
     } catch (err) {
       showToast("Pasted image upload failed", err instanceof Error ? err.message : undefined, "error");
     } finally {

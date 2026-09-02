@@ -346,17 +346,15 @@ export const getRelatedPosts = unstable_cache(
 );
 
 // Active announcement for the homepage banner / popup.
-export const getActiveAnnouncement = unstable_cache(
-  async () => {
-    try {
-      return await prisma.announcement.findFirst({
-        where: { active: true },
-        orderBy: { createdAt: "desc" },
-      });
-    } catch {
-      return null;
-    }
-  },
-  ["active-announcement"],
-  { revalidate: CACHE_TTL, tags: ["content", "announcements"] }
-);
+// NOT wrapped in unstable_cache: single-row query, always fresh.
+// React `cache` deduplicates within a single request (generateMetadata + render).
+export const getActiveAnnouncement = cache(async () => {
+  try {
+    return await prisma.announcement.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+    });
+  } catch {
+    return null;
+  }
+});

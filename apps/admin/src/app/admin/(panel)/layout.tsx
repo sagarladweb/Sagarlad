@@ -62,7 +62,7 @@ export default async function AdminPanelLayout({
   // anyway (the JWT might still be valid client-side).
   if (!session?.user && !dbError) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="admin-panel min-h-screen bg-background flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center space-y-6">
           <span className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-red-50 text-red-500 mx-auto">
             <ShieldOff className="h-8 w-8" />

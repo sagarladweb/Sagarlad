@@ -22,6 +22,7 @@ import { getGaAnalytics } from "@/lib/analytics";
 import { adminHeartbeat } from "@/lib/heartbeat";
 import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
+import { SystemHealth } from "@/components/admin/dashboard/SystemHealth";
 import { Card, KPICard } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PublishedBadge } from "@/components/ui/Badge";
@@ -73,18 +74,8 @@ export default async function DashboardPage() {
     activity: [],
   };
 
-  try {
-    adminHeartbeat(); // fire-and-forget: keep Supabase alive from admin panel
-    const [published, drafts, scheduled, subs, recent, viewsAgg] = await getDashboardStats();
-    recentPosts = recent;
-    extras = await getDashboardExtras();
-    extras.activeSubs = subs;
-  } catch (e) {
-    console.error("Failed to load dashboard stats:", e);
-  }
-
-  const fallbackGa = {
-    ok: true as const,
+  const fallbackGa: { ok: true; data: import("@/lib/analytics").GaAnalytics } = {
+    ok: true,
     data: {
       days: 14,
       configured: false,
@@ -97,8 +88,24 @@ export default async function DashboardPage() {
       newVsReturning: [],
     },
   };
+  let ga = fallbackGa;
 
-  const ga = await getGaAnalytics(14).catch(() => fallbackGa);
+  try {
+    adminHeartbeat();
+    const [statsResult, extrasResult, gaResult] = await Promise.all([
+      getDashboardStats(),
+      getDashboardExtras(),
+      getGaAnalytics(14).catch(() => fallbackGa),
+    ]);
+
+    const [, , , subs, recent] = statsResult;
+    recentPosts = recent;
+    extras = extrasResult;
+    extras.activeSubs = subs;
+    ga = gaResult;
+  } catch (e) {
+    console.error("Failed to load dashboard stats:", e);
+  }
   const gaData = ga.data;
 
   const hour = new Date().getHours();
@@ -120,17 +127,12 @@ export default async function DashboardPage() {
     { label: "Pending comments", value: extras.pendingComments, href: "/admin/moderation", icon: MessagesSquare },
   ];
 
-  const postStats = [
-    { label: "Published", value: published ?? 0, icon: FileText, color: "text-green-600" },
-    { label: "Drafts", value: drafts ?? 0, icon: FileText, color: "text-amber-600" },
-    { label: "Scheduled", value: scheduled ?? 0, icon: Timer, color: "text-brand" },
-  ];
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      {/* Header */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="font-display text-2xl font-bold">{greeting}, Sagar</h1>
+          <h1 className="font-display text-3xl font-bold tracking-tight">{greeting}, Sagar</h1>
           <p className="mt-1 text-sm text-muted-foreground">{today}</p>
         </div>
         <Link href="/admin/posts/new">
@@ -140,134 +142,81 @@ export default async function DashboardPage() {
         </Link>
       </header>
 
+      {/* Analytics notice */}
       {!gaData.configured && (
         <div className="rounded-2xl border border-dashed border-border bg-card p-4 text-sm text-muted-foreground">
           Analytics not connected yet. Add <code className="rounded bg-muted px-1.5 py-0.5 text-xs">GA_PROPERTY_ID</code> to your .env to see traffic data.
         </div>
       )}
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {kpis.map((k) => (
-          <KPICard key={k.label} {...k} sparkline={<Sparkline values={k.values} />} />
-        ))}
-      </div>
+      {/* KPI row */}
+      <section>
+        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Overview</h2>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {kpis.map((k) => (
+            <KPICard key={k.label} {...k} sparkline={<Sparkline values={k.values} />} />
+          ))}
+        </div>
+      </section>
 
-      <div className="grid grid-cols-3 gap-4">
-        {postStats.map((s) => (
-          <Card key={s.label} title={s.label} icon={s.icon}>
-            <p className="text-3xl font-bold tabular-nums">{s.value}</p>
-            <p className="text-xs text-muted-foreground mt-1">{s.label.toLowerCase()} posts</p>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      {/* Bento: Chart + Sources + Content stats */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2">
-          <TrafficChart initial={ga} />
+          <Card title="Traffic" icon={TrendingUp}>
+            <TrafficChart initial={ga} />
+          </Card>
         </div>
 
-        <Card title="Top sources" icon={Radio}>
-          {gaData.topSources.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No traffic yet.</p>
-          ) : (
-            <ul className="space-y-3">
-              {gaData.topSources.map((s) => (
-                <li key={s.source}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="truncate font-medium">{s.source}</span>
-                    <span className="text-muted-foreground tabular-nums">{s.sessions}</span>
-                  </div>
-                  <div className="mt-1 h-1.5 rounded-full bg-muted">
-                    <div className="h-1.5 rounded-full bg-accent" style={{ width: `${Math.max(4, (s.sessions / maxSource) * 100)}%` }} />
-                  </div>
+        <div className="space-y-6">
+          <Card title="Top sources" icon={Radio}>
+            {gaData.topSources.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No traffic yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {gaData.topSources.map((s) => (
+                  <li key={s.source}>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="truncate font-medium">{s.source}</span>
+                      <span className="text-muted-foreground tabular-nums">{s.sessions}</span>
+                    </div>
+                    <div className="mt-1 h-1.5 rounded-full bg-muted">
+                      <div className="h-1.5 rounded-full bg-accent transition-all duration-500" style={{ width: `${Math.max(4, (s.sessions / maxSource) * 100)}%` }} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+              <span>
+                Engagement{" "}
+                <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.engagementRate}%</span>
+              </span>
+              <span>
+                Bounce rate{" "}
+                <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.bounceRate.toFixed(1)}%</span>
+              </span>
+            </div>
+          </Card>
+
+          <Card title="Content" icon={FileText}>
+            <ul className="space-y-1">
+              {contentStats.map((s) => (
+                <li key={s.label}>
+                  <Link href={s.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60 transition-all duration-150">
+                    <span className="inline-flex items-center gap-2.5 font-medium">
+                      <s.icon className="w-4 h-4 text-accent" /> {s.label}
+                    </span>
+                    <span className="tabular-nums text-muted-foreground">{s.value}</span>
+                  </Link>
                 </li>
               ))}
             </ul>
-          )}
-          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-            <span>
-              Engagement{" "}
-              <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.engagementRate}%</span>
-            </span>
-            <span>
-              Bounce rate{" "}
-              <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.bounceRate.toFixed(1)}%</span>
-            </span>
-          </div>
-        </Card>
-      </div>
-
-      <Card title="Top pages" icon={TrendingUp}>
-        {gaData.topPages.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No traffic yet.</p>
-        ) : (
-          <div className="overflow-x-auto -mx-5">
-            <table className="w-full text-sm">
-              <thead className="bg-muted text-left text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-5 py-3">Page</th>
-                  <th className="px-5 py-3 text-right">Views</th>
-                  <th className="px-5 py-3 text-right">Users</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {gaData.topPages.map((p) => (
-                  <tr key={p.path}>
-                    <td className="px-5 py-3 font-medium">{p.path}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{formatCompact(p.pageviews)}</td>
-                    <td className="px-5 py-3 text-right tabular-nums">{formatCompact(p.users)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </Card>
-
-      <section>
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold">Recent posts</h2>
-          <Link href="/admin/posts" className="inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
-            View all <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
+          </Card>
         </div>
-        {recentPosts.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No posts yet. <Link href="/admin/posts/new" className="text-accent font-medium">Write your first one →</Link>
-          </p>
-        ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border">
-            <table className="w-full text-sm">
-              <thead className="bg-muted text-left text-xs uppercase tracking-wider text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3">Title</th>
-                  <th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Views</th>
-                  <th className="px-4 py-3">Likes</th>
-                  <th className="px-4 py-3">Edit</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {recentPosts.map((p) => (
-                  <tr key={p.slug}>
-                    <td className="px-4 py-3 font-medium">{p.title}</td>
-                    <td className="px-4 py-3"><PublishedBadge published={p.published} /></td>
-                    <td className="px-4 py-3 tabular-nums">{p.views}</td>
-                    <td className="px-4 py-3 tabular-nums">{p.likes}</td>
-                    <td className="px-4 py-3">
-                      <Link href={`/admin/posts/${encodeURIComponent(p.slug)}/edit`} className="text-accent font-medium hover:underline">
-                        Edit
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      {/* Bento: Newsletter + System Health + Activity */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <Card title="Newsletter" icon={Mail}>
           <div className="space-y-3 text-sm">
             <div className="flex items-center justify-between">
@@ -293,19 +242,8 @@ export default async function DashboardPage() {
           </Link>
         </Card>
 
-        <Card title="Content" icon={FileText}>
-          <ul className="space-y-2">
-            {contentStats.map((s) => (
-              <li key={s.label}>
-                <Link href={s.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60 transition-colors">
-                  <span className="inline-flex items-center gap-2.5 font-medium">
-                    <s.icon className="w-4 h-4 text-accent" /> {s.label}
-                  </span>
-                  <span className="tabular-nums text-muted-foreground">{s.value}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <Card title="System Health" icon={RefreshCw}>
+          <SystemHealth />
         </Card>
 
         <Card title="Recent activity" icon={RefreshCw}>
@@ -322,7 +260,80 @@ export default async function DashboardPage() {
             </ul>
           )}
         </Card>
-      </div>
+      </section>
+
+      {/* Recent posts table */}
+      <section>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">Recent posts</h2>
+          <Link href="/admin/posts" className="inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
+            View all <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </div>
+        {recentPosts.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            No posts yet. <Link href="/admin/posts/new" className="text-accent font-medium">Write your first one →</Link>
+          </p>
+        ) : (
+          <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-glow">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                <tr>
+                  <th className="px-4 py-3">Title</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3">Views</th>
+                  <th className="px-4 py-3">Likes</th>
+                  <th className="px-4 py-3">Edit</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {recentPosts.map((p) => (
+                  <tr key={p.slug} className="hover:bg-muted/30 transition-colors duration-150">
+                    <td className="px-4 py-3 font-medium">{p.title}</td>
+                    <td className="px-4 py-3"><PublishedBadge published={p.published} /></td>
+                    <td className="px-4 py-3 tabular-nums">{p.views}</td>
+                    <td className="px-4 py-3 tabular-nums">{p.likes}</td>
+                    <td className="px-4 py-3">
+                      <Link href={`/admin/posts/${encodeURIComponent(p.slug)}/edit`} className="text-accent font-medium hover:underline">
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
+      {/* Full-width top pages table */}
+      {gaData.topPages.length > 0 && (
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">All pages</h2>
+          <Card>
+            <div className="overflow-x-auto -mx-5">
+              <table className="w-full text-sm">
+                <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
+                  <tr>
+                    <th className="px-5 py-3">Page</th>
+                    <th className="px-5 py-3 text-right">Views</th>
+                    <th className="px-5 py-3 text-right">Users</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {gaData.topPages.map((p) => (
+                    <tr key={p.path} className="hover:bg-muted/30 transition-colors duration-150">
+                      <td className="px-5 py-3 font-medium">{p.path}</td>
+                      <td className="px-5 py-3 text-right tabular-nums">{formatCompact(p.pageviews)}</td>
+                      <td className="px-5 py-3 text-right tabular-nums">{formatCompact(p.users)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </Card>
+        </section>
+      )}
     </div>
   );
 }

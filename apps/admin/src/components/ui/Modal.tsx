@@ -37,12 +37,12 @@ export function Modal({
       aria-label={title}
     >
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-md"
         onClick={onClose}
         aria-hidden="true"
       />
       <div
-        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in zoom-in-95 fade-in-0 ${
+        className={`relative flex max-h-[92vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-elevated animate-in zoom-in-95 fade-in-0 duration-200 ${
           wide ? "max-w-3xl" : "max-w-xl"
         }`}
       >
@@ -51,7 +51,7 @@ export function Modal({
           <button
             onClick={onClose}
             aria-label="Close"
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150 active:scale-95"
           >
             <X className="w-4 h-4" />
           </button>

@@ -465,10 +465,22 @@ export function MentorshipClient() {
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        "[data-m-hero]",
-        { opacity: 0, y: 40, filter: "blur(4px)" },
+    let rafId = 0;
+    let ctx: gsap.Context | null = null;
+
+    rafId = requestAnimationFrame(() => {
+      rafId = requestAnimationFrame(() => {
+        document.body.classList.add("gsap-ready");
+
+        ctx = gsap.context(() => {
+          // Clear CSS initial state before GSAP takes over
+          gsap.utils.toArray<HTMLElement>("[data-m-hero]").forEach((e) => gsap.set(e, { clearProps: "all" }));
+          gsap.utils.toArray<HTMLElement>("[data-m-pillar]").forEach((e) => gsap.set(e, { clearProps: "all" }));
+          gsap.utils.toArray<HTMLElement>("[data-m-cta]").forEach((e) => gsap.set(e, { clearProps: "all" }));
+
+          gsap.fromTo(
+            "[data-m-hero]",
+            { opacity: 0, y: 40, filter: "blur(4px)" },
         {
           opacity: 1,
           y: 0,
@@ -516,9 +528,15 @@ export function MentorshipClient() {
           },
         }
       );
-    }, el);
+        }); // gsap.context
+      }); // second rAF
+    }); // first rAF
 
-    return () => ctx.revert();
+    return () => {
+      cancelAnimationFrame(rafId);
+      document.body.classList.remove("gsap-ready");
+      ctx?.revert();
+    };
   }, []);
 
   return (

@@ -45,7 +45,11 @@ export async function PATCH(request: Request) {
   }
 
   try {
-    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    // Look up by email instead of JWT id — the env-bootstrap fallback
+    // hardcodes id "env-bootstrap" which doesn't match the real DB cuid().
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email! },
+    });
     if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     if (parsed.data.action === "profile") {

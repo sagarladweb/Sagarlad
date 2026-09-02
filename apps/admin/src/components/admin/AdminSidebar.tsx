@@ -77,11 +77,11 @@ export function AdminSidebar({
 
   return (
     <aside
-      className="group hidden md:flex sticky top-0 h-screen w-[68px] hover:w-60 shrink-0 flex-col border-r border-border bg-card overflow-hidden transition-[width] duration-300 ease-out shadow-sm z-30"
-      style={{ borderColor: "color-mix(in srgb, var(--brand) 15%, var(--border))" }}
+      className="group hidden md:flex sticky top-0 h-screen w-[68px] hover:w-60 shrink-0 flex-col glass-subtle overflow-hidden transition-[width] duration-300 ease-out z-30"
+      style={{ borderColor: "color-mix(in srgb, var(--brand) 12%, var(--border))" }}
       aria-label="Admin sidebar"
     >
-      <div className="px-3.5 py-4 border-b border-border flex items-center gap-3.5">
+      <div className="px-3.5 py-4 border-b border-border/60 flex items-center gap-3.5">
         <Link
           href="/admin/dashboard"
           className="flex items-center gap-3.5 min-w-0"
@@ -106,15 +106,15 @@ export function AdminSidebar({
               key={item.href}
               href={item.href}
               title={item.label}
-              className={`relative flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+              className={`relative flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ease-[var(--ease-spring)] ${
                 active
-                  ? "bg-accent/10 text-accent font-semibold"
-                  : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                  ? "bg-accent/10 text-accent font-semibold shadow-[0_0_12px_-2px_rgba(13,33,161,0.15)]"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
               }`}
               aria-current={active ? "page" : undefined}
             >
               {active && (
-                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent" />
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent shadow-[0_0_8px_rgba(13,33,161,0.3)]" />
               )}
               <Icon className="w-5 h-5 shrink-0" />
               {item.href === "/admin/moderation" && <CommunityBadge />}
@@ -124,12 +124,12 @@ export function AdminSidebar({
         })}
       </nav>
 
-      <div className="p-2.5 border-t border-border space-y-1">
+      <div className="p-2.5 border-t border-border/60 space-y-1">
         <Link
           href="https://www.sagarlad.com"
           target="_blank"
           title="View site"
-          className="flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+          className="flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200"
         >
           <ExternalLink className="w-5 h-5 shrink-0" />
           <span className={labelCls}>sagarlad.com</span>
@@ -143,7 +143,7 @@ export function AdminSidebar({
             router.refresh();
           }}
           title="Sign out"
-          className="w-full flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-red-600 hover:bg-red-500/10 transition-colors"
+          className="w-full flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-foreground hover:text-red-600 hover:bg-red-500/10 transition-all duration-200"
         >
           <LogOut className="w-5 h-5 shrink-0" />
           <span className={`${labelCls} truncate text-left`}>
