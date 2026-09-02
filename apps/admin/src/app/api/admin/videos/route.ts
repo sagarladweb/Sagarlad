@@ -27,11 +27,16 @@ const videoSchema = z.object({
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const videos = await prisma.video.findMany({
-    include: { category: { select: { id: true, name: true, slug: true } } },
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-  });
-  return NextResponse.json({ videos });
+  try {
+    const videos = await prisma.video.findMany({
+      include: { category: { select: { id: true, name: true, slug: true } } },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+    return NextResponse.json({ videos });
+  } catch (err) {
+    console.error("[videos] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -57,9 +62,14 @@ export async function POST(request: Request) {
       { status: 400 }
     );
   }
-  const video = await prisma.video.create({ data: { ...data, embedUrl: norm.url } });
-  revalidatePublic();
-  return NextResponse.json({ video }, { status: 201 });
+  try {
+    const video = await prisma.video.create({ data: { ...data, embedUrl: norm.url } });
+    revalidatePublic();
+    return NextResponse.json({ video }, { status: 201 });
+  } catch (err) {
+    console.error("[videos] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -89,9 +99,14 @@ export async function PUT(request: Request) {
     }
     data.embedUrl = norm.url;
   }
-  const video = await prisma.video.update({ where: { id }, data });
-  revalidatePublic();
-  return NextResponse.json({ video });
+  try {
+    const video = await prisma.video.update({ where: { id }, data });
+    revalidatePublic();
+    return NextResponse.json({ video });
+  } catch (err) {
+    console.error("[videos] PUT failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -100,7 +115,12 @@ export async function DELETE(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  await prisma.video.delete({ where: { id } });
-  revalidatePublic();
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.video.delete({ where: { id } });
+    revalidatePublic();
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[videos] DELETE failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

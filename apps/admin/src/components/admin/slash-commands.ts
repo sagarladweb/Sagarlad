@@ -15,12 +15,14 @@ import {
   Highlighter,
   type LucideIcon,
 } from "lucide-react";
+import { showPrompt } from "@/components/admin/ConfirmDialog";
 
 export type SlashCommand = {
   label: string;
   icon: LucideIcon;
   description: string;
-  action: (editor: Editor) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  action: (editor: Editor) => any;
 };
 
 export const SLASH_COMMANDS: SlashCommand[] = [
@@ -82,8 +84,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     label: "Image",
     icon: ImageIcon,
     description: "Upload or embed an image",
-    action: (e) => {
-      const url = window.prompt("Image URL:");
+    action: async (e) => {
+      const url = await showPrompt({ title: "Image URL", placeholder: "https://...", confirmLabel: "Add image" });
       if (url) e.chain().focus().setImage({ src: url }).run();
     },
   },
@@ -99,8 +101,8 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     label: "Link",
     icon: Link,
     description: "Add a hyperlink",
-    action: (e) => {
-      const url = window.prompt("Link URL:");
+    action: async (e) => {
+      const url = await showPrompt({ title: "Link URL", placeholder: "https://...", confirmLabel: "Add link" });
       if (url) e.chain().focus().setLink({ href: url }).run();
     },
   },

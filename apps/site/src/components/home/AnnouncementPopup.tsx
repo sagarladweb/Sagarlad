@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
+import { AnnouncementSection } from "./AnnouncementSection";
 
 type AnnouncementData = {
   id: string;
@@ -11,6 +12,7 @@ type AnnouncementData = {
   imageUrl: string | null;
   buttonText: string | null;
   buttonLink: string | null;
+  eventDate: string | Date | null;
 };
 
 const DISMISS_KEY = "announcement-dismissed";
@@ -21,73 +23,75 @@ export function AnnouncementPopup({
   announcement: AnnouncementData;
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem(DISMISS_KEY) === announcement.id) return;
-    const timer = setTimeout(() => setOpen(true), 6000);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (sessionStorage.getItem(DISMISS_KEY) === announcement.id) {
+      document.documentElement.dataset.announcementActive = 'false';
+      return;
+    }
+    
+    // Signal that announcement is active to pause other popups
+    document.documentElement.dataset.announcementActive = 'true';
+    window.dispatchEvent(new CustomEvent('announcementInit'));
+
+    // Show after 8 seconds
+    const timer = setTimeout(() => setOpen(true), 8000);
     return () => clearTimeout(timer);
   }, [announcement.id]);
 
-  function dismiss() {
+  function dismiss(e?: React.MouseEvent) {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     setOpen(false);
     sessionStorage.setItem(DISMISS_KEY, announcement.id);
+    document.documentElement.dataset.announcementActive = 'false';
+    window.dispatchEvent(new CustomEvent('announcementClosed'));
   }
 
-  if (!open) return null;
+  if (!open || !mounted) return null;
 
-  const { title, description, imageUrl, buttonText, buttonLink } = announcement;
-
-  return (
+  const content = (
     <div
-      className="fixed inset-0 z-[9998] flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] grid place-items-center p-4"
       role="dialog"
-      aria-modal="true"
       aria-label="Announcement"
     >
-      <div
-        className="absolute inset-0 bg-background/60 backdrop-blur-sm"
-        onClick={dismiss}
-      />
+      <div className="absolute inset-0 bg-black/60" />
 
-      <div className="relative w-full max-w-sm rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in slide-in-from-bottom-4 duration-300">
+      <div className="relative w-full max-w-[420px] rounded-xl border border-border/80 bg-card/95 shadow-2xl shadow-black/15 overflow-hidden animate-in zoom-in-95 duration-300">
         <button
           type="button"
           onClick={dismiss}
-          className="absolute top-3 right-3 z-10 p-1.5 rounded-full bg-background/80 hover:bg-background text-muted-foreground transition-colors cursor-pointer"
+          className="absolute top-3 right-3 z-[100] p-1.5 rounded-full bg-black/40 hover:bg-black/60 text-white transition-colors cursor-pointer"
           aria-label="Close"
         >
           <X className="w-4 h-4" />
         </button>
 
-        {imageUrl && (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={imageUrl}
-            alt={title}
-            className="w-full h-32 object-cover"
-          />
-        )}
-
-        <div className="p-4 space-y-2">
-          <h3 className="font-display text-base font-bold text-foreground leading-snug">
-            {title}
-          </h3>
-          {description && (
-            <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-              {description}
-            </p>
-          )}
-          {buttonText && buttonLink && (
-            <Link
-              href={buttonLink}
-              onClick={dismiss}
-              className="inline-flex items-center gap-1.5 rounded-full bg-accent text-accent-foreground px-4 py-2 text-sm font-semibold hover:scale-[1.03] transition-transform"
-            >
-              {buttonText}
-            </Link>
-          )}
+        <div onClick={dismiss}>
+          <AnnouncementSection announcement={announcement} />
         </div>
       </div>
     </div>
   );
+
+  return createPortal(content, document.body);
 }

@@ -123,20 +123,27 @@ function BookViewerInner({ bookId, buyUrl, open, onClose }: Props) {
       role="dialog"
       aria-label="Book preview"
     >
-      {/* Top bar */}
-      <div
-        className="w-full flex items-center justify-between gap-4 z-[10000] px-4 sm:px-6 pt-4 sm:pt-6 pb-2 shrink-0"
-        onClick={(e) => e.stopPropagation()}
+      {/* Floating Close Button */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close book preview"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-[10000] grid h-10 w-10 sm:h-12 sm:w-12 place-items-center rounded-full bg-white/10 hover:bg-white/20 text-white backdrop-blur-md transition-colors"
       >
-        <span className="text-sm sm:text-base text-white font-semibold truncate">Book Preview</span>
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close book preview"
-          className="grid h-9 w-9 place-items-center rounded-full bg-white/90 text-black shadow-md hover:bg-white"
+        <X className="w-5 h-5 sm:w-6 sm:h-6" />
+      </button>
+
+      {/* Floating Buy Button */}
+      <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-[10000]" onClick={(e) => e.stopPropagation()}>
+        <a
+          href={buyUrl ?? "/books"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 rounded-full bg-[#ffd51d] text-black px-6 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base font-bold shadow-2xl hover:scale-105 transition-transform"
         >
-          <X className="w-5 h-5" />
-        </button>
+          <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
+          Buy Now
+        </a>
       </div>
 
       {/* Book area */}
@@ -180,21 +187,6 @@ function BookViewerInner({ bookId, buyUrl, open, onClose }: Props) {
           >
             <ChevronRight className="w-5 h-5" />
           </button>
-        </div>
-      </div>
-
-      {/* Buy CTA */}
-      <div className="w-full shrink-0 px-4 sm:px-6 pb-4 sm:pb-6 pt-2 z-[10000]" onClick={(e) => e.stopPropagation()}>
-        <div className="max-w-md mx-auto sm:max-w-lg">
-          <a
-            href={buyUrl ?? "/books"}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2 w-full rounded-full bg-[#ffd51d] text-black px-6 py-3.5 text-sm font-bold shadow-lg hover:scale-[1.02] transition-transform"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Buy Now
-          </a>
         </div>
       </div>
 

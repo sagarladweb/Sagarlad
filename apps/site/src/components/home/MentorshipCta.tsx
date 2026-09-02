@@ -8,7 +8,7 @@ export function MentorshipCta() {
       aria-label="Mentorship"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-2xl text-center" data-animate="up" suppressHydrationWarning>
           <Pill className="mb-4">1-on-1 Mentorship</Pill>
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-accent-strong">
             One conversation. Total clarity.

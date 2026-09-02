@@ -29,7 +29,7 @@ export function SocialsGrid({ socials }: { socials: Social[] }) {
             href={s.href}
             target="_blank"
             rel="noopener noreferrer"
-            className="card-hover group flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-4 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
+            className="card-hover group flex items-center gap-4 rounded-lg border border-border bg-card px-5 py-4"
           >
             <span
               className="grid h-11 w-11 shrink-0 place-items-center rounded-md bg-muted/70 overflow-hidden transition-colors group-hover:bg-brand-light/15"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { formatDate, readingTime, postCover } from "@/lib/site";
 import { Pill } from "@/components/ui/Pill";
+import { BlogCard } from "@/components/blog/BlogCard";
 
 type FeaturedPost = {
   id: string;
@@ -10,7 +10,7 @@ type FeaturedPost = {
   excerpt: string | null;
   content: string;
   coverImage: string | null;
-  publishedAt: Date;
+  publishedAt: Date | string;
   category: { id: string; name: string; slug: string } | null;
 };
 
@@ -22,8 +22,8 @@ export function BlogPreview({
   return (
     <section className="py-16 md:py-24 border-b border-border">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left" data-animate-group suppressHydrationWarning>
-           <div data-animate-item suppressHydrationWarning>
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 text-center sm:text-left" suppressHydrationWarning>
+           <div data-animate="left" suppressHydrationWarning>
             <Pill>The Blog</Pill>
             <h2 className="mt-3 font-display text-3xl md:text-4xl font-bold">
               Recent writing
@@ -31,45 +31,9 @@ export function BlogPreview({
           </div>
         </div>
 
-        <div data-animate-group suppressHydrationWarning className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div data-animate="right" suppressHydrationWarning className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {posts.map((post) => (
-            <Link
-              key={post.id}
-              data-animate-item
-              suppressHydrationWarning
-              href={`/blog/${post.slug}`}
-              className="card-hover group rounded-2xl border border-border bg-card overflow-hidden flex flex-col hover:-translate-y-1 hover:shadow-lg transition-all duration-300"
-            >
-              <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={post.coverImage || postCover(post.slug)}
-                  alt={post.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  loading="lazy"
-                />
-              </div>
-              <div className="p-6 flex flex-col flex-1">
-                {post.category && (
-                  <span className="text-xs font-semibold uppercase tracking-wider text-accent-strong">
-                    {post.category.name}
-                  </span>
-                )}
-                <h3 className="mt-2 font-display text-lg font-bold leading-snug group-hover:underline underline-offset-4">
-                  {post.title}
-                </h3>
-                <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2 flex-1">
-                  {post.excerpt}
-                </p>
-                <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
-                  <time dateTime={new Date(post.publishedAt).toISOString()}>
-                    {formatDate(post.publishedAt)}
-                  </time>
-                  <span aria-hidden="true">·</span>
-                  <span>{readingTime(post.content)} min read</span>
-                </div>
-              </div>
-            </Link>
+            <BlogCard key={post.id} post={post} />
           ))}
         </div>
 

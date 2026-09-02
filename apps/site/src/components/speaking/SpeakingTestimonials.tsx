@@ -99,7 +99,7 @@ function TestimonialCard({
   t: { name: string; role: string; stars: number; quote: string };
 }) {
   return (
-    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40 active:scale-[0.98]">
+    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card card-hover">
       <div className="mb-2.5">
         <StarRating stars={t.stars} />
       </div>
@@ -145,7 +145,7 @@ export function SpeakingTestimonials() {
 
       {/* Desktop — grid */}
       <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <blockquote className="rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6 lg:row-span-2 hover:border-brand-light/70 hover:shadow-md transition-all duration-200">
+        <blockquote className="card-hover rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6 lg:row-span-2">
           <Quote className="w-6 h-6 text-accent-strong" aria-hidden="true" />
           <p className="text-foreground/85 leading-relaxed text-lg">
             &ldquo;Sagar could go deep on engineering and still keep a packed
@@ -156,7 +156,7 @@ export function SpeakingTestimonials() {
             Summit organizer · Scottish Summit
           </footer>
         </blockquote>
-        <blockquote className="rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6 hover:border-brand-light/70 hover:shadow-md transition-all duration-200">
+        <blockquote className="card-hover rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6">
           <Quote className="w-6 h-6 text-accent-strong" aria-hidden="true" />
           <p className="text-foreground/85 leading-relaxed text-sm">
             &ldquo;He didn&apos;t just give a talk — our students left with a
@@ -167,7 +167,7 @@ export function SpeakingTestimonials() {
             University event lead
           </footer>
         </blockquote>
-        <blockquote className="rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6 hover:border-brand-light/70 hover:shadow-md transition-all duration-200">
+        <blockquote className="card-hover rounded-lg border border-border bg-card p-7 sm:p-9 flex flex-col justify-between gap-6 lg:col-span-6">
           <Quote className="w-6 h-6 text-accent-strong" aria-hidden="true" />
           <p className="text-foreground/85 leading-relaxed text-sm">
             &ldquo;From the prep call to the final Q&A it was effortless. He

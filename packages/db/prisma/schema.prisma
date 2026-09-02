@@ -328,6 +328,8 @@ model Announcement {
   barLink     String?
   barStyle    String    @default("scrolling")
   barSpeed    Int       @default(30)
+  barBgColor  String?   @default("#dbeafe")
+  barColor    String?   @default("#1e3a5f")
   active      Boolean   @default(false)
   eventDate   DateTime?
   createdAt   DateTime  @default(now())

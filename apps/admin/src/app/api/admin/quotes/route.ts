@@ -15,10 +15,15 @@ const quoteSchema = z.object({
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const quotes = await prisma.quote.findMany({
-    orderBy: { createdAt: "desc" },
-  });
-  return NextResponse.json({ quotes });
+  try {
+    const quotes = await prisma.quote.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json({ quotes });
+  } catch (err) {
+    console.error("[quotes] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -34,9 +39,14 @@ export async function POST(request: Request) {
   if (id) {
     return NextResponse.json({ error: "Use PUT to update" }, { status: 400 });
   }
-  const quote = await prisma.quote.create({ data });
-  revalidatePublic();
-  return NextResponse.json({ quote }, { status: 201 });
+  try {
+    const quote = await prisma.quote.create({ data });
+    revalidatePublic();
+    return NextResponse.json({ quote }, { status: 201 });
+  } catch (err) {
+    console.error("[quotes] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -49,9 +59,14 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
   const { id, ...data } = parsed.data;
-  const quote = await prisma.quote.update({ where: { id }, data });
-  revalidatePublic();
-  return NextResponse.json({ quote });
+  try {
+    const quote = await prisma.quote.update({ where: { id }, data });
+    revalidatePublic();
+    return NextResponse.json({ quote });
+  } catch (err) {
+    console.error("[quotes] PUT failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -60,7 +75,12 @@ export async function DELETE(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  await prisma.quote.delete({ where: { id } });
-  revalidatePublic();
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.quote.delete({ where: { id } });
+    revalidatePublic();
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[quotes] DELETE failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

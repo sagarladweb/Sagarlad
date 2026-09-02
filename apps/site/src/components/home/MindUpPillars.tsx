@@ -351,7 +351,7 @@ export function MindUpPillars() {
     >
       <div className="mx-auto max-w-7xl px-6 sm:px-8">
         {/* Mobile / tablet */}
-        <div className="text-center lg:hidden" data-animate="blur" suppressHydrationWarning>
+        <div className="text-center lg:hidden" data-animate="up" suppressHydrationWarning>
           <Pill>The Mind Up Theory</Pill>
           <h2 className="mt-8 font-display text-4xl font-bold leading-[1.1] tracking-tight text-[#1e293b] sm:text-5xl">
             Six Pillars.
@@ -366,8 +366,8 @@ export function MindUpPillars() {
         </div>
 
         {/* Desktop */}
-        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24" data-animate="blur" suppressHydrationWarning>
-          <div className="lg:min-h-[280px]">
+        <div className="hidden lg:grid lg:grid-cols-2 lg:items-center lg:gap-16 xl:gap-24" suppressHydrationWarning>
+          <div className="lg:min-h-[280px]" data-animate="left" suppressHydrationWarning>
             <Pill>The Mind Up Theory</Pill>
             <div key={activePillar?.id ?? "intro"} className="pillar-swap mt-8">
               {activePillar && !playing ? (
@@ -399,7 +399,7 @@ export function MindUpPillars() {
             </div>
           </div>
 
-          <div>
+          <div data-animate="right" suppressHydrationWarning>
             <PillarRing
               active={active}
               activePillar={activePillar}

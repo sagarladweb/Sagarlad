@@ -10,19 +10,26 @@ export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [subscribers, comments, enquiries] = await Promise.all([
-    prisma.newsletterSubscriber.findMany({
-      orderBy: { createdAt: "desc" },
-      select: { id: true, email: true, unsubscribed: true, createdAt: true },
-    }),
-    prisma.comment.findMany({
-      include: { post: { select: { title: true, slug: true } } },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.contactRequest.findMany({ orderBy: { createdAt: "desc" } }),
-  ]);
+  try {
+    const [subscribers, comments, enquiries] = await Promise.all([
+      prisma.newsletterSubscriber.findMany({
+        orderBy: { createdAt: "desc" },
+        take: 500,
+        select: { id: true, email: true, unsubscribed: true, createdAt: true },
+      }),
+      prisma.comment.findMany({
+        include: { post: { select: { title: true, slug: true } } },
+        orderBy: { createdAt: "desc" },
+        take: 500,
+      }),
+      prisma.contactRequest.findMany({ orderBy: { createdAt: "desc" }, take: 500 }),
+    ]);
 
-  return NextResponse.json({ subscribers, comments, enquiries });
+    return NextResponse.json({ subscribers, comments, enquiries });
+  } catch (err) {
+    console.error("[moderation] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -46,14 +53,19 @@ export async function PATCH(request: Request) {
     return NextResponse.json({ error: "Invalid action" }, { status: 400 });
   }
 
-  if (parsed.data.kind === "subscriber") {
-    await prisma.newsletterSubscriber.deleteMany({ where: { id: { in: ids } } });
-  } else if (parsed.data.kind === "comment") {
-    await prisma.comment.deleteMany({ where: { id: { in: ids } } });
-  } else if (parsed.data.kind === "enquiry") {
-    await prisma.contactRequest.deleteMany({ where: { id: { in: ids } } });
-  }
+  try {
+    if (parsed.data.kind === "subscriber") {
+      await prisma.newsletterSubscriber.deleteMany({ where: { id: { in: ids } } });
+    } else if (parsed.data.kind === "comment") {
+      await prisma.comment.deleteMany({ where: { id: { in: ids } } });
+    } else if (parsed.data.kind === "enquiry") {
+      await prisma.contactRequest.deleteMany({ where: { id: { in: ids } } });
+    }
 
-  if (parsed.data.kind === "comment") revalidatePublic();
-  return NextResponse.json({ ok: true });
+    if (parsed.data.kind === "comment") revalidatePublic();
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[moderation] PATCH failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

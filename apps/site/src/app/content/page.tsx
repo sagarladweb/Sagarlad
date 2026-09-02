@@ -44,7 +44,7 @@ export default async function ContentPage() {
               <Link
                 key={c.id}
                 href={`/content/${c.slug}`}
-                className="card-hover group rounded-lg border border-border bg-card p-6 flex flex-col justify-between transition-all duration-300 hover:-translate-y-0.5"
+                className="card-hover group rounded-lg border border-border bg-card p-6 flex flex-col justify-between"
               >
                 <div>
                   <span className="inline-flex w-11 h-11 items-center justify-center rounded-md bg-brand-light/15 text-brand mb-4">

@@ -411,7 +411,7 @@ export default function AboutPage() {
                     key={r.race}
                     data-runner-card
                     data-count={r.count}
-                    className="rounded-xl border border-border bg-background p-5 text-center transition-all duration-200 hover:border-brand-light/70 hover:shadow-md"
+                    className="card-hover rounded-xl border border-border bg-background p-5 text-center"
                   >
                     <div className="mx-auto w-10 h-10 rounded-lg bg-brand-light/15 grid place-items-center text-brand">
                       <Icon className="w-5 h-5" />

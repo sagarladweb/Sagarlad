@@ -263,7 +263,7 @@ export default function SpeakingPage() {
                   <div
                     key={e.title}
                     data-animate-item
-                    className="group relative rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-brand-light/60 hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] hover:-translate-y-1"
+                    className="card-hover group relative rounded-xl border border-border bg-card p-6"
                   >
                     <div className="absolute inset-x-0 top-0 h-1 rounded-t-xl bg-gradient-to-r from-brand/0 via-brand/20 to-brand/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <span className="absolute top-4 right-4 text-[10px] font-bold tabular-nums text-muted-foreground/30">
@@ -304,7 +304,7 @@ export default function SpeakingPage() {
                   <div
                     key={m.title}
                     data-animate-item
-                    className="group relative flex items-start gap-4 rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:border-accent/40 hover:shadow-[0_8px_30px_rgba(255,213,29,0.06)] hover:-translate-y-1"
+                    className="card-hover group relative flex items-start gap-4 rounded-xl border border-border bg-card p-6"
                   >
                     {/* Icon */}
                     <div className="shrink-0 w-12 h-12 rounded-lg bg-accent/10 text-accent-strong grid place-items-center transition-all duration-300 group-hover:bg-accent group-hover:text-accent-foreground group-hover:scale-110">
@@ -345,7 +345,7 @@ export default function SpeakingPage() {
             {processSteps.map((step, i) => (
               <div
                 key={step.n}
-                className={`group rounded-lg border border-border bg-card p-7 sm:p-8 transition-all duration-200 hover:border-brand-light/70 hover:shadow-md ${
+                className={`card-hover group rounded-lg border border-border bg-card p-7 sm:p-8 ${
                   i === 0 ? "lg:col-span-7" : "lg:col-span-5"
                 }`}
                 data-animate-item

@@ -44,51 +44,56 @@ export async function PATCH(request: Request) {
     );
   }
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
-  if (parsed.data.action === "profile") {
-    const { name, image } = parsed.data;
+    if (parsed.data.action === "profile") {
+      const { name, image } = parsed.data;
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          name: name?.trim() ? name.trim() : null,
+          image: image?.trim() ? image.trim() : null,
+        },
+      });
+      await logAudit("PROFILE_UPDATE", { userId: user.id });
+      revalidatePublic();
+      return NextResponse.json({ ok: true, name: name?.trim() || null, image: image?.trim() || null });
+    }
+
+    const passwordOk =
+      user.passwordHash && (await compare(parsed.data.currentPassword, user.passwordHash));
+    if (!passwordOk) {
+      return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
+    }
+
+    if (parsed.data.action === "password") {
+      const passwordHash = await hash(parsed.data.newPassword, 12);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { passwordHash },
+      });
+      await logAudit("PASSWORD_CHANGE", { userId: user.id });
+      return NextResponse.json({ ok: true });
+    }
+
+    // email change
+    const exists = await prisma.user.findUnique({
+      where: { email: parsed.data.newEmail },
+      select: { id: true },
+    });
+    if (exists) {
+      return NextResponse.json({ error: "That email is already in use" }, { status: 409 });
+    }
     await prisma.user.update({
       where: { id: user.id },
-      data: {
-        name: name?.trim() ? name.trim() : null,
-        image: image?.trim() ? image.trim() : null,
-      },
+      data: { email: parsed.data.newEmail },
     });
-    await logAudit("PROFILE_UPDATE", { userId: user.id });
-    revalidatePublic();
-    return NextResponse.json({ ok: true, name: name?.trim() || null, image: image?.trim() || null });
-  }
-
-  const passwordOk =
-    user.passwordHash && (await compare(parsed.data.currentPassword, user.passwordHash));
-  if (!passwordOk) {
-    return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 });
-  }
-
-  if (parsed.data.action === "password") {
-    const passwordHash = await hash(parsed.data.newPassword, 12);
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { passwordHash },
-    });
-    await logAudit("PASSWORD_CHANGE", { userId: user.id });
+    await logAudit("PROFILE_UPDATE", { userId: user.id, meta: { action: "email" } });
     return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[profile] PATCH failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
   }
-
-  // email change
-  const exists = await prisma.user.findUnique({
-    where: { email: parsed.data.newEmail },
-    select: { id: true },
-  });
-  if (exists) {
-    return NextResponse.json({ error: "That email is already in use" }, { status: 409 });
-  }
-  await prisma.user.update({
-    where: { id: user.id },
-    data: { email: parsed.data.newEmail },
-  });
-  await logAudit("PROFILE_UPDATE", { userId: user.id, meta: { action: "email" } });
-  return NextResponse.json({ ok: true });
 }

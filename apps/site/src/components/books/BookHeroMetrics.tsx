@@ -70,7 +70,7 @@ export function BookHeroMetrics() {
           key={s.label}
           data-stat={s.value}
           data-stat-suffix={s.suffix}
-          className="flex flex-col items-center text-center px-2 sm:px-3 card-hover rounded-lg transition-all hover:bg-white/5 py-2"
+          className="flex flex-col items-center text-center px-2 sm:px-3 card-hover rounded-lg py-2"
         >
           <div className="w-8 h-8 rounded-lg bg-brand-light/15 text-brand flex items-center justify-center mb-3">
             <s.icon className="h-4 w-4" strokeWidth={1.5} />

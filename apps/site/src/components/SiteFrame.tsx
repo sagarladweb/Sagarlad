@@ -33,6 +33,8 @@ type AnnouncementBarData = {
   buttonLink?: string | null;
   barStyle?: string;
   barSpeed?: number;
+  barBgColor?: string | null;
+  barColor?: string | null;
 };
 
 export function SiteFrame({
@@ -90,6 +92,8 @@ export function SiteFrame({
           link={barLink}
           style={effectiveAnnouncement?.barStyle || "scrolling"}
           speed={effectiveAnnouncement?.barSpeed || 30}
+          bgColor={effectiveAnnouncement?.barBgColor}
+          textColor={effectiveAnnouncement?.barColor}
         />
       )}
       {!isAdmin && <Navbar />}

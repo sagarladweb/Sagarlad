@@ -22,10 +22,15 @@ const socialSchema = z.object({
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const socials = await prisma.socialLink.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-  });
-  return NextResponse.json({ socials });
+  try {
+    const socials = await prisma.socialLink.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    });
+    return NextResponse.json({ socials });
+  } catch (err) {
+    console.error("[socials] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 // Social links are update-only: the brand's set of links is fixed in code, so
@@ -40,7 +45,12 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
   const { id, ...data } = parsed.data;
-  const social = await prisma.socialLink.update({ where: { id }, data });
-  revalidatePublic();
-  return NextResponse.json({ social });
+  try {
+    const social = await prisma.socialLink.update({ where: { id }, data });
+    revalidatePublic();
+    return NextResponse.json({ social });
+  } catch (err) {
+    console.error("[socials] PUT failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

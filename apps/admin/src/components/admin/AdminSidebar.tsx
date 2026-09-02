@@ -78,6 +78,7 @@ export function AdminSidebar({
   return (
     <aside
       className="group hidden md:flex sticky top-0 h-screen w-[68px] hover:w-60 shrink-0 flex-col border-r border-border bg-card overflow-hidden transition-[width] duration-300 ease-out shadow-sm z-30"
+      style={{ borderColor: "color-mix(in srgb, var(--brand) 15%, var(--border))" }}
       aria-label="Admin sidebar"
     >
       <div className="px-3.5 py-4 border-b border-border flex items-center gap-3.5">
@@ -107,11 +108,14 @@ export function AdminSidebar({
               title={item.label}
               className={`relative flex items-center gap-3.5 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-accent/10 text-accent"
+                  ? "bg-accent/10 text-accent font-semibold"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted/80"
               }`}
               aria-current={active ? "page" : undefined}
             >
+              {active && (
+                <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-full bg-accent" />
+              )}
               <Icon className="w-5 h-5 shrink-0" />
               {item.href === "/admin/moderation" && <CommunityBadge />}
               <span className={labelCls}>{item.label}</span>

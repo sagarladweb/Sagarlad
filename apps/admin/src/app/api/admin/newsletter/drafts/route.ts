@@ -23,37 +23,42 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid draft" }, { status: 400 });
   }
 
-  const content = parsed.data.content as NewsletterContent;
-  const html = buildTemplateBody(content.template ?? "letter", content);
+  try {
+    const content = parsed.data.content as NewsletterContent;
+    const html = buildTemplateBody(content.template ?? "letter", content);
 
-  if (parsed.data.id) {
-    const existing = await prisma.newsletterCampaign.findFirst({
-      where: { id: parsed.data.id, draft: true },
-      select: { id: true },
-    });
-    if (!existing) {
-      return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+    if (parsed.data.id) {
+      const existing = await prisma.newsletterCampaign.findFirst({
+        where: { id: parsed.data.id, draft: true },
+        select: { id: true },
+      });
+      if (!existing) {
+        return NextResponse.json({ error: "Draft not found" }, { status: 404 });
+      }
+      const campaign = await prisma.newsletterCampaign.update({
+        where: { id: existing.id },
+        data: {
+          subject: parsed.data.subject,
+          html,
+          contentJson: content as object,
+        },
+      });
+      return NextResponse.json({ campaign });
     }
-    const campaign = await prisma.newsletterCampaign.update({
-      where: { id: existing.id },
+
+    const campaign = await prisma.newsletterCampaign.create({
       data: {
         subject: parsed.data.subject,
         html,
         contentJson: content as object,
+        draft: true,
       },
     });
-    return NextResponse.json({ campaign });
+    return NextResponse.json({ campaign }, { status: 201 });
+  } catch (err) {
+    console.error("[drafts] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
   }
-
-  const campaign = await prisma.newsletterCampaign.create({
-    data: {
-      subject: parsed.data.subject,
-      html,
-      contentJson: content as object,
-      draft: true,
-    },
-  });
-  return NextResponse.json({ campaign }, { status: 201 });
 }
 
 // Drop a draft.
@@ -65,6 +70,11 @@ export async function DELETE(request: Request) {
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
-  await prisma.newsletterCampaign.deleteMany({ where: { id, draft: true } });
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.newsletterCampaign.deleteMany({ where: { id, draft: true } });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[drafts] DELETE failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

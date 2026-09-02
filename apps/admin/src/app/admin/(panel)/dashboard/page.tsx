@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { getDashboardStats, getDashboardExtras } from "@/lib/content";
 import { getGaAnalytics } from "@/lib/analytics";
+import { adminHeartbeat } from "@/lib/heartbeat";
 import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
 import { Card, KPICard } from "@/components/ui/Card";
@@ -73,6 +74,7 @@ export default async function DashboardPage() {
   };
 
   try {
+    adminHeartbeat(); // fire-and-forget: keep Supabase alive from admin panel
     const [published, drafts, scheduled, subs, recent, viewsAgg] = await getDashboardStats();
     recentPosts = recent;
     extras = await getDashboardExtras();

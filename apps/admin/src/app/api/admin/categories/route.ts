@@ -14,23 +14,28 @@ const categorySchema = z.object({
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const categories = await prisma.category.findMany({
-    include: {
-      _count: { select: { posts: true, videos: true } },
-      posts: {
-        select: { id: true, title: true },
-        orderBy: { createdAt: "desc" },
-        take: 50,
+  try {
+    const categories = await prisma.category.findMany({
+      include: {
+        _count: { select: { posts: true, videos: true } },
+        posts: {
+          select: { id: true, title: true },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        },
+        videos: {
+          select: { id: true, title: true },
+          orderBy: { createdAt: "desc" },
+          take: 50,
+        },
       },
-      videos: {
-        select: { id: true, title: true },
-        orderBy: { createdAt: "desc" },
-        take: 50,
-      },
-    },
-    orderBy: { name: "asc" },
-  });
-  return NextResponse.json({ categories });
+      orderBy: { name: "asc" },
+    });
+    return NextResponse.json({ categories });
+  } catch (err) {
+    console.error("[categories] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -43,17 +48,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid category name" }, { status: 400 });
   }
 
-  const slug = slugify(parsed.data.name);
-  const exists = await prisma.category.findUnique({ where: { slug } });
-  if (exists) {
-    return NextResponse.json({ error: "Category already exists" }, { status: 409 });
-  }
+  try {
+    const slug = slugify(parsed.data.name);
+    const exists = await prisma.category.findUnique({ where: { slug } });
+    if (exists) {
+      return NextResponse.json({ error: "Category already exists" }, { status: 409 });
+    }
 
-  const category = await prisma.category.create({
-    data: { name: parsed.data.name, slug },
-  });
-  revalidatePublic();
-  return NextResponse.json({ category }, { status: 201 });
+    const category = await prisma.category.create({
+      data: { name: parsed.data.name, slug },
+    });
+    revalidatePublic();
+    return NextResponse.json({ category }, { status: 201 });
+  } catch (err) {
+    console.error("[categories] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -67,25 +77,30 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "Invalid category name" }, { status: 400 });
   }
 
-  const category = await prisma.category.findUnique({ where: { id } });
-  if (!category) {
-    return NextResponse.json({ error: "Category not found" }, { status: 404 });
-  }
+  try {
+    const category = await prisma.category.findUnique({ where: { id } });
+    if (!category) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    }
 
-  const slug = slugify(parsed.data.name);
-  const slugTaken = await prisma.category.findFirst({
-    where: { slug, id: { not: id } },
-  });
-  if (slugTaken) {
-    return NextResponse.json({ error: "Another category already has that name" }, { status: 409 });
-  }
+    const slug = slugify(parsed.data.name);
+    const slugTaken = await prisma.category.findFirst({
+      where: { slug, id: { not: id } },
+    });
+    if (slugTaken) {
+      return NextResponse.json({ error: "Another category already has that name" }, { status: 409 });
+    }
 
-  const updated = await prisma.category.update({
-    where: { id },
-    data: { name: parsed.data.name, slug },
-  });
-  revalidatePublic();
-  return NextResponse.json({ category: updated });
+    const updated = await prisma.category.update({
+      where: { id },
+      data: { name: parsed.data.name, slug },
+    });
+    revalidatePublic();
+    return NextResponse.json({ category: updated });
+  } catch (err) {
+    console.error("[categories] PUT failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function DELETE(request: Request) {

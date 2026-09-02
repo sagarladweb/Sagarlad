@@ -73,14 +73,14 @@ function MarqueeTopicCard({ t, onPause, onResume }: { t: Topic; onPause: () => v
   return (
     <Link
       href={`/blog?category=${encodeURIComponent(t.slug)}`}
-      className="group flex flex-col items-center justify-center text-center p-4 sm:p-9 rounded-xl border border-[#e2e8f0]/60 bg-white hover:border-brand hover:shadow-[0_8px_30px_rgba(13,33,161,0.08)] transition-all duration-300 shrink-0 h-[140px] w-[140px] sm:h-[220px] sm:w-[280px] select-none cursor-pointer"
+      className="card-hover group flex flex-col items-center justify-center text-center p-4 sm:p-9 rounded-xl border border-border bg-card shrink-0 h-[140px] w-[140px] sm:h-[220px] sm:w-[280px] select-none cursor-pointer"
       onMouseEnter={onPause}
       onMouseLeave={onResume}
     >
-      <span className="grid h-9 w-9 sm:h-14 sm:w-14 place-items-center rounded-full bg-[#f1f5f9] text-[#475569] mb-2 sm:mb-4 transition-all duration-300 group-hover:bg-brand/10 group-hover:text-brand">
+      <span className="grid h-9 w-9 sm:h-14 sm:w-14 place-items-center rounded-full bg-muted text-muted-foreground mb-2 sm:mb-4 transition-all duration-300 group-hover:bg-brand/10 group-hover:text-brand">
         <Icon className="w-4 h-4 sm:w-6 sm:h-6" strokeWidth={1.5} />
       </span>
-      <h3 className="font-display text-xs sm:text-lg font-semibold leading-snug text-[#334155] group-hover:text-[#1e293b] transition-colors duration-200 line-clamp-2">
+      <h3 className="font-display text-xs sm:text-lg font-semibold leading-snug text-foreground group-hover:text-foreground transition-colors duration-200 line-clamp-2">
         {t.name}
       </h3>
     </Link>
@@ -99,7 +99,7 @@ export function TopicsGrid({ topics }: { topics: Topic[] }) {
 
   return (
     <section className="py-16 md:py-24 border-b border-border bg-background overflow-hidden" aria-label="Explore Topics">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center" data-animate="up" suppressHydrationWarning>
         <div className="w-full flex justify-center text-center">
           <Pill>Explore</Pill>
         </div>

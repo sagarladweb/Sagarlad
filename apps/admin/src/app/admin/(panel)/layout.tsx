@@ -17,6 +17,7 @@ import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { MobileNav } from "@/components/admin/MobileNav";
 import { ToastContainer } from "@/components/admin/Toast";
 import { ConfirmContainer } from "@/components/admin/ConfirmDialog";
+import { PromptContainer } from "@/components/admin/ConfirmDialog";
 import { OfflineSync } from "@/components/admin/OfflineSync";
 import { ThemeToggle } from "@/components/admin/ThemeToggle";
 import { PHASE_1 } from "@/lib/phase";
@@ -103,6 +104,7 @@ export default async function AdminPanelLayout({
     <div className="admin-panel min-h-screen bg-background flex">
       <ToastContainer />
       <ConfirmContainer />
+      <PromptContainer />
       <OfflineSync />
       <ThemeToggle />
       <AdminSidebar

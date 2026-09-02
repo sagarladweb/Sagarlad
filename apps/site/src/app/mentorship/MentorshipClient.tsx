@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import {
   UserCheck,
@@ -227,7 +228,7 @@ function StarRating({ stars, size = "w-3 h-3" }: { stars: number; size?: string 
 
 function TestimonialCard({ t }: { t: { name: string; role: string; stars: number; quote: string } }) {
   return (
-    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card transition-all duration-300 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] hover:border-brand-light/40 active:shadow-[0_8px_30px_rgba(0,0,0,0.1)] active:border-brand-light/50 active:scale-[0.98]">
+    <div className="w-[260px] sm:w-[300px] shrink-0 flex flex-col p-4 sm:p-5 rounded-2xl border border-border bg-card card-hover">
       <div className="mb-2.5">
         <StarRating stars={t.stars} />
       </div>
@@ -415,9 +416,9 @@ function ReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) 
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden p-4 sm:p-6"
+      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6"
       role="dialog"
       aria-modal="true"
       aria-label="Write a review"
@@ -428,7 +429,7 @@ function ReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) 
         onClick={onClose}
       />
       {/* Panel — centered in viewport */}
-      <div className="relative w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl">
+      <div className="relative w-full max-w-md max-h-[90dvh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl z-10">
         <button
           type="button"
           onClick={onClose}
@@ -441,7 +442,8 @@ function ReviewModal({ open, onClose }: { open: boolean; onClose: () => void }) 
           <ReviewForm onClose={onClose} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -599,7 +601,7 @@ export function MentorshipClient() {
                 <div
                   key={p.title}
                   data-m-pillar
-                  className="group relative flex items-start gap-5 rounded-2xl bg-card border border-border p-6 sm:p-7 transition-all duration-400 hover:border-brand/30 hover:shadow-[0_8px_40px_-12px_rgba(13,33,161,0.1)]"
+                  className="card-hover group relative flex items-start gap-5 rounded-2xl bg-card border border-border p-6 sm:p-7"
                 >
                   {/* left accent bar */}
                   <div className="absolute left-0 top-6 bottom-6 w-[3px] rounded-full bg-brand/0 group-hover:bg-brand transition-all duration-400" />
@@ -724,9 +726,9 @@ export function MentorshipClient() {
             <p className="mt-4 text-xs text-muted-foreground">
               Book a Free Chat with Sagar
               <br />
-              <span className="inline-flex items-center gap-1 animate-bounce-up">
+              <span className="inline-flex items-center gap-1">
                 available
-                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-foreground">
+                <svg width="10" height="10" viewBox="0 0 10 10" fill="none" className="text-foreground animate-bounce-up">
                   <path d="M5 8V2M5 2L2 5M5 2L8 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </span>
@@ -762,9 +764,17 @@ export function MentorshipClient() {
                       {faq.question}
                     </span>
                     <span className={`shrink-0 flex items-center justify-center w-7 h-7 rounded-full border transition-all duration-200 ${
-                      isOpen ? "border-accent/40 bg-accent/10 rotate-45" : "border-border text-muted-foreground"
+                      isOpen ? "border-accent/40 bg-accent/10" : "border-border text-muted-foreground"
                     }`}>
-                      <span className="text-lg leading-none font-light">+</span>
+                      {isOpen ? (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-accent">
+                          <path d="M2.5 6h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      ) : (
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" className="text-muted-foreground">
+                          <path d="M6 2.5v7M2.5 6h7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      )}
                     </span>
                   </button>
 

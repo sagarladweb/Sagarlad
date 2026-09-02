@@ -144,7 +144,7 @@ export function BlogVideoGrid({
       <article
         key={v.id}
         onClick={() => setPlaying(v)}
-        className="card-hover group flex flex-col rounded-lg border border-border bg-card overflow-hidden transition-all duration-200 hover:border-brand-light/70 hover:shadow-md cursor-pointer"
+        className="card-hover group flex flex-col rounded-lg border border-border bg-card overflow-hidden cursor-pointer"
       >
         {/* Image Container with precise aspect ratio. Reels are capped so
             a 9:16 portrait never towers over the feed. */}

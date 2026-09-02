@@ -35,7 +35,6 @@
     "@tiptap/react": "^3.29.2",
     "@tiptap/starter-kit": "^3.29.2",
     "@tiptap/suggestion": "3.29.2",
-    "@types/jsdom": "^28.0.3",
     "bcryptjs": "^3.0.3",
     "dompurify": "^3.4.13",
     "jsdom": "^30.0.1",
@@ -54,6 +53,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsdom": "^28.0.3",
     "@types/node": "^20",
     "@types/qrcode": "^1.5.5",
     "@types/react": "^19",

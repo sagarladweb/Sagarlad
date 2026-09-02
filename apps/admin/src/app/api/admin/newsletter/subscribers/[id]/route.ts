@@ -16,12 +16,10 @@ export async function GET() {
   return NextResponse.json({ counts });
 }
 
-export async function POST(request: Request) {
+async function deleteSubscriber(id: string, request: Request) {
   const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json().catch(() => null);
-  const id = typeof body?.id === "string" ? body.id.trim() : "";
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   const sub = await prisma.newsletterSubscriber.findUnique({ where: { id } });
@@ -34,4 +32,18 @@ export async function POST(request: Request) {
   });
 
   return NextResponse.json({ ok: true });
+}
+
+export async function POST(request: Request) {
+  const body = await request.json().catch(() => null);
+  const id = typeof body?.id === "string" ? body.id.trim() : "";
+  return deleteSubscriber(id, request);
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  return deleteSubscriber(id, request);
 }

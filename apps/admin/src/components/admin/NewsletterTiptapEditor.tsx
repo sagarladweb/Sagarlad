@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
+import { showPrompt } from "@/components/admin/ConfirmDialog";
 import { BubbleMenu } from "@tiptap/react/menus";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
@@ -207,8 +208,8 @@ export function NewsletterTiptapEditor({
         <BubbleMenuButton
           icon={LinkIcon}
           active={editor.isActive("link")}
-          onClick={() => {
-            const url = window.prompt("Link URL:");
+          onClick={async () => {
+            const url = await showPrompt({ title: "Link URL", placeholder: "https://...", confirmLabel: "Add link" });
             if (url) editor.chain().focus().setLink({ href: url }).run();
           }}
           label="Add link"

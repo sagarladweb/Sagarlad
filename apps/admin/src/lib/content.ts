@@ -219,37 +219,43 @@ export async function getNewsletterInsertItems() {
       return fallback;
     });
 
-  const [posts, videos, published, read, quotes] = await Promise.all([
+  const [posts, videos, published, read, ebooks, quotes] = await Promise.all([
     safeQuery(
-      prisma.post.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, slug: true } }),
+      prisma.post.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 10, select: { title: true, slug: true, coverImage: true } }),
       []
     ),
     safeQuery(
-      prisma.video.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, slug: true } }),
+      prisma.video.findMany({ where: { published: true }, orderBy: { createdAt: "desc" }, take: 10, select: { title: true, slug: true, thumbnail: true } }),
       []
     ),
     safeQuery(
-      prisma.book.findMany({ where: { published: true, type: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, buyUrl: true } }),
+      prisma.book.findMany({ where: { published: true, type: "PUBLISHED" }, orderBy: { createdAt: "desc" }, take: 10, select: { title: true, buyUrl: true, imageUrl: true } }),
       []
     ),
     safeQuery(
-      prisma.book.findMany({ where: { published: true, type: "READ" }, orderBy: { createdAt: "desc" }, take: 5, select: { title: true, buyUrl: true } }),
+      prisma.book.findMany({ where: { published: true, type: "READ" }, orderBy: { createdAt: "desc" }, take: 10, select: { title: true, buyUrl: true, imageUrl: true } }),
       []
     ),
     safeQuery(
-      prisma.quote.findMany({ orderBy: { createdAt: "desc" }, take: 5, select: { text: true, tag: true } }),
+      prisma.book.findMany({ where: { published: true, type: "EBOOK" }, orderBy: { createdAt: "desc" }, take: 10, select: { title: true, buyUrl: true, imageUrl: true } }),
+      []
+    ),
+    safeQuery(
+      prisma.quote.findMany({ orderBy: { createdAt: "desc" }, take: 10, select: { text: true, tag: true } }),
       []
     ),
   ]);
 
   return {
-    posts: posts.map((p) => ({ title: p.title, url: `${SITE.url}/blog/${p.slug}` })),
+    posts: posts.map((p) => ({ title: p.title, url: `${SITE.url}/blog/${p.slug}`, image: p.coverImage || null })),
     videos: videos.map((v) => ({
       title: v.title,
       url: v.slug ? `${SITE.url}/videos/${v.slug}` : SITE.url,
+      image: v.thumbnail || null,
     })),
-    books: published.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
-    read: read.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books` })),
+    books: published.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books`, image: b.imageUrl || null })),
+    read: read.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books`, image: b.imageUrl || null })),
+    ebooks: ebooks.map((b) => ({ title: b.title, url: b.buyUrl || `${SITE.url}/books`, image: b.imageUrl || null })),
     quotes: quotes.map((q) => ({ title: q.text, url: `${SITE.url}/quotes` })),
   };
 }

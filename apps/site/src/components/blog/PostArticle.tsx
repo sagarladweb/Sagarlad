@@ -236,7 +236,7 @@ export function PostArticle({
               <Link
                 key={p.slug}
                 href={`/blog/${p.slug}`}
-                className="card-hover group min-w-[260px] max-w-[280px] flex-none snap-start overflow-hidden rounded-lg border border-border bg-card transition-all duration-200 hover:border-brand-light/70 hover:shadow-md sm:min-w-0 sm:max-w-none sm:flex-none"
+                className="card-hover group min-w-[260px] max-w-[280px] flex-none snap-start overflow-hidden rounded-lg border border-border bg-card sm:min-w-0 sm:max-w-none sm:flex-none"
               >
                 <div className="aspect-video w-full overflow-hidden bg-muted">
                   {p.coverImage ? (

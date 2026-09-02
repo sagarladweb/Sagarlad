@@ -28,10 +28,15 @@ const bookSchema = z.object({
 export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const books = await prisma.book.findMany({
-    orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
-  });
-  return NextResponse.json({ books });
+  try {
+    const books = await prisma.book.findMany({
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+    });
+    return NextResponse.json({ books });
+  } catch (err) {
+    console.error("[books] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -47,9 +52,14 @@ export async function POST(request: Request) {
   if (id) {
     return NextResponse.json({ error: "Use PUT to update" }, { status: 400 });
   }
-  const book = await prisma.book.create({ data });
-  revalidatePublic();
-  return NextResponse.json({ book }, { status: 201 });
+  try {
+    const book = await prisma.book.create({ data });
+    revalidatePublic();
+    return NextResponse.json({ book }, { status: 201 });
+  } catch (err) {
+    console.error("[books] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function PUT(request: Request) {
@@ -62,9 +72,14 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: "id is required" }, { status: 400 });
   }
   const { id, ...data } = parsed.data;
-  const book = await prisma.book.update({ where: { id }, data });
-  revalidatePublic();
-  return NextResponse.json({ book });
+  try {
+    const book = await prisma.book.update({ where: { id }, data });
+    revalidatePublic();
+    return NextResponse.json({ book });
+  } catch (err) {
+    console.error("[books] PUT failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -73,7 +88,12 @@ export async function DELETE(request: Request) {
   const url = new URL(request.url);
   const id = url.searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  await prisma.book.delete({ where: { id } });
-  revalidatePublic();
-  return NextResponse.json({ ok: true });
+  try {
+    await prisma.book.delete({ where: { id } });
+    revalidatePublic();
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[books] DELETE failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }

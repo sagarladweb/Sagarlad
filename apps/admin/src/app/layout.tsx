@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { adminHeartbeat } from "@/lib/heartbeat";
 
 // Self-hosted fonts — never depend on Google Fonts being reachable at build
 // or serve time, so CSS always loads. Files in src/app/fonts/.
@@ -53,8 +52,6 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  adminHeartbeat(); // fire-and-forget: keeps Supabase alive from admin panel
-
   return (
     <html
       lang="en"

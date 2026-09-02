@@ -9,10 +9,11 @@ export const runtime = "nodejs";
 const testSchema = z.object({
   subject: z.string().trim().min(3).max(200),
   html: z.string().trim().min(10).max(100_000),
+  to: z.string().trim().email().optional(),
 });
 
-// Send the composed email to the admin's own inbox so they can check the real
-// render before broadcasting to everyone.
+// Send the composed email to the admin's own inbox (or a custom test email)
+// so they can check the real render before broadcasting to everyone.
 export async function POST(request: Request) {
   const session = await requireAdmin(request);
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -23,8 +24,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid input" }, { status: 400 });
   }
 
-  const to = session.user.email;
-  if (!to) return NextResponse.json({ error: "No email on your account" }, { status: 400 });
+  const to = parsed.data.to || session.user.email;
+  if (!to) return NextResponse.json({ error: "No email on your account", to: null }, { status: 400 });
 
   try {
     await sendTestEmail(to, parsed.data.subject, sanitizeHtml(parsed.data.html));

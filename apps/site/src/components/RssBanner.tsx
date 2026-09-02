@@ -7,8 +7,25 @@ export function RssBanner() {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
-    const t = setTimeout(() => setShow(true), 22000);
-    return () => clearTimeout(t);
+    let t: number;
+    const startTimer = () => {
+      t = window.setTimeout(() => setShow(true), 22000);
+    };
+
+    if (document.documentElement.dataset.announcementActive === 'true') {
+      const onClosed = () => {
+        window.removeEventListener('announcementClosed', onClosed);
+        startTimer();
+      };
+      window.addEventListener('announcementClosed', onClosed);
+      return () => {
+        window.removeEventListener('announcementClosed', onClosed);
+        clearTimeout(t);
+      };
+    } else {
+      startTimer();
+      return () => clearTimeout(t);
+    }
   }, []);
 
   useEffect(() => {

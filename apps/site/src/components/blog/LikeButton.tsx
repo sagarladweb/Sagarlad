@@ -98,16 +98,20 @@ export function LikeButton({
         toggle();
       }}
       disabled={loading}
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-all ${
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-medium transition-colors ${
         liked
-          ? "border-red-300 bg-red-50 text-red-600 hover:bg-red-100"
-          : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+          ? "border-red-200 bg-red-50 text-red-500"
+          : "border-border text-muted-foreground hover:bg-muted"
       }`}
       aria-label={liked ? `Unlike (${likes})` : `Like (${likes})`}
     >
-      <Heart
-        className={`w-3.5 h-3.5 transition-transform ${liked ? "fill-red-500 text-red-500 scale-110" : ""}`}
-      />
+      <span className="relative flex items-center justify-center w-3.5 h-3.5">
+        <Heart
+          className={`absolute inset-0 w-3.5 h-3.5 transition-all duration-200 ${
+            liked ? "fill-red-500 text-red-500 scale-110" : ""
+          }`}
+        />
+      </span>
       {likes.toLocaleString()}
     </button>
   );

@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 
 let inflight: Promise<{ published: number; alive: boolean }> | null = null;
 let lastHeartbeat = 0;
@@ -14,6 +14,9 @@ const FAILURE_BACKOFF = 300_000; // 5 min — don't retry immediately if DB is d
  *
  * Promise lock: if two concurrent requests race in, only ONE query fires.
  * The second caller awaits the first caller's result.
+ *
+ * Uses dbSafe with retry — transient connection errors are retried twice
+ * before giving up. Exponential backoff prevents hammering a cold DB.
  */
 export async function heartbeat(): Promise<{
   published: number;
@@ -37,18 +40,22 @@ export async function heartbeat(): Promise<{
   inflight = (async () => {
     try {
       const nowDate = new Date();
-      const result = await prisma.post.updateMany({
-        where: {
-          published: false,
-          scheduledAt: { not: null, lte: nowDate },
-          deletedAt: null,
-        },
-        data: {
-          published: true,
-          publishedAt: nowDate,
-          scheduledAt: null,
-        },
-      });
+      const result = await dbSafe(
+        () =>
+          prisma.post.updateMany({
+            where: {
+              published: false,
+              scheduledAt: { not: null, lte: nowDate },
+              deletedAt: null,
+            },
+            data: {
+              published: true,
+              publishedAt: nowDate,
+              scheduledAt: null,
+            },
+          }),
+        { count: 0 }
+      );
 
       if (result.count > 0) {
         console.log(`[heartbeat] Published ${result.count} scheduled post(s)`);

@@ -79,6 +79,154 @@ export const defaultNewsletter: NewsletterContent = {
   socials: [],
 };
 
+// ── Pre-built layout: Weekly Digest ─────────────────────
+// Warm yellow branding, blog-centric layout with featured article,
+// curated links, and a quote. Best for regular newsletters.
+export const LAYOUT_WEEKLY_DIGEST: NewsletterContent = {
+  template: "letter",
+  accent: "#ffd51d",
+  preheader: "Your weekly dose of ideas on building, creating, and shipping.",
+  greeting: "Hey there,",
+  intro: "Welcome to another week of The Sagar Lad Letter. I've been deep in the weeds building something exciting — here's what's been on my mind and what I think you'll find useful.",
+  sections: [
+    {
+      heading: "Featured This Week",
+      body: "I've been thinking a lot about what separates products that ship from products that ship *well*. It's not velocity — it's **taste**.\n\nThe best builders I know don't move faster. They move with more clarity. They know what to cut, what to polish, and when to stop.\n\nHere's my framework for building with taste: start with the smallest version that tells the full story. Every pixel, every word, every interaction should earn its place.",
+    },
+    {
+      heading: "__BLOG__",
+      body: JSON.stringify({ title: "The Art of Shipping Clean Code", url: "https://sagarlad.com/blog/shipping-clean-code", excerpt: "Why the best code is the code you never had to write — and how to get there.", image: "" }),
+    },
+    {
+      heading: "__BLOG__",
+      body: JSON.stringify({ title: "From Side Project to Product", url: "https://sagarlad.com/blog/side-project-to-product", excerpt: "Lessons learned turning weekend hacks into real products that people use.", image: "" }),
+    },
+    { heading: "", body: "---" },
+    {
+      heading: "__QUOTE__",
+      body: JSON.stringify({ text: "Simplicity is the ultimate sophistication.", author: "Leonardo da Vinci" }),
+    },
+    { heading: "", body: "\n\n" },
+    {
+      heading: "Quick Links",
+      body: "• **My latest blog post** — on building products that people actually want to use\n→ **Tools I'm using** — the stack I reach for when starting something new\n✓ **A recommendation** — if you're building in public, this is worth your time",
+    },
+  ],
+  quote: null,
+  cta: { label: "Read the full blog", url: "https://sagarlad.com/blog" },
+  signoff: "Cheers,\nSagar",
+  socials: [],
+};
+
+// ── Pre-built layout: Deep Dive ─────────────────────────
+// Bold blue branding, long-form format with columns, code blocks,
+// tables, and visual cards. Best for in-depth technical newsletters.
+export const LAYOUT_DEEP_DIVE: NewsletterContent = {
+  template: "editorial",
+  accent: "#0d21a1",
+  preheader: "A deep dive into building systems that scale — from architecture to execution.",
+  greeting: "Hi,",
+  intro: "This edition is a deep dive into something I've been wrestling with at work: how to build systems that don't just work today, but still make sense in six months. Let's get into it.",
+  sections: [
+    {
+      heading: "The Problem",
+      body: "Every codebase starts clean. The first commit is pure intent — every function does exactly one thing, every module has a clear purpose. Then reality hits.\n\nFeatures get bolted on. Edge cases multiply. The team grows. And one day you look at the code and think: *how did we get here?*\n\nThe answer is always the same: **we optimized for speed instead of clarity**. And the fix isn't a refactor — it's a change in habits.",
+    },
+    {
+      heading: "__COL_LEFT__",
+      body: JSON.stringify({ left: "## Principles I Follow\n\n• **Read before you write** — understand the system before adding to it\n• **Small diffs, small PRs** — if a PR is bigger than 300 lines, it's too big\n• **One way to do things** — consistency beats cleverness every time\n• **Delete aggressively** — dead code is a liability, not a safety net", right: "" }),
+    },
+    {
+      heading: "__COL_RIGHT__",
+      body: JSON.stringify({ left: "", right: "" }),
+    },
+    { heading: "", body: "---" },
+    {
+      heading: "By the Numbers",
+      body: "",
+    },
+    {
+      heading: "__TABLE__",
+      body: JSON.stringify({
+        headerRow: true,
+        rows: [
+          ["Metric", "Before", "After", "Change"],
+          ["PR Size (avg)", "520 lines", "180 lines", "-65%"],
+          ["Review Time", "3.2 days", "0.8 days", "-75%"],
+          ["Bug Rate", "12/quarter", "4/quarter", "-67%"],
+          ["Deploy Frequency", "Weekly", "Daily", "+7x"],
+        ],
+      }),
+    },
+    { heading: "", body: "\n\n" },
+    {
+      heading: "__CODE__",
+      body: "// The simplest version of this principle:\n// Every function should be small enough to fit in your head.\n\nfunction processOrder(order: Order): Result {\n  const validated = validateOrder(order);\n  if (!validated.ok) return validated;\n  \n  const priced = calculateTotal(validated.value);\n  const saved = persistOrder(priced);\n  \n  return { ok: true, value: saved };\n}",
+    },
+    { heading: "", body: "\n\n" },
+    {
+      heading: "__QUOTE__",
+      body: JSON.stringify({ text: "First, solve the problem. Then, write the code.", author: "John Johnson" }),
+    },
+    { heading: "", body: "\n\n" },
+    {
+      heading: "What I'm Reading",
+      body: "• *The Pragmatic Programmer* — still the best book on software craft\n• *Staff Engineer* — if you're thinking about the senior+ path\n• *A Philosophy of Software Design* — on managing complexity",
+    },
+  ],
+  quote: null,
+  cta: { label: "Continue reading on the blog", url: "https://sagarlad.com/blog" },
+  signoff: "Until next time,\nSagar",
+  socials: [],
+};
+
+// Layout registry — used by the layout picker in the composer
+export type LayoutId = "blank" | "weekly-digest" | "deep-dive";
+
+export const PREBUILT_LAYOUTS: {
+  id: LayoutId;
+  name: string;
+  description: string;
+  accent: string;
+  template: TemplateId;
+  content: NewsletterContent;
+}[] = [
+  {
+    id: "blank",
+    name: "Blank Canvas",
+    description: "Start from scratch with an empty newsletter.",
+    accent: "#ffd51d",
+    template: "letter",
+    content: {
+      ...defaultNewsletter,
+      greeting: "",
+      intro: "",
+      preheader: "",
+      signoff: "",
+      quote: null,
+      cta: null,
+      socials: [],
+      sections: [],
+    },
+  },
+  {
+    id: "weekly-digest",
+    name: "Weekly Digest",
+    description: "Warm, blog-focused layout with featured article, curated links, and a quote.",
+    accent: "#ffd51d",
+    template: "letter",
+    content: LAYOUT_WEEKLY_DIGEST,
+  },
+  {
+    id: "deep-dive",
+    name: "Deep Dive",
+    description: "Bold, technical format with columns, tables, code blocks, and long-form content.",
+    accent: "#0d21a1",
+    template: "editorial",
+    content: LAYOUT_DEEP_DIVE,
+  },
+];
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")
@@ -87,13 +235,205 @@ function esc(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-// Split text on blank lines into <p> tags.
+// Split text on blank lines into <p> tags. Supports inline formatting.
 function paras(text: string): string {
-  const clean = esc(text).trim();
+  // Convert any literal <br> variants the user typed into real newlines before escaping
+  const clean = esc(text.replace(/<br\s*\/?>/gi, "\n")).trim();
   return clean
     .split(/\n\s*\n/)
-    .map((p) => `<p style="margin:0 0 16px 0;line-height:1.65">${p.replace(/\n/g, "<br/>")}</p>`)
+    .map((p) => `<p style="margin:0 0 16px 0;line-height:1.65">${formatInline(p.replace(/\n/g, "<br/>"))}</p>`)
     .join("");
+}
+
+// Render inline formatting: bold, italic, highlight, colored text.
+function formatInline(text: string): string {
+  let s = text;
+  // ==highlight== → <mark>
+  s = s.replace(/==(.+?)==/g, '<mark style="background:#fef08a;padding:1px 3px;border-radius:2px">$1</mark>');
+  // [color:red]text[/color] → <span style="color:red">
+  s = s.replace(/\[color:(\w+)\](.+?)\[\/color\]/g, '<span style="color:$1">$2</span>');
+  // **bold** → <strong>
+  s = s.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+  // *italic* → <em>
+  s = s.replace(/\*(.+?)\*/g, "<em>$1</em>");
+  return s;
+}
+
+// Render a list (bullet or ordered) from body text. Supports bullet styles.
+function listHtml(body: string, ordered: boolean): string {
+  const tag = ordered ? "ol" : "ul";
+  const items = body.split("\n").filter((l) => l.trim()).map((l) => {
+    const text = l.replace(/^[-*•→✓\d.]+\s*/, "").trim();
+    return `<li style="margin:0 0 6px 0;line-height:1.6">${formatInline(esc(text))}</li>`;
+  }).join("");
+  return `<${tag} style="margin:0;padding-left:24px">${items}</${tag}>`;
+}
+
+// Detect section kind from heading/body markers.
+export type SectionKind = "heading" | "text" | "image" | "divider" | "spacer" | "columns" | "list" | "ordered-list" | "code" | "quote" | "social" | "blog" | "video" | "book" | "table";
+
+function sectionKind(s: { heading: string; body: string }): SectionKind {
+  if (s.body === "---") return "divider";
+  if (s.body === "\n\n") return "spacer";
+  if (s.heading === "__CODE__") return "code";
+  if (s.heading === "__SOCIAL__") return "social";
+  if (s.heading === "__QUOTE__") return "quote";
+  if (s.heading === "__BLOG__") return "blog";
+  if (s.heading === "__VIDEO__") return "video";
+  if (s.heading === "__BOOK__") return "book";
+  if (s.heading === "__TABLE__") return "table";
+  if (s.heading.startsWith("__COL_LEFT__") || s.heading.startsWith("__COL_RIGHT__")) return "columns";
+  if (s.body.startsWith("https://") || s.body.startsWith("http://")) return "image";
+  if (s.heading === "" && (s.body.startsWith("- ") || /^[•→✓]\s/.test(s.body))) return "list";
+  if (s.heading === "" && s.body.startsWith("1. ")) return "ordered-list";
+  return "text";
+}
+
+// Shared section renderer — email-safe HTML for all block types.
+function sectionHtml(s: { heading: string; body: string }, accent: string, socialLinks?: { label: string; href: string; logoUrl?: string | null; color?: string | null }[]): string {
+  const kind = sectionKind(s);
+
+  switch (kind) {
+    case "divider":
+      return `<tr><td style="padding:8px 40px"><hr style="border:none;border-top:1px solid #e2e0db;margin:0"/></td></tr>`;
+
+    case "spacer":
+      return `<tr><td style="padding:20px 40px"></td></tr>`;
+
+    case "image": {
+      const url = esc(s.body.trim());
+      return `<tr><td style="padding:8px 40px"><img src="${url}" alt="" style="width:100%;border-radius:8px;display:block"/></td></tr>`;
+    }
+
+    case "columns": {
+      if (s.heading.startsWith("__COL_RIGHT__")) return "";
+      let left = ""; let right = ""; let leftTitle = ""; let rightTitle = ""; let bulletStyle = "dot";
+      try { const d = JSON.parse(s.body); left = d.left || ""; right = d.right || ""; leftTitle = d.leftTitle || ""; rightTitle = d.rightTitle || ""; bulletStyle = d.bulletStyle || "dot"; } catch { left = s.body; }
+      const bulletPrefix = { dot: "•", square: "■", number: "", roman: "" }[bulletStyle] ?? "•";
+      const isNumbered = bulletStyle === "number" || bulletStyle === "roman";
+      const listTag = isNumbered ? (bulletStyle === "roman" ? "lower-roman" : "decimal") : (bulletStyle === "square" ? "square" : "disc");
+      function colListHtml(text: string) {
+        if (!text.trim()) return "";
+        const tag = isNumbered ? "ol" : "ul";
+        const items = text.split("\n").filter((l) => l.trim()).map((l) => {
+          const t = l.replace(/^[-*•→✓\d.]+\s*/, "").trim();
+          return `<li style="margin:0 0 6px 0;line-height:1.6">${formatInline(esc(t))}</li>`;
+        }).join("");
+        return `<${tag} style="margin:0;padding-left:20px;list-style-type:${listTag}">${items}</${tag}>`;
+      }
+      const leftTitleHtml = leftTitle ? `<p style="margin:0 0 10px 0;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${MUTED}">${esc(leftTitle)}</p>` : "";
+      const rightTitleHtml = rightTitle ? `<p style="margin:0 0 10px 0;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:${MUTED}">${esc(rightTitle)}</p>` : "";
+      return `<tr><td style="padding:8px 40px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td width="48%" valign="top" style="font-size:15px;color:#2a2926;line-height:1.65">${leftTitleHtml}${colListHtml(left)}</td>
+        <td width="4%"></td>
+        <td width="48%" valign="top" style="font-size:15px;color:#2a2926;line-height:1.65">${rightTitleHtml}${colListHtml(right)}</td>
+      </tr></table></td></tr>`;
+    }
+
+    case "list":
+      return `<tr><td style="padding:8px 40px;font-size:15px;color:#2a2926">${listHtml(s.body, false)}</td></tr>`;
+
+    case "ordered-list":
+      return `<tr><td style="padding:8px 40px;font-size:15px;color:#2a2926">${listHtml(s.body, true)}</td></tr>`;
+
+    case "code": {
+      let html = s.body;
+      try { const d = JSON.parse(s.body); html = d.html || s.body; } catch { /* raw HTML */ }
+      const codeReset = `<style>pre{white-space:pre-wrap!important;word-break:break-word!important;overflow-x:hidden!important;max-width:100%!important}table{max-width:100%!important;width:100%!important;border-collapse:collapse!important}code,pre,div,span,img,iframe{max-width:100%!important;overflow:hidden!important;width:100%!important}*{box-sizing:border-box!important}</style>`;
+      return `<tr><td style="padding:8px 40px;overflow:hidden;max-width:100%"><div style="background:#f8f7f4;border:1px solid #e8e6e1;border-radius:8px;padding:20px;font-size:14px;color:#2a2926;overflow:hidden;max-width:100%;box-sizing:border-box;word-break:break-word">${codeReset}${html}</div></td></tr>`;
+    }
+
+    case "quote": {
+      let text = ""; let author = "";
+      try { const d = JSON.parse(s.body); text = d.text || ""; author = d.author || ""; } catch { text = s.body; }
+      return `<tr><td style="padding:12px 40px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td width="4" style="background:${accent};border-radius:2px"></td>
+        <td style="padding:6px 22px;font-style:italic;font-family:Georgia,'Times New Roman',serif;font-size:16px;color:#3c3a35">${esc(text)}
+          ${author ? `<div style="font-style:normal;font-size:13px;font-weight:700;color:${MUTED};margin-top:8px">— ${esc(author)}</div>` : ""}
+        </td>
+      </tr></table></td></tr>`;
+    }
+
+    case "social": {
+      if (!socialLinks || socialLinks.length === 0) return "";
+      let selected: string[] = [];
+      try { const d = JSON.parse(s.body); selected = d.selected || []; } catch { return ""; }
+      const links = socialLinks.filter((sl) => selected.includes(sl.label.toLowerCase()) || selected.includes(sl.href));
+      if (links.length === 0) return "";
+      const cells = links.map((sl) => {
+        const logo = sl.logoUrl ? `<img src="${esc(sl.logoUrl)}" alt="${esc(sl.label)}" style="width:20px;height:20px;border-radius:4px;vertical-align:middle;margin-right:6px"/>` : "";
+        return `<td style="padding:0 8px 0 0"><a href="${esc(sl.href)}" style="color:${sl.color || INK};text-decoration:none;font-size:13px;font-weight:600;white-space:nowrap;vertical-align:middle">${logo}${esc(sl.label)}</a></td>`;
+      }).join("");
+      return `<tr><td style="padding:8px 40px"><p style="margin:0 0 8px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${MUTED}">Follow me</p><table role="presentation" cellpadding="0" cellspacing="0"><tr>${cells}</tr></table></td></tr>`;
+    }
+
+    case "blog": {
+      let d = { title: "", url: "", excerpt: "", image: "" };
+      try { d = JSON.parse(s.body); } catch { d = { title: s.heading, url: s.body, excerpt: "", image: "" }; }
+      const imgHtml = d.image ? `<img src="${esc(d.image)}" alt="" style="width:100%;border-radius:8px;display:block;margin-bottom:12px"/>` : "";
+      return `<tr><td style="padding:8px 40px">
+        ${imgHtml}
+        <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${MUTED}">Blog Post</p>
+        <p style="margin:0 0 4px 0;font-size:18px;font-weight:700;font-family:Georgia,'Times New Roman',serif;color:${INK}">${esc(d.title || "Untitled")}</p>
+        ${d.excerpt ? `<p style="margin:0 0 8px 0;font-size:14px;color:${MUTED};line-height:1.5">${esc(d.excerpt)}</p>` : ""}
+        ${d.url ? `<a href="${esc(d.url)}" style="color:${MUTED};text-decoration:underline;font-size:13px">Read more →</a>` : ""}
+      </td></tr>`;
+    }
+
+    case "video": {
+      let d = { title: "", url: "", thumbnail: "" };
+      try { d = JSON.parse(s.body); } catch { d = { title: s.heading, url: s.body, thumbnail: "" }; }
+      const thumbHtml = d.thumbnail ? `<img src="${esc(d.thumbnail)}" alt="" style="width:100%;border-radius:8px;display:block"/>` : "";
+      return `<tr><td style="padding:8px 40px">
+        <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${MUTED}">Video</p>
+        ${thumbHtml}
+        <p style="margin:8px 0 4px 0;font-size:18px;font-weight:700;font-family:Georgia,'Times New Roman',serif;color:${INK}">${esc(d.title || "Untitled")}</p>
+        ${d.url ? `<a href="${esc(d.url)}" style="color:${MUTED};text-decoration:underline;font-size:13px">Watch →</a>` : ""}
+      </td></tr>`;
+    }
+
+    case "book": {
+      let d = { title: "", author: "", url: "", cover: "" };
+      try { d = JSON.parse(s.body); } catch { d = { title: s.heading, author: "", url: s.body, cover: "" }; }
+      const coverHtml = d.cover ? `<td width="100" valign="top" style="padding-right:16px"><img src="${esc(d.cover)}" alt="" style="width:100px;border-radius:6px;display:block"/></td>` : "";
+      return `<tr><td style="padding:8px 40px">
+        <p style="margin:0 0 4px 0;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:${MUTED}">Book</p>
+        <table role="presentation" cellpadding="0" cellspacing="0"><tr>
+          ${coverHtml}
+          <td valign="top">
+            <p style="margin:0 0 4px 0;font-size:18px;font-weight:700;font-family:Georgia,'Times New Roman',serif;color:${INK}">${esc(d.title || "Untitled")}</p>
+            ${d.author ? `<p style="margin:0 0 8px 0;font-size:13px;color:${MUTED}">by ${esc(d.author)}</p>` : ""}
+            ${d.url ? `<a href="${esc(d.url)}" style="color:${MUTED};text-decoration:underline;font-size:13px">Get it →</a>` : ""}
+          </td>
+        </tr></table>
+      </td></tr>`;
+    }
+
+    case "table": {
+      let data: { headerRow: boolean; rows: string[][] } = { headerRow: true, rows: [] };
+      try { data = JSON.parse(s.body); } catch { return ""; }
+      if (!data.rows.length) return "";
+      const rows = data.rows.map((row, ri) => {
+        const isHeader = ri === 0 && data.headerRow;
+        const cells = row.map((cell) => {
+          const style = isHeader
+            ? `padding:10px 14px;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:${INK};background:${accent}15;border-bottom:2px solid ${accent}`
+            : `padding:10px 14px;font-size:14px;color:#2a2926;border-bottom:1px solid #e8e6e1`;
+          return `<td style="${style}">${formatInline(esc(cell || "—"))}</td>`;
+        }).join("");
+        return `<tr>${cells}</tr>`;
+      }).join("");
+      return `<tr><td style="padding:8px 40px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid #e8e6e1;border-radius:8px;overflow:hidden;border-collapse:collapse">${rows}</table></td></tr>`;
+    }
+
+    case "heading":
+    case "text":
+    default: {
+      if (!s.heading && !s.body) return "";
+      const headingHtml = s.heading ? `<p style="margin:0 0 10px 0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:${INK}">${esc(s.heading)}</p><div style="margin:0 0 14px 0;height:3px;width:42px;background:${accent}"></div>` : "";
+      return `<tr><td style="padding:8px 40px;font-size:15px;color:#2a2926">${headingHtml}${paras(s.body)}</td></tr>`;
+    }
+  }
 }
 
 // Brand tokens — aligned with design.md. Yellow accent is the site's only
@@ -157,14 +497,7 @@ export function letterBody(c: NewsletterContent): string {
           ${paras(c.intro)}
         </td></tr>
         ${c.sections
-          .map(
-            (s, i) => `
-        <tr><td style="padding:${i === 0 ? "14px" : "6px"} 40px 0 40px">
-          <p style="margin:0 0 10px 0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:${INK}">${esc(s.heading)}</p>
-          <div style="margin:0 0 14px 0;height:3px;width:42px;background:${c.accent}"></div>
-          <div style="font-size:15px;color:#2a2926">${paras(s.body)}</div>
-        </td></tr>`
-          )
+          .map((s) => sectionHtml(s, c.accent, c.socials))
           .join("")}
         ${
           c.quote
@@ -223,13 +556,7 @@ export function editorialBody(c: NewsletterContent): string {
           ${paras(c.intro)}
         </td></tr>
         ${c.sections
-          .map(
-            (s, i) => `
-        <tr><td style="padding:${i === 0 ? "18px" : "10px"} 40px 0 40px;border-top:1px solid #efede8">
-          <p style="margin:16px 0 12px 0;font-size:19px;font-weight:800;color:${INK}">${esc(s.heading)}</p>
-          <div style="font-size:15px;color:#2b2a26">${paras(s.body)}</div>
-        </td></tr>`
-          )
+          .map((s) => sectionHtml(s, c.accent, c.socials))
           .join("")}
         ${
           c.quote
@@ -289,13 +616,7 @@ export function minimalBody(c: NewsletterContent): string {
           ${paras(c.intro)}
         </td></tr>
         ${c.sections
-          .map(
-            (s, i) => `
-        <tr><td style="padding:${i === 0 ? "14px" : "4px"} 24px 0 24px">
-          <p style="margin:0 0 12px 0;font-size:16px;font-weight:600;color:${INK}">${esc(s.heading)}</p>
-          <div style="font-size:15px;color:#4a4843">${paras(s.body)}</div>
-        </td></tr>`
-          )
+          .map((s) => sectionHtml(s, c.accent, c.socials))
           .join("")}
         ${
           c.quote
@@ -356,15 +677,14 @@ export const emptyNewsletter: NewsletterContent = {
 // Full envelope: body + unsubscribe footer. Rendered identically by the
 // composer preview and the Brevo send path.
 export function emailShell(companyName: string, bodyHtml: string, unsubscribeUrl: string): string {
-  return `<!doctype html><html><body style="margin:0;padding:0;background:#fafafa">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;padding:24px">
+  return `<!doctype html><html><head><meta name="color-scheme" content="light dark"><style>@media(prefers-color-scheme:dark){body,table{background:#1a1a1a!important}td{color:#e5e5e5!important}table table{background:#262626!important}a{color:#93c5fd!important}hr{border-color:#404040!important} .footer-cell{color:#a3a3a3!important}}</style></head><body style="margin:0;padding:0;background:#fafafa;overflow-x:hidden">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;padding:24px;overflow:hidden">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;font-family:-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;color:#1a1a1a">
-        <tr><td>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;font-family:-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;color:#1a1a1a;overflow:hidden">
+        <tr><td style="overflow:hidden">
           ${bodyHtml}
         </td></tr>
-        <tr><td style="padding:26px 20px 10px 20px;font-size:12px;color:#888;text-align:center;${FONT}">
-          You are receiving this because you subscribed to ${esc(companyName)}.<br/>
+        <tr><td class="footer-cell" style="padding:26px 20px 10px 20px;font-size:12px;color:#888;text-align:center;${FONT}">
           <a href="${esc(unsubscribeUrl)}" style="color:#888">Unsubscribe</a>
         </td></tr>
       </table>

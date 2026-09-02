@@ -17,6 +17,8 @@ const fullSchema = z.object({
   barLink: z.string().max(500).nullable().optional(),
   barStyle: z.string().optional().default("scrolling"),
   barSpeed: z.coerce.number().int().min(10).max(60).optional().default(30),
+  barBgColor: z.string().max(7).nullable().optional().default("#dbeafe"),
+  barColor: z.string().max(7).nullable().optional().default("#1e3a5f"),
   active: z.boolean().optional().default(false),
   eventDate: z.string().nullable().optional(),
 });

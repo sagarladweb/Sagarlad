@@ -20,8 +20,27 @@ export function NewsletterPopup() {
 
   useEffect(() => {
     if (dismissed) return;
-    const t = setTimeout(() => setVisible(true), 14000);
-    return () => clearTimeout(t);
+
+    let t: number;
+    const startTimer = () => {
+      t = window.setTimeout(() => setVisible(true), 14000);
+    };
+
+    // If an announcement is currently active, wait for it to close
+    if (document.documentElement.dataset.announcementActive === 'true') {
+      const onClosed = () => {
+        window.removeEventListener('announcementClosed', onClosed);
+        startTimer();
+      };
+      window.addEventListener('announcementClosed', onClosed);
+      return () => {
+        window.removeEventListener('announcementClosed', onClosed);
+        clearTimeout(t);
+      };
+    } else {
+      startTimer();
+      return () => clearTimeout(t);
+    }
   }, []);
 
   // Auto-close 5s after the popup appears, unless the user has started typing.

@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { User, ShieldCheck, LogOut, Clock, Activity } from "lucide-react";
+import { User, ShieldCheck, LogOut, Clock, Activity, Mail } from "lucide-react";
 import { ProfileForm } from "@/components/admin/ProfileForm";
 import { SecuritySettings } from "@/components/admin/SecuritySettings";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SystemHealthWidget } from "@/components/admin/SystemHealthWidget";
+import { NewsletterSettings } from "@/components/admin/NewsletterSettings";
 
 type SessionUser = {
   name?: string | null;
@@ -21,12 +22,12 @@ const tabBtn = (active: boolean) =>
   }`;
 
 export function SettingsTabs({ session }: { session: SessionUser | null }) {
-  const [tab, setTab] = useState<"profile" | "security" | "health">("profile");
+  const [tab, setTab] = useState<"profile" | "security" | "health" | "newsletter">("profile");
 
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex items-center gap-2" role="tablist" aria-label="Settings sections">
+      <div className="flex flex-wrap items-center gap-2" role="tablist" aria-label="Settings sections">
         <button
           type="button"
           role="tab"
@@ -44,6 +45,15 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           className={tabBtn(tab === "security")}
         >
           <ShieldCheck className="h-4 w-4" /> Security
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={tab === "newsletter"}
+          onClick={() => setTab("newsletter")}
+          className={tabBtn(tab === "newsletter")}
+        >
+          <Mail className="h-4 w-4" /> Newsletter
         </button>
         <button
           type="button"
@@ -88,6 +98,8 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           </div>
           <SecuritySettings />
         </div>
+      ) : tab === "newsletter" ? (
+        <NewsletterSettings />
       ) : (
         <SystemHealthWidget />
       )}

@@ -141,7 +141,7 @@ export function AboutMe() {
                 aria-hidden="true"
                 className="absolute -inset-4 rounded-[2.5rem] bg-gradient-to-tr from-brand-light/25 via-brand-light/10 to-transparent blur-2xl opacity-75"
               />
-              <figure className="card-hover relative aspect-[4/5] rounded-xl overflow-hidden border border-[#e2e8f0]/60 bg-card">
+              <figure className="card-hover relative aspect-[4/5] rounded-xl overflow-hidden border border-border bg-card">
                 <Image
                   src="/images/profile/about-3.webp"
                   alt="Sagar Lad"
@@ -194,7 +194,7 @@ export function AboutMe() {
                   key={s.label}
                   data-story-stat={s.value}
                   data-story-suffix={s.suffix}
-                  className="text-center card-hover rounded-xl p-4 transition-all hover:bg-card/40"
+                  className="text-center card-hover rounded-xl p-4"
                 >
                   <p
                     data-story-num

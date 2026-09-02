@@ -66,10 +66,28 @@
 .admin-panel {
   --accent: #0d21a1;
   --accent-foreground: #ffffff;
+  --brand: #0d21a1;
+  --brand-light: #3f88c5;
 }
 .dark .admin-panel {
   --accent: #3f88c5;
   --accent-foreground: #ffffff;
+  --brand: #3f88c5;
+  --brand-light: #7fa8d9;
+}
+
+/* Admin blue card/border tints */
+.admin-panel .bg-card {
+  background-color: #f8fafd;
+}
+.dark .admin-panel .bg-card {
+  background-color: #131720;
+}
+.admin-panel .border-border {
+  border-color: #d4dfef;
+}
+.dark .admin-panel .border-border {
+  border-color: #1e2a3d;
 }
 
 body {

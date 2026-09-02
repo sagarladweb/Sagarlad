@@ -23,10 +23,15 @@ export async function GET() {
   const session = await requireAdmin();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  return NextResponse.json({
-    enabled: Boolean(user?.twoFactorEnabled),
-  });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+    return NextResponse.json({
+      enabled: Boolean(user?.twoFactorEnabled),
+    });
+  } catch (err) {
+    console.error("[security] GET failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
 }
 
 export async function POST(request: Request) {
@@ -41,61 +46,66 @@ export async function POST(request: Request) {
   }
   const { action, secret, token } = parsed.data;
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  try {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  if (action === "setup") {
-    if (user.twoFactorEnabled) {
-      return NextResponse.json({ error: "2FA is already enabled" }, { status: 409 });
+    if (action === "setup") {
+      if (user.twoFactorEnabled) {
+        return NextResponse.json({ error: "2FA is already enabled" }, { status: 409 });
+      }
+      const newSecret = generateTotpSecret();
+      const email = user.email ?? "admin@sagarlad.com";
+      const uri = totpUri(newSecret, email);
+      const qrDataUrl = await QRCode.toDataURL(uri, {
+        width: 280,
+        margin: 2,
+        errorCorrectionLevel: "M",
+      });
+      return NextResponse.json({ secret: newSecret, uri, qr: qrDataUrl });
     }
-    const newSecret = generateTotpSecret();
-    const email = user.email ?? "admin@sagarlad.com";
-    const uri = totpUri(newSecret, email);
-    const qrDataUrl = await QRCode.toDataURL(uri, {
-      width: 280,
-      margin: 2,
-      errorCorrectionLevel: "M",
-    });
-    return NextResponse.json({ secret: newSecret, uri, qr: qrDataUrl });
-  }
 
-  if (action === "enable") {
-    if (user.twoFactorEnabled) {
-      return NextResponse.json({ error: "2FA is already enabled" }, { status: 409 });
+    if (action === "enable") {
+      if (user.twoFactorEnabled) {
+        return NextResponse.json({ error: "2FA is already enabled" }, { status: 409 });
+      }
+      if (!secret || !token) {
+        return NextResponse.json({ error: "Secret and code are required" }, { status: 400 });
+      }
+      if (!verifyTotp(token, secret)) {
+        return NextResponse.json({ error: "Invalid code. Please try again." }, { status: 400 });
+      }
+      const recoveryCodes = generateRecoveryCodes();
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          twoFactorEnabled: true,
+          twoFactorSecret: secret,
+          twoFactorRecovery: recoveryCodes.join(","),
+        },
+      });
+      await logAudit("2FA_SETUP", { userId });
+      return NextResponse.json({ ok: true, recoveryCodes });
     }
-    if (!secret || !token) {
-      return NextResponse.json({ error: "Secret and code are required" }, { status: 400 });
+
+    // action === "disable"
+    if (!user.twoFactorSecret) {
+      return NextResponse.json({ ok: true });
     }
-    if (!verifyTotp(token, secret)) {
+    if (!token) {
+      return NextResponse.json({ error: "Authentication code is required" }, { status: 400 });
+    }
+    if (!verifyTotp(token, user.twoFactorSecret)) {
       return NextResponse.json({ error: "Invalid code. Please try again." }, { status: 400 });
     }
-    const recoveryCodes = generateRecoveryCodes();
     await prisma.user.update({
       where: { id: userId },
-      data: {
-        twoFactorEnabled: true,
-        twoFactorSecret: secret,
-        twoFactorRecovery: recoveryCodes.join(","),
-      },
+      data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorRecovery: null },
     });
-    await logAudit("2FA_SETUP", { userId });
-    return NextResponse.json({ ok: true, recoveryCodes });
-  }
-
-  // action === "disable"
-  if (!user.twoFactorSecret) {
+    await logAudit("2FA_DISABLE", { userId });
     return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[security] POST failed:", (err as Error).message);
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
   }
-  if (!token) {
-    return NextResponse.json({ error: "Authentication code is required" }, { status: 400 });
-  }
-  if (!verifyTotp(token, user.twoFactorSecret)) {
-    return NextResponse.json({ error: "Invalid code. Please try again." }, { status: 400 });
-  }
-  await prisma.user.update({
-    where: { id: userId },
-    data: { twoFactorEnabled: false, twoFactorSecret: null, twoFactorRecovery: null },
-  });
-  await logAudit("2FA_DISABLE", { userId });
-  return NextResponse.json({ ok: true });
 }
