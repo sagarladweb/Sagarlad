@@ -30,6 +30,9 @@ yarn-error.log*
 .env*
 !.env.example
 
+# Google Analytics service account (contains private key)
+sagarlad-analytics-*.json
+
 # vercel
 .vercel
 

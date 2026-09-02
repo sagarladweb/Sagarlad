@@ -180,7 +180,7 @@ const BOOKS = [
 ];
 
 const COVER = (id: string) =>
-  `https://vvawladyffozwclpqdhu.supabase.co/storage/v1/object/public/sagarlad-assets/books/${id}`;
+  `https://izdtlzkdgnywtpairjbt.supabase.co/storage/v1/object/public/sagarlad-assets/books/${id}`;
 
 // Cover images recovered from Supabase Storage (matched to each title by OCR).
 const READ_COVERS: Record<string, string> = {
