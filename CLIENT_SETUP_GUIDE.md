@@ -486,7 +486,7 @@ This section lists every credential, what it does, and exactly how to get it.
 **How to get it:**
 1. Same Supabase project -> **Project Settings -> Database**
 2. Under **Connection string**, copy the **Direct connection** URL (port `5432`)
-3. It looks like: `postgresql://postgres:Sagarlad@2026@db.vvawladyffozwclpqdhu.supabase.co:5432/postgres`
+3. It looks like: `postgresql://postgres:YOUR_PASSWORD@db.YOUR_PROJECT_REF.supabase.co:5432/postgres`
 
 **Important:** This is only used locally for `prisma migrate` and `prisma db push`. Do NOT use this in Vercel (it will exhaust your connection limit).
 
@@ -534,7 +534,7 @@ This outputs something like: `8/AGlmM5ktb4sFRSReSFM7+CQeBl9BOtuWJ5A34FZwc=`
 **How to get it:**
 1. Supabase dashboard -> **Project Settings -> API**
 2. Copy **Project URL**
-3. It looks like: `https://vvawladyffozwclpqdhu.supabase.co`
+3. It looks like: `https://YOUR_PROJECT_REF.supabase.co`
 
 **Format:** `https://[PROJECT_REF].supabase.co`
 

@@ -51,3 +51,16 @@ dev.db
 dev.db-journal
 .builds/
 /apps/*/.builds/
+
+# AI tool directories and config
+.claude/
+.opencode/
+.agents/
+.cursor/
+.cursorrules
+.windsurfrules
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+copilot-instructions.md
+.github/copilot*
