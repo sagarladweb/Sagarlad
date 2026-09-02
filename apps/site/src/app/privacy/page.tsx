@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
-import { formatDate, pageMetadata } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, formatDate, pageMetadata } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Privacy Policy",
@@ -13,6 +14,17 @@ export const revalidate = 604800;
 export default function PrivacyPage() {
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Privacy Policy — Sagar Lad",
+          description: "How we collect, use and protect your information on sagarlad.com.",
+          url: `${SITE.url}/privacy`,
+          author: { "@type": "Person", name: "Sagar Lad", url: SITE.url },
+          dateModified: new Date().toISOString(),
+        }}
+      />
       <PageHeader
         eyebrow="Legal"
         title="Privacy Policy"

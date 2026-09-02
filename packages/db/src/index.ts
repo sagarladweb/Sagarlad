@@ -61,7 +61,7 @@ function createClient() {
     idleTimeoutMillis: 30000,
     query_timeout: 10000,
     statement_timeout: 10000,
-  });
+  } as Record<string, unknown>);
   pool.on("error", (err) => {
     console.error("[db] idle pool error:", err.message);
   });

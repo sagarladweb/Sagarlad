@@ -6,6 +6,8 @@ import { validateContact, sanitizeText, digitsOnly } from "@/lib/client-validato
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Calendar } from "@/components/ui/Calendar";
 import { SocialLinks } from "@/components/SocialLinks";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE } from "@/lib/site";
 
 import Image from "next/image";
 
@@ -102,6 +104,21 @@ export default function SpeakingContactPage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Speaking Contact — Sagar Lad",
+          description: "Book Sagar Lad for keynotes, panels, corporate events and speaking engagements.",
+          url: `${SITE.url}/speaking/contact`,
+          mainEntity: {
+            "@type": "Person",
+            name: "Sagar Lad",
+            url: SITE.url,
+            jobTitle: "Author · Investor · Public Speaker",
+          },
+        }}
+      />
       {/* Event Booking Hero — white, light-blue gradient behind the portrait, blue accents */}
       <header className="overflow-hidden border-b border-border bg-background text-foreground py-16 sm:py-24">
         <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-4 sm:px-6 lg:grid-cols-12 lg:gap-10">

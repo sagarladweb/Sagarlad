@@ -1,0 +1,60 @@
+# Sagar Lad — Full Site Context
+
+## About Sagar Lad
+Sagar Lad is an author, investor and public speaker. He has worked across multiple countries and published books on data, cloud computing and personal development. His website sagarlad.com is the central hub for his blog, books, videos, newsletter, mentorship and speaking engagements.
+
+## Site Structure
+
+### Homepage (https://sagarlad.com)
+The homepage introduces Sagar Lad with a hero section, featured content, latest blog posts, and newsletter signup.
+
+### Blog (https://sagarlad.com/blog)
+Articles covering personal finance, career advice, productivity, and self-awareness. Each post has comments, likes, and view counts. Posts are published weekly.
+
+### Books (https://sagarlad.com/books)
+Published books by Sagar Lad. Includes both physical books available on Amazon and free/premium eBooks.
+
+### eBooks (https://sagarlad.com/ebooks)
+Free and premium downloadable guides on money, career and productivity topics.
+
+### Books Read (https://sagarlad.com/books-read)
+A curated reading list of books that have influenced Sagar's thinking, with key takeaways from each.
+
+### Videos (https://sagarlad.com/videos)
+Video content on money, career, relationships and awareness. Sourced from YouTube and other platforms.
+
+### Newsletter (https://sagarlad.com/newsletter)
+The Sagar Lad Letter — a free weekly email with practical frameworks. Subscribers get one email per week.
+
+### Quotes (https://sagarlad.com/quotes)
+Short ideas on habits, confidence, money and happiness.
+
+### Content (https://sagarlad.com/content)
+Browse all content by topic/category. Categories include finance, career, productivity and more.
+
+### Mentorship (https://sagarlad.com/mentorship)
+Book 1:1 mentorship sessions with Sagar Lad via Topmate.
+
+### Speaking (https://sagarlad.com/speaking)
+Sagar Lad's public speaking page — keynotes, panels, and corporate events. Includes a contact form for booking.
+
+### Contact (https://sagarlad.com/contact)
+General contact form for inquiries.
+
+### Socials (https://sagarlad.com/socials)
+Links to all social media profiles — YouTube, Instagram, LinkedIn, X (Twitter), GitHub.
+
+### About (https://sagarlad.com/about)
+Background, journey, and timeline of Sagar Lad's career.
+
+### Privacy Policy (https://sagarlad.com/privacy)
+How data is collected, used and protected on sagarlad.com.
+
+### Terms of Use (https://sagarlad.com/terms)
+Rules for using the website.
+
+## RSS Feed
+- https://sagarlad.com/rss.xml — Latest blog posts in RSS format
+
+## Contact
+For business inquiries, speaking engagements, or media requests: https://sagarlad.com/contact

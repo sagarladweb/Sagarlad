@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
-import { formatDate, pageMetadata } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, formatDate, pageMetadata } from "@/lib/site";
 
 export const metadata: Metadata = pageMetadata({
   title: "Terms of Use",
@@ -13,6 +14,17 @@ export const revalidate = 604800;
 export default function TermsPage() {
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          name: "Terms of Use — Sagar Lad",
+          description: "The rules of the road for using the Sagar Lad website.",
+          url: `${SITE.url}/terms`,
+          author: { "@type": "Person", name: "Sagar Lad", url: SITE.url },
+          dateModified: new Date().toISOString(),
+        }}
+      />
       <PageHeader
         eyebrow="Legal"
         title="Terms of Use"

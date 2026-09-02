@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { BookLibrary } from "@/components/books/BookLibrary";
-import { pageMetadata } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getPublishedBooks } from "@/lib/content";
 
 export const metadata: Metadata = pageMetadata({
@@ -23,6 +24,16 @@ export default async function EbooksPage() {
 
   return (
     <>
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "eBooks & Guides — Sagar Lad",
+          description: "Free and premium eBooks and guides by Sagar Lad on money, careers and productivity.",
+          url: `${SITE.url}/ebooks`,
+          author: { "@type": "Person", name: "Sagar Lad", url: SITE.url },
+        }}
+      />
       <PageHeader
         eyebrow="eBooks"
         title="Guides you can start today"

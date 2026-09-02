@@ -3,7 +3,8 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { BookLibrary } from "@/components/books/BookLibrary";
 import { BookStats } from "@/components/books/BookStats";
-import { pageMetadata } from "@/lib/site";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE, pageMetadata } from "@/lib/site";
 import { getPublishedBooks } from "@/lib/content";
 
 export const metadata: Metadata = pageMetadata({
@@ -29,6 +30,16 @@ export default async function BooksReadPage() {
 
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: "Books I've Read — Sagar Lad",
+          description: "A running list of the books that have shaped my thinking — with the one clear lesson each one left me with.",
+          url: `${SITE.url}/books-read`,
+          author: { "@type": "Person", name: "Sagar Lad", url: SITE.url },
+        }}
+      />
       <header className="border-b border-border bg-background">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-14 md:py-20">
           <p className="btn-premium inline-block text-xs font-semibold uppercase tracking-[0.2em] text-brand bg-brand-light/10 rounded-full px-3.5 py-1">

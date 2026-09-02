@@ -7,6 +7,8 @@ import { gsap, ScrollTrigger } from "@/lib/gsap";
 import { ArrowRight, Trophy, Medal, Footprints } from "lucide-react";
 import { SiteLogo } from "@/components/SiteLogo";
 import { Timeline } from "@/components/about/Timeline";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE } from "@/lib/site";
 
 import { METRICS } from "@/lib/metrics";
 
@@ -196,6 +198,21 @@ export default function AboutPage() {
 
   return (
     <div ref={root} className="bg-background overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          name: "About Sagar Lad",
+          description: "Background, journey and timeline of Sagar Lad — author, investor and public speaker.",
+          url: `${SITE.url}/about`,
+          mainEntity: {
+            "@type": "Person",
+            name: "Sagar Lad",
+            url: SITE.url,
+            jobTitle: "Author · Investor · Public Speaker",
+          },
+        }}
+      />
       {/* ---------- Visual Hero ---------- */}
       <section className="relative -mt-16 min-h-[calc(100svh+4rem)] border-b border-border bg-foreground text-background overflow-hidden">
         <div className="absolute inset-0" aria-hidden="true">

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { JsonLd } from "@/components/JsonLd";
+import { SITE } from "@/lib/site";
 import {
   Loader2,
   CheckCircle2,
@@ -104,6 +106,20 @@ export default function ContactPage() {
 
   return (
     <div className="overflow-x-clip">
+      <JsonLd
+        data={{
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          name: "Contact — Sagar Lad",
+          description: "Get in touch with Sagar Lad for inquiries, collaborations, or general questions.",
+          url: `${SITE.url}/contact`,
+          mainEntity: {
+            "@type": "Person",
+            name: "Sagar Lad",
+            url: SITE.url,
+          },
+        }}
+      />
       {/* ── Hero ─────────────────────────────────────────────── */}
       <header className="relative overflow-hidden border-b border-border bg-background">
         {/* Very soft blue gradient — bottom-left, barely there */}

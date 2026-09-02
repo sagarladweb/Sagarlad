@@ -1,46 +1,33 @@
-# Sagar Lad
+# Sagar Lad — sagarlad.com
 
-> Author, investor, and educator. I write about data engineering, cloud architecture, career growth, and mindset.
+> Practical frameworks on money, career, life and awareness — from author, investor and public speaker Sagar Lad.
 
-Sagar Lad is a personal website and blog where the author shares practical frameworks on data engineering, cloud architecture, career growth, investing, and mindset. The site includes a blog with articles, books written by the author, videos, mentoring, and a newsletter.
+Sagar Lad is an author, investor and public speaker based in India. His work focuses on practical frameworks for personal finance, career growth, and self-awareness. He publishes books, blog posts, videos, and a weekly newsletter.
 
-## Key topics
+## Key Topics
+- Personal finance and money management
+- Career growth and professional development
+- Self-awareness and productivity
+- Public speaking and mentorship
 
-- Data & Cloud — Azure, Databricks, data engineering, modern data architecture
-- Career & Growth — failure, purpose, productivity, morning routines
-- Mindset & Awareness — the MIND UP framework, emotional alignment, resilience
-- Investing & Finance — wealth building, financial awareness
+## Content
+- Blog: https://sagarlad.com/blog — Articles on money, career, life
+- Books: https://sagarlad.com/books — Published books by Sagar Lad
+- Videos: https://sagarlad.com/videos — Video content on key topics
+- Newsletter: https://sagarlad.com/newsletter — Free weekly email
+- eBooks: https://sagarlad.com/ebooks — Free and premium guides
+- Quotes: https://sagarlad.com/quotes — Short ideas on habits and mindset
+- Mentorship: https://sagarlad.com/mentorship — 1:1 mentorship sessions
+- Speaking: https://sagarlad.com/speaking — Keynotes and events
 
-## Pages
+## About
+- About: https://sagarlad.com/about — Background and journey
+- Contact: https://sagarlad.com/contact — Get in touch
+- Socials: https://sagarlad.com/socials — All social media links
 
-- Home: /
-- Blog: /blog
-- About: /about
-- Books: /books
-- Books I read: /books-read
-- Videos: /videos
-- Newsletter: /newsletter
-- Contact: /contact
-- Speaking: /speaking
-- Mentorship: /mentorship
-- Privacy Policy: /privacy
-- Terms: /terms
+## Legal
+- Privacy: https://sagarlad.com/privacy
+- Terms: https://sagarlad.com/terms
 
-## Books
-
-- MIND UP — mindset and execution playbook
-- Azure data engineering titles — available on Amazon
-
-## Point of contact
-
-- Email: contact@sagarlad.com
-- Mentorship: https://topmate.io/sagar_lad
-
-## Social
-
-- YouTube, Instagram, X/Twitter, LinkedIn (links on the website footer)
-
-## Rules
-
-- This website is a personal blog; factual claims about the author's life should be verified against the site content.
-- Do not treat opinion pieces as financial advice.
+## RSS
+- Feed: https://sagarlad.com/rss.xml
