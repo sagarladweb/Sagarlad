@@ -17,10 +17,16 @@ function shortDate(iso: string): string {
 }
 
 const W = 800;
-const H = 300;
-const PAD_TOP = 20;
-const PAD_BOTTOM = 50;
-const CHART_H = H - PAD_TOP - PAD_BOTTOM;
+const H = 311;
+const PAD_TOP = 29;
+const PAD_BOTTOM = 48;
+const CHART_H = H - PAD_TOP - PAD_BOTTOM; // 234
+const LABEL_Y = H - 14 - 6; // 291
+const LABEL_SIZE = 12;
+const GRID_LABEL_SIZE = 12;
+const LINE_WIDTH = 2.5;
+const LABEL_X_PAD = 23;
+const LABEL_EVERY_N: number = 1;
 
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(initial.data?.days ?? 14);
@@ -58,7 +64,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
   }));
 
   const dailyLen = data?.daily.length ?? 0;
-  const labelEvery = Math.max(1, Math.ceil(dailyLen / 7));
+  const labelEvery = LABEL_EVERY_N === 0 ? Math.max(1, Math.ceil(dailyLen / 7)) : LABEL_EVERY_N;
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card p-5">
@@ -131,22 +137,22 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               {gridLines.map((g) => (
                 <g key={g.y}>
                   <line x1="0" x2={W} y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="4 4" />
-                  <text x="4" y={g.y - 6} fontSize="10" fill="var(--muted-foreground)">{g.label}</text>
+                  <text x="4" y={g.y - 6} fontSize={GRID_LABEL_SIZE} fill="var(--muted-foreground)">{g.label}</text>
                 </g>
               ))}
 
               {pGeo.area && <path d={pGeo.area} fill="url(#ga-pageviews)" />}
               {sGeo.area && <path d={sGeo.area} fill="url(#ga-sessions)" />}
               {pGeo.line && <path d={pGeo.line} fill="none" stroke="#0ea5e9" strokeWidth="1.5" />}
-              {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth="2.5" />}
+              {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth={LINE_WIDTH} />}
 
               {data.daily.map((d, i) =>
                 i % labelEvery === 0 || i === dailyLen - 1 ? (
                   <g key={d.date}>
                     <line
-                      x1={(i * W) / Math.max(1, dailyLen - 1)}
+                      x1={LABEL_X_PAD + (i * (W - 2 * LABEL_X_PAD)) / Math.max(1, dailyLen - 1)}
                       y1={PAD_TOP}
-                      x2={(i * W) / Math.max(1, dailyLen - 1)}
+                      x2={LABEL_X_PAD + (i * (W - 2 * LABEL_X_PAD)) / Math.max(1, dailyLen - 1)}
                       y2={PAD_TOP + CHART_H}
                       stroke="var(--border)"
                       strokeWidth="0.5"
@@ -154,9 +160,9 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
                       opacity="0.3"
                     />
                     <text
-                      x={(i * W) / Math.max(1, dailyLen - 1)}
-                      y={H - 10}
-                      fontSize="10"
+                      x={LABEL_X_PAD + (i * (W - 2 * LABEL_X_PAD)) / Math.max(1, dailyLen - 1)}
+                      y={LABEL_Y}
+                      fontSize={LABEL_SIZE}
                       fill="var(--muted-foreground)"
                       textAnchor="middle"
                     >

@@ -2,6 +2,17 @@
 
 type Country = { country: string; users: number; sessions: number };
 
+const W = 800;
+const H = 240;
+const PAD_LEFT = 10;
+const PAD_RIGHT = 10;
+const PAD_TOP = 20;
+const PAD_BOTTOM = 40;
+const BAR_MAX_W = 47;
+const BAR_GAP = 13;
+const VAL_FONT_SIZE = 12;
+const COUNTRY_LABEL_SIZE = 10;
+
 export function WorldMap({ data }: { data: Country[] }) {
   const maxUsers = Math.max(...data.map((c) => c.users), 1);
 
@@ -13,23 +24,14 @@ export function WorldMap({ data }: { data: Country[] }) {
     );
   }
 
-  const W = 800;
-  const H = 220;
-  const PAD_LEFT = 10;
-  const PAD_RIGHT = 10;
-  const PAD_TOP = 20;
-  const PAD_BOTTOM = 40;
   const chartW = W - PAD_LEFT - PAD_RIGHT;
   const chartH = H - PAD_TOP - PAD_BOTTOM;
-  const barGap = 6;
-  const barW = Math.min(60, (chartW - barGap * (data.length - 1)) / data.length);
+  const barW = Math.min(BAR_MAX_W, (chartW - BAR_GAP * (data.length - 1)) / data.length);
 
   return (
-    <div style={{ height: H }}>
+    <div>
       <svg
         viewBox={`0 0 ${W} ${H}`}
-        width={W}
-        height={H}
         className="w-full block"
         role="img"
         aria-label="Visitors by country"
@@ -49,11 +51,10 @@ export function WorldMap({ data }: { data: Country[] }) {
         {/* Bars */}
         {data.map((c, i) => {
           const barH = (c.users / maxUsers) * chartH;
-          const x = PAD_LEFT + i * (barW + barGap) + (chartW - data.length * (barW + barGap) + barGap) / 2;
+          const x = PAD_LEFT + i * (barW + BAR_GAP) + (chartW - data.length * (barW + BAR_GAP) + BAR_GAP) / 2;
           const y = PAD_TOP + chartH - barH;
           return (
             <g key={c.country}>
-              {/* Bar */}
               <rect
                 x={x}
                 y={y}
@@ -63,22 +64,20 @@ export function WorldMap({ data }: { data: Country[] }) {
                 fill="#6366f1"
                 opacity="0.85"
               />
-              {/* Value on top */}
               <text
                 x={x + barW / 2}
                 y={y - 5}
-                fontSize="10"
+                fontSize={VAL_FONT_SIZE}
                 fontWeight="600"
                 fill="var(--foreground)"
                 textAnchor="middle"
               >
                 {c.users}
               </text>
-              {/* Country label */}
               <text
                 x={x + barW / 2}
                 y={H - 10}
-                fontSize="9"
+                fontSize={COUNTRY_LABEL_SIZE}
                 fill="var(--muted-foreground)"
                 textAnchor="middle"
               >
