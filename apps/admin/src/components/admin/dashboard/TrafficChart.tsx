@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import type { GaResult } from "@/lib/analytics";
 import { chartGeometry, formatCompact } from "@/lib/charts";
 
@@ -11,20 +11,25 @@ const RANGES = [
   { label: "ALL", days: 90 },
 ] as const;
 
-function shortDate(iso: string): string {
+function fullDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
-  return d
-    .toLocaleDateString("en-IN", { day: "numeric", month: "short" })
-    .toUpperCase();
+  return d.toLocaleDateString("en-IN", {
+    day: "numeric",
+    month: "long",
+  });
 }
 
 export function TrafficChart({ initial }: { initial: GaResult }) {
-  const [days, setDays] = useState<number>(14);
+  const [days, setDays] = useState<number>(initial.data?.days ?? 14);
   const [result, setResult] = useState<GaResult>(initial);
   const [loading, setLoading] = useState(false);
+  const initialRef = useRef(initial);
 
   useEffect(() => {
-    if (days === initial.data?.days && result === initial) return;
+    initialRef.current = initial;
+  }, [initial]);
+
+  useEffect(() => {
     let cancelled = false;
     setLoading(true);
     fetch(`/api/admin/analytics?days=${days}`)
@@ -88,7 +93,6 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
       </div>
 
       {loading ? (
-        /* Shine skeleton while loading new period */
         <div className="mt-6 space-y-3">
           <div className="flex gap-4 text-xs">
             <div className="h-3 w-16 sk-item rounded-full" />
@@ -97,7 +101,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
           <div className="h-[200px] w-full sk-item rounded-xl" />
           <div className="flex justify-between">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-3 w-8 sk-item rounded" />
+              <div key={i} className="h-3 w-12 sk-item rounded" />
             ))}
           </div>
         </div>
@@ -117,10 +121,11 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
           </div>
           <div className="mt-2">
             <svg
-              viewBox="0 0 600 190"
+              viewBox="0 0 600 210"
               className="w-full"
               role="img"
               aria-label="Traffic chart"
+              style={{ overflow: "visible" }}
             >
               <defs>
                 <linearGradient id="ga-sessions" x1="0" y1="0" x2="0" y2="1">
@@ -174,16 +179,16 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
                 />
               )}
               {data.daily.map((d, i) =>
-                i % labelEvery === 0 ? (
+                i % labelEvery === 0 || i === dailyLen - 1 ? (
                   <text
                     key={d.date}
                     x={(i * 600) / Math.max(1, dailyLen - 1)}
-                    y="186"
-                    fontSize="9"
+                    y="196"
+                    fontSize="8"
                     fill="var(--muted-foreground)"
                     textAnchor="middle"
                   >
-                    {shortDate(d.date)}
+                    {fullDate(d.date)}
                   </text>
                 ) : null
               )}

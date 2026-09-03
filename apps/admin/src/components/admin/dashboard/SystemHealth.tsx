@@ -119,14 +119,7 @@ export function SystemHealth() {
 
       {/* View all link */}
       <Link
-        href="/admin/settings"
-        onClick={() => {
-          // Trigger health tab after navigation
-          setTimeout(() => {
-            const btn = document.querySelector('[role="tab"]:nth-child(4)') as HTMLButtonElement | null;
-            btn?.click();
-          }, 100);
-        }}
+        href="/admin/settings#health"
         className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
       >
         View all checks <ArrowRight className="w-3 h-3" />

@@ -240,10 +240,17 @@ async function fetchGaAnalytics(days: number): Promise<GaResult> {
           users: num(row.metricValues?.[0]?.value),
           sessions: num(row.metricValues?.[1]?.value),
         })),
-        newVsReturning: (newVsReturning?.rows ?? []).map((row) => ({
-          type: row.dimensionValues?.[0]?.value === "new" ? "new" : "returning",
-          users: num(row.metricValues?.[0]?.value),
-        })),
+        newVsReturning: (() => {
+          const merged = new Map<string, number>();
+          for (const row of newVsReturning?.rows ?? []) {
+            const type = row.dimensionValues?.[0]?.value === "new" ? "new" : "returning";
+            merged.set(type, (merged.get(type) ?? 0) + num(row.metricValues?.[0]?.value));
+          }
+          return Array.from(merged.entries()).map(([type, users]) => ({
+            type: type as "new" | "returning",
+            users,
+          }));
+        })(),
       },
     };
   } catch (err) {

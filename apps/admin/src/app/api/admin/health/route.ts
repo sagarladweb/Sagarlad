@@ -99,35 +99,44 @@ async function checkBrevo(): Promise<HealthCheck> {
     };
   }
 
-  // Ping Brevo API to verify key is valid
   const start = Date.now();
   try {
     const res = await fetch("https://api.brevo.com/v3/account", {
       headers: { accept: "application/json", "api-key": key },
-      signal: AbortSignal.timeout(5000),
-    }).catch(() => null);
+      signal: AbortSignal.timeout(10000),
+    });
     const latency = Date.now() - start;
+    const body = await res.json().catch(() => null);
 
-    if (res && res.ok) {
-      const data = await res.json().catch(() => null);
-      const plan = data?.plan?.[0]?.type ?? "unknown";
+    if (res.ok) {
+      const plan = body?.plan?.[0]?.type ?? "unknown";
       return {
         label: "Brevo (Email)",
         status: "ok",
-        message: `API key valid — ${data.email ?? email} (${plan} plan)`,
+        message: `API key valid — ${body.email ?? email} (${plan} plan)`,
         latencyMs: latency,
       };
     }
+
+    // Provide specific error details
+    const msg = body?.message ?? body?.code ?? `HTTP ${res.status}`;
+    const isIpBlock = res.status === 401 && /unrecognised|ip/i.test(String(msg));
     return {
       label: "Brevo (Email)",
-      status: "error",
-      message: `API key invalid or expired (HTTP ${res?.status ?? "none"})`,
+      status: isIpBlock ? "warn" : "error",
+      message: isIpBlock
+        ? `IP not whitelisted — remove IP restrictions at app.brevo.com/security/authorised_ips`
+        : `API error: ${msg}`,
+      latencyMs: latency,
     };
-  } catch {
+  } catch (e) {
+    const latency = Date.now() - start;
+    const msg = e instanceof Error ? e.message : "Unknown error";
     return {
       label: "Brevo (Email)",
       status: "error",
-      message: "Could not reach Brevo API",
+      message: `Could not reach Brevo API — ${msg}`,
+      latencyMs: latency,
     };
   }
 }

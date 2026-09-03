@@ -169,7 +169,7 @@ export default async function DashboardPage() {
         <TrafficChart initial={ga} />
       </section>
 
-      {/* Sources + Content side by side */}
+      {/* Sources + Content + Newsletter side by side */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <Card title="Top sources" icon={Radio}>
           {gaData.topSources.length === 0 ? (
@@ -214,6 +214,31 @@ export default async function DashboardPage() {
               </li>
             ))}
           </ul>
+        </Card>
+
+        <Card title="Newsletter" icon={Mail}>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Active subscribers</span>
+              <span className="font-semibold tabular-nums">{extras.activeSubs}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Queued to send</span>
+              <span className="font-semibold tabular-nums">{extras.queued}</span>
+            </div>
+            {extras.lastCampaign && (
+              <div className="border-t border-border pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Last broadcast</p>
+                <p className="mt-1 truncate font-medium">{extras.lastCampaign.subject}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {new Date(extras.lastCampaign.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {extras.lastCampaign._count.deliveries} deliveries
+                </p>
+              </div>
+            )}
+          </div>
+          <Link href="/admin/newsletter" className="mt-4 inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
+            Open newsletter <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
         </Card>
       </section>
 
@@ -262,11 +287,11 @@ export default async function DashboardPage() {
               <p className="text-sm text-muted-foreground">No data yet.</p>
             ) : (
               <div className="space-y-3">
-                {gaData.newVsReturning.map((n) => {
+                {gaData.newVsReturning.map((n, idx) => {
                   const total = gaData.newVsReturning.reduce((a, x) => a + x.users, 0) || 1;
                   const pct = Math.round((n.users / total) * 100);
                   return (
-                    <div key={n.type}>
+                    <div key={`${n.type}-${idx}`}>
                       <div className="flex items-center justify-between text-sm">
                         <span className="font-medium capitalize">{n.type}</span>
                         <span className="tabular-nums text-muted-foreground">{n.users} ({pct}%)</span>
@@ -286,33 +311,8 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Newsletter + System Health + Activity */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <Card title="Newsletter" icon={Mail}>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Active subscribers</span>
-              <span className="font-semibold tabular-nums">{extras.activeSubs}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Queued to send</span>
-              <span className="font-semibold tabular-nums">{extras.queued}</span>
-            </div>
-            {extras.lastCampaign && (
-              <div className="border-t border-border pt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Last broadcast</p>
-                <p className="mt-1 truncate font-medium">{extras.lastCampaign.subject}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {new Date(extras.lastCampaign.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {extras.lastCampaign._count.deliveries} deliveries
-                </p>
-              </div>
-            )}
-          </div>
-          <Link href="/admin/newsletter" className="mt-4 inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
-            Open newsletter <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </Card>
-
+      {/* System Health + Activity */}
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
         <Card title="System Health" icon={RefreshCw}>
           <SystemHealth />
         </Card>

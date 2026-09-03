@@ -1,22 +1,23 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import {
-  ComposableMap,
-  Geographies,
-  Geography,
-} from "react-simple-maps";
+import { useEffect, useRef, useState, useMemo } from "react";
+import { Map as MaplibreMap, NavigationControl, Popup, LngLatBounds } from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { countryToISO } from "@/lib/country-iso";
 
 type Country = { country: string; users: number; sessions: number };
+type NativeMap<K, V> = globalThis.Map<K, V>;
 
-const MAP_URL = "https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json";
+const WORLD_GEOJSON =
+  "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_110m_admin_0_countries.geojson";
 
 export function WorldMap({ data }: { data: Country[] }) {
-  const [hovered, setHovered] = useState<Country | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<MaplibreMap | null>(null);
+  const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
 
   const isoMap = useMemo(() => {
-    const m = new Map<string, Country>();
+    const m = new globalThis.Map<string, Country>();
     for (const c of data) {
       const iso = countryToISO(c.country);
       if (iso) m.set(iso, c);
@@ -26,75 +27,193 @@ export function WorldMap({ data }: { data: Country[] }) {
 
   const maxUsers = Math.max(...data.map((c) => c.users), 1);
 
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
+
+    const map = new MaplibreMap({
+      container: containerRef.current,
+      style: {
+        version: 8,
+        sources: {
+          "carto-light": {
+            type: "raster",
+            tiles: [
+              "https://a.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
+              "https://b.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}@2x.png",
+            ],
+            tileSize: 256,
+            attribution: "&copy; OpenStreetMap &copy; CARTO",
+          },
+        },
+        layers: [
+          {
+            id: "carto-light",
+            type: "raster",
+            source: "carto-light",
+          },
+        ],
+      },
+      center: [20, 20],
+      zoom: 1.2,
+      maxZoom: 6,
+      attributionControl: false,
+    });
+
+    map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+
+    map.on("load", () => {
+      map.addSource("countries", {
+        type: "geojson",
+        data: WORLD_GEOJSON,
+      });
+
+      // Country fills — countries with data get accent color
+      map.addLayer({
+        id: "countries-fill",
+        type: "fill",
+        source: "countries",
+        paint: {
+          "fill-color": "rgba(99, 102, 241, 0.7)",
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "hasData"], false],
+            0.7,
+            0.06,
+          ],
+        },
+      });
+
+      // Country borders
+      map.addLayer({
+        id: "countries-outline",
+        type: "line",
+        source: "countries",
+        paint: {
+          "line-color": "rgba(0,0,0,0.15)",
+          "line-width": 0.5,
+        },
+      });
+
+      // Set feature states for countries with GA data
+      if (isoMap.size > 0) {
+        const features = map.querySourceFeatures("countries");
+        for (const f of features) {
+          const iso = f.properties?.ISO_A2;
+          if (iso && isoMap.has(iso)) {
+            map.setFeatureState(
+              { source: "countries", id: f.id },
+              { hasData: true }
+            );
+          }
+        }
+      }
+
+      // Hover effect
+      let hoveredId: string | number | null = null;
+      const popup = new Popup({
+        closeButton: false,
+        closeOnClick: false,
+        offset: 10,
+        className: "map-tooltip",
+      });
+
+      map.on("mousemove", "countries-fill", (e) => {
+        if (!e.features?.length) return;
+        const feature = e.features[0];
+        const iso = feature.properties?.ISO_A2;
+        const match = iso ? isoMap.get(iso) : undefined;
+
+        if (hoveredId !== null) {
+          map.setFeatureState(
+            { source: "countries", id: hoveredId },
+            { hover: false }
+          );
+        }
+        hoveredId = feature.id ?? null;
+        if (hoveredId !== null) {
+          map.setFeatureState(
+            { source: "countries", id: hoveredId },
+            { hover: true }
+          );
+        }
+
+        map.getCanvas().style.cursor = match ? "pointer" : "";
+
+        if (match) {
+          setHoveredCountry(match);
+          const coords = e.lngLat;
+          popup
+            .setLngLat(coords)
+            .setHTML(
+              `<div style="font-weight:600;font-size:13px">${match.country}</div>
+               <div style="font-size:11px;color:#888">${match.users} users · ${match.sessions} sessions</div>`
+            )
+            .addTo(map);
+        } else {
+          setHoveredCountry(null);
+          popup.remove();
+        }
+      });
+
+      map.on("mouseleave", "countries-fill", () => {
+        if (hoveredId !== null) {
+          map.setFeatureState(
+            { source: "countries", id: hoveredId },
+            { hover: false }
+          );
+          hoveredId = null;
+        }
+        map.getCanvas().style.cursor = "";
+        setHoveredCountry(null);
+        popup.remove();
+      });
+
+      // Fit bounds to data countries if any
+      if (data.length > 0) {
+        const features = map.querySourceFeatures("countries", {
+          sourceLayer: "",
+          filter: [
+            "in",
+            "ISO_A2",
+            ...Array.from(isoMap.keys()),
+          ],
+        });
+        if (features.length > 0) {
+          const bounds = new LngLatBounds();
+          features.forEach((f) => {
+            if (f.geometry.type === "Polygon") {
+              f.geometry.coordinates.forEach((ring) =>
+                ring.forEach((coord) => bounds.extend(coord as [number, number]))
+              );
+            } else if (f.geometry.type === "MultiPolygon") {
+              f.geometry.coordinates.forEach((poly) =>
+                poly.forEach((ring) =>
+                  ring.forEach((coord) => bounds.extend(coord as [number, number]))
+                )
+              );
+            }
+          });
+          if (!bounds.isEmpty()) {
+            map.fitBounds(bounds, { padding: 40, maxZoom: 4 });
+          }
+        }
+      }
+    });
+
+    mapRef.current = map;
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, [isoMap, maxUsers, data]);
+
   return (
     <div className="relative">
-      <div className="relative overflow-hidden rounded-xl border border-border/40">
-        <ComposableMap
-          projection="geoMercator"
-          projectionConfig={{
-            scale: 120,
-            center: [20, 20],
-          }}
-          style={{ width: "100%", height: "auto", maxHeight: 340 }}
-        >
-          <Geographies geography={MAP_URL}>
-            {({ geographies }) =>
-              geographies.map((geo) => {
-                const iso = geo.id as string;
-                const match = isoMap.get(iso);
-                const intensity = match
-                  ? 0.3 + (match.users / maxUsers) * 0.7
-                  : 0;
-
-                  return (
-                    <Geography
-                      key={geo.rsmKey}
-                      rsmKey={geo.rsmKey}
-                      geography={geo}
-                    onMouseEnter={() => match && setHovered(match)}
-                    onMouseLeave={() => setHovered(null)}
-                    style={{
-                      default: {
-                        fill: match ? `var(--accent)` : "var(--muted)",
-                        fillOpacity: match ? intensity : 0.3,
-                        stroke: "var(--border)",
-                        strokeWidth: 0.5,
-                        outline: "none",
-                        cursor: match ? "pointer" : "default",
-                      },
-                      hover: {
-                        fill: match ? `var(--accent)` : "var(--muted)",
-                        fillOpacity: match ? Math.min(intensity + 0.2, 1) : 0.4,
-                        stroke: "var(--border)",
-                        strokeWidth: 0.5,
-                        outline: "none",
-                        cursor: match ? "pointer" : "default",
-                      },
-                      pressed: {
-                        fill: match ? `var(--accent)` : "var(--muted)",
-                        fillOpacity: match ? intensity : 0.3,
-                        stroke: "var(--border)",
-                        strokeWidth: 0.5,
-                        outline: "none",
-                      },
-                    }}
-                  />
-                );
-              })
-            }
-          </Geographies>
-        </ComposableMap>
-      </div>
-
-      {/* Tooltip */}
-      {hovered && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 px-3 py-2 rounded-lg border border-border/60 bg-card/95 backdrop-blur-sm text-sm shadow-lg pointer-events-none">
-          <p className="font-semibold">{hovered.country}</p>
-          <p className="text-xs text-muted-foreground">
-            {hovered.users} users · {hovered.sessions} sessions
-          </p>
-        </div>
-      )}
+      <div
+        ref={containerRef}
+        className="relative overflow-hidden rounded-xl border border-border/40"
+        style={{ height: 340 }}
+      />
 
       {/* Country legend */}
       {data.length > 0 && (

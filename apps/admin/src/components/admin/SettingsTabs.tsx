@@ -1,12 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, ShieldCheck, LogOut, Clock, Activity, Mail } from "lucide-react";
 import { ProfileForm } from "@/components/admin/ProfileForm";
 import { SecuritySettings } from "@/components/admin/SecuritySettings";
 import { SignOutButton } from "@/components/admin/SignOutButton";
 import { SystemHealthWidget } from "@/components/admin/SystemHealthWidget";
 import { NewsletterSettings } from "@/components/admin/NewsletterSettings";
+
+type Tab = "profile" | "security" | "health" | "newsletter";
+const VALID_TABS: Tab[] = ["profile", "security", "health", "newsletter"];
 
 type SessionUser = {
   name?: string | null;
@@ -22,7 +25,21 @@ const tabBtn = (active: boolean) =>
   }`;
 
 export function SettingsTabs({ session }: { session: SessionUser | null }) {
-  const [tab, setTab] = useState<"profile" | "security" | "health" | "newsletter">("profile");
+  const [tab, setTab] = useState<Tab>("profile");
+
+  // Read tab from URL hash on mount
+  useEffect(() => {
+    const hash = window.location.hash.replace("#", "");
+    if (VALID_TABS.includes(hash as Tab)) {
+      setTab(hash as Tab);
+    }
+  }, []);
+
+  // Update hash when tab changes
+  const switchTab = (t: Tab) => {
+    setTab(t);
+    window.location.hash = t;
+  };
 
   return (
     <div className="space-y-6">
@@ -32,7 +49,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           type="button"
           role="tab"
           aria-selected={tab === "profile"}
-          onClick={() => setTab("profile")}
+          onClick={() => switchTab("profile")}
           className={tabBtn(tab === "profile")}
         >
           <User className="h-4 w-4" /> Profile
@@ -41,7 +58,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           type="button"
           role="tab"
           aria-selected={tab === "security"}
-          onClick={() => setTab("security")}
+          onClick={() => switchTab("security")}
           className={tabBtn(tab === "security")}
         >
           <ShieldCheck className="h-4 w-4" /> Security
@@ -50,7 +67,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           type="button"
           role="tab"
           aria-selected={tab === "newsletter"}
-          onClick={() => setTab("newsletter")}
+          onClick={() => switchTab("newsletter")}
           className={tabBtn(tab === "newsletter")}
         >
           <Mail className="h-4 w-4" /> Newsletter
@@ -59,7 +76,7 @@ export function SettingsTabs({ session }: { session: SessionUser | null }) {
           type="button"
           role="tab"
           aria-selected={tab === "health"}
-          onClick={() => setTab("health")}
+          onClick={() => switchTab("health")}
           className={tabBtn(tab === "health")}
         >
           <Activity className="h-4 w-4" /> System Health
