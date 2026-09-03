@@ -113,13 +113,13 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
             </span>
           </div>
-          <div className="mt-2 overflow-visible">
+          <div className="mt-2">
             <svg
               viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-              className="w-full block"
+              className="w-full"
               role="img"
               aria-label="Traffic chart"
-              preserveAspectRatio="xMidYMid meet"
+              style={{ height: "auto", maxHeight: "260px" }}
             >
               <defs>
                 <linearGradient id="ga-sessions" x1="0" y1="0" x2="0" y2="1">
