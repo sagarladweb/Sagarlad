@@ -150,11 +150,9 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
                 <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
               </span>
             </div>
-            <div style={{ height: svgH }}>
+            <div>
               <svg
-                viewBox={`0 0 ${svgW} ${svgH}`}
-                width={svgW}
-                height={svgH}
+                viewBox={`0 0 ${svgW} ${svgH + 40}`}
                 className="w-full block"
               >
                 <defs>
@@ -209,11 +207,9 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
           {/* Country bars */}
           <div className="rounded-2xl border border-border/50 bg-card p-5">
             <h3 className="font-display text-sm font-semibold mb-3">Country Bars Preview</h3>
-            <div style={{ height: countryH }}>
+            <div>
               <svg
-                viewBox={`0 0 ${svgW} ${countryH}`}
-                width={svgW}
-                height={countryH}
+                viewBox={`0 0 ${svgW} ${countryH + 40}`}
                 className="w-full block"
               >
                 {[0, 0.25, 0.5, 0.75, 1].map((f) => {
