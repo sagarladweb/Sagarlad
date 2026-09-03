@@ -313,7 +313,7 @@ function BarColorPicker({
         </div>
         {showCustomBg && (
           <div className="p-3 rounded-lg border border-border bg-background">
-            <ColorWheel color={bgColor} onChange={onChangeBg} />
+            <ColorWheel value={bgColor} onChange={onChangeBg} />
           </div>
         )}
       </div>
@@ -351,7 +351,7 @@ function BarColorPicker({
         </div>
         {showCustomFg && (
           <div className="p-3 rounded-lg border border-border bg-background">
-            <ColorWheel color={textColor} onChange={onChangeText} />
+            <ColorWheel value={textColor} onChange={onChangeText} />
           </div>
         )}
       </div>

@@ -20,5 +20,25 @@
   },
   "dependencies": {
     "@dietrichgebert/ponytail": "^4.9.0"
+  },
+  "overrides": {
+    "@tiptap/core": "3.30.5",
+    "@tiptap/pm": "3.30.5",
+    "@tiptap/react": "3.30.5",
+    "@tiptap/starter-kit": "3.30.5",
+    "@tiptap/suggestion": "3.30.5",
+    "@tiptap/extension-bubble-menu": "3.30.5",
+    "@tiptap/extension-character-count": "3.30.5",
+    "@tiptap/extension-color": "3.30.5",
+    "@tiptap/extension-dropcursor": "3.30.5",
+    "@tiptap/extension-gapcursor": "3.30.5",
+    "@tiptap/extension-highlight": "3.30.5",
+    "@tiptap/extension-image": "3.30.5",
+    "@tiptap/extension-link": "3.30.5",
+    "@tiptap/extension-placeholder": "3.30.5",
+    "@tiptap/extension-text-align": "3.30.5",
+    "@tiptap/extension-text-style": "3.30.5",
+    "@tiptap/extension-typography": "3.30.5",
+    "@tiptap/extension-underline": "3.30.5"
   }
 }

@@ -87,7 +87,7 @@ export async function POST(request: Request) {
 
   const file = form.get("file");
   const folder = safeFolder(form.get("folder"));
-  const name = sanitizeName(form.get("name"));
+  const name = sanitizeName(typeof form.get("name") === "string" ? (form.get("name") as string) : undefined);
 
   if (!file || !(file instanceof File)) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
