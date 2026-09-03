@@ -11,7 +11,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-border bg-card card-grad shadow-glow hover-lift p-5 ${className}`}
+      className={`rounded-2xl border border-border/60 bg-card card-grad p-5 transition-all duration-200 hover:border-accent/30 hover:bg-accent/[0.02] ${className}`}
     >
       {(title || Icon) && (
         <div className="flex items-center justify-between mb-4">
@@ -40,7 +40,7 @@ export function KPICard({
   sparkline?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card card-grad shadow-glow hover-lift p-5 flex flex-col group">
+    <div className="rounded-2xl border border-border/60 bg-card card-grad p-5 flex flex-col group transition-all duration-200 hover:border-accent/30 hover:bg-accent/[0.02]">
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           {label}

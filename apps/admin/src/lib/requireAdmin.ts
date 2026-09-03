@@ -32,8 +32,11 @@ export async function requireAdmin(request?: Request): Promise<Session | null> {
       if (source) {
         try {
           const sourceHost = new URL(source).host;
-          const allowed = process.env.AUTH_URL || "http://localhost:3001";
-          const allowedHost = new URL(allowed).host;
+          // Derive allowed host: AUTH_URL > request Host header > localhost fallback
+          const allowed = process.env.AUTH_URL
+            || request.headers.get("host")
+            || "localhost:3001";
+          const allowedHost = new URL(`https://${allowed}`).host;
           if (sourceHost !== allowedHost) {
             console.warn("[requireAdmin] CSRF blocked:", sourceHost, "!=", allowedHost);
             return null;

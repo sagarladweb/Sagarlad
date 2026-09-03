@@ -16,6 +16,10 @@ import {
   Video,
   Quote,
   MessagesSquare,
+  Globe,
+  Smartphone,
+  Monitor,
+  Repeat,
 } from "lucide-react";
 import { getDashboardStats, getDashboardExtras } from "@/lib/content";
 import { getGaAnalytics } from "@/lib/analytics";
@@ -23,6 +27,7 @@ import { adminHeartbeat } from "@/lib/heartbeat";
 import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
 import { SystemHealth } from "@/components/admin/dashboard/SystemHealth";
+import { WorldMap } from "@/components/admin/dashboard/WorldMap";
 import { Card, KPICard } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PublishedBadge } from "@/components/ui/Badge";
@@ -262,6 +267,77 @@ export default async function DashboardPage() {
         </Card>
       </section>
 
+      {/* Bento: World Map + Devices + New vs Returning */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <div className="lg:col-span-2">
+          <Card title="Visitors by country" icon={Globe}>
+            <WorldMap data={gaData.topCountries} />
+          </Card>
+        </div>
+
+        <div className="space-y-6">
+          <Card title="Devices" icon={Smartphone}>
+            {gaData.topDevices.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No data yet.</p>
+            ) : (
+              <ul className="space-y-3">
+                {gaData.topDevices.map((d) => {
+                  const total = gaData.topDevices.reduce((a, x) => a + x.users, 0) || 1;
+                  const pct = Math.round((d.users / total) * 100);
+                  return (
+                    <li key={d.device}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="inline-flex items-center gap-2 font-medium">
+                          {d.device === "mobile" ? (
+                            <Smartphone className="w-3.5 h-3.5 text-accent" />
+                          ) : d.device === "tablet" ? (
+                            <Monitor className="w-3.5 h-3.5 text-accent" />
+                          ) : (
+                            <Monitor className="w-3.5 h-3.5 text-accent" />
+                          )}
+                          {d.device}
+                        </span>
+                        <span className="text-muted-foreground tabular-nums">{pct}%</span>
+                      </div>
+                      <div className="mt-1 h-1.5 rounded-full bg-muted">
+                        <div className="h-1.5 rounded-full bg-accent transition-all duration-500" style={{ width: `${pct}%` }} />
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </Card>
+
+          <Card title="New vs returning" icon={Repeat}>
+            {gaData.newVsReturning.length === 0 ? (
+              <p className="text-sm text-muted-foreground">No data yet.</p>
+            ) : (
+              <div className="space-y-3">
+                {gaData.newVsReturning.map((n) => {
+                  const total = gaData.newVsReturning.reduce((a, x) => a + x.users, 0) || 1;
+                  const pct = Math.round((n.users / total) * 100);
+                  return (
+                    <div key={n.type}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium capitalize">{n.type}</span>
+                        <span className="tabular-nums text-muted-foreground">{n.users} ({pct}%)</span>
+                      </div>
+                      <div className="mt-1 h-1.5 rounded-full bg-muted">
+                        <div
+                          className={`h-1.5 rounded-full transition-all duration-500 ${n.type === "new" ? "bg-accent" : "bg-accent/40"}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </Card>
+        </div>
+      </section>
+
       {/* Recent posts table */}
       <section>
         <div className="mb-4 flex items-center justify-between">
@@ -275,7 +351,7 @@ export default async function DashboardPage() {
             No posts yet. <Link href="/admin/posts/new" className="text-accent font-medium">Write your first one →</Link>
           </p>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border border-border bg-card shadow-glow">
+          <div className="overflow-x-auto rounded-2xl border border-border/60 bg-card">
             <table className="w-full text-sm">
               <thead className="bg-muted/50 text-left text-xs uppercase tracking-wider text-muted-foreground">
                 <tr>
