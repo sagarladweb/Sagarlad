@@ -61,6 +61,7 @@ export function ChartSandbox({
   const [padTop, setPadTop] = useState(20);
   const [padBottom, setPadBottom] = useState(50);
   const [labelYOffset, setLabelYOffset] = useState(10);
+  const [labelXFromBottom, setLabelXFromBottom] = useState(0);
   const [labelSize, setLabelSize] = useState(10);
   const [gridSize, setGridSize] = useState(10);
   const [lineWidth, setLineWidth] = useState(2.5);
@@ -74,7 +75,7 @@ export function ChartSandbox({
   const [countryLabelSize, setCountryLabelSize] = useState(9);
 
   const chartH = svgH - padTop - padBottom;
-  const labelY = svgH - labelYOffset;
+  const labelY = svgH - labelYOffset - labelXFromBottom;
 
   const sessions = daily.map((d) => d.sessions);
   const pageviews = daily.map((d) => d.pageviews);
@@ -102,7 +103,7 @@ const H = ${svgH};
 const PAD_TOP = ${padTop};
 const PAD_BOTTOM = ${padBottom};
 const CHART_H = H - PAD_TOP - PAD_BOTTOM; // ${chartH}
-const LABEL_Y = H - ${labelYOffset}; // ${labelY}
+const LABEL_Y = H - ${labelYOffset} - ${labelXFromBottom}; // ${labelY}
 const LABEL_SIZE = ${labelSize};
 const GRID_LABEL_SIZE = ${gridSize};
 const LINE_WIDTH = ${lineWidth};
@@ -260,6 +261,7 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
           <Slider label="Pad Top" value={padTop} min={5} max={60} onChange={setPadTop} />
           <Slider label="Pad Bottom" value={padBottom} min={20} max={100} onChange={setPadBottom} />
           <Slider label="Label Y from bottom" value={labelYOffset} min={2} max={30} onChange={setLabelYOffset} />
+          <Slider label="Label X from bottom" value={labelXFromBottom} min={-20} max={40} onChange={setLabelXFromBottom} />
           <Slider label="Label Font Size" value={labelSize} min={6} max={18} onChange={setLabelSize} />
           <Slider label="Grid Font Size" value={gridSize} min={6} max={16} onChange={setGridSize} />
           <Slider label="Line Width" value={lineWidth} min={1} max={5} step={0.5} onChange={setLineWidth} />
