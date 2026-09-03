@@ -62,6 +62,7 @@ export function ChartSandbox({
   const [padBottom, setPadBottom] = useState(50);
   const [labelYOffset, setLabelYOffset] = useState(10);
   const [labelXFromBottom, setLabelXFromBottom] = useState(0);
+  const [labelXPad, setLabelXPad] = useState(0);
   const [labelSize, setLabelSize] = useState(10);
   const [gridSize, setGridSize] = useState(10);
   const [lineWidth, setLineWidth] = useState(2.5);
@@ -107,6 +108,7 @@ const LABEL_Y = H - ${labelYOffset} - ${labelXFromBottom}; // ${labelY}
 const LABEL_SIZE = ${labelSize};
 const GRID_LABEL_SIZE = ${gridSize};
 const LINE_WIDTH = ${lineWidth};
+const LABEL_X_PAD = ${labelXPad}; // horizontal padding so labels don't clip at edges
 const LABEL_EVERY_N = ${labelEveryN}; // ${labelEveryN === 0 ? "auto" : "every " + labelEveryN + " days"}
 
 // Country bars
@@ -180,9 +182,9 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
                   i % labelEvery === 0 || i === dailyLen - 1 ? (
                     <g key={d.date}>
                       <line
-                        x1={(i * svgW) / Math.max(1, dailyLen - 1)}
+                        x1={labelXPad + (i * (svgW - 2 * labelXPad)) / Math.max(1, dailyLen - 1)}
                         y1={padTop}
-                        x2={(i * svgW) / Math.max(1, dailyLen - 1)}
+                        x2={labelXPad + (i * (svgW - 2 * labelXPad)) / Math.max(1, dailyLen - 1)}
                         y2={padTop + chartH}
                         stroke="var(--border)"
                         strokeWidth="0.5"
@@ -190,7 +192,7 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
                         opacity="0.3"
                       />
                       <text
-                        x={(i * svgW) / Math.max(1, dailyLen - 1)}
+                        x={labelXPad + (i * (svgW - 2 * labelXPad)) / Math.max(1, dailyLen - 1)}
                         y={labelY}
                         fontSize={labelSize}
                         fill="var(--muted-foreground)"
@@ -262,6 +264,7 @@ const COUNTRY_LABEL_SIZE = ${countryLabelSize};`;
           <Slider label="Pad Bottom" value={padBottom} min={20} max={100} onChange={setPadBottom} />
           <Slider label="Label Y from bottom" value={labelYOffset} min={2} max={30} onChange={setLabelYOffset} />
           <Slider label="Label X from bottom" value={labelXFromBottom} min={-20} max={40} onChange={setLabelXFromBottom} />
+          <Slider label="Label X padding (left/right)" value={labelXPad} min={0} max={100} onChange={setLabelXPad} />
           <Slider label="Label Font Size" value={labelSize} min={6} max={18} onChange={setLabelSize} />
           <Slider label="Grid Font Size" value={gridSize} min={6} max={16} onChange={setGridSize} />
           <Slider label="Line Width" value={lineWidth} min={1} max={5} step={0.5} onChange={setLineWidth} />
