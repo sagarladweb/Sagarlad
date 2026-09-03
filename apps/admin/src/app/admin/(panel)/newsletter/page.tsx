@@ -6,6 +6,8 @@ import { CampaignList } from "@/components/admin/CampaignList";
 
 export const dynamic = "force-dynamic";
 
+const DAILY_LIMIT = parseInt(process.env.NEWSLETTER_DAILY_LIMIT || "300", 10);
+
 function statCard(icon: React.ReactNode, label: string, value: number | string, accent?: boolean) {
   return (
     <div className="flex items-center gap-3 rounded-xl border border-border bg-card px-4 py-3">
@@ -26,13 +28,20 @@ export default async function NewsletterPage() {
   let subscriberCount = 0;
   let campaignCount = 0;
   let sentCount = 0;
+  let sentToday = 0;
+  let inFlight = 0;
   let recentCampaigns: { id: string; subject: string; createdAt: string; draft: boolean; sent: number; total: number }[] = [];
 
   try {
-    [subscriberCount, campaignCount, sentCount] = await Promise.all([
+    const dayStart = new Date();
+    dayStart.setHours(0, 0, 0, 0);
+
+    [subscriberCount, campaignCount, sentCount, sentToday, inFlight] = await Promise.all([
       prisma.newsletterSubscriber.count({ where: { unsubscribed: false } }),
       prisma.newsletterCampaign.count(),
       prisma.newsletterDelivery.count({ where: { status: "SENT" } }),
+      prisma.newsletterDelivery.count({ where: { status: "SENT", sentAt: { gte: dayStart } } }),
+      prisma.newsletterDelivery.count({ where: { status: "SENDING" } }),
     ]);
     const recentRows = await prisma.newsletterCampaign.findMany({
       orderBy: { createdAt: "desc" },
@@ -56,6 +65,12 @@ export default async function NewsletterPage() {
   } catch (err) {
     console.warn("[admin newsletter] DB query failed:", (err as Error).message);
   }
+
+  const remaining = Math.max(0, DAILY_LIMIT - sentToday - inFlight);
+  const pct = Math.round((sentToday + inFlight) / DAILY_LIMIT * 100);
+  const quotaColor = remaining > 200 ? "text-green-600 dark:text-green-400"
+    : remaining > 50 ? "text-amber-600 dark:text-amber-400"
+    : "text-red-600 dark:text-red-400";
 
   return (
     <div className="space-y-8">
@@ -82,6 +97,15 @@ export default async function NewsletterPage() {
         {statCard(<FileText className="w-4 h-4" />, "Campaigns", campaignCount)}
         {statCard(<Send className="w-4 h-4" />, "Emails sent", sentCount, true)}
       </div>
+
+      {/* Daily quota */}
+      <p className={`text-xs tabular-nums ${quotaColor}`}>
+        {remaining === 0
+          ? `Daily limit reached — ${sentToday + inFlight} of ${DAILY_LIMIT} sent today`
+          : `${remaining} of ${DAILY_LIMIT} emails remaining today`
+        }
+        {inFlight > 0 && remaining > 0 ? ` · ${inFlight} sending now` : ""}
+      </p>
 
       {/* Recent campaigns */}
       <div>
