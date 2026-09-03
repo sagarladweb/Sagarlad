@@ -139,6 +139,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       const form = new FormData();
       form.append("file", file);
       form.append("folder", "avatars");
+      form.append("name", "admin profile");
       const res = await fetch("/api/admin/upload", { method: "POST", body: form });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Upload failed");
@@ -170,7 +171,7 @@ export function ProfileForm({ initial, onOpenSecurity }: Props) {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataUrl, folder: "avatars" }),
+        body: JSON.stringify({ dataUrl, folder: "avatars", name: "admin profile" }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Upload failed");

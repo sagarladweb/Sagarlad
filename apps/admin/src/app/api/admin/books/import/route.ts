@@ -126,7 +126,7 @@ export async function GET(request: Request) {
     const ogImage = meta(html, ["og:image", "twitter:image"]);
     if (ogImage) {
       const abs = /^https?:\/\//.test(ogImage) ? ogImage : new URL(ogImage, link).href;
-      const imageUrl = await downloadToSupabase({ remoteUrl: abs, folder: "books" });
+      const imageUrl = await downloadToSupabase({ remoteUrl: abs, folder: "books", name: title || undefined });
       return NextResponse.json({ title, description, imageUrl });
     }
   } catch {
@@ -134,7 +134,7 @@ export async function GET(request: Request) {
   }
 
   if (remoteImage) {
-    const imageUrl = await downloadToSupabase({ remoteUrl: remoteImage, folder: "books" });
+    const imageUrl = await downloadToSupabase({ remoteUrl: remoteImage, folder: "books", name: title || undefined });
     return NextResponse.json({ title, description, imageUrl });
   }
 

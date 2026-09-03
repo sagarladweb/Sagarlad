@@ -153,7 +153,7 @@ export function VideosManager() {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataUrl, folder: "videos" }),
+        body: JSON.stringify({ dataUrl, folder: "videos", name: editing.title }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
@@ -484,6 +484,7 @@ export function VideosManager() {
                   <ImageUpload
                     label="Thumbnail (optional)"
                     folder="videos"
+                    name={editing.title}
                     value={editing.thumbnail}
                     onChange={(url) => setEditing({ ...editing, thumbnail: url })}
                     onPastedDataUrl={handlePastedImage}

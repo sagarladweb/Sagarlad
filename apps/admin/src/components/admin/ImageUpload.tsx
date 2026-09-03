@@ -8,10 +8,11 @@ type Props = {
   onChange: (url: string | null) => void;
   label?: string;
   folder?: string;
+  name?: string;
   onPastedDataUrl?: (dataUrl: string) => Promise<void>;
 };
 
-export function ImageUpload({ value, onChange, label, folder, onPastedDataUrl }: Props) {
+export function ImageUpload({ value, onChange, label, folder, name, onPastedDataUrl }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
@@ -28,6 +29,7 @@ export function ImageUpload({ value, onChange, label, folder, onPastedDataUrl }:
       const form = new FormData();
       form.append("file", file);
       form.append("folder", folder ?? "general");
+      if (name) form.append("name", name);
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         body: form,

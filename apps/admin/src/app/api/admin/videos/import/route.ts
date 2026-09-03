@@ -60,6 +60,7 @@ export async function GET(request: Request) {
   const thumbnail = await downloadToSupabase({
     remoteUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
     folder: "videos",
+    name: title || undefined,
   });
 
   return NextResponse.json({ title, thumbnailUrl: thumbnail });

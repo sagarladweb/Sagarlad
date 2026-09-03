@@ -150,7 +150,7 @@ export function BooksManager() {
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataUrl, folder: "books" }),
+        body: JSON.stringify({ dataUrl, folder: "books", name: editing.title }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
@@ -512,6 +512,7 @@ export function BooksManager() {
             <ImageUpload
               label={editing.type === "READ" ? "Cover" : "Cover image"}
               folder="books"
+              name={editing.title}
               value={editing.imageUrl}
               onChange={(url) => setEditing({ ...editing, imageUrl: url })}
               onPastedDataUrl={handlePastedImage}

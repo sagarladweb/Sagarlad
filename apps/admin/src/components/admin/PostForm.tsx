@@ -101,6 +101,8 @@ export function PostForm({
     try {
       const body = new FormData();
       body.append("file", file);
+      body.append("folder", "covers");
+      if (form.slug || form.title) body.append("name", form.slug || form.title);
       const res = await fetch("/api/admin/upload", { method: "POST", body });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
@@ -123,7 +125,11 @@ export function PostForm({
       const res = await fetch("/api/admin/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ dataUrl, folder: "covers" }),
+        body: JSON.stringify({
+          dataUrl,
+          folder: "covers",
+          name: form.slug || form.title || undefined,
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
@@ -654,6 +660,7 @@ export function PostForm({
                   error: previewError,
                 }}
                 stickyToolbarOffset={isFullscreen ? "top-0" : "top-14 md:top-0"}
+                postTitle={form.slug || form.title}
               />
             ) : (
               <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-border bg-card">

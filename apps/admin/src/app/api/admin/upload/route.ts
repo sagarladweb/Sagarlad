@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { uploadToSupabase } from "@/lib/storage";
+import { generateSeoFilename } from "@/lib/seo-filename";
 
 import { requireAdmin } from "@/lib/requireAdmin";
 export const runtime = "nodejs";
@@ -17,16 +18,26 @@ const ALLOWED = new Set([
 // slug so a crafted request can't escape the media bucket via `../`.
 const FOLDER_RE = /^[a-z0-9][a-z0-9-_]{0,39}$/;
 
-function upload(buffer: Buffer, mime: string, folder: string) {
-  // Leave the filename extension to uploadToSupabase so it matches the actual
-  // content bytes (all non-GIF images are re-encoded to WebP on the way in).
+/** Sanitize a user-supplied name for use as an SEO filename prefix. */
+function sanitizeName(raw: string | null | undefined): string | undefined {
+  if (!raw || typeof raw !== "string") return undefined;
+  const clean = raw.trim().slice(0, 80);
+  return clean.length > 0 ? clean : undefined;
+}
+
+function upload(buffer: Buffer, mime: string, folder: string, name?: string) {
+  // SEO-friendly filename from context, or UUID fallback.
+  const ext = mime.split("/")[1]?.split("+")[0] ?? "webp";
+  const filename = name
+    ? generateSeoFilename(name, ext)
+    : `${crypto.randomUUID()}.${ext}`;
   // Avatars are downscaled hard (256px) so profile photos stay tiny.
   const maxDimension = folder === "avatars" ? 256 : 1800;
   return uploadToSupabase({
     buffer,
     mime,
     folder,
-    filename: crypto.randomUUID(),
+    filename,
     maxDimension,
   });
 }
@@ -47,6 +58,7 @@ export async function POST(request: Request) {
     const body = await request.json().catch(() => null);
     const dataUrl = typeof body?.dataUrl === "string" ? body.dataUrl : "";
     const folder = safeFolder(body?.folder);
+    const name = sanitizeName(body?.name);
     const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif|avif));base64,([\s\S]+)$/);
     if (!match) {
       return NextResponse.json(
@@ -62,7 +74,7 @@ export async function POST(request: Request) {
       );
     }
     try {
-      const url = await upload(buffer, match[1], folder);
+      const url = await upload(buffer, match[1], folder, name);
       return NextResponse.json({ url });
     } catch (err) {
       console.error("[upload] base64 upload failed:", err);
@@ -75,6 +87,7 @@ export async function POST(request: Request) {
 
   const file = form.get("file");
   const folder = safeFolder(form.get("folder"));
+  const name = sanitizeName(form.get("name"));
 
   if (!file || !(file instanceof File)) {
     return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
@@ -94,7 +107,7 @@ export async function POST(request: Request) {
 
   try {
     const buffer = Buffer.from(await file.arrayBuffer());
-    const url = await upload(buffer, file.type, folder);
+    const url = await upload(buffer, file.type, folder, name);
     return NextResponse.json({ url });
   } catch (err) {
     console.error("[upload] file upload failed:", err);

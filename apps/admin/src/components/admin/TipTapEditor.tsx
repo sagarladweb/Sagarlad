@@ -1157,6 +1157,7 @@ export function TipTapEditor({
   preview,
   footer,
   stickyToolbarOffset = "top-14",
+  postTitle,
 }: {
   initialContent?: string;
   onChange: (html: string) => void;
@@ -1168,6 +1169,7 @@ export function TipTapEditor({
   };
   footer?: React.ReactNode;
   stickyToolbarOffset?: string;
+  postTitle?: string;
 }) {
   const [mode, setMode] = useState<"write" | "preview">("write");
   const [contextMenuPos, setContextMenuPos] = useState<{ x: number; y: number } | null>(null);
@@ -1313,6 +1315,7 @@ export function TipTapEditor({
           void (async () => {
             const body = new FormData();
             body.append("file", file);
+            if (postTitle) body.append("name", postTitle);
             const res = await fetch("/api/admin/upload", { method: "POST", body });
             const data = await res.json().catch(() => ({}));
             if (res.ok && data.url) insertUploaded(data.url, file.name);
@@ -1337,7 +1340,7 @@ export function TipTapEditor({
             const res = await fetch("/api/admin/upload-from-url", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ url: remoteUrl }),
+              body: JSON.stringify({ url: remoteUrl, name: postTitle }),
             });
             const data = await res.json().catch(() => ({}));
             if (res.ok && data.url) insertUploaded(data.url, "");
@@ -1673,6 +1676,7 @@ export function TipTapEditor({
     try {
       const body = new FormData();
       body.append("file", file);
+      if (postTitle) body.append("name", postTitle);
       const res = await fetch("/api/admin/upload", { method: "POST", body });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {

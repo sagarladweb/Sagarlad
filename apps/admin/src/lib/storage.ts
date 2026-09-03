@@ -1,5 +1,6 @@
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
 import sharp from "sharp";
+import { generateSeoFilename } from "./seo-filename";
 
 const url = process.env.SUPABASE_URL!;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -127,6 +128,7 @@ export async function uploadToSupabase(opts: {
   mime?: string;
   folder?: string;
   filename?: string;
+  name?: string;
   maxDimension?: number;
 }): Promise<string> {
   const c = getClient();
@@ -134,7 +136,15 @@ export async function uploadToSupabase(opts: {
   const { data, contentType } = await optimizeImage(opts.buffer, opts.mime, opts.maxDimension);
   const folder = opts.folder ?? "general";
   const ext = contentType.split("/")[1]?.split("+")[0] ?? "bin";
-  const name = opts.filename ?? `${crypto.randomUUID()}.${ext}`;
+  // Use provided filename, or generate SEO-friendly name from context, or UUID fallback.
+  let name: string;
+  if (opts.filename) {
+    name = opts.filename;
+  } else if (opts.name) {
+    name = generateSeoFilename(opts.name, ext);
+  } else {
+    name = `${crypto.randomUUID()}.${ext}`;
+  }
   const path = `${folder}/${name}`;
 
   const { error } = await c.storage.from(BUCKET).upload(path, data, {
@@ -159,6 +169,7 @@ export function publicUrl(path: string): string {
 export async function downloadToSupabase(opts: {
   remoteUrl: string;
   folder: string;
+  name?: string;
 }): Promise<string> {
   try {
     const controller = new AbortController();
@@ -173,6 +184,7 @@ export async function downloadToSupabase(opts: {
       buffer: buf,
       mime: blob.type || "image/jpeg",
       folder: opts.folder,
+      name: opts.name,
     });
   } catch (err) {
     console.error("downloadToSupabase failed:", err);
