@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CheckCircle2, AlertCircle, Info, X } from "lucide-react";
+import { CheckCircle2, AlertCircle, Info } from "lucide-react";
 
 export type ToastType = "success" | "error" | "info";
 
@@ -41,10 +41,6 @@ export function ToastContainer() {
     };
   }, []);
 
-  const removeToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
   if (toasts.length === 0) return null;
 
   return (
@@ -69,14 +65,6 @@ export function ToastContainer() {
             <h4 className="text-sm font-semibold">{t.title}</h4>
             {t.message && <p className="text-xs text-muted-foreground mt-0.5 leading-normal">{t.message}</p>}
           </div>
-
-          <button
-            onClick={() => removeToast(t.id)}
-            className="p-1 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
-            aria-label="Close notification"
-          >
-            <X className="w-4 h-4" />
-          </button>
         </div>
       ))}
     </div>
