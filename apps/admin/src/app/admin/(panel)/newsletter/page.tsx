@@ -3,10 +3,11 @@ import { assertPhase2 } from "@/lib/phase";
 import { Mail, FileText, Users, Send, PenLine } from "lucide-react";
 import Link from "next/link";
 import { CampaignList } from "@/components/admin/CampaignList";
+import { QuotaText } from "@/components/admin/QuotaText";
 
 export const dynamic = "force-dynamic";
 
-const DAILY_LIMIT = parseInt(process.env.NEWSLETTER_DAILY_LIMIT || "300", 10);
+const DAILY_LIMIT = parseInt(process.env.DAILY_EMAIL_LIMIT || process.env.NEWSLETTER_DAILY_LIMIT || "300", 10);
 
 function statCard(icon: React.ReactNode, label: string, value: number | string, accent?: boolean) {
   return (
@@ -67,10 +68,6 @@ export default async function NewsletterPage() {
   }
 
   const remaining = Math.max(0, DAILY_LIMIT - sentToday - inFlight);
-  const pct = Math.round((sentToday + inFlight) / DAILY_LIMIT * 100);
-  const quotaColor = remaining > 200 ? "text-green-600 dark:text-green-400"
-    : remaining > 50 ? "text-amber-600 dark:text-amber-400"
-    : "text-red-600 dark:text-red-400";
 
   return (
     <div className="space-y-8">
@@ -99,13 +96,7 @@ export default async function NewsletterPage() {
       </div>
 
       {/* Daily quota */}
-      <p className={`text-xs tabular-nums ${quotaColor}`}>
-        {remaining === 0
-          ? `Daily limit reached — ${sentToday + inFlight} of ${DAILY_LIMIT} sent today`
-          : `${remaining} of ${DAILY_LIMIT} emails remaining today`
-        }
-        {inFlight > 0 && remaining > 0 ? ` · ${inFlight} sending now` : ""}
-      </p>
+      <QuotaText remaining={remaining} total={DAILY_LIMIT} inFlight={inFlight} />
 
       {/* Recent campaigns */}
       <div>

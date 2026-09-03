@@ -617,14 +617,14 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                   {/* Email card */}
                   <div className="mx-auto max-w-[600px] my-6" style={{ background: "#ffffff", border: "1px solid #ecebe6", borderRadius: "14px" }}>
 
-                    {/* Greeting — matches email: padding:30px 40px 6px 40px */}
-                    <div style={{ padding: "30px 40px 6px 40px" }}>
+                    {/* Greeting — matches email: padding:34px 40px 10px 40px */}
+                    <div style={{ padding: "34px 40px 10px 40px" }}>
                       <input value={content.greeting} onChange={(e) => update({ greeting: e.target.value })} placeholder="Hi there,"
                         style={{ width: "100%", fontSize: "15px", fontWeight: 700, color: "#111110", background: "transparent", border: "none", outline: "none", padding: "0 0 6px 0", borderBottom: "1px solid #ecebe6", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }} />
                     </div>
 
-                    {/* Intro — matches email: padding:30px 40px 6px 40px */}
-                    <div style={{ padding: "0 40px 20px 40px" }}>
+                    {/* Intro — matches email: inside same greeting td, bottom spacing 0 */}
+                    <div style={{ padding: "0 40px 4px 40px" }}>
                       <textarea value={content.intro} onChange={(e) => { update({ intro: e.target.value }); markDirty(); }} placeholder="What's new this week…"
                         rows={3}
                         style={{ width: "100%", fontSize: "15px", lineHeight: "1.65", color: "#2a2926", background: "transparent", border: "none", outline: "none", resize: "none", padding: "0 0 8px 0", borderBottom: "1px solid #ecebe6", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }} />
@@ -890,22 +890,25 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                     </div>
                   )}
 
-                  {/* Signoff */}
-                  {(content.signoff || content.cta) && (
-                    <div style={{ padding: "0 40px 34px 40px" }} className="space-y-4 overflow-hidden">
-                      {content.cta && (
-                        <div style={{ padding: "26px 0 0 0", textAlign: "center" }}>
-                          <a href={content.cta.url} style={{ background: content.accent, color: "#111110", textDecoration: "none", fontWeight: 700, fontSize: "15px", padding: "13px 34px", borderRadius: "999px", display: "inline-block" }}>{content.cta.label}</a>
-                        </div>
-                      )}
-                      {content.signoff && <p style={{ fontSize: "14px", color: "#6b6a66", margin: "28px 0 0 0", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>{content.signoff}</p>}
+                  {/* CTA — matches email: padding:26px 40px 0 40px, separate row */}
+                  {content.cta && (
+                    <div style={{ padding: "26px 40px 0 40px", textAlign: "center" }}>
+                      <a href={content.cta.url} style={{ background: content.accent, color: "#111110", textDecoration: "none", fontWeight: 700, fontSize: "15px", padding: "13px 34px", borderRadius: "999px", display: "inline-block" }}>{content.cta.label}</a>
                     </div>
                   )}
 
-                  {/* Footer */}
-                  <div style={{ padding: "26px 40px 34px 40px", color: "#6b6a66", textAlign: "center", fontSize: "14px", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>
-                    <p style={{ margin: 0 }}>{SITE.name}</p>
-                    <p style={{ margin: "4px 0 0 0", fontSize: "12px" }}><a href="#" style={{ color: "#6b6a66", textDecoration: "underline" }}>Unsubscribe</a></p>
+                  {/* Signoff — matches email: padding:14px 40px 30px 40px */}
+                  {content.signoff && (
+                    <div style={{ padding: "14px 40px 30px 40px", color: "#6b6a66", fontSize: "14px", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>
+                      {content.signoff.split("\n").map((line, j) => (
+                        <p key={j} style={{ margin: j > 0 ? "2px 0 0 0" : 0 }}>{line}</p>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Footer — matches email: site name + unsubscribe */}
+                  <div style={{ padding: "26px 40px 34px 40px", color: "#6b6a66", textAlign: "center", fontSize: "12px", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>
+                    <p style={{ margin: 0 }}>Unsubscribe</p>
                   </div>
                   </div>
                 </div>
