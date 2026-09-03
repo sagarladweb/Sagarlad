@@ -11,7 +11,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 ease-out hover:border-accent/25 hover:bg-accent/[0.015] hover:shadow-[0_0_0_1px_rgba(0,0,0,0.02)] ${className}`}
+      className={`rounded-2xl border border-border/50 bg-card p-5 transition-all duration-300 ease-out hover:border-accent/25 hover:bg-accent/[0.015] ${className}`}
     >
       {(title || Icon) && (
         <div className="flex items-center justify-between mb-4">
@@ -30,17 +30,26 @@ export function KPICard({
   label,
   value,
   sub,
+  tip,
   icon: Icon,
   sparkline,
 }: {
   label: string;
   value: string;
   sub: string;
+  tip?: string;
   icon: React.ComponentType<{ className?: string }>;
   sparkline?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-2xl border border-border/50 bg-card p-5 flex flex-col group transition-all duration-300 ease-out hover:border-accent/25 hover:bg-accent/[0.015]">
+    <div className="relative rounded-2xl border border-border/50 bg-card p-5 flex flex-col group transition-all duration-300 ease-out hover:border-accent/25 hover:bg-accent/[0.015]">
+      {/* Tooltip on hover */}
+      {tip && (
+        <div className="absolute -top-9 left-1/2 -translate-x-1/2 px-2.5 py-1 rounded-md bg-foreground text-background text-[10px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+          {tip}
+          <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground/70">
           {label}

@@ -118,10 +118,10 @@ export default async function DashboardPage() {
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
   const kpis = [
-    { label: "Users", value: gaData.totals.users.toLocaleString(), sub: "unique visitors", icon: Users, values: gaData.daily.map((d) => d.users) },
-    { label: "Sessions", value: gaData.totals.sessions.toLocaleString(), sub: "visits", icon: MousePointerClick, values: gaData.daily.map((d) => d.sessions) },
-    { label: "Pageviews", value: gaData.totals.pageviews.toLocaleString(), sub: "last 14 days", icon: Eye, values: gaData.daily.map((d) => d.pageviews) },
-    { label: "Avg. engagement", value: formatDuration(gaData.totals.avgEngagement), sub: "time per session", icon: Timer, values: gaData.daily.map((d) => d.avgEngagement) },
+    { label: "Visitors", value: gaData.totals.users.toLocaleString(), sub: "unique people", icon: Users, tip: "Distinct people who visited", values: gaData.daily.map((d) => d.sessions) },
+    { label: "Visits", value: gaData.totals.sessions.toLocaleString(), sub: "total sessions", icon: MousePointerClick, tip: "Every visit to your site", values: gaData.daily.map((d) => d.sessions) },
+    { label: "Page views", value: gaData.totals.pageviews.toLocaleString(), sub: "pages loaded", icon: Eye, tip: "Pages people looked at", values: gaData.daily.map((d) => d.pageviews) },
+    { label: "Avg. time", value: formatDuration(gaData.totals.avgEngagement), sub: "per visit", icon: Timer, tip: "How long people stay", values: gaData.daily.map((d) => d.avgEngagement) },
   ];
 
   const maxSource = Math.max(...(gaData.topSources.map((s) => s.sessions) ?? [1]));
@@ -129,7 +129,7 @@ export default async function DashboardPage() {
     { label: "Books", value: extras.books, href: "/admin/books", icon: BookOpen },
     { label: "Videos", value: extras.videos, href: "/admin/videos", icon: Video },
     { label: "Quotes", value: extras.quotes, href: "/admin/content", icon: Quote },
-    { label: "Pending comments", value: extras.pendingComments, href: "/admin/moderation", icon: MessagesSquare },
+    { label: "Comments", value: extras.pendingComments, href: "/admin/moderation", icon: MessagesSquare },
   ];
 
   return (
@@ -164,110 +164,60 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Bento: Chart + Sources + Content stats */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <div className="lg:col-span-2">
-          <Card title="Traffic" icon={TrendingUp}>
-            <TrafficChart initial={ga} />
-          </Card>
-        </div>
-
-        <div className="space-y-6">
-          <Card title="Top sources" icon={Radio}>
-            {gaData.topSources.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No traffic yet.</p>
-            ) : (
-              <ul className="space-y-3">
-                {gaData.topSources.map((s) => (
-                  <li key={s.source}>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="truncate font-medium">{s.source}</span>
-                      <span className="text-muted-foreground tabular-nums">{s.sessions}</span>
-                    </div>
-                    <div className="mt-1 h-1.5 rounded-full bg-muted">
-                      <div className="h-1.5 rounded-full bg-accent transition-all duration-500" style={{ width: `${Math.max(4, (s.sessions / maxSource) * 100)}%` }} />
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
-              <span>
-                Engagement{" "}
-                <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.engagementRate}%</span>
-              </span>
-              <span>
-                Bounce rate{" "}
-                <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.bounceRate.toFixed(1)}%</span>
-              </span>
-            </div>
-          </Card>
-
-          <Card title="Content" icon={FileText}>
-            <ul className="space-y-1">
-              {contentStats.map((s) => (
-                <li key={s.label}>
-                  <Link href={s.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60 transition-all duration-150">
-                    <span className="inline-flex items-center gap-2.5 font-medium">
-                      <s.icon className="w-4 h-4 text-accent" /> {s.label}
-                    </span>
-                    <span className="tabular-nums text-muted-foreground">{s.value}</span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </Card>
-        </div>
+      {/* Traffic chart — full width */}
+      <section>
+        <TrafficChart initial={ga} />
       </section>
 
-      {/* Bento: Newsletter + System Health + Activity */}
+      {/* Sources + Content side by side */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        <Card title="Newsletter" icon={Mail}>
-          <div className="space-y-3 text-sm">
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Active subscribers</span>
-              <span className="font-semibold tabular-nums">{extras.activeSubs}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-muted-foreground">Queued to send</span>
-              <span className="font-semibold tabular-nums">{extras.queued}</span>
-            </div>
-            {extras.lastCampaign && (
-              <div className="border-t border-border pt-3">
-                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Last broadcast</p>
-                <p className="mt-1 truncate font-medium">{extras.lastCampaign.subject}</p>
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {new Date(extras.lastCampaign.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {extras.lastCampaign._count.deliveries} deliveries
-                </p>
-              </div>
-            )}
-          </div>
-          <Link href="/admin/newsletter" className="mt-4 inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
-            Open newsletter <ArrowRight className="w-3.5 h-3.5" />
-          </Link>
-        </Card>
-
-        <Card title="System Health" icon={RefreshCw}>
-          <SystemHealth />
-        </Card>
-
-        <Card title="Recent activity" icon={RefreshCw}>
-          {extras.activity.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No activity yet.</p>
+        <Card title="Top sources" icon={Radio}>
+          {gaData.topSources.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No traffic yet.</p>
           ) : (
-            <ul className="space-y-2.5">
-              {extras.activity.map((a, i) => (
-                <li key={i} className="flex items-center justify-between gap-3 text-sm">
-                  <span className="truncate">{activityLabel(a.action)}</span>
-                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{timeAgo(a.createdAt)}</span>
+            <ul className="space-y-3">
+              {gaData.topSources.map((s) => (
+                <li key={s.source}>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="truncate font-medium">{s.source}</span>
+                    <span className="text-muted-foreground tabular-nums">{s.sessions}</span>
+                  </div>
+                  <div className="mt-1 h-1.5 rounded-full bg-muted">
+                    <div className="h-1.5 rounded-full bg-accent transition-all duration-500" style={{ width: `${Math.max(4, (s.sessions / maxSource) * 100)}%` }} />
+                  </div>
                 </li>
               ))}
             </ul>
           )}
+          <div className="mt-4 grid grid-cols-2 gap-3 border-t border-border pt-3 text-xs text-muted-foreground">
+            <span>
+              Engagement{" "}
+              <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.engagementRate}%</span>
+            </span>
+            <span>
+              Bounce rate{" "}
+              <span className="block font-semibold text-foreground tabular-nums">{gaData.totals.bounceRate.toFixed(1)}%</span>
+            </span>
+          </div>
+        </Card>
+
+        <Card title="Content" icon={FileText}>
+          <ul className="space-y-1">
+            {contentStats.map((s) => (
+              <li key={s.label}>
+                <Link href={s.href} className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm hover:bg-muted/60 transition-all duration-150">
+                  <span className="inline-flex items-center gap-2.5 font-medium">
+                    <s.icon className="w-4 h-4 text-accent" /> {s.label}
+                  </span>
+                  <span className="tabular-nums text-muted-foreground">{s.value}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </Card>
       </section>
 
-      {/* Bento: World Map + Devices + New vs Returning */}
+      {/* Map + Devices + New vs Returning */}
       <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2">
           <Card title="Visitors by country" icon={Globe}>
@@ -290,8 +240,6 @@ export default async function DashboardPage() {
                         <span className="inline-flex items-center gap-2 font-medium">
                           {d.device === "mobile" ? (
                             <Smartphone className="w-3.5 h-3.5 text-accent" />
-                          ) : d.device === "tablet" ? (
-                            <Monitor className="w-3.5 h-3.5 text-accent" />
                           ) : (
                             <Monitor className="w-3.5 h-3.5 text-accent" />
                           )}
@@ -338,6 +286,53 @@ export default async function DashboardPage() {
         </div>
       </section>
 
+      {/* Newsletter + System Health + Activity */}
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+        <Card title="Newsletter" icon={Mail}>
+          <div className="space-y-3 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Active subscribers</span>
+              <span className="font-semibold tabular-nums">{extras.activeSubs}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted-foreground">Queued to send</span>
+              <span className="font-semibold tabular-nums">{extras.queued}</span>
+            </div>
+            {extras.lastCampaign && (
+              <div className="border-t border-border pt-3">
+                <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">Last broadcast</p>
+                <p className="mt-1 truncate font-medium">{extras.lastCampaign.subject}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {new Date(extras.lastCampaign.createdAt).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })} · {extras.lastCampaign._count.deliveries} deliveries
+                </p>
+              </div>
+            )}
+          </div>
+          <Link href="/admin/newsletter" className="mt-4 inline-flex items-center gap-1 text-sm text-accent font-medium hover:underline">
+            Open newsletter <ArrowRight className="w-3.5 h-3.5" />
+          </Link>
+        </Card>
+
+        <Card title="System Health" icon={RefreshCw}>
+          <SystemHealth />
+        </Card>
+
+        <Card title="Recent activity" icon={RefreshCw}>
+          {extras.activity.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No activity yet.</p>
+          ) : (
+            <ul className="space-y-2.5">
+              {extras.activity.map((a, i) => (
+                <li key={i} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="truncate">{activityLabel(a.action)}</span>
+                  <span className="shrink-0 text-xs text-muted-foreground tabular-nums">{timeAgo(a.createdAt)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </Card>
+      </section>
+
       {/* Recent posts table */}
       <section>
         <div className="mb-4 flex items-center justify-between">
@@ -382,7 +377,7 @@ export default async function DashboardPage() {
         )}
       </section>
 
-      {/* Full-width top pages table */}
+      {/* Top pages table */}
       {gaData.topPages.length > 0 && (
         <section>
           <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">All pages</h2>

@@ -21,27 +21,27 @@ function shortDate(iso: string): string {
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(14);
   const [result, setResult] = useState<GaResult>(initial);
-  const [loadedDays, setLoadedDays] = useState<number>(14);
-  const loading = days !== loadedDays;
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (days === loadedDays) return;
+    if (days === initial.data?.days && result === initial) return;
     let cancelled = false;
+    setLoading(true);
     fetch(`/api/admin/analytics?days=${days}`)
       .then((r) => r.json())
       .then((data) => {
         if (!cancelled) {
           setResult(data as GaResult);
-          setLoadedDays(days);
+          setLoading(false);
         }
       })
       .catch(() => {
-        if (!cancelled) setLoadedDays(days);
+        if (!cancelled) setLoading(false);
       });
     return () => {
       cancelled = true;
     };
-  }, [days, loadedDays]);
+  }, [days]);
 
   const data = result.ok ? result.data : null;
   const sessions = data?.daily.map((d) => d.sessions) ?? [];
@@ -56,13 +56,14 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
     label: formatCompact(Math.round(gridMax * (1 - f))),
   }));
 
-  const labelEvery = Math.max(1, Math.ceil(data?.daily.length ? data.daily.length / 6 : 6));
+  const dailyLen = data?.daily.length ?? 0;
+  const labelEvery = Math.max(1, Math.ceil(dailyLen / 6));
 
   return (
-    <div className="rounded-2xl border border-border bg-card card-grad p-5">
+    <div className="rounded-2xl border border-border/50 bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="font-display text-lg font-bold">Traffic</h2>
+          <h2 className="font-display text-lg font-semibold tracking-tight">Traffic</h2>
           <p className="text-xs text-muted-foreground">
             Sessions vs pageviews
           </p>
@@ -87,8 +88,18 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
       </div>
 
       {loading ? (
-        <div className="mt-6 grid h-[220px] place-items-center text-sm text-muted-foreground">
-          Loading…
+        /* Shine skeleton while loading new period */
+        <div className="mt-6 space-y-3">
+          <div className="flex gap-4 text-xs">
+            <div className="h-3 w-16 sk-item rounded-full" />
+            <div className="h-3 w-16 sk-item rounded-full" />
+          </div>
+          <div className="h-[200px] w-full sk-item rounded-xl" />
+          <div className="flex justify-between">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="h-3 w-8 sk-item rounded" />
+            ))}
+          </div>
         </div>
       ) : !data ? (
         <div className="mt-6 grid h-[220px] place-items-center text-center text-sm text-muted-foreground">
@@ -166,7 +177,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
                 i % labelEvery === 0 ? (
                   <text
                     key={d.date}
-                    x={(i * 600) / Math.max(1, data.daily.length - 1)}
+                    x={(i * 600) / Math.max(1, dailyLen - 1)}
                     y="186"
                     fontSize="9"
                     fill="var(--muted-foreground)"
