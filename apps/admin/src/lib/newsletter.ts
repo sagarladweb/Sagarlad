@@ -55,8 +55,8 @@ async function sendBrevo({
     });
     if (!res.ok) {
       const body = await res.text().catch(() => "");
-      const parsed = JSON.parse(body).catch(() => null);
-      const detail = parsed?.message || body.slice(0, 300);
+      let detail = body.slice(0, 300);
+      try { detail = JSON.parse(body).message || detail; } catch {}
       throw new Error(`Brevo ${res.status}: ${detail}`);
     }
   } finally {
