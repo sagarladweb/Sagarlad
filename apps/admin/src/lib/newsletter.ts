@@ -33,7 +33,7 @@ async function sendBrevo({
     throw new Error("BREVO_API_KEY and BREVO_FROM_EMAIL must be set");
   }
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
   try {
     const res = await fetch("https://api.brevo.com/v3/smtp/email", {
       method: "POST",
@@ -54,7 +54,10 @@ async function sendBrevo({
       }),
     });
     if (!res.ok) {
-      throw new Error(`Brevo ${res.status}: ${(await res.text()).slice(0, 300)}`);
+      const body = await res.text().catch(() => "");
+      const parsed = JSON.parse(body).catch(() => null);
+      const detail = parsed?.message || body.slice(0, 300);
+      throw new Error(`Brevo ${res.status}: ${detail}`);
     }
   } finally {
     clearTimeout(timeout);

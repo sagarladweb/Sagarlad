@@ -31,9 +31,10 @@ export async function POST(request: Request) {
     await sendTestEmail(to, parsed.data.subject, sanitizeHtml(parsed.data.html));
     return NextResponse.json({ ok: true, to });
   } catch (err) {
-    console.error("[newsletter] test send failed:", err);
+    const msg = err instanceof Error ? err.message : "Unknown error";
+    console.error("[newsletter] test send failed:", msg);
     return NextResponse.json(
-      { error: "Test send failed" },
+      { error: `Test send failed: ${msg}` },
       { status: 500 }
     );
   }
