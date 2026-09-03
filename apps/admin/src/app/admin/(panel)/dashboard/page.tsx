@@ -312,7 +312,7 @@ export default async function DashboardPage() {
       </section>
 
       {/* System Health + Activity */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         <Card title="System Health" icon={RefreshCw}>
           <SystemHealth />
         </Card>

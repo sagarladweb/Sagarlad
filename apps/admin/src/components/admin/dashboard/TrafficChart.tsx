@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { GaResult } from "@/lib/analytics";
 import { chartGeometry, formatCompact } from "@/lib/charts";
 
@@ -11,28 +11,20 @@ const RANGES = [
   { label: "ALL", days: 90 },
 ] as const;
 
-function fullDate(iso: string): string {
+function shortDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
-  return d.toLocaleDateString("en-IN", {
-    day: "numeric",
-    month: "long",
-  });
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(initial.data?.days ?? 14);
   const [result, setResult] = useState<GaResult>(initial);
   const [loading, setLoading] = useState(false);
-  const initialRef = useRef(initial);
-
-  useEffect(() => {
-    initialRef.current = initial;
-  }, [initial]);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
-    fetch(`/api/admin/analytics?days=${days}`)
+    fetch(`/api/admin/analytics?days=${days}`, { cache: "no-store" })
       .then((r) => r.json())
       .then((data) => {
         if (!cancelled) {
@@ -43,9 +35,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
       .catch(() => {
         if (!cancelled) setLoading(false);
       });
-    return () => {
-      cancelled = true;
-    };
+    return () => { cancelled = true; };
   }, [days]);
 
   const data = result.ok ? result.data : null;
@@ -62,16 +52,14 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
   }));
 
   const dailyLen = data?.daily.length ?? 0;
-  const labelEvery = Math.max(1, Math.ceil(dailyLen / 6));
+  const labelEvery = Math.max(1, Math.ceil(dailyLen / 7));
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card p-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="font-display text-lg font-semibold tracking-tight">Traffic</h2>
-          <p className="text-xs text-muted-foreground">
-            Sessions vs pageviews
-          </p>
+          <p className="text-xs text-muted-foreground">Sessions vs pageviews</p>
         </div>
         <div className="flex items-center gap-1 rounded-full bg-muted p-1">
           {RANGES.map((r) => (
@@ -100,8 +88,8 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
           </div>
           <div className="h-[200px] w-full sk-item rounded-xl" />
           <div className="flex justify-between">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="h-3 w-12 sk-item rounded" />
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="h-3 w-10 sk-item rounded" />
             ))}
           </div>
         </div>
@@ -125,7 +113,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               className="w-full"
               role="img"
               aria-label="Traffic chart"
-              style={{ overflow: "visible" }}
+              preserveAspectRatio="xMidYMid meet"
             >
               <defs>
                 <linearGradient id="ga-sessions" x1="0" y1="0" x2="0" y2="1">
@@ -139,56 +127,25 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               </defs>
               {gridLines.map((g) => (
                 <g key={g.y}>
-                  <line
-                    x1="0"
-                    x2="600"
-                    y1={g.y}
-                    y2={g.y}
-                    stroke="var(--border)"
-                    strokeWidth="1"
-                    strokeDasharray="3 3"
-                  />
-                  <text
-                    x="2"
-                    y={g.y - 4}
-                    fontSize="9"
-                    fill="var(--muted-foreground)"
-                  >
-                    {g.label}
-                  </text>
+                  <line x1="0" x2="600" y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
+                  <text x="2" y={g.y - 4} fontSize="9" fill="var(--muted-foreground)">{g.label}</text>
                 </g>
               ))}
-              {pGeo.area && (
-                <path d={pGeo.area} fill="url(#ga-pageviews)" />
-              )}
+              {pGeo.area && <path d={pGeo.area} fill="url(#ga-pageviews)" />}
               {sGeo.area && <path d={sGeo.area} fill="url(#ga-sessions)" />}
-              {pGeo.line && (
-                <path
-                  d={pGeo.line}
-                  fill="none"
-                  stroke="#0ea5e9"
-                  strokeWidth="1.5"
-                />
-              )}
-              {sGeo.line && (
-                <path
-                  d={sGeo.line}
-                  fill="none"
-                  stroke="var(--accent)"
-                  strokeWidth="2"
-                />
-              )}
+              {pGeo.line && <path d={pGeo.line} fill="none" stroke="#0ea5e9" strokeWidth="1.5" />}
+              {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth="2" />}
               {data.daily.map((d, i) =>
                 i % labelEvery === 0 || i === dailyLen - 1 ? (
                   <text
                     key={d.date}
                     x={(i * 600) / Math.max(1, dailyLen - 1)}
-                    y="196"
+                    y="205"
                     fontSize="8"
                     fill="var(--muted-foreground)"
                     textAnchor="middle"
                   >
-                    {fullDate(d.date)}
+                    {shortDate(d.date)}
                   </text>
                 ) : null
               )}

@@ -6,7 +6,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { countryToISO } from "@/lib/country-iso";
 
 type Country = { country: string; users: number; sessions: number };
-type NativeMap<K, V> = globalThis.Map<K, V>;
 
 const WORLD_GEOJSON =
   "https://cdn.jsdelivr.net/gh/nvkelso/natural-earth-vector@v5.1.2/geojson/ne_110m_admin_0_countries.geojson";
@@ -14,10 +13,10 @@ const WORLD_GEOJSON =
 export function WorldMap({ data }: { data: Country[] }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<MaplibreMap | null>(null);
-  const [hoveredCountry, setHoveredCountry] = useState<Country | null>(null);
+  const [mapReady, setMapReady] = useState(false);
 
   const isoMap = useMemo(() => {
-    const m = new globalThis.Map<string, Country>();
+    const m = new Map<string, Country>();
     for (const c of data) {
       const iso = countryToISO(c.country);
       if (iso) m.set(iso, c);
@@ -67,21 +66,52 @@ export function WorldMap({ data }: { data: Country[] }) {
         data: WORLD_GEOJSON,
       });
 
-      // Country fills — countries with data get accent color
+      // All countries fill
       map.addLayer({
         id: "countries-fill",
         type: "fill",
         source: "countries",
         paint: {
-          "fill-color": "rgba(99, 102, 241, 0.7)",
-          "fill-opacity": [
-            "case",
-            ["boolean", ["feature-state", "hasData"], false],
-            0.7,
-            0.06,
-          ],
+          "fill-color": "#c7d2fe",
+          "fill-opacity": 0.3,
         },
       });
+
+      // Highlighted countries — countries with data
+      map.addLayer({
+        id: "countries-highlight",
+        type: "fill",
+        source: "countries",
+        paint: {
+          "fill-color": "#6366f1",
+          "fill-opacity": [
+            "interpolate",
+            ["linear"],
+            ["coalesce", ["get", "_dataIntensity"], 0],
+            0, 0,
+            1, 0.75,
+          ],
+        },
+        filter: ["in", "ISO_A2", ["literal", Array.from(isoMap.keys())]],
+      });
+
+      // Set intensity properties on features that have data
+      const source = map.getSource("countries");
+      if (source && "setData" in source) {
+        // Re-fetch the data to inject intensity
+        fetch(WORLD_GEOJSON)
+          .then((r) => r.json())
+          .then((geojson) => {
+            for (const f of geojson.features) {
+              const iso = f.properties?.ISO_A2;
+              if (iso && isoMap.has(iso)) {
+                const c = isoMap.get(iso)!;
+                f.properties._dataIntensity = Math.min(1, c.users / maxUsers);
+              }
+            }
+            (source as { setData: (d: unknown) => void }).setData(geojson);
+          });
+      }
 
       // Country borders
       map.addLayer({
@@ -94,21 +124,7 @@ export function WorldMap({ data }: { data: Country[] }) {
         },
       });
 
-      // Set feature states for countries with GA data
-      if (isoMap.size > 0) {
-        const features = map.querySourceFeatures("countries");
-        for (const f of features) {
-          const iso = f.properties?.ISO_A2;
-          if (iso && isoMap.has(iso)) {
-            map.setFeatureState(
-              { source: "countries", id: f.id },
-              { hasData: true }
-            );
-          }
-        }
-      }
-
-      // Hover effect
+      // Hover
       let hoveredId: string | number | null = null;
       const popup = new Popup({
         closeButton: false,
@@ -124,23 +140,16 @@ export function WorldMap({ data }: { data: Country[] }) {
         const match = iso ? isoMap.get(iso) : undefined;
 
         if (hoveredId !== null) {
-          map.setFeatureState(
-            { source: "countries", id: hoveredId },
-            { hover: false }
-          );
+          map.setFeatureState({ source: "countries", id: hoveredId }, { hover: false });
         }
         hoveredId = feature.id ?? null;
         if (hoveredId !== null) {
-          map.setFeatureState(
-            { source: "countries", id: hoveredId },
-            { hover: true }
-          );
+          map.setFeatureState({ source: "countries", id: hoveredId }, { hover: true });
         }
 
         map.getCanvas().style.cursor = match ? "pointer" : "";
 
         if (match) {
-          setHoveredCountry(match);
           const coords = e.lngLat;
           popup
             .setLngLat(coords)
@@ -150,37 +159,27 @@ export function WorldMap({ data }: { data: Country[] }) {
             )
             .addTo(map);
         } else {
-          setHoveredCountry(null);
           popup.remove();
         }
       });
 
       map.on("mouseleave", "countries-fill", () => {
         if (hoveredId !== null) {
-          map.setFeatureState(
-            { source: "countries", id: hoveredId },
-            { hover: false }
-          );
+          map.setFeatureState({ source: "countries", id: hoveredId }, { hover: false });
           hoveredId = null;
         }
         map.getCanvas().style.cursor = "";
-        setHoveredCountry(null);
         popup.remove();
       });
 
-      // Fit bounds to data countries if any
+      // Fit bounds to data countries
       if (data.length > 0) {
         const features = map.querySourceFeatures("countries", {
-          sourceLayer: "",
-          filter: [
-            "in",
-            "ISO_A2",
-            ...Array.from(isoMap.keys()),
-          ],
+          filter: ["in", "ISO_A2", ["literal", Array.from(isoMap.keys())]],
         });
         if (features.length > 0) {
           const bounds = new LngLatBounds();
-          features.forEach((f) => {
+          for (const f of features) {
             if (f.geometry.type === "Polygon") {
               f.geometry.coordinates.forEach((ring) =>
                 ring.forEach((coord) => bounds.extend(coord as [number, number]))
@@ -192,12 +191,14 @@ export function WorldMap({ data }: { data: Country[] }) {
                 )
               );
             }
-          });
+          }
           if (!bounds.isEmpty()) {
             map.fitBounds(bounds, { padding: 40, maxZoom: 4 });
           }
         }
       }
+
+      setMapReady(true);
     });
 
     mapRef.current = map;
@@ -214,6 +215,13 @@ export function WorldMap({ data }: { data: Country[] }) {
         className="relative overflow-hidden rounded-xl border border-border/40"
         style={{ height: 340 }}
       />
+
+      {/* Tooltip */}
+      {data.length > 0 && mapReady && (
+        <div className="absolute bottom-3 left-3 rounded-lg bg-card/90 backdrop-blur border border-border/40 px-3 py-2 text-xs text-muted-foreground">
+          Hover countries for details
+        </div>
+      )}
 
       {/* Country legend */}
       {data.length > 0 && (

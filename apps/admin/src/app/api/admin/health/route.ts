@@ -120,13 +120,10 @@ async function checkBrevo(): Promise<HealthCheck> {
 
     // Provide specific error details
     const msg = body?.message ?? body?.code ?? `HTTP ${res.status}`;
-    const isIpBlock = res.status === 401 && /unrecognised|ip/i.test(String(msg));
     return {
       label: "Brevo (Email)",
-      status: isIpBlock ? "warn" : "error",
-      message: isIpBlock
-        ? `IP not whitelisted — remove IP restrictions at app.brevo.com/security/authorised_ips`
-        : `API error: ${msg}`,
+      status: "error",
+      message: `API error (${res.status}): ${msg}`,
       latencyMs: latency,
     };
   } catch (e) {
