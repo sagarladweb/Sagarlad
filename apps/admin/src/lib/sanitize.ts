@@ -2,8 +2,16 @@ import DOMPurify from "dompurify";
 import { JSDOM } from "jsdom";
 import type { WindowLike } from "dompurify";
 
-const { window } = new JSDOM("");
-const purify = DOMPurify(window as unknown as WindowLike);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let purify: any = null;
+
+function getPurify() {
+  if (!purify) {
+    const { window } = new JSDOM("");
+    purify = DOMPurify(window as unknown as WindowLike);
+  }
+  return purify;
+}
 
 // Block all event handler attributes (on*) plus dangerous attrs
 const FORBID_ATTR = [
@@ -33,7 +41,7 @@ const FORBID_ATTR = [
 ];
 
 export function sanitizeHtml(dirty: string): string {
-  return purify.sanitize(dirty, {
+  return getPurify().sanitize(dirty, {
     USE_PROFILES: { html: true },
     FORBID_TAGS: [
       "script", "style", "iframe", "object", "embed",
