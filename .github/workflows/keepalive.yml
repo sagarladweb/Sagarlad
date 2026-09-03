@@ -1,0 +1,18 @@
+# Supabase free-tier pauses the DB after ~7 days of inactivity.
+# This pings the combined keepalive + newsletter drain endpoint every 12 hours.
+# On Vercel, the same endpoint is also triggered by the daily cron in vercel.json,
+# but this GitHub Action is the primary scheduler — it runs even if Vercel is down.
+name: Keepalive + Newsletter Drain
+on:
+  schedule:
+    - cron: "0 */12 * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping combined endpoint
+        run: |
+          curl -sf -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "https://sagarlad.com/api/cron/keepalive" || true
