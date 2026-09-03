@@ -114,11 +114,9 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
             </span>
           </div>
-          <div className="mt-3" style={{ height: H }}>
+          <div className="mt-3">
             <svg
               viewBox={`0 0 ${W} ${H}`}
-              width={W}
-              height={H}
               className="w-full block"
               role="img"
               aria-label="Traffic chart"
