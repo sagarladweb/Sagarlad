@@ -25,6 +25,7 @@ import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
 import { SystemHealth } from "@/components/admin/dashboard/SystemHealth";
 import { WorldMap } from "@/components/admin/dashboard/WorldMap";
 import { KPISection } from "@/components/admin/dashboard/KPISection";
+import { ChartSandbox } from "@/components/admin/dashboard/ChartSandbox";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PublishedBadge } from "@/components/ui/Badge";
@@ -371,6 +372,9 @@ export default async function DashboardPage() {
           </Card>
         </section>
       )}
+
+      {/* Chart sandbox — floating button, opens full-screen overlay */}
+      <ChartSandbox daily={gaData.daily} countries={gaData.topCountries} />
     </div>
   );
 }
