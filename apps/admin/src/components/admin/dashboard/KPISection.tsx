@@ -142,7 +142,6 @@ export function KPISection({
               label={k.label}
               value={k.value}
               sub={k.sub}
-              tip={k.tip}
               icon={k.icon}
               sparkline={<Sparkline values={k.values} />}
             />
