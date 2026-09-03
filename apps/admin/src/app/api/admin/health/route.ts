@@ -103,7 +103,7 @@ async function checkBrevo(): Promise<HealthCheck> {
   const start = Date.now();
   try {
     const res = await fetch("https://api.brevo.com/v3/account", {
-      headers: { accept: "application/json", apikey: key },
+      headers: { accept: "application/json", "api-key": key },
       signal: AbortSignal.timeout(5000),
     }).catch(() => null);
     const latency = Date.now() - start;

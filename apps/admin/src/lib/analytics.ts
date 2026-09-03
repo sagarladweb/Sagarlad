@@ -140,7 +140,7 @@ async function fetchGaAnalytics(days: number): Promise<GaResult> {
           { name: "newUsers" },
           { name: "sessions" },
           { name: "screenPageViews" },
-          { name: "events" },
+          { name: "eventCount" },
           { name: "averageSessionDuration" },
           { name: "engagementRate" },
           { name: "bounceRate" },
@@ -182,7 +182,7 @@ async function fetchGaAnalytics(days: number): Promise<GaResult> {
       client.runReport({
         property: `properties/${config.propertyId}`,
         dateRanges,
-        dimensions: [{ name: "newVsReturningUserMetric" }],
+        dimensions: [{ name: "newVsReturning" }],
         metrics: [{ name: "totalUsers" }],
       }),
     ]);
@@ -252,9 +252,8 @@ async function fetchGaAnalytics(days: number): Promise<GaResult> {
   }
 }
 
-export function getGaAnalytics(days: number): Promise<GaResult> {
-  return unstable_cache(() => fetchGaAnalytics(days), ["ga-analytics", String(days)], {
+export async function getGaAnalytics(days: number): Promise<GaResult> {
+  return unstable_cache(async () => fetchGaAnalytics(days), ["ga-analytics", String(days)], {
     revalidate: 900,
-    tags: ["ga-analytics"],
   })();
 }
