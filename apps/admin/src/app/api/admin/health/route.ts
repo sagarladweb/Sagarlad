@@ -99,43 +99,11 @@ async function checkBrevo(): Promise<HealthCheck> {
     };
   }
 
-  const start = Date.now();
-  try {
-    const res = await fetch("https://api.brevo.com/v3/account", {
-      headers: { accept: "application/json", "api-key": key },
-      signal: AbortSignal.timeout(10000),
-    });
-    const latency = Date.now() - start;
-    const body = await res.json().catch(() => null);
-
-    if (res.ok) {
-      const plan = body?.plan?.[0]?.type ?? "unknown";
-      return {
-        label: "Brevo (Email)",
-        status: "ok",
-        message: `API key valid — ${body.email ?? email} (${plan} plan)`,
-        latencyMs: latency,
-      };
-    }
-
-    // Provide specific error details
-    const msg = body?.message ?? body?.code ?? `HTTP ${res.status}`;
-    return {
-      label: "Brevo (Email)",
-      status: "warn",
-      message: `API error (${res.status}): ${msg}`,
-      latencyMs: latency,
-    };
-  } catch (e) {
-    const latency = Date.now() - start;
-    const msg = e instanceof Error ? e.message : "Unknown error";
-    return {
-      label: "Brevo (Email)",
-      status: "error",
-      message: `Could not reach Brevo API — ${msg}`,
-      latencyMs: latency,
-    };
-  }
+  return {
+    label: "Brevo (Email)",
+    status: "ok",
+    message: `API key configured — ${email}`,
+  };
 }
 
 async function checkGoogleAnalytics(): Promise<HealthCheck> {

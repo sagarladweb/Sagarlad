@@ -16,10 +16,11 @@ function shortDate(iso: string): string {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-const SVG_W = 700;
-const CHART_TOP = 15;
-const CHART_H = 180;
-const LABEL_Y = CHART_TOP + CHART_H + 25;
+const W = 800;
+const H = 300;
+const PAD_TOP = 20;
+const PAD_BOTTOM = 50;
+const CHART_H = H - PAD_TOP - PAD_BOTTOM;
 
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(initial.data?.days ?? 14);
@@ -47,12 +48,12 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
   const sessions = data?.daily.map((d) => d.sessions) ?? [];
   const pageviews = data?.daily.map((d) => d.pageviews) ?? [];
 
-  const sGeo = chartGeometry(sessions, SVG_W, CHART_H);
-  const pGeo = chartGeometry(pageviews, SVG_W, CHART_H);
+  const sGeo = chartGeometry(sessions, W, CHART_H);
+  const pGeo = chartGeometry(pageviews, W, CHART_H);
   const gridMax = Math.max(sGeo.max, pGeo.max);
 
   const gridLines = [0, 0.25, 0.5, 0.75, 1].map((f) => ({
-    y: CHART_TOP + f * CHART_H,
+    y: PAD_TOP + f * CHART_H,
     label: formatCompact(Math.round(gridMax * (1 - f))),
   }));
 
@@ -91,15 +92,10 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
             <div className="h-3 w-16 sk-item rounded-full" />
             <div className="h-3 w-16 sk-item rounded-full" />
           </div>
-          <div className="h-[260px] w-full sk-item rounded-xl" />
-          <div className="flex justify-between">
-            {[...Array(7)].map((_, i) => (
-              <div key={i} className="h-3 w-10 sk-item rounded" />
-            ))}
-          </div>
+          <div className="h-[300px] w-full sk-item rounded-xl" />
         </div>
       ) : !data ? (
-        <div className="mt-6 grid h-[260px] place-items-center text-center text-sm text-muted-foreground">
+        <div className="mt-6 grid h-[300px] place-items-center text-center text-sm text-muted-foreground">
           No analytics data yet.
         </div>
       ) : (
@@ -112,10 +108,12 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
             </span>
           </div>
-          <div className="mt-3">
+          <div className="mt-3" style={{ height: H }}>
             <svg
-              viewBox={`0 0 ${SVG_W} ${CHART_TOP + CHART_H + 40}`}
-              className="w-full"
+              viewBox={`0 0 ${W} ${H}`}
+              width={W}
+              height={H}
+              className="w-full block"
               role="img"
               aria-label="Traffic chart"
             >
@@ -129,28 +127,42 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
                   <stop offset="100%" stopColor="#0ea5e9" stopOpacity="0" />
                 </linearGradient>
               </defs>
+
               {gridLines.map((g) => (
                 <g key={g.y}>
-                  <line x1="0" x2={SVG_W} y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
-                  <text x="4" y={g.y - 5} fontSize="10" fill="var(--muted-foreground)">{g.label}</text>
+                  <line x1="0" x2={W} y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="4 4" />
+                  <text x="4" y={g.y - 6} fontSize="10" fill="var(--muted-foreground)">{g.label}</text>
                 </g>
               ))}
+
               {pGeo.area && <path d={pGeo.area} fill="url(#ga-pageviews)" />}
               {sGeo.area && <path d={sGeo.area} fill="url(#ga-sessions)" />}
               {pGeo.line && <path d={pGeo.line} fill="none" stroke="#0ea5e9" strokeWidth="1.5" />}
               {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth="2.5" />}
+
               {data.daily.map((d, i) =>
                 i % labelEvery === 0 || i === dailyLen - 1 ? (
-                  <text
-                    key={d.date}
-                    x={(i * SVG_W) / Math.max(1, dailyLen - 1)}
-                    y={LABEL_Y}
-                    fontSize="10"
-                    fill="var(--muted-foreground)"
-                    textAnchor="middle"
-                  >
-                    {shortDate(d.date)}
-                  </text>
+                  <g key={d.date}>
+                    <line
+                      x1={(i * W) / Math.max(1, dailyLen - 1)}
+                      y1={PAD_TOP}
+                      x2={(i * W) / Math.max(1, dailyLen - 1)}
+                      y2={PAD_TOP + CHART_H}
+                      stroke="var(--border)"
+                      strokeWidth="0.5"
+                      strokeDasharray="2 2"
+                      opacity="0.3"
+                    />
+                    <text
+                      x={(i * W) / Math.max(1, dailyLen - 1)}
+                      y={H - 10}
+                      fontSize="10"
+                      fill="var(--muted-foreground)"
+                      textAnchor="middle"
+                    >
+                      {shortDate(d.date)}
+                    </text>
+                  </g>
                 ) : null
               )}
             </svg>
