@@ -66,7 +66,7 @@ export function WorldMap({ data }: { data: Country[] }) {
         data: WORLD_GEOJSON,
       });
 
-      // All countries fill
+      // All countries fill (light blue tint)
       map.addLayer({
         id: "countries-fill",
         type: "fill",
@@ -77,7 +77,7 @@ export function WorldMap({ data }: { data: Country[] }) {
         },
       });
 
-      // Highlighted countries — countries with data
+      // Highlighted countries with GA data (indigo)
       map.addLayer({
         id: "countries-highlight",
         type: "fill",
@@ -95,10 +95,9 @@ export function WorldMap({ data }: { data: Country[] }) {
         filter: ["in", "ISO_A2", ["literal", Array.from(isoMap.keys())]],
       });
 
-      // Set intensity properties on features that have data
+      // Inject _dataIntensity into GeoJSON features for data-driven fill
       const source = map.getSource("countries");
       if (source && "setData" in source) {
-        // Re-fetch the data to inject intensity
         fetch(WORLD_GEOJSON)
           .then((r) => r.json())
           .then((geojson) => {
@@ -110,7 +109,8 @@ export function WorldMap({ data }: { data: Country[] }) {
               }
             }
             (source as { setData: (d: unknown) => void }).setData(geojson);
-          });
+          })
+          .catch(() => {});
       }
 
       // Country borders
@@ -216,7 +216,7 @@ export function WorldMap({ data }: { data: Country[] }) {
         style={{ height: 340 }}
       />
 
-      {/* Tooltip */}
+      {/* Tooltip hint */}
       {data.length > 0 && mapReady && (
         <div className="absolute bottom-3 left-3 rounded-lg bg-card/90 backdrop-blur border border-border/40 px-3 py-2 text-xs text-muted-foreground">
           Hover countries for details

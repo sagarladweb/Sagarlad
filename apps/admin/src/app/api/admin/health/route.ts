@@ -120,10 +120,13 @@ async function checkBrevo(): Promise<HealthCheck> {
 
     // Provide specific error details
     const msg = body?.message ?? body?.code ?? `HTTP ${res.status}`;
+    const isAuthFail = res.status === 401 || res.status === 403;
     return {
       label: "Brevo (Email)",
-      status: "error",
-      message: `API error (${res.status}): ${msg}`,
+      status: isAuthFail ? "warn" : "error",
+      message: isAuthFail
+        ? `Auth failed (${res.status}): ${msg} — check BREVO_API_KEY`
+        : `API error (${res.status}): ${msg}`,
       latencyMs: latency,
     };
   } catch (e) {

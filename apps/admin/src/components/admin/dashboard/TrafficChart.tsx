@@ -16,6 +16,12 @@ function shortDate(iso: string): string {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
+const SVG_W = 600;
+const SVG_H = 230;
+const CHART_TOP = 10;
+const CHART_H = 155;
+const LABEL_Y = SVG_H - 5;
+
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(initial.data?.days ?? 14);
   const [result, setResult] = useState<GaResult>(initial);
@@ -42,12 +48,12 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
   const sessions = data?.daily.map((d) => d.sessions) ?? [];
   const pageviews = data?.daily.map((d) => d.pageviews) ?? [];
 
-  const sGeo = chartGeometry(sessions, 600, 180);
-  const pGeo = chartGeometry(pageviews, 600, 180);
+  const sGeo = chartGeometry(sessions, SVG_W, CHART_H);
+  const pGeo = chartGeometry(pageviews, SVG_W, CHART_H);
   const gridMax = Math.max(sGeo.max, pGeo.max);
 
   const gridLines = [0, 0.25, 0.5, 0.75, 1].map((f) => ({
-    y: 10 + f * 160,
+    y: CHART_TOP + f * CHART_H,
     label: formatCompact(Math.round(gridMax * (1 - f))),
   }));
 
@@ -107,10 +113,10 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
             </span>
           </div>
-          <div className="mt-2">
+          <div className="mt-2 overflow-visible">
             <svg
-              viewBox="0 0 600 210"
-              className="w-full"
+              viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+              className="w-full block"
               role="img"
               aria-label="Traffic chart"
               preserveAspectRatio="xMidYMid meet"
@@ -127,7 +133,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               </defs>
               {gridLines.map((g) => (
                 <g key={g.y}>
-                  <line x1="0" x2="600" y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
+                  <line x1="0" x2={SVG_W} y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
                   <text x="2" y={g.y - 4} fontSize="9" fill="var(--muted-foreground)">{g.label}</text>
                 </g>
               ))}
@@ -139,9 +145,9 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
                 i % labelEvery === 0 || i === dailyLen - 1 ? (
                   <text
                     key={d.date}
-                    x={(i * 600) / Math.max(1, dailyLen - 1)}
-                    y="205"
-                    fontSize="8"
+                    x={(i * SVG_W) / Math.max(1, dailyLen - 1)}
+                    y={LABEL_Y}
+                    fontSize="9"
                     fill="var(--muted-foreground)"
                     textAnchor="middle"
                   >
