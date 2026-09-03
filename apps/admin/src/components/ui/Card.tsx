@@ -52,7 +52,7 @@ export function KPICard({
           <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-foreground" />
         </div>
       )}
-      <div className="flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-300">
+      <div className="flex items-center justify-between">
         <span className="text-[11px] font-medium uppercase tracking-widest text-muted-foreground/70">
           {label}
         </span>
@@ -60,12 +60,10 @@ export function KPICard({
           <Icon className="w-3.5 h-3.5" />
         </span>
       </div>
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-500">
-        <p className="mt-3 font-display text-3xl font-bold tabular-nums leading-none tracking-tight">
-          {value}
-        </p>
-        <p className="mt-1.5 text-xs text-muted-foreground/60">{sub}</p>
-      </div>
+      <p className="mt-3 font-display text-3xl font-bold tabular-nums leading-none tracking-tight">
+        {value}
+      </p>
+      <p className="mt-1.5 text-xs text-muted-foreground/60">{sub}</p>
       {sparkline && <div className="mt-auto pt-3">{sparkline}</div>}
       {/* Hover details — shows after 3s */}
       {details && (
