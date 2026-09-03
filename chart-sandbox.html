@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chart Layout Sandbox</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: #0a0a0a; font-family: 'Inter', system-ui, sans-serif; }
+    .sandbox-chart { background: #18181b; border: 1px solid #27272a; border-radius: 16px; padding: 20px; }
+    .control-group { background: #18181b; border: 1px solid #27272a; border-radius: 12px; padding: 16px; }
+    input[type="range"] { -webkit-appearance: none; background: #27272a; height: 6px; border-radius: 3px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #6366f1; cursor: pointer; }
+    .output-box { background: #0f0f11; border: 1px solid #27272a; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 12px; color: #a1a1aa; white-space: pre-wrap; word-break: break-all; }
+  </style>
+</head>
+<body class="min-h-screen text-white p-6">
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-2xl font-bold mb-2">Chart Layout Sandbox</h1>
+    <p class="text-sm text-zinc-400 mb-6">Adjust sliders to position date/month labels. Copy the output settings and paste them for implementation.</p>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Chart preview -->
+      <div class="lg:col-span-2">
+        <div class="sandbox-chart">
+          <h2 class="text-sm font-semibold text-zinc-300 mb-4">Preview</h2>
+          <div id="chart-container" style="height: 400px;">
+            <svg id="chart-svg" viewBox="0 0 800 400" width="800" height="400" class="w-full block"></svg>
+          </div>
+        </div>
+
+        <!-- Country bars preview -->
+        <div class="sandbox-chart mt-6">
+          <h2 class="text-sm font-semibold text-zinc-300 mb-4">Country Bars Preview</h2>
+          <div style="height: 250px;">
+            <svg id="country-svg" viewBox="0 0 800 250" width="800" height="250" class="w-full block"></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls -->
+      <div class="space-y-4">
+        <!-- Traffic Chart Controls -->
+        <div class="control-group">
+          <h3 class="text-sm font-semibold text-indigo-400 mb-3">Traffic Chart</h3>
+
+          <div class="space-y-3">
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>SVG Width</span>
+                <span id="val-svgW" class="text-zinc-300">800</span>
+              </label>
+              <input type="range" id="svgW" min="400" max="1200" value="800" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>SVG Height</span>
+                <span id="val-svgH" class="text-zinc-300">300</span>
+              </label>
+              <input type="range" id="svgH" min="200" max="500" value="300" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Chart Top (padding)</span>
+                <span id="val-padTop" class="text-zinc-300">20</span>
+              </label>
+              <input type="range" id="padTop" min="5" max="60" value="20" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Chart Bottom (label area)</span>
+                <span id="val-padBottom" class="text-zinc-300">50</span>
+              </label>
+              <input type="range" id="padBottom" min="20" max="100" value="50" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div class="border-t border-zinc-800 pt-3 mt-3">
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Label Y offset from bottom</span>
+                <span id="val-labelYOffset" class="text-zinc-300">10</span>
+              </label>
+              <input type="range" id="labelYOffset" min="2" max="30" value="10" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Label Font Size</span>
+                <span id="val-labelSize" class="text-zinc-300">10</span>
+              </label>
+              <input type="range" id="labelSize" min="6" max="18" value="10" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Grid Label Font Size</span>
+                <span id="val-gridLabelSize" class="text-zinc-300">10</span>
+              </label>
+              <input type="range" id="gridLabelSize" min="6" max="16" value="10" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Line Stroke Width</span>
+                <span id="val-lineWidth" class="text-zinc-300">2.5</span>
+              </label>
+              <input type="range" id="lineWidth" min="1" max="5" value="2.5" step="0.5" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Label Every N days</span>
+                <span id="val-labelEvery" class="text-zinc-300">auto</span>
+              </label>
+              <input type="range" id="labelEvery" min="1" max="14" value="0" class="w-full" oninput="updateChart()">
+              <span class="text-[10px] text-zinc-500">0 = auto (show ~7 labels)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Country Chart Controls -->
+        <div class="control-group">
+          <h3 class="text-sm font-semibold text-indigo-400 mb-3">Country Bars</h3>
+
+          <div class="space-y-3">
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>SVG Height</span>
+                <span id="val-countryH" class="text-zinc-300">220</span>
+              </label>
+              <input type="range" id="countryH" min="150" max="400" value="220" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Bar Max Width</span>
+                <span id="val-barMaxW" class="text-zinc-300">60</span>
+              </label>
+              <input type="range" id="barMaxW" min="20" max="100" value="60" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Bar Gap</span>
+                <span id="val-barGap" class="text-zinc-300">6</span>
+              </label>
+              <input type="range" id="barGap" min="2" max="20" value="6" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Value Font Size (on bar)</span>
+                <span id="val-valSize" class="text-zinc-300">10</span>
+              </label>
+              <input type="range" id="valSize" min="6" max="16" value="10" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Country Label Font Size</span>
+                <span id="val-countryLabelSize" class="text-zinc-300">9</span>
+              </label>
+              <input type="range" id="countryLabelSize" min="6" max="14" value="9" class="w-full" oninput="updateChart()">
+            </div>
+
+            <div>
+              <label class="flex items-center justify-between text-xs text-zinc-400 mb-1">
+                <span>Bar Color</span>
+              </label>
+              <input type="color" id="barColor" value="#6366f1" class="w-full h-8 rounded cursor-pointer" onchange="updateChart()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Output -->
+        <div class="control-group">
+          <h3 class="text-sm font-semibold text-green-400 mb-3">Output Settings</h3>
+          <div id="output" class="output-box"></div>
+          <button onclick="copyOutput()" class="mt-3 w-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold py-2 rounded-lg transition-colors">
+            Copy Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Sample data matching real GA data
+const dailyData = [
+  { date: "2025-08-20", sessions: 12, pageviews: 18 },
+  { date: "2025-08-21", sessions: 8, pageviews: 14 },
+  { date: "2025-08-22", sessions: 15, pageviews: 22 },
+  { date: "2025-08-23", sessions: 6, pageviews: 10 },
+  { date: "2025-08-24", sessions: 20, pageviews: 31 },
+  { date: "2025-08-25", sessions: 18, pageviews: 27 },
+  { date: "2025-08-26", sessions: 25, pageviews: 40 },
+  { date: "2025-08-27", sessions: 22, pageviews: 35 },
+  { date: "2025-08-28", sessions: 30, pageviews: 48 },
+  { date: "2025-08-29", sessions: 28, pageviews: 42 },
+  { date: "2025-08-30", sessions: 35, pageviews: 55 },
+  { date: "2025-08-31", sessions: 10, pageviews: 16 },
+  { date: "2025-09-01", sessions: 40, pageviews: 62 },
+  { date: "2025-09-02", sessions: 38, pageviews: 58 },
+];
+
+const countryData = [
+  { country: "India", users: 45, sessions: 52 },
+  { country: "United States", users: 18, sessions: 22 },
+  { country: "Germany", users: 8, sessions: 10 },
+  { country: "United Kingdom", users: 6, sessions: 7 },
+  { country: "Canada", users: 4, sessions: 5 },
+];
+
+function shortDate(iso) {
+  const d = new Date(iso + "T00:00:00");
+  return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+}
+
+function formatCompact(n) {
+  if (n >= 1000) return (n / 1000).toFixed(1) + "k";
+  return String(n);
+}
+
+function buildPath(data, w, h) {
+  const max = Math.max(...data, 1);
+  const step = w / Math.max(1, data.length - 1);
+  const points = data.map((v, i) => [i * step, h - (v / max) * h]);
+  const line = points.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(" ");
+  const area = line + ` L${points[points.length-1][0]},${h} L0,${h} Z`;
+  return { line, area };
+}
+
+function updateChart() {
+  const W = +document.getElementById("svgW").value;
+  const H = +document.getElementById("svgH").value;
+  const PAD_TOP = +document.getElementById("padTop").value;
+  const PAD_BOTTOM = +document.getElementById("padBottom").value;
+  const LABEL_Y_OFFSET = +document.getElementById("labelYOffset").value;
+  const LABEL_SIZE = +document.getElementById("labelSize").value;
+  const GRID_SIZE = +document.getElementById("gridLabelSize").value;
+  const LINE_W = +document.getElementById("lineWidth").value;
+  const LABEL_EVERY = +document.getElementById("labelEvery").value;
+
+  const COUNTRY_H = +document.getElementById("countryH").value;
+  const BAR_MAX_W = +document.getElementById("barMaxW").value;
+  const BAR_GAP = +document.getElementById("barGap").value;
+  const VAL_SIZE = +document.getElementById("valSize").value;
+  const COUNTRY_LABEL_SIZE = +document.getElementById("countryLabelSize").value;
+  const BAR_COLOR = document.getElementById("barColor").value;
+
+  const CHART_H = H - PAD_TOP - PAD_BOTTOM;
+  const sessions = dailyData.map(d => d.sessions);
+  const pageviews = dailyData.map(d => d.pageviews);
+
+  const sGeo = buildPath(sessions, W, CHART_H);
+  const pGeo = buildPath(pageviews, W, CHART_H);
+  const gridMax = Math.max(...sessions, ...pageviews);
+
+  // Update display values
+  document.getElementById("val-svgW").textContent = W;
+  document.getElementById("val-svgH").textContent = H;
+  document.getElementById("val-padTop").textContent = PAD_TOP;
+  document.getElementById("val-padBottom").textContent = PAD_BOTTOM;
+  document.getElementById("val-labelYOffset").textContent = LABEL_Y_OFFSET;
+  document.getElementById("val-labelSize").textContent = LABEL_SIZE;
+  document.getElementById("val-gridLabelSize").textContent = GRID_SIZE;
+  document.getElementById("val-lineWidth").textContent = LINE_W;
+  document.getElementById("val-labelEvery").textContent = LABEL_EVERY === 0 ? "auto" : LABEL_EVERY;
+  document.getElementById("val-countryH").textContent = COUNTRY_H;
+  document.getElementById("val-barMaxW").textContent = BAR_MAX_W;
+  document.getElementById("val-barGap").textContent = BAR_GAP;
+  document.getElementById("val-valSize").textContent = VAL_SIZE;
+  document.getElementById("val-countryLabelSize").textContent = COUNTRY_LABEL_SIZE;
+
+  // Build traffic chart SVG
+  const labelEvery = LABEL_EVERY === 0 ? Math.max(1, Math.ceil(dailyData.length / 7)) : LABEL_EVERY;
+  const LABEL_Y = H - LABEL_Y_OFFSET;
+
+  let svgContent = `<defs>
+    <linearGradient id="ga-sessions" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6366f1" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="ga-pageviews" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0ea5e9" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#0ea5e9" stop-opacity="0"/>
+    </linearGradient>
+  </defs>`;
+
+  // Grid lines
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = PAD_TOP + f * CHART_H;
+    const val = Math.round(gridMax * (1 - f));
+    svgContent += `<line x1="0" x2="${W}" y1="${y}" y2="${y}" stroke="#27272a" stroke-width="1" stroke-dasharray="4 4"/>`;
+    svgContent += `<text x="4" y="${y - 6}" font-size="${GRID_SIZE}" fill="#71717a">${formatCompact(val)}</text>`;
+  });
+
+  // Areas and lines
+  svgContent += `<path d="${pGeo.area}" fill="url(#ga-pageviews)"/>`;
+  svgContent += `<path d="${sGeo.area}" fill="url(#ga-sessions)"/>`;
+  svgContent += `<path d="${pGeo.line}" fill="none" stroke="#0ea5e9" stroke-width="1.5"/>`;
+  svgContent += `<path d="${sGeo.line}" fill="none" stroke="#6366f1" stroke-width="${LINE_W}"/>`;
+
+  // Date labels
+  dailyData.forEach((d, i) => {
+    if (i % labelEvery === 0 || i === dailyData.length - 1) {
+      const x = (i * W) / Math.max(1, dailyData.length - 1);
+      svgContent += `<line x1="${x}" y1="${PAD_TOP}" x2="${x}" y2="${PAD_TOP + CHART_H}" stroke="#27272a" stroke-width="0.5" stroke-dasharray="2 2" opacity="0.3"/>`;
+      svgContent += `<text x="${x}" y="${LABEL_Y}" font-size="${LABEL_SIZE}" fill="#a1a1aa" text-anchor="middle">${shortDate(d.date)}</text>`;
+    }
+  });
+
+  document.getElementById("chart-svg").innerHTML = svgContent;
+
+  // Build country bars SVG
+  const COUNTRY_PAD_TOP = 20;
+  const COUNTRY_PAD_BOTTOM = 40;
+  const COUNTRY_CHART_H = COUNTRY_H - COUNTRY_PAD_TOP - COUNTRY_PAD_BOTTOM;
+  const maxUsers = Math.max(...countryData.map(c => c.users));
+  const barW = Math.min(BAR_MAX_W, ((W - 20) - BAR_GAP * (countryData.length - 1)) / countryData.length);
+
+  let countryContent = "";
+  [0, 0.25, 0.5, 0.75, 1].forEach(f => {
+    const y = COUNTRY_PAD_TOP + COUNTRY_CHART_H - f * COUNTRY_CHART_H;
+    const val = Math.round(maxUsers * f);
+    countryContent += `<line x1="10" x2="${W - 10}" y1="${y}" y2="${y}" stroke="#27272a" stroke-width="1" stroke-dasharray="3 3"/>`;
+    countryContent += `<text x="10" y="${y - 5}" font-size="9" fill="#71717a">${val}</text>`;
+  });
+
+  countryData.forEach((c, i) => {
+    const barH = (c.users / maxUsers) * COUNTRY_CHART_H;
+    const x = 10 + i * (barW + BAR_GAP) + ((W - 20) - countryData.length * (barW + BAR_GAP) + BAR_GAP) / 2;
+    const y = COUNTRY_PAD_TOP + COUNTRY_CHART_H - barH;
+    countryContent += `<rect x="${x}" y="${y}" width="${barW}" height="${barH}" rx="4" fill="${BAR_COLOR}" opacity="0.85"/>`;
+    countryContent += `<text x="${x + barW / 2}" y="${y - 5}" font-size="${VAL_SIZE}" font-weight="600" fill="#fafafa" text-anchor="middle">${c.users}</text>`;
+    const label = c.country.length > 8 ? c.country.slice(0, 7) + "…" : c.country;
+    countryContent += `<text x="${x + barW / 2}" y="${COUNTRY_H - 10}" font-size="${COUNTRY_LABEL_SIZE}" fill="#a1a1aa" text-anchor="middle">${label}</text>`;
+  });
+
+  document.getElementById("country-svg").innerHTML = countryContent;
+
+  // Generate output
+  const output = `// TrafficChart settings
+const W = ${W};
+const H = ${H};
+const PAD_TOP = ${PAD_TOP};
+const PAD_BOTTOM = ${PAD_BOTTOM};
+const CHART_H = H - PAD_TOP - PAD_BOTTOM;
+const LABEL_Y = H - ${LABEL_Y_OFFSET};
+const LABEL_SIZE = ${LABEL_SIZE};
+const GRID_LABEL_SIZE = ${GRID_SIZE};
+const LINE_WIDTH = ${LINE_W};
+const LABEL_EVERY_N = ${LABEL_EVERY}; // 0 = auto
+
+// Country bars settings
+const COUNTRY_H = ${COUNTRY_H};
+const BAR_MAX_W = ${BAR_MAX_W};
+const BAR_GAP = ${BAR_GAP};
+const VAL_FONT_SIZE = ${VAL_SIZE};
+const COUNTRY_LABEL_SIZE = ${COUNTRY_LABEL_SIZE};
+const BAR_COLOR = "${BAR_COLOR}";
+
+// SVG attributes
+<svg viewBox="0 0 \${W} \${H}" width={W} height={H}>`;
+
+  document.getElementById("output").textContent = output;
+}
+
+function copyOutput() {
+  const text = document.getElementById("output").textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector("button");
+    btn.textContent = "Copied!";
+    setTimeout(() => btn.textContent = "Copy Settings", 1500);
+  });
+}
+
+// Initial render
+updateChart();
+</script>
+</body>
+</html>

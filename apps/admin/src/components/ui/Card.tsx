@@ -33,6 +33,7 @@ export function KPICard({
   tip,
   icon: Icon,
   sparkline,
+  details,
 }: {
   label: string;
   value: string;
@@ -40,6 +41,7 @@ export function KPICard({
   tip?: string;
   icon: React.ComponentType<{ className?: string }>;
   sparkline?: React.ReactNode;
+  details?: React.ReactNode;
 }) {
   return (
     <div className="relative rounded-2xl border border-border/50 bg-card p-5 flex flex-col group transition-all duration-300 ease-out hover:border-accent/25 hover:bg-accent/[0.015]">
@@ -63,6 +65,15 @@ export function KPICard({
       </p>
       <p className="mt-1.5 text-xs text-muted-foreground/60">{sub}</p>
       {sparkline && <div className="mt-auto pt-3">{sparkline}</div>}
+      {/* Hover details — shows after 3s */}
+      {details && (
+        <div className="absolute inset-0 z-20 rounded-2xl border border-accent/30 bg-card/95 backdrop-blur-sm p-5 shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-300 overflow-auto">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-semibold uppercase tracking-widest text-accent">Details</span>
+          </div>
+          {details}
+        </div>
+      )}
     </div>
   );
 }

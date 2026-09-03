@@ -1,10 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import {
-  Users,
-  MousePointerClick,
-  Eye,
-  Timer,
   Plus,
   FileText,
   Mail,
@@ -24,33 +20,17 @@ import {
 import { getDashboardStats, getDashboardExtras } from "@/lib/content";
 import { getGaAnalytics } from "@/lib/analytics";
 import { adminHeartbeat } from "@/lib/heartbeat";
-import { chartGeometry, formatCompact, formatDuration } from "@/lib/charts";
+import { formatCompact } from "@/lib/charts";
 import { TrafficChart } from "@/components/admin/dashboard/TrafficChart";
 import { SystemHealth } from "@/components/admin/dashboard/SystemHealth";
 import { WorldMap } from "@/components/admin/dashboard/WorldMap";
-import { Card, KPICard } from "@/components/ui/Card";
+import { KPISection } from "@/components/admin/dashboard/KPISection";
+import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { PublishedBadge } from "@/components/ui/Badge";
 import { PHASE_1 } from "@/lib/phase";
 
 export const dynamic = "force-dynamic";
-
-function Sparkline({ values }: { values: number[] }) {
-  const { line, area } = chartGeometry(values, 120, 36);
-  if (!line) return <div className="h-9" />;
-  return (
-    <svg viewBox="0 0 120 36" className="w-full h-9" aria-hidden="true">
-      <defs>
-        <linearGradient id="kpi-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="var(--accent)" stopOpacity="0.25" />
-          <stop offset="100%" stopColor="var(--accent)" stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#kpi-fill)" />
-      <path d={line} fill="none" stroke="var(--accent)" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
 
 export default async function DashboardPage() {
   if (PHASE_1) redirect("/admin/posts");
@@ -117,13 +97,6 @@ export default async function DashboardPage() {
   const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
   const today = new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" });
 
-  const kpis = [
-    { label: "Visitors", value: gaData.totals.users.toLocaleString(), sub: "unique people", icon: Users, tip: "Distinct people who visited", values: gaData.daily.map((d) => d.sessions) },
-    { label: "Visits", value: gaData.totals.sessions.toLocaleString(), sub: "total sessions", icon: MousePointerClick, tip: "Every visit to your site", values: gaData.daily.map((d) => d.sessions) },
-    { label: "Page views", value: gaData.totals.pageviews.toLocaleString(), sub: "pages loaded", icon: Eye, tip: "Pages people looked at", values: gaData.daily.map((d) => d.pageviews) },
-    { label: "Avg. time", value: formatDuration(gaData.totals.avgEngagement), sub: "per visit", icon: Timer, tip: "How long people stay", values: gaData.daily.map((d) => d.avgEngagement) },
-  ];
-
   const maxSource = Math.max(...(gaData.topSources.map((s) => s.sessions) ?? [1]));
   const contentStats = [
     { label: "Books", value: extras.books, href: "/admin/books", icon: BookOpen },
@@ -155,14 +128,7 @@ export default async function DashboardPage() {
       )}
 
       {/* KPI row */}
-      <section>
-        <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">Overview</h2>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {kpis.map((k) => (
-            <KPICard key={k.label} {...k} sparkline={<Sparkline values={k.values} />} />
-          ))}
-        </div>
-      </section>
+      <KPISection totals={gaData.totals} daily={gaData.daily} />
 
       {/* Traffic chart — full width */}
       <section>
