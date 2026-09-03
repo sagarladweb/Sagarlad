@@ -604,7 +604,8 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
 
               {viewMode === "edit" ? (
                 /* ── Interactive Edit Canvas ─────────────────── */
-                <div className={`rounded-xl border bg-card shadow-lg overflow-hidden transition-all ${dropActive ? "border-accent ring-4 ring-accent/10" : "border-border/50"}`}>
+                <div className={`rounded-xl shadow-lg overflow-hidden transition-all ${dropActive ? "ring-4 ring-accent/10" : ""}`}
+                  style={{ background: "#faf9f6", border: "1px solid #e5e3dd" }}>
                   {dropActive && (
                     <div className="absolute inset-0 z-10 flex items-center justify-center pointer-events-none">
                       <div className="rounded-xl border border-dashed border-accent/30 bg-accent/5 px-6 py-4">
@@ -613,18 +614,21 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                     </div>
                   )}
 
-                  {/* Greeting */}
-                  <div className="px-12 pt-10 pb-1 overflow-hidden">
-                    <input value={content.greeting} onChange={(e) => update({ greeting: e.target.value })} placeholder="Hi there,"
-                      className="w-full text-[28px] font-bold text-foreground outline-none placeholder:text-muted-foreground/40 bg-transparent border-b border-border pb-2 transition-colors focus:border-accent" />
-                  </div>
+                  {/* Email card */}
+                  <div className="mx-auto max-w-[600px] my-6" style={{ background: "#ffffff", border: "1px solid #ecebe6", borderRadius: "14px" }}>
 
-                  {/* Intro */}
-                  <div className="px-12 pb-6 pt-2 overflow-hidden">
-                    <textarea value={content.intro} onChange={(e) => { update({ intro: e.target.value }); markDirty(); }} placeholder="What's new this week…"
-                      rows={3}
-                      className="w-full text-[16px] leading-relaxed text-muted-foreground outline-none resize-none placeholder:text-muted-foreground/40 bg-transparent border-b border-border pb-2 transition-colors focus:border-accent" />
-                  </div>
+                    {/* Greeting — matches email: padding:30px 40px 6px 40px */}
+                    <div style={{ padding: "30px 40px 6px 40px" }}>
+                      <input value={content.greeting} onChange={(e) => update({ greeting: e.target.value })} placeholder="Hi there,"
+                        style={{ width: "100%", fontSize: "15px", fontWeight: 700, color: "#111110", background: "transparent", border: "none", outline: "none", padding: "0 0 6px 0", borderBottom: "1px solid #ecebe6", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }} />
+                    </div>
+
+                    {/* Intro — matches email: padding:30px 40px 6px 40px */}
+                    <div style={{ padding: "0 40px 20px 40px" }}>
+                      <textarea value={content.intro} onChange={(e) => { update({ intro: e.target.value }); markDirty(); }} placeholder="What's new this week…"
+                        rows={3}
+                        style={{ width: "100%", fontSize: "15px", lineHeight: "1.65", color: "#2a2926", background: "transparent", border: "none", outline: "none", resize: "none", padding: "0 0 8px 0", borderBottom: "1px solid #ecebe6", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }} />
+                    </div>
 
                   {/* Sections */}
                   {content.sections.map((s, i) => {
@@ -680,108 +684,117 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                         )}
 
                         {/* ── Section rendering ─────────────── */}
-                        <div className="px-12 py-6 cursor-pointer overflow-hidden" onClick={() => selectSection(i)}>
+                        <div className="cursor-pointer overflow-hidden" style={{ padding: "8px 40px" }} onClick={() => selectSection(i)}>
                           {kind === "heading" && (
                             <input value={s.heading} onChange={(e) => setSection(i, { heading: e.target.value })}
                               placeholder="Section heading"
-                              className="w-full text-[24px] font-bold text-foreground outline-none placeholder:text-muted-foreground/40 bg-transparent border-b border-border/50 pb-1 transition-colors focus:border-accent" />
+                              style={{ width: "100%", fontSize: "21px", fontWeight: 700, color: "#111110", background: "transparent", border: "none", outline: "none", padding: "0 0 10px 0", borderBottom: "1px solid #ecebe6", fontFamily: "Georgia,'Times New Roman',serif" }} />
                           )}
                           {kind === "text" && (
-                            <TextBlockWithFormat value={s.body} onChange={(val) => setSection(i, { body: val })} />
+                            <div style={{ fontSize: "15px", color: "#2a2926", lineHeight: "1.65" }}>
+                              <TextBlockWithFormat value={s.body} onChange={(val) => setSection(i, { body: val })} />
+                            </div>
                           )}
                           {kind === "image" && (
-                            <div className="space-y-2">
+                            <div>
                               {s.body && s.body !== "https://images.unsplash.com/photo-1500964757637-c85e8a162699?w=800&q=80" ? (
-                                <img src={s.body} alt="" className="w-full rounded-lg border border-border/50" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+                                <img src={s.body} alt="" style={{ width: "100%", borderRadius: "8px", display: "block" }} onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                               ) : (
-                                <div className="w-full rounded-lg border border-dashed border-border flex flex-col items-center justify-center gap-2 bg-muted/30 py-10">
-                                  <ImageIcon className="w-8 h-8 text-muted-foreground/40" />
-                                  <p className="text-xs text-muted-foreground/60">Paste image URL below</p>
+                                <div style={{ width: "100%", borderRadius: "8px", border: "1px dashed #e8e6e1", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "8px", padding: "40px 0", background: "#faf9f6" }}>
+                                  <ImageIcon style={{ width: "32px", height: "32px", color: "#6b6a66", opacity: 0.4 }} />
+                                  <p style={{ fontSize: "12px", color: "#6b6a66", opacity: 0.6 }}>Paste image URL below</p>
                                 </div>
                               )}
                               <input value={s.body} onChange={(e) => setSection(i, { body: e.target.value })}
                                 placeholder="https://example.com/image.jpg"
-                                className="w-full text-xs text-muted-foreground outline-none placeholder:text-muted-foreground/40 bg-transparent border-b border-border pb-1 transition-colors focus:border-accent" />
+                                style={{ width: "100%", fontSize: "12px", color: "#6b6a66", background: "transparent", border: "none", outline: "none", padding: "8px 0", borderBottom: "1px solid #ecebe6" }} />
                             </div>
                           )}
                           {kind === "button" && (
-                            <div className="text-center py-1">
-                              <div className="inline-flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-full text-sm font-semibold">
+                            <div style={{ textAlign: "center", padding: "8px 0" }}>
+                              <a href={content.cta?.url || "#"} style={{ background: content.accent, color: "#111110", textDecoration: "none", fontWeight: 700, fontSize: "15px", padding: "13px 34px", borderRadius: "999px", display: "inline-block" }}>
                                 {content.cta?.label || "Button"} →
-                              </div>
+                              </a>
                             </div>
                           )}
                           {kind === "quote" && (() => {
                             let qData: { text: string; author: string } = { text: "", author: "" };
                             try { qData = JSON.parse(s.body); } catch { qData = { text: s.body, author: "" }; }
                             return (
-                              <div className="border-l-2 border-accent/40 pl-5 py-2">
-                                <p className="text-[16px] italic text-muted-foreground leading-relaxed">{qData.text || "Quote text"}</p>
-                                {qData.author && <p className="text-[13px] text-muted-foreground/60 mt-2">— {qData.author}</p>}
+                              <div style={{ borderLeft: `4px solid ${content.accent}`, padding: "6px 22px", fontStyle: "italic", fontFamily: "Georgia,'Times New Roman',serif", fontSize: "16px", color: "#3c3a35" }}>
+                                <p style={{ margin: 0 }}>{qData.text || "Quote text"}</p>
+                                {qData.author && <p style={{ fontStyle: "normal", fontSize: "13px", fontWeight: 700, color: "#6b6a66", marginTop: "8px" }}>— {qData.author}</p>}
                               </div>
                             );
                           })()}
-                          {kind === "divider" && <hr className="border-border/50" />}
-                          {kind === "spacer" && <div className="h-6" />}
+                          {kind === "divider" && <hr style={{ border: "none", borderTop: "1px solid #e2e0db", margin: "8px 0" }} />}
+                          {kind === "spacer" && <div style={{ height: "20px" }} />}
                           {kind === "columns" && (() => {
                             let colData: { left: string; right: string; leftTitle: string; rightTitle: string; bulletStyle: string } = { left: "", right: "", leftTitle: "", rightTitle: "", bulletStyle: "dot" };
                             try { colData = { ...colData, ...JSON.parse(s.body) }; } catch { colData = { ...colData, left: s.body }; }
                             const bulletPrefix = { dot: "•", square: "■", number: "", roman: "" }[colData.bulletStyle] ?? "•";
                             const isNumbered = colData.bulletStyle === "number" || colData.bulletStyle === "roman";
                             function renderList(text: string) {
-                              if (!text.trim()) return <p className="text-[14px] text-muted-foreground/40 italic">Empty</p>;
+                              if (!text.trim()) return <p style={{ fontSize: "14px", color: "#6b6a66", opacity: 0.4, fontStyle: "italic" }}>Empty</p>;
                               const lines = text.split("\n").filter((l) => l.trim());
                               if (isNumbered) {
                                 return (
-                                   <ol className={`space-y-1 text-[15px] text-muted-foreground leading-relaxed ${colData.bulletStyle === "roman" ? "list-[lower-roman]" : "list-decimal"} list-inside`}>
-                                    {lines.map((l, j) => <li key={j}>{l.replace(/^[-*•→✓\d.]+\s*/, "")}</li>)}
+                                   <ol style={{ margin: 0, paddingLeft: "20px", listStyleType: colData.bulletStyle === "roman" ? "lower-roman" : "decimal" }}>
+                                    {lines.map((l, j) => <li key={j} style={{ margin: "0 0 6px 0", lineHeight: 1.6, fontSize: "15px", color: "#2a2926" }}>{l.replace(/^[-*•→✓\d.]+\s*/, "")}</li>)}
                                   </ol>
                                 );
                               }
                               return (
-                                 <ul className={`space-y-1 text-[15px] text-muted-foreground leading-relaxed ${colData.bulletStyle === "square" ? "list-[square]" : "list-disc"} list-inside`}>
-                                  {lines.map((l, j) => <li key={j}>{l.replace(/^[-*•→✓\d.]+\s*/, "")}</li>)}
+                                 <ul style={{ margin: 0, paddingLeft: "20px", listStyleType: colData.bulletStyle === "square" ? "square" : "disc" }}>
+                                  {lines.map((l, j) => <li key={j} style={{ margin: "0 0 6px 0", lineHeight: 1.6, fontSize: "15px", color: "#2a2926" }}>{l.replace(/^[-*•→✓\d.]+\s*/, "")}</li>)}
                                 </ul>
                               );
                             }
                             return (
-                              <div className="grid grid-cols-2 gap-5 items-stretch">
-                                <div className="rounded-lg border border-border/50 bg-muted/30 p-4 flex flex-col">
-                                  {colData.leftTitle && <p className="text-[13px] font-bold text-foreground uppercase tracking-wider mb-2">{colData.leftTitle}</p>}
-                                  <div className="flex-1">{renderList(colData.left)}</div>
-                                </div>
-                                <div className="rounded-lg border border-border/50 bg-muted/30 p-4 flex flex-col">
-                                  {colData.rightTitle && <p className="text-[13px] font-bold text-foreground uppercase tracking-wider mb-2">{colData.rightTitle}</p>}
-                                  <div className="flex-1">{renderList(colData.right)}</div>
+                              <div style={{ display: "table", width: "100%", borderSpacing: 0 }}>
+                                <div style={{ display: "table-row" }}>
+                                  <div style={{ display: "table-cell", width: "48%", verticalAlign: "top", fontSize: "15px", color: "#2a2926", lineHeight: 1.65, padding: "0 8px 0 0" }}>
+                                    {colData.leftTitle && <p style={{ margin: "0 0 10px 0", fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6a66" }}>{colData.leftTitle}</p>}
+                                    {renderList(colData.left)}
+                                  </div>
+                                  <div style={{ display: "table-cell", width: "4%" }}></div>
+                                  <div style={{ display: "table-cell", width: "48%", verticalAlign: "top", fontSize: "15px", color: "#2a2926", lineHeight: 1.65, padding: "0 0 0 8px" }}>
+                                    {colData.rightTitle && <p style={{ margin: "0 0 10px 0", fontSize: "12px", fontWeight: 700, letterSpacing: "1.5px", textTransform: "uppercase", color: "#6b6a66" }}>{colData.rightTitle}</p>}
+                                    {renderList(colData.right)}
+                                  </div>
                                 </div>
                               </div>
                             );
                           })()}
                           {kind === "list" && (
-                            <ul className="list-disc list-inside space-y-1 text-[16px] text-muted-foreground leading-relaxed">
-                              {s.body.split("\n").filter((l) => l.startsWith("- ") || /^[•→✓]\s/.test(l)).map((l, j) => <li key={j}>{l.replace(/^[-•→✓]\s*/, "")}</li>)}
+                            <ul style={{ margin: 0, paddingLeft: "24px", fontSize: "15px", color: "#2a2926" }}>
+                              {s.body.split("\n").filter((l) => l.startsWith("- ") || /^[•→✓]\s/.test(l)).map((l, j) => <li key={j} style={{ margin: "0 0 6px 0", lineHeight: 1.6 }}>{l.replace(/^[-•→✓]\s*/, "")}</li>)}
                             </ul>
                           )}
                           {kind === "ordered-list" && (
-                            <ol className="list-decimal list-inside space-y-1 text-[16px] text-muted-foreground leading-relaxed">
-                              {s.body.split("\n").filter((l) => /^\d+\./.test(l)).map((l, j) => <li key={j}>{l.replace(/^\d+\.\s*/, "")}</li>)}
+                            <ol style={{ margin: 0, paddingLeft: "24px", fontSize: "15px", color: "#2a2926" }}>
+                              {s.body.split("\n").filter((l) => /^\d+\./.test(l)).map((l, j) => <li key={j} style={{ margin: "0 0 6px 0", lineHeight: 1.6 }}>{l.replace(/^\d+\.\s*/, "")}</li>)}
                             </ol>
                           )}
                           {kind === "code" && (
-                            <CodePreview body={s.body} />
+                            <div style={{ background: "#f8f7f4", border: "1px solid #e8e6e1", borderRadius: "8px", padding: "20px", fontSize: "14px", color: "#2a2926", overflow: "hidden", maxWidth: "100%", boxSizing: "border-box", wordBreak: "break-word" }}>
+                              <CodePreview body={s.body} />
+                            </div>
                           )}
                           {kind === "social" && (() => {
                             let selKeys: string[] = [];
                             try { selKeys = JSON.parse(s.body).selected ?? []; } catch { selKeys = []; }
                             const activeSocials = dbSocials.filter((ds) => selKeys.includes(ds.key));
                             return (
-                              <div className="flex gap-3 justify-center py-2">
-                                {activeSocials.length > 0 ? activeSocials.map((s) => (
-                                  <a key={s.key} href={s.href} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-medium" style={{ color: s.color ?? "#6366f1" }}>
-                                    {s.logoUrl ? <img src={s.logoUrl} alt="" className="w-4 h-4 rounded" /> : null}
-                                    {s.label}
-                                  </a>
-                                )) : <p className="text-xs text-muted-foreground/60">No social links selected</p>}
+                              <div>
+                                <p style={{ margin: "0 0 8px 0", fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#6b6a66" }}>Follow me</p>
+                                <div style={{ display: "flex", gap: "12px" }}>
+                                  {activeSocials.length > 0 ? activeSocials.map((s) => (
+                                    <a key={s.key} href={s.href} target="_blank" rel="noopener noreferrer" style={{ color: s.color ?? "#6366f1", textDecoration: "none", fontSize: "13px", fontWeight: 600, whiteSpace: "nowrap" }}>
+                                      {s.label}
+                                    </a>
+                                  )) : <p style={{ fontSize: "12px", color: "#6b6a66", opacity: 0.6 }}>No social links selected</p>}
+                                </div>
                               </div>
                             );
                           })()}
@@ -789,14 +802,12 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                             let d: { title: string; url: string; excerpt: string; image: string } = { title: "", url: "", excerpt: "", image: "" };
                             try { d = JSON.parse(s.body); } catch { d = { title: s.heading, url: s.body, excerpt: "", image: "" }; }
                             return (
-                              <div className="rounded-lg border border-border/50 overflow-hidden bg-muted/30">
-                                {d.image ? <img src={d.image} alt="" className="w-full object-cover rounded-t-lg" /> : <div className="w-full bg-muted flex items-center justify-center py-10"><ImageIcon className="w-8 h-8 text-muted-foreground/40" /></div>}
-                                <div className="p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1">Blog Post</p>
-                                  <p className="text-[15px] font-semibold text-foreground">{d.title || "Untitled"}</p>
-                                  {d.excerpt && <p className="text-[13px] text-muted-foreground mt-1 line-clamp-2">{d.excerpt}</p>}
-                                  {d.url && <a href={d.url} target="_blank" rel="noopener noreferrer" className="inline-block text-[11px] text-accent mt-2 hover:underline">Read more →</a>}
-                                </div>
+                              <div>
+                                {d.image ? <img src={d.image} alt="" style={{ width: "100%", borderRadius: "8px", display: "block", marginBottom: "12px" }} /> : null}
+                                <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#6b6a66" }}>Blog Post</p>
+                                <p style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 700, fontFamily: "Georgia,'Times New Roman',serif", color: "#111110" }}>{d.title || "Untitled"}</p>
+                                {d.excerpt && <p style={{ margin: "0 0 8px 0", fontSize: "14px", color: "#6b6a66", lineHeight: 1.5 }}>{d.excerpt}</p>}
+                                {d.url && <a href={d.url} style={{ color: "#6b6a66", textDecoration: "underline", fontSize: "13px" }}>Read more →</a>}
                               </div>
                             );
                           })()}
@@ -804,13 +815,11 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                             let d: { title: string; url: string; thumbnail: string } = { title: "", url: "", thumbnail: "" };
                             try { d = JSON.parse(s.body); } catch { d = { title: s.heading, url: s.body, thumbnail: "" }; }
                             return (
-                              <div className="rounded-lg border border-border/50 overflow-hidden bg-muted/30">
-                                {d.thumbnail ? <img src={d.thumbnail} alt="" className="w-full object-cover rounded-t-lg" /> : <div className="w-full bg-muted flex items-center justify-center py-8"><ImageIcon className="w-8 h-8 text-muted-foreground/40" /></div>}
-                                <div className="p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1">Video</p>
-                                  <p className="text-[15px] font-semibold text-foreground">{d.title || "Untitled"}</p>
-                                  {d.url && <a href={d.url} target="_blank" rel="noopener noreferrer" className="inline-block text-[11px] text-accent mt-2 hover:underline">Watch →</a>}
-                                </div>
+                              <div>
+                                <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#6b6a66" }}>Video</p>
+                                {d.thumbnail ? <img src={d.thumbnail} alt="" style={{ width: "100%", borderRadius: "8px", display: "block" }} /> : null}
+                                <p style={{ margin: "8px 0 4px 0", fontSize: "18px", fontWeight: 700, fontFamily: "Georgia,'Times New Roman',serif", color: "#111110" }}>{d.title || "Untitled"}</p>
+                                {d.url && <a href={d.url} style={{ color: "#6b6a66", textDecoration: "underline", fontSize: "13px" }}>Watch →</a>}
                               </div>
                             );
                           })()}
@@ -818,13 +827,15 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                             let d: { title: string; author: string; url: string; cover: string } = { title: "", author: "", url: "", cover: "" };
                             try { d = JSON.parse(s.body); } catch { d = { title: s.heading, author: "", url: s.body, cover: "" }; }
                             return (
-                              <div className="rounded-lg border border-border/50 overflow-hidden bg-muted/30">
-                                {d.cover ? <img src={d.cover} alt="" className="w-full object-cover rounded-t-lg" /> : <div className="w-full bg-muted flex items-center justify-center py-12"><AlignLeft className="w-8 h-8 text-muted-foreground/40" /></div>}
-                                <div className="p-3">
-                                  <p className="text-[10px] font-bold uppercase tracking-wider text-accent mb-1">Book</p>
-                                  <p className="text-[15px] font-semibold text-foreground">{d.title || "Untitled"}</p>
-                                  {d.author && <p className="text-[13px] text-muted-foreground">by {d.author}</p>}
-                                  {d.url && <a href={d.url} target="_blank" rel="noopener noreferrer" className="inline-block text-[11px] text-accent mt-2 hover:underline">Get it →</a>}
+                              <div>
+                                <p style={{ margin: "0 0 4px 0", fontSize: "11px", fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase", color: "#6b6a66" }}>Book</p>
+                                <div style={{ display: "flex", gap: "16px", alignItems: "flex-start" }}>
+                                  {d.cover && <img src={d.cover} alt="" style={{ width: "100px", borderRadius: "6px", flexShrink: 0 }} />}
+                                  <div>
+                                    <p style={{ margin: "0 0 4px 0", fontSize: "18px", fontWeight: 700, fontFamily: "Georgia,'Times New Roman',serif", color: "#111110" }}>{d.title || "Untitled"}</p>
+                                    {d.author && <p style={{ margin: "0 0 8px 0", fontSize: "13px", color: "#6b6a66" }}>by {d.author}</p>}
+                                    {d.url && <a href={d.url} style={{ color: "#6b6a66", textDecoration: "underline", fontSize: "13px" }}>Get it →</a>}
+                                  </div>
                                 </div>
                               </div>
                             );
@@ -833,14 +844,23 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
                             let tableData: { headerRow: boolean; rows: string[][] } = { headerRow: true, rows: [] };
                             try { tableData = JSON.parse(s.body); } catch { tableData = { headerRow: true, rows: [["", ""], ["", ""]] }; }
                             return (
-                              <div className="overflow-x-auto">
-                                <table className="w-full text-[14px] border border-border rounded-lg overflow-hidden">
+                              <div style={{ overflowX: "auto" }}>
+                                <table style={{ width: "100%", borderCollapse: "collapse", border: "1px solid #e8e6e1", borderRadius: "8px", overflow: "hidden" }}>
                                   <tbody>
                                     {tableData.rows.map((row, ri) => (
-                                      <tr key={ri} className={ri === 0 && tableData.headerRow ? "bg-muted/50" : ""}>
+                                      <tr key={ri}>
                                         {row.map((cell, ci) => (
-                                          <td key={ci} className={`border border-border px-4 py-2.5 ${ri === 0 && tableData.headerRow ? "font-bold text-foreground text-[13px] uppercase tracking-wider" : "text-muted-foreground"}`}>
-                                            {cell || <span className="text-muted-foreground/40">—</span>}
+                                          <td key={ci} style={{
+                                            padding: "10px 14px",
+                                            fontSize: ri === 0 && tableData.headerRow ? "13px" : "14px",
+                                            fontWeight: ri === 0 && tableData.headerRow ? 700 : 400,
+                                            textTransform: ri === 0 && tableData.headerRow ? "uppercase" : "none",
+                                            letterSpacing: ri === 0 && tableData.headerRow ? "1px" : "normal",
+                                            color: ri === 0 && tableData.headerRow ? "#111110" : "#2a2926",
+                                            background: ri === 0 && tableData.headerRow ? `${content.accent}15` : "transparent",
+                                            borderBottom: ri === 0 && tableData.headerRow ? `2px solid ${content.accent}` : "1px solid #e8e6e1"
+                                          }}>
+                                            {cell || "—"}
                                           </td>
                                         ))}
                                       </tr>
@@ -857,14 +877,14 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
 
                   {/* Empty state */}
                   {content.sections.length === 0 && (
-                    <div className="px-10 pb-10">
-                      <div className="border-2 border-dashed border-border rounded-xl py-16 flex flex-col items-center gap-3">
-                        <Plus className="w-8 h-8 text-muted-foreground/40" />
-                        <p className="text-sm text-muted-foreground/60">Drop blocks here or click one from the left panel</p>
-                        <div className="flex gap-2 mt-2">
-                          <button type="button" onClick={() => insertBlock("text")} className="rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-border/80 hover:text-foreground transition-colors">+ Text</button>
-                          <button type="button" onClick={() => insertBlock("image")} className="rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-border/80 hover:text-foreground transition-colors">+ Image</button>
-                          <button type="button" onClick={() => insertBlock("button")} className="rounded-full border border-border px-4 py-1.5 text-xs text-muted-foreground hover:border-border/80 hover:text-foreground transition-colors">+ Button</button>
+                    <div style={{ padding: "0 40px 40px 40px" }}>
+                      <div style={{ border: "2px dashed #e8e6e1", borderRadius: "12px", padding: "64px 0", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                        <Plus style={{ width: "32px", height: "32px", color: "#6b6a66", opacity: 0.4 }} />
+                        <p style={{ fontSize: "14px", color: "#6b6a66", opacity: 0.6 }}>Drop blocks here or click one from the left panel</p>
+                        <div style={{ display: "flex", gap: "8px", marginTop: "8px" }}>
+                          <button type="button" onClick={() => insertBlock("text")} style={{ borderRadius: "999px", border: "1px solid #e8e6e1", padding: "6px 16px", fontSize: "12px", color: "#6b6a66", background: "transparent", cursor: "pointer" }}>+ Text</button>
+                          <button type="button" onClick={() => insertBlock("image")} style={{ borderRadius: "999px", border: "1px solid #e8e6e1", padding: "6px 16px", fontSize: "12px", color: "#6b6a66", background: "transparent", cursor: "pointer" }}>+ Image</button>
+                          <button type="button" onClick={() => insertBlock("button")} style={{ borderRadius: "999px", border: "1px solid #e8e6e1", padding: "6px 16px", fontSize: "12px", color: "#6b6a66", background: "transparent", cursor: "pointer" }}>+ Button</button>
                         </div>
                       </div>
                     </div>
@@ -872,26 +892,28 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
 
                   {/* Signoff */}
                   {(content.signoff || content.cta) && (
-                    <div className="px-10 pb-6 space-y-4 overflow-hidden">
+                    <div style={{ padding: "0 40px 34px 40px" }} className="space-y-4 overflow-hidden">
                       {content.cta && (
-                        <div className="text-center py-2">
-                          <a href={content.cta.url} className="inline-block px-7 py-3 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: content.accent }}>{content.cta.label}</a>
+                        <div style={{ padding: "26px 0 0 0", textAlign: "center" }}>
+                          <a href={content.cta.url} style={{ background: content.accent, color: "#111110", textDecoration: "none", fontWeight: 700, fontSize: "15px", padding: "13px 34px", borderRadius: "999px", display: "inline-block" }}>{content.cta.label}</a>
                         </div>
                       )}
-                      {content.signoff && <p className="text-[15px] text-muted-foreground">{content.signoff}</p>}
+                      {content.signoff && <p style={{ fontSize: "14px", color: "#6b6a66", margin: "28px 0 0 0", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>{content.signoff}</p>}
                     </div>
                   )}
 
                   {/* Footer */}
-                  <div className="px-10 py-6 border-t border-border/50 bg-muted/30 text-center space-y-2">
-                    <p className="text-[13px] font-semibold text-foreground">{SITE.name}</p>
-                    <p className="text-[11px]"><a href="#" className="text-muted-foreground/60 underline">Unsubscribe</a></p>
+                  <div style={{ padding: "26px 40px 34px 40px", color: "#6b6a66", textAlign: "center", fontSize: "14px", fontFamily: "-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif" }}>
+                    <p style={{ margin: 0 }}>{SITE.name}</p>
+                    <p style={{ margin: "4px 0 0 0", fontSize: "12px" }}><a href="#" style={{ color: "#6b6a66", textDecoration: "underline" }}>Unsubscribe</a></p>
+                  </div>
                   </div>
                 </div>
               ) : (
                 /* ── Email Preview (iframe) ──────────────── */
-                <div className={`rounded-xl border border-border/50 bg-card shadow-lg overflow-hidden transition-all ${dropActive ? "border-accent ring-4 ring-accent/10" : ""}`}>
-                  <div className="overflow-hidden w-full">
+                <div className={`rounded-xl shadow-lg overflow-hidden transition-all ${dropActive ? "ring-4 ring-accent/10" : ""}`}
+                  style={{ border: "1px solid #e5e3dd" }}>
+                  <div className="overflow-hidden w-full" style={{ background: "#fafafa" }}>
                     <iframe title="Email preview" srcDoc={previewHtml} sandbox="allow-same-origin" loading="lazy" className="block border-0" style={{ width: "100%", height: "900px", maxWidth: "100%", border: "none" }} />
                   </div>
                 </div>
