@@ -66,3 +66,17 @@ copilot-instructions.md
 .github/copilot*
 opencode.json
 packages/db/prisma/migrate-supabase.ts
+
+# AI-generated docs (never commit)
+ARCHITECTURE.md
+DESIGN.md
+design.md
+CLIENT_SETUP_GUIDE.md
+architecture.drawio
+
+# AI-facing SEO files
+llms.txt
+llms-full.txt
+
+# AI tool artifacts
+skills-lock.json
