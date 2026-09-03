@@ -16,11 +16,10 @@ function shortDate(iso: string): string {
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
-const SVG_W = 600;
-const SVG_H = 230;
-const CHART_TOP = 10;
-const CHART_H = 155;
-const LABEL_Y = SVG_H - 5;
+const SVG_W = 700;
+const CHART_TOP = 15;
+const CHART_H = 180;
+const LABEL_Y = CHART_TOP + CHART_H + 25;
 
 export function TrafficChart({ initial }: { initial: GaResult }) {
   const [days, setDays] = useState<number>(initial.data?.days ?? 14);
@@ -92,7 +91,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
             <div className="h-3 w-16 sk-item rounded-full" />
             <div className="h-3 w-16 sk-item rounded-full" />
           </div>
-          <div className="h-[200px] w-full sk-item rounded-xl" />
+          <div className="h-[260px] w-full sk-item rounded-xl" />
           <div className="flex justify-between">
             {[...Array(7)].map((_, i) => (
               <div key={i} className="h-3 w-10 sk-item rounded" />
@@ -100,7 +99,7 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
           </div>
         </div>
       ) : !data ? (
-        <div className="mt-6 grid h-[220px] place-items-center text-center text-sm text-muted-foreground">
+        <div className="mt-6 grid h-[260px] place-items-center text-center text-sm text-muted-foreground">
           No analytics data yet.
         </div>
       ) : (
@@ -113,13 +112,12 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               <span className="h-2 w-2 rounded-full bg-sky-500" /> Pageviews
             </span>
           </div>
-          <div className="mt-2">
+          <div className="mt-3">
             <svg
-              viewBox={`0 0 ${SVG_W} ${SVG_H}`}
+              viewBox={`0 0 ${SVG_W} ${CHART_TOP + CHART_H + 40}`}
               className="w-full"
               role="img"
               aria-label="Traffic chart"
-              style={{ height: "auto", maxHeight: "260px" }}
             >
               <defs>
                 <linearGradient id="ga-sessions" x1="0" y1="0" x2="0" y2="1">
@@ -134,20 +132,20 @@ export function TrafficChart({ initial }: { initial: GaResult }) {
               {gridLines.map((g) => (
                 <g key={g.y}>
                   <line x1="0" x2={SVG_W} y1={g.y} y2={g.y} stroke="var(--border)" strokeWidth="1" strokeDasharray="3 3" />
-                  <text x="2" y={g.y - 4} fontSize="9" fill="var(--muted-foreground)">{g.label}</text>
+                  <text x="4" y={g.y - 5} fontSize="10" fill="var(--muted-foreground)">{g.label}</text>
                 </g>
               ))}
               {pGeo.area && <path d={pGeo.area} fill="url(#ga-pageviews)" />}
               {sGeo.area && <path d={sGeo.area} fill="url(#ga-sessions)" />}
               {pGeo.line && <path d={pGeo.line} fill="none" stroke="#0ea5e9" strokeWidth="1.5" />}
-              {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth="2" />}
+              {sGeo.line && <path d={sGeo.line} fill="none" stroke="var(--accent)" strokeWidth="2.5" />}
               {data.daily.map((d, i) =>
                 i % labelEvery === 0 || i === dailyLen - 1 ? (
                   <text
                     key={d.date}
                     x={(i * SVG_W) / Math.max(1, dailyLen - 1)}
                     y={LABEL_Y}
-                    fontSize="9"
+                    fontSize="10"
                     fill="var(--muted-foreground)"
                     textAnchor="middle"
                   >
