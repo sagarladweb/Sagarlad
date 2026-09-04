@@ -133,6 +133,12 @@ function AdminLogin() {
     setMounted(true);
   }, []);
 
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      localStorage.clear();
+    }
+  }, [status]);
+
   const hour = new Date().getHours();
   const rawGreeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
@@ -171,7 +177,7 @@ function AdminLogin() {
           return {
             needOtp: false,
             ok: false,
-            message: "Too many failed attempts. Account locked for 30 minutes.",
+            message: "Too many failed attempts. Account locked for 15 minutes.",
           };
         }
         if (errStr === "DB_UNAVAILABLE" || errStr.includes("DB_UNAVAILABLE")) {
@@ -202,7 +208,7 @@ function AdminLogin() {
         return {
           needOtp: false,
           ok: false,
-          message: "Too many failed attempts. Account locked for 30 minutes.",
+          message: "Too many failed attempts. Account locked for 15 minutes.",
         };
       }
       if (errMsg.includes("DB_UNAVAILABLE")) {
@@ -354,6 +360,7 @@ function AdminLogin() {
                   </button>
                   <button
                     onClick={() => {
+                      localStorage.clear();
                       import("next-auth/react").then(({ signOut }) => signOut({ callbackUrl: "/admin" }));
                     }}
                     className="inline-flex w-full items-center justify-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
@@ -392,7 +399,7 @@ function AdminLogin() {
                           value={email}
                           onChange={setEmail}
                           placeholder="sagar@sagarlad.com"
-                          autoComplete="username"
+                          autoComplete="off"
                           icon={Mail}
                         />
                         <PasswordField
@@ -400,7 +407,7 @@ function AdminLogin() {
                           label="Password"
                           value={password}
                           onChange={setPassword}
-                          autoComplete="current-password"
+                          autoComplete="new-password"
                         />
 
                         {error && (

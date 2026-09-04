@@ -73,7 +73,7 @@ import { prisma } from "@/lib/db";
 import { isDbDown, markDbDown } from "@sagarlad/db";
 
 const LOGIN_MAX = 3;
-const LOGIN_WINDOW_MS = 30 * 60_000;
+const LOGIN_WINDOW_MS = 15 * 60_000;
 const FAIL_ACTIONS = ["LOGIN_FAIL", "LOGIN_LOCKED", "LOGIN_THROTTLED"];
 
 export async function loginThrottleStatus(
