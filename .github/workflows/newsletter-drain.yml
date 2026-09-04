@@ -12,8 +12,8 @@ jobs:
   drain:
     runs-on: ubuntu-latest
     steps:
-      - name: Drain newsletter queue
+      - name: Drain newsletter queue + publish scheduled posts
         run: |
-          curl -fsS -X POST \
+          curl -fsS \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "https://sagarlad.com/api/newsletter/process" || true
+            "https://sagarlad.com/api/cron/keepalive" || true
