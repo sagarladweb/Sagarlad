@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
-import { getCategories, getPublishedVideos, getPostCount, getVideoCount, getPostList } from "@/lib/content";
+import { getCategoriesWithFallback, getPublishedVideosWithFallback, getPostCountWithFallback, getVideoCountWithFallback, getPostListWithFallback } from "@/lib/content";
 import { SITE, VISIBLE_POST_WHERE, pageMetadata } from "@/lib/site";
 import { BlogVideoGrid } from "@/components/blog/BlogVideoGrid";
 import { JsonLd } from "@/components/JsonLd";
@@ -33,9 +33,9 @@ export default async function BlogPage({
   const q = (params.q ?? "").trim();
 
   const [categories, totalPosts, totalVideos] = await Promise.all([
-    getCategories(),
-    getPostCount(VISIBLE_POST_WHERE),
-    getVideoCount(),
+    getCategoriesWithFallback(),
+    getPostCountWithFallback(VISIBLE_POST_WHERE),
+    getVideoCountWithFallback(),
   ]);
   const categorySlug = categories.some((c) => c.slug === params.category)
     ? params.category
@@ -61,15 +61,15 @@ export default async function BlogPage({
   // counts are always needed; the list+count for the other tab are not.
   let posts: { id: string; slug: string; title: string; coverImage: string | null; publishedAt: Date; excerpt: string | null; views: number; likes: number; category: { name: string; slug: string } | null }[] = [];
   let total = 0;
-  let videos: Awaited<ReturnType<typeof getPublishedVideos>> = [];
+  let videos: Awaited<ReturnType<typeof getPublishedVideosWithFallback>> = [];
 
   if (tab === "posts") {
     [posts, total] = await Promise.all([
-      getPostList(where, { take: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE }),
-      getPostCount(where),
+      getPostListWithFallback(where, { take: PAGE_SIZE, skip: (page - 1) * PAGE_SIZE }),
+      getPostCountWithFallback(where),
     ]);
   } else {
-    videos = await getPublishedVideos(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE);
+    videos = await getPublishedVideosWithFallback(PAGE_SIZE, undefined, (vpage - 1) * PAGE_SIZE);
   }
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));

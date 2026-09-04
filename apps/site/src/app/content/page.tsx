@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { ArrowRight, Film, FileText } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { SITE, pageMetadata } from "@/lib/site";
-import { getCategories } from "@/lib/content";
+import { getCategoriesWithFallback } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
@@ -16,7 +16,7 @@ export const metadata: Metadata = pageMetadata({
 export const revalidate = 604800;
 
 export default async function ContentPage() {
-  const categories = await getCategories();
+  const categories = await getCategoriesWithFallback();
 
   return (
     <>

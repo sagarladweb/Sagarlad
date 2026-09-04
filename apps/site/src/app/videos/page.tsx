@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { PageHeader } from "@/components/PageHeader";
 import { FaYoutube, FaInstagram } from "@/lib/icons";
 import { SITE, pageMetadata } from "@/lib/site";
-import { getPublishedVideos } from "@/lib/content";
+import { getPublishedVideosWithFallback } from "@/lib/content";
 import { VideoFeed } from "@/components/video/VideoFeed";
 import { JsonLd } from "@/components/JsonLd";
 
@@ -18,7 +18,7 @@ export const revalidate = 604800;
 const PAGE_SIZE = 12;
 
 export default async function VideosPage() {
-  const videos = await getPublishedVideos(PAGE_SIZE);
+  const videos = await getPublishedVideosWithFallback(PAGE_SIZE);
 
   return (
     <div className="overflow-x-clip">

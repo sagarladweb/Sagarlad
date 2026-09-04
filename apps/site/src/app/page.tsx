@@ -1,6 +1,6 @@
 import { SITE, VISIBLE_POST_WHERE } from "@/lib/site";
 import { getSiteSocials } from "@/lib/social-links";
-import { getCategories, getFeaturedPosts, getActiveAnnouncement } from "@/lib/content";
+import { getCategoriesWithFallback, getFeaturedPostsWithFallback, getActiveAnnouncement } from "@/lib/content";
 import { prisma } from "@/lib/db";
 import { JsonLd } from "@/components/JsonLd";
 
@@ -33,9 +33,9 @@ export default async function HomePage({
     : getActiveAnnouncement();
 
   const [posts, socials, allCategories, announcement] = await Promise.all([
-    getFeaturedPosts(VISIBLE_POST_WHERE, 4),
+    getFeaturedPostsWithFallback(VISIBLE_POST_WHERE, 4),
     getSiteSocials(),
-    getCategories(),
+    getCategoriesWithFallback(),
     fetchAnnouncement,
   ]);
 

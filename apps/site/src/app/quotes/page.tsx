@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { SITE, pageMetadata } from "@/lib/site";
-import { getQuotes } from "@/lib/content";
+import { getQuotesWithFallback } from "@/lib/content";
 import { JsonLd } from "@/components/JsonLd";
 
 export const metadata: Metadata = pageMetadata({
@@ -13,7 +13,7 @@ export const metadata: Metadata = pageMetadata({
 export const revalidate = 604800;
 
 export default async function QuotesPage() {
-  const quotes = await getQuotes();
+  const quotes = await getQuotesWithFallback();
   return (
     <>
       <JsonLd
