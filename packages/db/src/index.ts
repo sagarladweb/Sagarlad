@@ -4,38 +4,29 @@ import { PrismaPg } from "@prisma/adapter-pg";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
+  dbPool: pg.Pool | undefined;
 };
 
-/* ── Exponential backoff cooldown ────────────────────────────────── *
- * Instead of a fixed 20 s cooldown, we double the wait each failure:
- *   1st failure → 5 s, 2nd → 10 s, 3rd → 20 s, 4th → 40 s … cap 120 s.
- * A success resets the backoff to zero.
+/* ── Recovery tracking ─────────────────────────────────────────── *
+ * No cooldown short-circuit — every request always attempts the
+ * query with retries. The retry delays give Supabase time to wake.
+ * A success resets the failure counter.
  * ─────────────────────────────────────────────────────────────────── */
-const BACKOFF_BASE_MS = 5_000;
-const BACKOFF_CAP_MS = 120_000;
-let dbDownUntil = 0;
 let consecutiveFailures = 0;
-
-export function isDbDown(): boolean {
-  return Date.now() < dbDownUntil;
-}
-
-export function markDbDown() {
-  consecutiveFailures++;
-  const delay = Math.min(BACKOFF_BASE_MS * 2 ** (consecutiveFailures - 1), BACKOFF_CAP_MS);
-  dbDownUntil = Date.now() + delay;
-  console.warn(`[db] marked down — retry in ${Math.round(delay / 1000)}s (failure #${consecutiveFailures})`);
-}
 
 function markDbUp() {
   if (consecutiveFailures > 0) {
     console.log(`[db] connection recovered after ${consecutiveFailures} failure(s)`);
   }
   consecutiveFailures = 0;
-  dbDownUntil = 0;
 }
 
-function createClient() {
+export function markDbDown() {
+  consecutiveFailures++;
+  console.warn(`[db] connection failed (failure #${consecutiveFailures})`);
+}
+
+function createPool(): pg.Pool {
   const url = process.env.DATABASE_URL || "";
   if (!url) {
     throw new Error("DATABASE_URL is not set");
@@ -49,13 +40,26 @@ function createClient() {
     family: 4,
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
-    query_timeout: 10000,
-    statement_timeout: 10000,
+    query_timeout: 15000,
+    statement_timeout: 15000,
   } as Record<string, unknown>);
   pool.on("error", (err) => {
     console.error("[db] idle pool error:", err.message);
   });
 
+  return pool;
+}
+
+function getPool(): pg.Pool {
+  const existing = globalForPrisma.dbPool;
+  if (existing) return existing;
+  const pool = createPool();
+  globalForPrisma.dbPool = pool;
+  return pool;
+}
+
+function createClient() {
+  const pool = getPool();
   const adapter = new PrismaPg(pool);
 
   return new PrismaClient({
@@ -87,7 +91,6 @@ export const prisma = new Proxy({} as PrismaClient, {
  * ─────────────────────────────────────────────────────────────────── */
 const CONNECTION_ERROR_CODES = new Set([
   "P1001", "P1002", "P1003", "P1008", "P1010", "P1011", "P1012", "P1017",
-  // pg library errors
   "ECONNREFUSED", "ECONNRESET", "ETIMEDOUT", "ENOTFOUND",
 ]);
 
@@ -109,13 +112,33 @@ function isConnectionError(err: unknown): boolean {
 }
 
 /**
- * Run a DB query with retry logic and automatic cooldown.
- * Returns `fallback` if the DB is unreachable after retries.
+ * Reset the pg pool — destroys all idle connections and creates fresh ones.
+ * Called when the DB wakes up from a pause to clear stale connections.
+ */
+async function resetPool() {
+  const pool = globalForPrisma.dbPool;
+  if (!pool) return;
+  try {
+    await pool.end();
+  } catch {
+    // ignore
+  }
+  globalForPrisma.dbPool = undefined;
+  globalForPrisma.prisma = undefined;
+}
+
+/**
+ * Run a DB query with retry logic.
+ * Retries at 2s and 5s — enough time for Supabase free-tier to wake
+ * from a paused state (typically 5-15s).
+ * Returns `fallback` if all retries fail.
  */
 export async function dbSafe<T>(query: () => Promise<T>, fallback: T): Promise<T> {
-  if (isDbDown()) return fallback;
+  // Retry delays: 2s first retry, 5s second retry.
+  // Supabase free-tier takes 5-15s to wake from pause.
+  const RETRY_DELAYS = [2000, 5000];
+  const MAX_RETRIES = RETRY_DELAYS.length;
 
-  const MAX_RETRIES = 2;
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const result = await query();
@@ -125,19 +148,23 @@ export async function dbSafe<T>(query: () => Promise<T>, fallback: T): Promise<T
       if (!isConnectionError(err)) throw err;
 
       if (attempt < MAX_RETRIES) {
-        // Brief delay before retry (100ms first, 300ms second)
-        await new Promise((r) => setTimeout(r, 100 * (attempt + 1)));
+        await new Promise((r) => setTimeout(r, RETRY_DELAYS[attempt]));
         continue;
       }
 
       markDbDown();
+      // Reset pool on failure — next request gets fresh connections
+      resetPool().catch(() => {});
       console.warn("[db] connection error after retries, using fallback:", (err as Error).message);
       return fallback;
     }
   }
 
-  // Unreachable, but TypeScript needs it
   return fallback;
+}
+
+export function isDbDown(): boolean {
+  return consecutiveFailures > 2;
 }
 
 export * from "./generated/prisma/client";
