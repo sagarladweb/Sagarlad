@@ -82,7 +82,7 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     console.error("[announcements] db:", err);
-    return NextResponse.json({ error: err instanceof Error ? err.message : "DB error" }, { status: 500 });
+    return NextResponse.json({ error: "Failed to save announcement" }, { status: 500 });
   }
 
   try { await revalidatePublic(); } catch {}

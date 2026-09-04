@@ -1,12 +1,20 @@
 import { prisma } from "@/lib/db";
+import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
-// One-click unsubscribe from the email footer. Marks the subscriber so future
-// campaign snapshots skip them.
 export async function GET(request: Request) {
+  const ip = getClientIp(request);
+  const { ok, retryAfter } = await rateLimitByIp(`unsub:${ip}`, 10, 60_000);
+  if (!ok) {
+    return new Response("Too many requests", {
+      status: 429,
+      headers: { "Retry-After": String(retryAfter) },
+    });
+  }
+
   const token = new URL(request.url).searchParams.get("token");
-  if (token) {
+  if (token && typeof token === "string") {
     await prisma.newsletterSubscriber.updateMany({
       where: { unsubscribeToken: token, unsubscribed: false },
       data: { unsubscribed: true },

@@ -3,11 +3,25 @@ import { prisma } from "@/lib/db";
 
 export const runtime = "nodejs";
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get("id");
-  if (!id) return NextResponse.json({ error: "id required" }, { status: 400 });
-
-  const announcement = await prisma.announcement.findUnique({ where: { id } });
-  return NextResponse.json({ announcement });
+export async function GET() {
+  const announcements = await prisma.announcement.findMany({
+    where: { active: true },
+    orderBy: { createdAt: "desc" },
+    select: {
+      id: true,
+      title: true,
+      description: true,
+      imageUrl: true,
+      buttonText: true,
+      buttonLink: true,
+      barText: true,
+      barLink: true,
+      barStyle: true,
+      barSpeed: true,
+      barBgColor: true,
+      barColor: true,
+      eventDate: true,
+    },
+  });
+  return NextResponse.json({ announcements });
 }

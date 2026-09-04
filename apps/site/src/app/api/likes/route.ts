@@ -1,10 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimitByIp, getClientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const { ok, retryAfter } = await rateLimitByIp(`like:${ip}`, 20, 60_000);
+    if (!ok) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: { "Retry-After": String(retryAfter) } },
+      );
+    }
+
     const body = await request.json().catch(() => null);
     const postSlug = body?.postSlug;
     const clientToken = body?.clientToken;

@@ -18,24 +18,8 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // For API routes under /api/admin, block unauthenticated requests.
-  // NextAuth v5 uses "authjs.session-token"; v4 used "next-auth.session-token".
-  if (pathname.startsWith("/api/admin")) {
-    const sessionToken =
-      request.cookies.get("authjs.session-token")?.value
-      ?? request.cookies.get("__Secure-authjs.session-token")?.value
-      ?? request.cookies.get("next-auth.session-token")?.value
-      ?? request.cookies.get("__Secure-next-auth.session-token")?.value;
-
-    if (!sessionToken) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-    return NextResponse.next();
-  }
-
-  // For page routes under /admin/*, always pass through.
-  // The server component layout handles auth and shows an inline
-  // session-expired page when needed — no redirect, no loop.
+  // All API and page routes rely on requireAdmin() for real auth (JWT + role
+  // check). This middleware only gates static assets and the login page.
   return NextResponse.next();
 }
 
