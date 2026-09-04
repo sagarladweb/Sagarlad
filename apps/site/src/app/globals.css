@@ -1215,13 +1215,13 @@ nav a:not([class*="rounded-full"]) {
 }
 
 /* GSAP failure fallback: if .gsap-ready is never added (GSAP didn't load),
-   show content after 2s via CSS animation. Once GSAP loads it clears
+   show content after 1s via CSS animation. Once GSAP loads it clears
    the animation and takes over normally. */
 @keyframes gsap-fallback {
   to { opacity: 1; filter: none; transform: none; }
 }
 [data-animate]:not(.gsap-ready [data-animate]) {
-  animation: gsap-fallback 0.6s ease-out 2s forwards;
+  animation: gsap-fallback 0.6s ease-out 1s forwards;
 }
 .gsap-ready [data-animate] {
   animation: none;
@@ -1239,7 +1239,7 @@ nav a:not([class*="rounded-full"]) {
   to { opacity: 1; filter: none; transform: none; }
 }
 [data-animate-item]:not(.gsap-ready [data-animate-item]) {
-  animation: gsap-item-fallback 0.6s ease-out 2.2s forwards;
+  animation: gsap-item-fallback 0.6s ease-out 1.2s forwards;
 }
 .gsap-ready [data-animate-item] {
   animation: none;
