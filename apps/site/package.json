@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "rm -rf .next/cache/turbopack && next dev",
-    "prebuild": "npm run db:generate -w @sagarlad/db",
+    "prebuild": "rm -rf .next && npm run db:generate -w @sagarlad/db",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
