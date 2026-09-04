@@ -143,6 +143,16 @@ export function NewsletterComposer({ subscriberCount, onSent, onBack, onDirtyCha
   const markClean = useCallback(() => { dirtyRef.current = false; onDirtyChange?.(false); }, [onDirtyChange]);
   const markDirty = useCallback(() => { if (!dirtyRef.current) { dirtyRef.current = true; onDirtyChange?.(true); } }, [onDirtyChange]);
 
+  // Auto-dismiss status after 5 seconds
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (status) {
+      if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+      statusTimerRef.current = setTimeout(() => setStatus(null), 5000);
+    }
+    return () => { if (statusTimerRef.current) clearTimeout(statusTimerRef.current); };
+  }, [status]);
+
   /* ── localStorage auto-save ────────────────────────── */
   const LS_KEY = "nl_composer_autosave";
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -1071,7 +1081,6 @@ function handleSectionDrop(e: React.DragEvent, toIdx: number) {
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-[10000]">
           <div role={status.ok ? "status" : "alert"} className={`flex items-center gap-2 rounded-xl border px-4 py-3 text-sm shadow-xl backdrop-blur ${status.ok ? "border-green-500/30 bg-green-500/10 text-green-600 dark:text-green-400" : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400"}`}>
             {status.text}
-            <button type="button" onClick={() => setStatus(null)} className="ml-2 p-0.5"><X className="w-3.5 h-3.5" /></button>
           </div>
         </div>
       )}

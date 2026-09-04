@@ -241,7 +241,7 @@ function paras(text: string): string {
   const clean = esc(text.replace(/<br\s*\/?>/gi, "\n")).trim();
   return clean
     .split(/\n\s*\n/)
-    .map((p) => `<p style="margin:0 0 16px 0;line-height:1.65">${formatInline(p.replace(/\n/g, "<br/>"))}</p>`)
+    .map((p) => `<p style="margin:0 0 16px 0;padding:0;line-height:1.65">${formatInline(p.replace(/\n/g, "<br/>"))}</p>`)
     .join("");
 }
 
@@ -298,7 +298,7 @@ function sectionHtml(s: { heading: string; body: string }, accent: string, socia
       return `<tr><td style="padding:8px 40px"><hr style="border:none;border-top:1px solid #e2e0db;margin:0"/></td></tr>`;
 
     case "spacer":
-      return `<tr><td style="padding:20px 40px"></td></tr>`;
+      return `<tr><td style="padding:20px 40px;font-size:0;line-height:0">&nbsp;</td></tr>`;
 
     case "image": {
       const url = esc(s.body.trim());
@@ -430,7 +430,7 @@ function sectionHtml(s: { heading: string; body: string }, accent: string, socia
     case "text":
     default: {
       if (!s.heading && !s.body) return "";
-      const headingHtml = s.heading ? `<p style="margin:0 0 10px 0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:${INK}">${esc(s.heading)}</p><div style="margin:0 0 14px 0;height:3px;width:42px;background:${accent}"></div>` : "";
+      const headingHtml = s.heading ? `<p style="margin:0 0 10px 0;font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:700;color:${INK}">${esc(s.heading)}</p><table role="presentation" cellpadding="0" cellspacing="0"><tr><td style="height:3px;width:42px;background:${accent};font-size:0;line-height:0">&nbsp;</td></tr></table>` : "";
       return `<tr><td style="padding:8px 40px;font-size:15px;color:#2a2926">${headingHtml}${paras(s.body)}</td></tr>`;
     }
   }
@@ -489,9 +489,7 @@ export function letterBody(c: NewsletterContent): string {
             </tr>
           </table>
         </td></tr>
-        <tr><td style="height:1px;background:${c.accent};padding:0 40px">
-          <div style="height:2px;background:${c.accent}"></div>
-        </td></tr>
+        <tr><td style="padding:0 40px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:2px;background:${c.accent};font-size:0;line-height:0">&nbsp;</td></tr></table></td></tr>
         <tr><td style="padding:30px 40px 6px 40px;font-size:15px;color:${INK};${FONT}min-height:40px">
           <p style="margin:0 0 6px 0;font-weight:700">${esc(c.greeting)}</p>
           ${paras(c.intro)}
@@ -677,11 +675,11 @@ export const emptyNewsletter: NewsletterContent = {
 // Full envelope: body + unsubscribe footer. Rendered identically by the
 // composer preview and the Brevo send path.
 export function emailShell(companyName: string, bodyHtml: string, unsubscribeUrl: string): string {
-  return `<!doctype html><html><head><meta name="color-scheme" content="light dark"><style>@media(prefers-color-scheme:dark){body,table{background:#1a1a1a!important}td{color:#e5e5e5!important}table table{background:#262626!important}a{color:#93c5fd!important}hr{border-color:#404040!important} .footer-cell{color:#a3a3a3!important}}</style></head><body style="margin:0;padding:0;background:#fafafa;overflow-x:hidden">
-  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;padding:24px;overflow:hidden">
+  return `<!doctype html><html><head><meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width,initial-scale=1"><style>@media(prefers-color-scheme:dark){body,table{background:#1a1a1a!important}td{color:#e5e5e5!important}table table{background:#262626!important}a{color:#93c5fd!important}hr{border-color:#404040!important}.footer-cell{color:#a3a3a3!important}}</style></head><body style="margin:0;padding:0;background:#fafafa;overflow-x:hidden">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fafafa;padding:24px">
     <tr><td align="center">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;font-family:-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;color:#1a1a1a;overflow:hidden">
-        <tr><td style="overflow:hidden">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:600px;font-family:-apple-system,'Segoe UI',Roboto,Arial,Helvetica,sans-serif;color:#1a1a1a">
+        <tr><td>
           ${bodyHtml}
         </td></tr>
         <tr><td class="footer-cell" style="padding:26px 20px 10px 20px;font-size:12px;color:#888;text-align:center;${FONT}">
