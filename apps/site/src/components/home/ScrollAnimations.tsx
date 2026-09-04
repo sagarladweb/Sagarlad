@@ -17,7 +17,6 @@ export function ScrollAnimations() {
   useEffect(() => {
     if (!ready) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Reduced motion: just show everything immediately
       document.body.classList.add("gsap-ready");
       document.querySelectorAll<HTMLElement>("[data-animate], [data-animate-item]").forEach((el) => {
         el.style.opacity = "1";
@@ -28,14 +27,26 @@ export function ScrollAnimations() {
     }
 
     let ctx: gsap.Context | null = null;
-    let rafId = 0;
-    let safetyTimer: ReturnType<typeof setTimeout> | null = null;
+    let cancelled = false;
+    let gsapInitialized = false;
+
+    // Safety: if GSAP doesn't initialize within 1.5s, force .gsap-ready
+    // so the CSS fallback animation kicks in immediately.
+    const gsapTimeout = setTimeout(() => {
+      if (!gsapInitialized && !cancelled) {
+        document.body.classList.add("gsap-ready");
+      }
+    }, 1500);
 
     // Double rAF: ensures GSAP runs after React hydration + browser paint
-    rafId = requestAnimationFrame(() => {
-      rafId = requestAnimationFrame(() => {
-        // Clear CSS initial hidden state — GSAP takes over from here
+    let raf1 = 0;
+    let raf2 = 0;
+    raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        if (cancelled) return;
+
         document.body.classList.add("gsap-ready");
+        gsapInitialized = true;
 
         ctx = gsap.context(() => {
           // ── Individual reveals ──────────────────────────────────────
@@ -63,40 +74,18 @@ export function ScrollAnimations() {
             const to: gsap.TweenVars = (() => {
               switch (variant) {
                 case "image":
-                  return {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1.1,
-                    ease: "power3.out",
-                  };
+                  return { opacity: 1, scale: 1, duration: 1.1, ease: "power3.out" };
                 case "blur":
-                  return {
-                    opacity: 1,
-                    filter: "blur(0px)",
-                    duration: 1,
-                    ease: "power2.out",
-                  };
+                  return { opacity: 1, filter: "blur(0px)", duration: 1, ease: "power2.out" };
                 default:
-                  return {
-                    opacity: 1,
-                    x: 0,
-                    y: 0,
-                    scale: 1,
-                    filter: "blur(0px)",
-                    duration: 0.9,
-                    ease: "power3.out",
-                  };
+                  return { opacity: 1, x: 0, y: 0, scale: 1, filter: "blur(0px)", duration: 0.9, ease: "power3.out" };
               }
             })();
 
-            // Check if element is already in viewport — if so, reveal immediately
-            // instead of relying on ScrollTrigger which may not fire for
-            // above-the-fold content on slow/cold-start loads.
             const rect = item.getBoundingClientRect();
             const alreadyVisible = rect.top < window.innerHeight * 0.95 && rect.bottom > 0;
 
             if (alreadyVisible && delay === 0) {
-              // Element is in viewport: set to final state immediately (no animation)
               gsap.set(item, { opacity: 1, x: 0, y: 0, scale: 1, filter: "none" });
             } else {
               gsap.fromTo(item, from, {
@@ -112,51 +101,35 @@ export function ScrollAnimations() {
           });
 
           // ── Staggered groups ────────────────────────────────────────
-          gsap.utils
-            .toArray<HTMLElement>("[data-animate-group]")
-            .forEach((group) => {
-              const items = gsap.utils.toArray<HTMLElement>(
-                "[data-animate-item]",
-                group
+          gsap.utils.toArray<HTMLElement>("[data-animate-group]").forEach((group) => {
+            const items = gsap.utils.toArray<HTMLElement>("[data-animate-item]", group);
+            if (!items.length) return;
+
+            const rect = group.getBoundingClientRect();
+            const alreadyVisible = rect.top < window.innerHeight * 0.95 && rect.bottom > 0;
+
+            if (alreadyVisible) {
+              items.forEach((el) => {
+                el.style.opacity = "1";
+                el.style.filter = "none";
+                el.style.transform = "none";
+              });
+            } else {
+              gsap.fromTo(
+                items,
+                { opacity: 0, y: 40, filter: "blur(3px)" },
+                {
+                  opacity: 1,
+                  y: 0,
+                  filter: "blur(0px)",
+                  duration: 0.75,
+                  ease: "power3.out",
+                  stagger: 0.1,
+                  scrollTrigger: { trigger: group, start: "top 90%", toggleActions: "play none none none" },
+                }
               );
-              if (!items.length) return;
-
-              const variant = group.dataset.animate ?? "up";
-              const fromY = variant === "zoom" ? 20 : 40;
-
-              const rect = group.getBoundingClientRect();
-              const alreadyVisible = rect.top < window.innerHeight * 0.95 && rect.bottom > 0;
-
-              if (alreadyVisible) {
-                items.forEach((el) => {
-                  el.style.opacity = "1";
-                  el.style.filter = "none";
-                  el.style.transform = "none";
-                });
-              } else {
-                gsap.fromTo(
-                  items,
-                  {
-                    opacity: 0,
-                    y: fromY,
-                    filter: "blur(3px)",
-                  },
-                  {
-                    opacity: 1,
-                    y: 0,
-                    filter: "blur(0px)",
-                    duration: 0.75,
-                    ease: "power3.out",
-                    stagger: 0.1,
-                    scrollTrigger: {
-                      trigger: group,
-                      start: "top 90%",
-                      toggleActions: "play none none none",
-                    },
-                  }
-                );
-              }
-            });
+            }
+          });
 
           // ── Parallax layers ─────────────────────────────────────────
           gsap.utils.toArray<HTMLElement>("[data-parallax]").forEach((layer) => {
@@ -177,36 +150,14 @@ export function ScrollAnimations() {
             );
           });
         });
-
-        // Safety net: if any [data-animate] elements are still invisible
-        // after 3s (GSAP loaded but ScrollTrigger didn't fire for some),
-        // force them visible.
-        safetyTimer = setTimeout(() => {
-          document.querySelectorAll<HTMLElement>("[data-animate]").forEach((el) => {
-            const s = getComputedStyle(el);
-            if (s.opacity === "0" || s.opacity === "0.3" || parseFloat(s.opacity) < 0.5) {
-              el.style.opacity = "1";
-              el.style.filter = "none";
-              el.style.transform = "none";
-              el.style.transition = "opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease";
-            }
-          });
-          document.querySelectorAll<HTMLElement>("[data-animate-item]").forEach((el) => {
-            const s = getComputedStyle(el);
-            if (parseFloat(s.opacity) < 0.5) {
-              el.style.opacity = "1";
-              el.style.filter = "none";
-              el.style.transform = "none";
-              el.style.transition = "opacity 0.5s ease, filter 0.5s ease, transform 0.5s ease";
-            }
-          });
-        }, 3000);
       });
     });
 
     return () => {
-      cancelAnimationFrame(rafId);
-      if (safetyTimer) clearTimeout(safetyTimer);
+      cancelled = true;
+      clearTimeout(gsapTimeout);
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
       document.body.classList.remove("gsap-ready");
       ctx?.revert();
     };

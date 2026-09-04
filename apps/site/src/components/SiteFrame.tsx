@@ -10,11 +10,6 @@ import { GoogleAnalytics } from "@/components/GoogleAnalytics";
 import { RssBanner } from "@/components/RssBanner";
 import { AnnouncementBar } from "@/components/AnnouncementBar";
 
-const PageEntrance = dynamic(
-  () => import("@/components/PageEntrance").then((m) => m.PageEntrance),
-  { ssr: false }
-);
-
 const ScrollAnimations = dynamic(
   () => import("@/components/home/ScrollAnimations").then((m) => m.ScrollAnimations),
   { ssr: false }
@@ -106,7 +101,6 @@ export function SiteFrame({
       <main className="flex-1">
         {children}
         {!isAdmin && <ScrollAnimations />}
-        {!isAdmin && <PageEntrance />}
       </main>
       {!isAdmin && <ScrollTopButton />}
       {!isAdmin && <Footer />}

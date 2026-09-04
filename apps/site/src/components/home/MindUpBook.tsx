@@ -24,7 +24,18 @@ export async function MindUpBook() {
       author: b.author,
     }));
 
-  if (!slides.length) return null;
+  if (!slides.length) {
+    return (
+      <section
+        className="relative overflow-hidden border-b border-border bg-background"
+        aria-label="Featured books"
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-16 md:py-24 text-center">
+          <p className="text-muted-foreground">Loading featured books…</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section
