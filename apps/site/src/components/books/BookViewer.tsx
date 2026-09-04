@@ -190,8 +190,8 @@ function BookViewerInner({ bookId, buyUrl, open, onClose }: Props) {
         </div>
       </div>
 
-      {/* Page indicator */}
-      <div className="hidden sm:flex w-full items-center justify-center gap-6 z-[10000] pb-4 shrink-0" onClick={(e) => e.stopPropagation()}>
+      {/* Page indicator — padded up so Buy Now button doesn't overlap */}
+      <div className="hidden sm:flex w-full items-center justify-center gap-6 z-[10000] pb-20 shrink-0" onClick={(e) => e.stopPropagation()}>
         <span className="text-xs font-bold text-white tracking-widest tabular-nums bg-white/10 px-4 py-1.5 rounded-full border border-white/20">
           {totalPages > 0 ? `${currentPage + 1} / ${totalPages}` : ""}
         </span>

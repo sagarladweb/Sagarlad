@@ -12,8 +12,6 @@ type Stat = {
   label: string;
 };
 
-// Interpolate a running count into the target label's shape: renders
-// "10,000+", "1M+" and "10K+" styles from the static METRICS string.
 const formatCount = (v: number, display: string) => {
   if (display.includes("M")) return `${Math.round(v)}M+`;
   if (display.includes("K")) return `${Math.round(v)}K+`;
@@ -28,68 +26,87 @@ const stats: Stat[] = [
 
 export function BookStats() {
   const root = useRef<HTMLDivElement>(null);
+  const playedRef = useRef(false);
 
   useEffect(() => {
     const el = root.current;
     if (!el) return;
+
+    const items = el.querySelectorAll<HTMLElement>("[data-stat]");
+    if (!items.length) return;
+
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      // Skip the count-up but still show the real numbers.
-      el.querySelectorAll<HTMLElement>("[data-stat]").forEach((item) => {
+      items.forEach((item) => {
         const numEl = item.querySelector("[data-num]");
-        if (!numEl) return;
-        numEl.textContent = item.dataset.display ?? "";
+        if (numEl) numEl.textContent = item.dataset.display ?? "";
       });
       return;
     }
 
-    const ctx = gsap.context(() => {
-      gsap.utils.toArray<HTMLElement>("[data-stat]").forEach((item, i) => {
-        const numEl = item.querySelector("[data-num]");
-        if (!numEl) return;
-        const display = item.dataset.display ?? "";
-        const target = Number(item.dataset.stat || "0");
-        const counter = { v: 0 };
-        const render = () => {
-          numEl.textContent = formatCount(counter.v, display);
-        };
-        render();
-        gsap.fromTo(
-          item,
-          { opacity: 0, y: 24, filter: "blur(3px)" },
-          {
-            opacity: 1,
-            y: 0,
-            filter: "blur(0px)",
-            duration: 0.7,
-            delay: i * 0.1,
-            ease: "power3.out",
-            scrollTrigger: {
-              trigger: item,
-              start: "top 88%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-        gsap.fromTo(
-          counter,
-          { v: 0 },
-          {
-            v: target,
-            duration: 2.2,
-            delay: 0.2 + i * 0.1,
-            ease: "power2.out",
-            onUpdate: render,
-            scrollTrigger: {
-              trigger: item,
-              start: "top 88%",
-              toggleActions: "play none none none",
-            },
-          }
-        );
-      });
-    }, el);
+    let ctx: gsap.Context | null = null;
 
-    return () => ctx.revert();
+    const animate = () => {
+      ctx?.revert();
+      items.forEach((item) => {
+        const numEl = item.querySelector("[data-num]");
+        if (numEl) numEl.textContent = "0";
+      });
+
+      ctx = gsap.context(() => {
+        items.forEach((item, i) => {
+          const numEl = item.querySelector("[data-num]");
+          if (!numEl) return;
+          const display = item.dataset.display ?? "";
+          const target = Number(item.dataset.stat || "0");
+          const counter = { v: 0 };
+
+          gsap.fromTo(
+            item,
+            { opacity: 0, y: 24, filter: "blur(3px)" },
+            {
+              opacity: 1,
+              y: 0,
+              filter: "blur(0px)",
+              duration: 0.7,
+              delay: i * 0.1,
+              ease: "power3.out",
+            }
+          );
+          gsap.fromTo(
+            counter,
+            { v: 0 },
+            {
+              v: target,
+              duration: 2.2,
+              delay: 0.2 + i * 0.1,
+              ease: "power2.out",
+              onUpdate: () => {
+                numEl.textContent = formatCount(counter.v, display);
+              },
+            }
+          );
+        });
+      }, el);
+    };
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          animate();
+          playedRef.current = true;
+        } else if (playedRef.current) {
+          ctx?.revert();
+          ctx = null;
+        }
+      },
+      { threshold: 0.3 }
+    );
+    io.observe(el);
+
+    return () => {
+      io.disconnect();
+      ctx?.revert();
+    };
   }, []);
 
   return (

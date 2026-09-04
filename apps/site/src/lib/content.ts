@@ -1,6 +1,6 @@
 import { unstable_cache } from "next/cache";
 import { cache } from "react";
-import { prisma } from "@/lib/db";
+import { prisma, dbSafe } from "@/lib/db";
 import { isInstagramUrl } from "@/lib/instagram";
 import { VISIBLE_POST_WHERE } from "@/lib/site";
 
@@ -89,16 +89,16 @@ export type VideoCard = {
 
 export const getCategories = unstable_cache(
   async () => {
-    try {
-      const cats = await prisma.category.findMany({
+    const result = await dbSafe(
+      () => prisma.category.findMany({
         orderBy: { name: "asc" },
         include: { _count: { select: { posts: true, videos: true } } },
-      });
-      return cats.length > 0 ? cats : FALLBACK_CATEGORIES;
-    } catch (err) {
-      console.warn("[content] getCategories failed, using fallback:", (err as Error).message);
-      return FALLBACK_CATEGORIES;
-    }
+      }),
+      null,
+    );
+    if (result && result.length > 0) return result;
+    console.warn("[content] getCategories: DB returned empty, using fallback");
+    return FALLBACK_CATEGORIES;
   },
   ["categories"],
   { revalidate: CACHE_TTL, tags: ["content", "categories"] }
@@ -106,8 +106,8 @@ export const getCategories = unstable_cache(
 
 export const getPublishedVideos = unstable_cache(
   async (take?: number, platform?: "youtube" | "instagram", skip?: number) => {
-    try {
-      const rows = await prisma.video.findMany({
+    const rows = await dbSafe(
+      () => prisma.video.findMany({
         where: { published: true, deletedAt: null },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         ...(take ? { take } : {}),
@@ -121,29 +121,19 @@ export const getPublishedVideos = unstable_cache(
           content: true,
           category: { select: { slug: true } },
         },
-      });
-      return rows
-        .map((v) => ({
-          ...v,
-          content: v.content,
-        }))
-        .filter((v) =>
-          platform
-            ? platform === "instagram"
-              ? isInstagramUrl(v.embedUrl)
-              : !isInstagramUrl(v.embedUrl)
-            : true
-        );
-    } catch (err) {
-      console.warn("[content] getPublishedVideos failed:", (err as Error).message);
-      return FALLBACK_VIDEOS.filter((v) =>
+      }),
+      null,
+    );
+    if (!rows) return FALLBACK_VIDEOS;
+    return rows
+      .map((v) => ({ ...v, content: v.content }))
+      .filter((v) =>
         platform
           ? platform === "instagram"
             ? isInstagramUrl(v.embedUrl)
             : !isInstagramUrl(v.embedUrl)
           : true
-      ).slice(0, take ?? undefined);
-    }
+      );
   },
   ["videos"],
   { revalidate: CACHE_TTL, tags: ["content", "videos"] }
@@ -151,8 +141,8 @@ export const getPublishedVideos = unstable_cache(
 
 export const getPublishedVideoBySlug = unstable_cache(
   async (slug: string) => {
-    try {
-      return await prisma.video.findFirst({
+    return dbSafe(
+      () => prisma.video.findFirst({
         where: { slug, published: true, deletedAt: null },
         select: {
           id: true,
@@ -165,11 +155,9 @@ export const getPublishedVideoBySlug = unstable_cache(
           createdAt: true,
           category: { select: { slug: true, name: true } },
         },
-      });
-    } catch (err) {
-      console.warn("[content] getPublishedVideoBySlug failed:", (err as Error).message);
-      return null;
-    }
+      }),
+      null,
+    );
   },
   ["video-by-slug"],
   { revalidate: CACHE_TTL, tags: ["content", "videos"] }
@@ -177,23 +165,23 @@ export const getPublishedVideoBySlug = unstable_cache(
 
 export const getQuotes = unstable_cache(
   async () => {
-    try {
-      return await prisma.quote.findMany({
+    const result = await dbSafe(
+      () => prisma.quote.findMany({
         orderBy: { createdAt: "asc" },
         select: { id: true, text: true, tag: true },
-      });
-    } catch (err) {
-      console.warn("[content] getQuotes failed:", (err as Error).message);
-      return FALLBACK_QUOTES;
-    }
+      }),
+      null,
+    );
+    if (result && result.length > 0) return result;
+    return FALLBACK_QUOTES;
   },
   ["quotes"],
   { revalidate: CACHE_TTL, tags: ["content", "quotes"] }
 );
 
 export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
-  try {
-    const books = await prisma.book.findMany({
+  const books = await dbSafe(
+    () => prisma.book.findMany({
       where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: {
@@ -212,15 +200,16 @@ export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
         sortOrder: true,
         currentlyReading: true,
       },
-    });
+    }),
+    null,
+  );
+  if (books && books.length > 0) {
     console.log(`[content] getPublishedBooks(${type ?? "all"}): DB returned ${books.length} books`);
     return books;
-  } catch (err) {
-    console.warn("[content] getPublishedBooks FAILED:", (err as Error).message, (err as Error).stack?.split("\n")[1]);
-    const fb = type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
-    console.warn(`[content] returning ${fb.length} fallback books`);
-    return fb;
   }
+  const fb = type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
+  console.warn(`[content] getPublishedBooks: DB empty/down, returning ${fb.length} fallback books`);
+  return fb;
 }
 
 // ── Blog listing helpers ──────────────────────────────────────────────
@@ -230,11 +219,11 @@ export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
 
 export const getPostCount = unstable_cache(
   async (where?: Record<string, unknown>) => {
-    try {
-      return await prisma.post.count({ where: where ?? VISIBLE_POST_WHERE });
-    } catch {
-      return 18;
-    }
+    const count = await dbSafe(
+      () => prisma.post.count({ where: where ?? VISIBLE_POST_WHERE }),
+      null,
+    );
+    return count ?? 18;
   },
   ["post-count"],
   { revalidate: CACHE_TTL, tags: ["content", "posts"] }
@@ -242,11 +231,11 @@ export const getPostCount = unstable_cache(
 
 export const getVideoCount = unstable_cache(
   async () => {
-    try {
-      return await prisma.video.count({ where: { published: true, deletedAt: null } });
-    } catch {
-      return 6;
-    }
+    const count = await dbSafe(
+      () => prisma.video.count({ where: { published: true, deletedAt: null } }),
+      null,
+    );
+    return count ?? 6;
   },
   ["video-count"],
   { revalidate: CACHE_TTL, tags: ["content", "videos"] }
@@ -257,8 +246,8 @@ export const getPostList = unstable_cache(
     where: Record<string, unknown>,
     opts: { take: number; skip: number }
   ) => {
-    try {
-      return await prisma.post.findMany({
+    const posts = await dbSafe(
+      () => prisma.post.findMany({
         where,
         select: {
           id: true,
@@ -274,10 +263,11 @@ export const getPostList = unstable_cache(
         orderBy: { publishedAt: "desc" },
         take: opts.take,
         skip: opts.skip,
-      });
-    } catch {
-      return FALLBACK_POSTS.slice(opts.skip, opts.skip + opts.take);
-    }
+      }),
+      null,
+    );
+    if (posts && posts.length > 0) return posts;
+    return FALLBACK_POSTS.slice(opts.skip, opts.skip + opts.take);
   },
   ["post-list"],
   { revalidate: CACHE_TTL, tags: ["content", "posts"] }
@@ -285,8 +275,8 @@ export const getPostList = unstable_cache(
 
 export const getFeaturedPosts = unstable_cache(
   async (where: Record<string, unknown>, take: number) => {
-    try {
-      return await prisma.post.findMany({
+    const posts = await dbSafe(
+      () => prisma.post.findMany({
         where,
         select: {
           id: true,
@@ -301,16 +291,20 @@ export const getFeaturedPosts = unstable_cache(
         },
         orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
         take,
-      });
-    } catch (err) {
-      console.warn("[content] getFeaturedPosts failed:", (err as Error).message);
-      return FALLBACK_POSTS.slice(0, take).map((p) => ({
-        ...p,
-        views: 0,
-        likes: 0,
-        category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
-      }));
+      }),
+      null,
+    );
+    if (posts && posts.length > 0) {
+      console.log(`[content] getFeaturedPosts: DB returned ${posts.length} posts`);
+      return posts;
     }
+    console.warn("[content] getFeaturedPosts: DB empty/down, returning fallback posts");
+    return FALLBACK_POSTS.slice(0, take).map((p) => ({
+      ...p,
+      views: 0,
+      likes: 0,
+      category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
+    }));
   },
   ["featured-posts"],
   { revalidate: CACHE_TTL, tags: ["content", "posts"] }
@@ -318,30 +312,33 @@ export const getFeaturedPosts = unstable_cache(
 
 export const getRelatedPosts = unstable_cache(
   async (postId: string, categoryId: string | null) => {
-    try {
-      const where = {
-        ...VISIBLE_POST_WHERE,
-        NOT: { id: postId },
-        ...(categoryId ? { categoryId } : { categoryId: null }),
-      };
-      let related = await prisma.post.findMany({
+    const where = {
+      ...VISIBLE_POST_WHERE,
+      NOT: { id: postId },
+      ...(categoryId ? { categoryId } : { categoryId: null }),
+    };
+    let related = await dbSafe(
+      () => prisma.post.findMany({
         where,
         select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
         orderBy: { publishedAt: "desc" },
         take: 3,
-      });
-      if (related.length < 3) {
-        related = await prisma.post.findMany({
+      }),
+      null,
+    );
+    if (!related || related.length === 0) return [];
+    if (related.length < 3) {
+      related = await dbSafe(
+        () => prisma.post.findMany({
           where: { ...VISIBLE_POST_WHERE, NOT: { id: postId } },
           select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
           orderBy: { publishedAt: "desc" },
           take: 3,
-        });
-      }
-      return related.slice(0, 3);
-    } catch {
-      return [];
+        }),
+        related,
+      );
     }
+    return (related ?? []).slice(0, 3);
   },
   ["related-posts"],
   { revalidate: CACHE_TTL, tags: ["content", "posts"] }
