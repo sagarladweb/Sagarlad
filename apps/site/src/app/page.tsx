@@ -3,22 +3,20 @@ import { getSiteSocials } from "@/lib/social-links";
 import { getCategories, getFeaturedPosts, getActiveAnnouncement } from "@/lib/content";
 import { prisma } from "@/lib/db";
 import { JsonLd } from "@/components/JsonLd";
-import dynamic from "next/dynamic";
 
 import { Hero } from "@/components/home/Hero";
 import { FeaturedOn } from "@/components/home/FeaturedOn";
+import { AboutMe } from "@/components/home/AboutMe";
+import { TopicsGrid } from "@/components/home/TopicsGrid";
+import { MindUp } from "@/components/home/MindUp";
+import { MindUpBook } from "@/components/home/MindUpBook";
+import { BlogPreview } from "@/components/home/BlogPreview";
+import { Testimonials } from "@/components/home/Testimonials";
+import { MentorshipCta } from "@/components/home/MentorshipCta";
+import { NewsletterCta } from "@/components/home/NewsletterCta";
+import { SagarGallery } from "@/components/home/SagarGallery";
 import { AnnouncementSection } from "@/components/home/AnnouncementSection";
 import { AnnouncementPopup } from "@/components/home/AnnouncementPopup";
-
-const AboutMe = dynamic(() => import("@/components/home/AboutMe").then((m) => m.AboutMe));
-const TopicsGrid = dynamic(() => import("@/components/home/TopicsGrid").then((m) => m.TopicsGrid));
-const MindUp = dynamic(() => import("@/components/home/MindUp").then((m) => m.MindUp));
-const MindUpBook = dynamic(() => import("@/components/home/MindUpBook").then((m) => m.MindUpBook));
-const BlogPreview = dynamic(() => import("@/components/home/BlogPreview").then((m) => m.BlogPreview));
-const Testimonials = dynamic(() => import("@/components/home/Testimonials").then((m) => m.Testimonials));
-const MentorshipCta = dynamic(() => import("@/components/home/MentorshipCta").then((m) => m.MentorshipCta));
-const NewsletterCta = dynamic(() => import("@/components/home/NewsletterCta").then((m) => m.NewsletterCta));
-const SagarGallery = dynamic(() => import("@/components/home/SagarGallery").then((m) => m.SagarGallery));
 
 export const revalidate = 300;
 

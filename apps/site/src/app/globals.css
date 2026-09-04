@@ -1213,6 +1213,19 @@ nav a:not([class*="rounded-full"]) {
   filter: blur(12px);
   transform: none;
 }
+
+/* GSAP failure fallback: if .gsap-ready is never added (GSAP didn't load),
+   show content after 2s via CSS animation. Once GSAP loads it clears
+   the animation and takes over normally. */
+@keyframes gsap-fallback {
+  to { opacity: 1; filter: none; transform: none; }
+}
+[data-animate]:not(.gsap-ready [data-animate]) {
+  animation: gsap-fallback 0.6s ease-out 2s forwards;
+}
+.gsap-ready [data-animate] {
+  animation: none;
+}
 [data-animate="image"] {
   filter: none;
   transform: scale(1.08);
@@ -1221,6 +1234,15 @@ nav a:not([class*="rounded-full"]) {
   opacity: 0;
   filter: blur(3px);
   transform: translateY(40px);
+}
+@keyframes gsap-item-fallback {
+  to { opacity: 1; filter: none; transform: none; }
+}
+[data-animate-item]:not(.gsap-ready [data-animate-item]) {
+  animation: gsap-item-fallback 0.6s ease-out 2.2s forwards;
+}
+.gsap-ready [data-animate-item] {
+  animation: none;
 }
 
 /* Mentorship page GSAP elements */
