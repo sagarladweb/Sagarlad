@@ -26,13 +26,20 @@ export function ImageUpload({ value, onChange, label, folder, name, onPastedData
     setUploading(true);
     setError("");
     try {
-      const form = new FormData();
-      form.append("file", file);
-      form.append("folder", folder ?? "general");
-      if (name) form.append("name", name);
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
       const res = await fetch("/api/admin/upload", {
         method: "POST",
-        body: form,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dataUrl,
+          folder: folder ?? "general",
+          name: name || undefined,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Upload failed");

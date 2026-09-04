@@ -20,7 +20,7 @@ export const getPostBySlug = cache((slug: string) =>
 // books). The results are cached and re-validated instantly on admin writes
 // via `revalidatePublic()` -> revalidateTag("content").
 // In development, cache for 60 seconds so fixes apply quickly.
-const CACHE_TTL = process.env.NODE_ENV === "development" ? 60 : 604800;
+const CACHE_TTL = process.env.NODE_ENV === "development" ? 60 : 300;
 
 // Supabase free-tier pauses the DB after inactivity; every content fetcher
 // returns an empty fallback instead of crashing the page.

@@ -8,6 +8,7 @@ export const runtime = "nodejs";
 const MAX_SIZE = 8 * 1024 * 1024; // 8MB
 const ALLOWED = new Set([
   "image/jpeg",
+  "image/jpg",
   "image/png",
   "image/webp",
   "image/gif",
@@ -59,7 +60,7 @@ export async function POST(request: Request) {
     const dataUrl = typeof body?.dataUrl === "string" ? body.dataUrl : "";
     const folder = safeFolder(body?.folder);
     const name = sanitizeName(body?.name);
-    const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp|gif|avif));base64,([\s\S]+)$/);
+    const match = dataUrl.match(/^data:(image\/(?:jpeg|jpg|png|webp|gif|avif));base64,([\s\S]+)$/);
     if (!match) {
       return NextResponse.json(
         { error: "Please paste a valid base64 image (copy an image, then paste it here)." },

@@ -20,7 +20,7 @@ const MentorshipCta = dynamic(() => import("@/components/home/MentorshipCta").th
 const NewsletterCta = dynamic(() => import("@/components/home/NewsletterCta").then((m) => m.NewsletterCta));
 const SagarGallery = dynamic(() => import("@/components/home/SagarGallery").then((m) => m.SagarGallery));
 
-export const revalidate = 604800;
+export const revalidate = 300;
 
 export default async function HomePage({
   searchParams,

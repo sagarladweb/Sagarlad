@@ -99,11 +99,21 @@ export function PostForm({
     setUploadState("loading");
     setUploadMessage("");
     try {
-      const body = new FormData();
-      body.append("file", file);
-      body.append("folder", "covers");
-      if (form.slug || form.title) body.append("name", form.slug || form.title);
-      const res = await fetch("/api/admin/upload", { method: "POST", body });
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          dataUrl,
+          folder: "covers",
+          name: form.slug || form.title || undefined,
+        }),
+      });
       const data = await res.json().catch(() => ({}));
       if (res.ok && data.url) {
         setForm((f) => ({ ...f, coverImage: data.url }));

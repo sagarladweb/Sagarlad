@@ -1313,10 +1313,20 @@ export function TipTapEditor({
         if (file) {
           event.preventDefault();
           void (async () => {
-            const body = new FormData();
-            body.append("file", file);
-            if (postTitle) body.append("name", postTitle);
-            const res = await fetch("/api/admin/upload", { method: "POST", body });
+            const dataUrl = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(file);
+            });
+            const res = await fetch("/api/admin/upload", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                dataUrl,
+                folder: "covers",
+                name: postTitle || undefined,
+              }),
+            });
             const data = await res.json().catch(() => ({}));
             if (res.ok && data.url) insertUploaded(data.url, file.name);
           })();

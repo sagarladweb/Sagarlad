@@ -15,6 +15,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
+  console.log(`[cron] keepalive triggered at ${now.toISOString()}`);
 
   // 1. Publish scheduled posts whose time has come
   let published = 0;
@@ -32,7 +33,15 @@ export async function GET(req: Request) {
       },
     });
     published = due.count;
-    if (published > 0) revalidateTag("content", "max");
+    if (published > 0) {
+      console.log(`[cron] published ${published} scheduled post(s)`);
+      revalidateTag("content", "max");
+    }
+    // Log pending scheduled posts for diagnostics
+    const pending = await prisma.post.count({
+      where: { published: false, scheduledAt: { not: null }, deletedAt: null },
+    });
+    if (pending > 0) console.log(`[cron] ${pending} post(s) still pending schedule`);
   } catch (err) {
     console.error("[cron] scheduled post publish failed:", (err as Error).message);
   }

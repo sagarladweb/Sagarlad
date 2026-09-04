@@ -36,7 +36,7 @@ export function BlogCard({
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card card-hover"
+      className="group relative flex flex-col overflow-hidden rounded-2xl border border-border bg-card transition-all duration-300 hover:border-brand-light/60 hover:text-brand hover:shadow-[0_0_0_1px_var(--brand-light)]"
       data-animate-item
       suppressHydrationWarning
     >

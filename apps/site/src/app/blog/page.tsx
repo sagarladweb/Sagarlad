@@ -15,7 +15,7 @@ export const metadata: Metadata = pageMetadata({
   path: "/blog",
 });
 
-export const revalidate = 604800;
+export const revalidate = 300;
 
 const PAGE_SIZE = 9;
 
