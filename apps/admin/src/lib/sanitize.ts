@@ -1,14 +1,14 @@
-import DOMPurify from "dompurify";
-import { JSDOM } from "jsdom";
-import type { WindowLike } from "dompurify";
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let purify: any = null;
 
 function getPurify() {
   if (!purify) {
+    // Dynamic require inside function — avoids top-level import crash on
+    // Vercel serverless where there is no browser `window` at module-load time.
+    const { JSDOM } = require("jsdom") as typeof import("jsdom");
+    const DOMPurify = require("dompurify");
     const { window } = new JSDOM("");
-    purify = DOMPurify(window as unknown as WindowLike);
+    purify = DOMPurify(window);
   }
   return purify;
 }
