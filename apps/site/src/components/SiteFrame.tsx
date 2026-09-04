@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams, useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ScrollTopButton } from "@/components/ui/ScrollTopButton";
@@ -46,6 +46,7 @@ export function SiteFrame({
 }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const isAdmin = pathname.startsWith("/admin");
   const isBarPreview = searchParams.get("announce_preview") === "bar";
   const previewId = searchParams.get("id");
@@ -68,6 +69,11 @@ export function SiteFrame({
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+    router.prefetch("/blog");
+    router.prefetch("/about");
+  }, [router]);
 
   useEffect(() => {
     const MEDIA = "img, video, svg, picture, canvas";

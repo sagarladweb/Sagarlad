@@ -1,11 +1,18 @@
 import Link from "next/link";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { ArrowLeft, CalendarDays, Clock, Eye, Link2, Video, Image as ImageIcon } from "lucide-react";
 import { SITE, formatDate, readingTime } from "@/lib/site";
 import { SanitizedContent } from "@/components/SanitizedContent";
-import { ShareButtons } from "@/components/blog/ShareButtons";
 import { LikeButton } from "@/components/blog/LikeButton";
-import { CommentsSection } from "@/components/blog/CommentsSection";
+
+const ShareButtons = dynamic(
+  () => import("@/components/blog/ShareButtons").then((m) => m.ShareButtons)
+);
+
+const CommentsSection = dynamic(
+  () => import("@/components/blog/CommentsSection").then((m) => m.CommentsSection)
+);
 
 /** Deterministic daily micro-growth: 0-2 extra views per day, seeded by postId + date. */
 function dailyBonus(postId: string): number {
