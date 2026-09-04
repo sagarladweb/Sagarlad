@@ -146,7 +146,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
 
       {/* Carousel area with side arrows */}
       <div
-        className="relative touch-pan-y select-none overflow-hidden"
+        className="relative touch-pan-y select-none px-0 md:px-16"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -158,7 +158,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
             type="button"
             onClick={prev}
             aria-label="Previous book"
-            className="btn-premium absolute left-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b] -translate-x-1/2"
+            className="btn-premium absolute left-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
@@ -273,7 +273,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
             type="button"
             onClick={next}
             aria-label="Next book"
-            className="btn-premium absolute right-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b] translate-x-1/2"
+            className="btn-premium absolute right-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
           >
             <ChevronRight className="w-5 h-5" />
           </button>

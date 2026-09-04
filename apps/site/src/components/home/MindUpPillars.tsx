@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Play, Brain, Heart, Users, Briefcase, TrendingUp, Star } from "lucide-react";
+import { Play, Pause, Brain, Heart, Users, Briefcase, TrendingUp, Star } from "lucide-react";
 import { MINDUP_PILLARS, type MindUpPillar } from "@/lib/mindup";
 import { Pill } from "@/components/ui/Pill";
 
@@ -12,7 +12,7 @@ const INNER = 106;
 const MID = (OUTER + INNER) / 2;
 const GAP = 1.4;
 const STEP = 360 / MINDUP_PILLARS.length;
-const TRACE_DUR = 1800;
+const TRACE_DUR = 2800;
 
 const PILLAR_ICONS: Record<string, typeof Brain> = {
   M: Brain,
@@ -207,7 +207,7 @@ function PillarRing({
                 fill="none"
                 stroke={p.color}
                 strokeWidth={3}
-                strokeLinecap="round"
+                strokeLinecap="butt"
                 strokeDasharray={arcLen}
                 strokeDashoffset={status === "done" ? 0 : arcLen * (1 - playProgress)}
                 opacity={status === "done" ? 0.8 : 1}
@@ -222,13 +222,21 @@ function PillarRing({
           className="pointer-events-none absolute left-1/2 top-1/2 flex h-[52%] w-[52%] -translate-x-1/2 -translate-y-1/2 flex-col items-center justify-center rounded-full bg-[#FAF9F6]/95 text-center ring-1 ring-black/5 overflow-hidden"
         >
           {playing && activePillar ? (
-            <div key={`play-${activePillar.id}`} className="pillar-swap px-5 z-10">
+            <div key={`play-${activePillar.id}`} className="pillar-swap px-5 z-10 flex flex-col items-center">
               <p className="text-[0.6rem] font-bold uppercase tracking-[0.35em]" style={{ color: activePillar.color }}>
                 {activePillar.short}
               </p>
               <p className="mt-1 font-display text-sm font-semibold leading-snug text-[#1e293b]">
                 {activePillar.shortDescription}
               </p>
+              <button
+                type="button"
+                onClick={onPlayToggle}
+                aria-label="Pause walkthrough"
+                className="btn-premium pointer-events-auto z-10 mt-3 flex h-10 w-10 items-center justify-center rounded-full border border-[#1e293b]/15 bg-transparent hover:bg-[#1e293b]/5 text-[#1e293b] active:scale-95"
+              >
+                <Pause className="h-4 w-4" />
+              </button>
             </div>
           ) : activePillar ? (
             <div key={activePillar.id} className="pillar-swap px-5 z-10">
