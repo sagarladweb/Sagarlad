@@ -66,7 +66,7 @@ export default async function HomePage({
         <TopicsGrid topics={topicsWithViews} />
         <MindUp />
         <MindUpBook />
-        <BlogPreview posts={posts} />
+      <BlogPreview posts={posts} showStats />
         <Testimonials />
         <MentorshipCta />
         <NewsletterCta />

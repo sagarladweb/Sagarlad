@@ -910,20 +910,17 @@ video {
 
 /* ── Card hover: border accent + minimal lift ────────────────────── */
 .card-hover,
-[data-animate-item],
 [data-card-hover] {
   transition:
     border-color 0.3s ease,
     box-shadow 0.3s ease;
 }
 .card-hover:hover,
-[data-animate-item]:hover,
 [data-card-hover]:hover {
   border-color: var(--accent);
   box-shadow: 0 0 0 1px var(--accent);
 }
 .card-hover:active,
-[data-animate-item]:active,
 [data-card-hover]:active {
   transform: none;
   transition-duration: 0.1s;
@@ -1082,7 +1079,6 @@ nav a:not([class*="rounded-full"]) {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-  [data-animate-item]:hover,
   .card-hover:hover,
   [data-card-hover]:hover {
     border-color: inherit;

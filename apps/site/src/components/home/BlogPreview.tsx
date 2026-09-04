@@ -11,13 +11,17 @@ type FeaturedPost = {
   content?: string;
   coverImage: string | null;
   publishedAt: Date | string;
+  views?: number;
+  likes?: number;
   category: { id: string; name: string; slug: string } | null;
 };
 
 export function BlogPreview({
   posts,
+  showStats = false,
 }: {
   posts: FeaturedPost[];
+  showStats?: boolean;
 }) {
   return (
     <section className="py-16 md:py-24 border-b border-border">
@@ -33,7 +37,7 @@ export function BlogPreview({
 
         <div data-animate="right" suppressHydrationWarning className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
           {posts.map((post) => (
-            <BlogCard key={post.id} post={post} />
+            <BlogCard key={post.id} post={post} showStats={showStats} />
           ))}
         </div>
 
