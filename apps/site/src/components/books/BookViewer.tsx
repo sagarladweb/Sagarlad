@@ -134,12 +134,12 @@ function BookViewerInner({ bookId, buyUrl, open, onClose }: Props) {
       </button>
 
       {/* Floating Buy Button */}
-      <div className="absolute bottom-6 sm:bottom-10 left-1/2 -translate-x-1/2 z-[10000]" onClick={(e) => e.stopPropagation()}>
+      <div className="absolute bottom-20 sm:bottom-24 left-1/2 -translate-x-1/2 z-[10000]" onClick={(e) => e.stopPropagation()}>
         <a
           href={buyUrl ?? "/books"}
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center justify-center gap-2 rounded-full bg-[#ffd51d] text-black px-6 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base font-bold shadow-2xl hover:scale-105 transition-transform"
+          className="btn-premium flex items-center justify-center gap-2 rounded-full bg-[#ffd51d] text-black px-6 py-3 sm:px-8 sm:py-3.5 text-sm sm:text-base font-bold shadow-2xl hover:opacity-90 transition-opacity"
         >
           <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
           Buy Now
@@ -190,8 +190,8 @@ function BookViewerInner({ bookId, buyUrl, open, onClose }: Props) {
         </div>
       </div>
 
-      {/* Page indicator — padded up so Buy Now button doesn't overlap */}
-      <div className="hidden sm:flex w-full items-center justify-center gap-6 z-[10000] pb-20 shrink-0" onClick={(e) => e.stopPropagation()}>
+      {/* Page indicator */}
+      <div className="hidden sm:flex w-full items-center justify-center gap-6 z-[10000] pb-6 shrink-0" onClick={(e) => e.stopPropagation()}>
         <span className="text-xs font-bold text-white tracking-widest tabular-nums bg-white/10 px-4 py-1.5 rounded-full border border-white/20">
           {totalPages > 0 ? `${currentPage + 1} / ${totalPages}` : ""}
         </span>

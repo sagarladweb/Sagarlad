@@ -1,14 +1,12 @@
-import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { prisma, dbSafe } from "@/lib/db";
 import { isInstagramUrl } from "@/lib/instagram";
 import { VISIBLE_POST_WHERE } from "@/lib/site";
 
-// Blog posts are deliberately NOT wrapped in unstable_cache here: they carry
-// Date fields that unstable_cache would stringify, and the post pages already
-// use ISR (`revalidate = 604800`) + `revalidatePublic()`, so the DB is only
-// hit when a cached page actually revalidates. React `cache` dedupes the
-// per-request double fetch (generateMetadata + render).
+// Blog posts: React `cache` dedupes per-request (generateMetadata + render).
+// Page-level `revalidate = 300` handles ISR. No unstable_cache here — it
+// would cache fallback data when Supabase is paused, showing stale posts
+// for 5 minutes even after the DB wakes up.
 export const getPostBySlug = cache((slug: string) =>
   prisma.post.findFirst({
     where: { slug, ...VISIBLE_POST_WHERE },
@@ -16,14 +14,7 @@ export const getPostBySlug = cache((slug: string) =>
   })
 );
 
-// Shared read-model helpers for stable public content (categories, videos,
-// books). The results are cached and re-validated instantly on admin writes
-// via `revalidatePublic()` -> revalidateTag("content").
-// In development, cache for 60 seconds so fixes apply quickly.
-const CACHE_TTL = process.env.NODE_ENV === "development" ? 60 : 300;
-
-// Supabase free-tier pauses the DB after inactivity; every content fetcher
-// returns an empty fallback instead of crashing the page.
+// ── Fallback data (used when Supabase free-tier DB is paused) ──────────
 export const FALLBACK_CATEGORIES = [
   { name: "Life Lessons", slug: "life-lessons" },
   { name: "Money", slug: "money" },
@@ -61,11 +52,9 @@ const FALLBACK_QUOTES = [
 const FALLBACK_BOOKS = [
   { id: "fb-bk-1", type: "PUBLISHED" as const, title: "MindUp", author: "Sagar Lad", tagline: "A practical guide to upgrading your mindset and habits", description: "MindUp distills the most powerful ideas on money, career, and personal growth into actionable steps. No fluff, no motivational clichés — just frameworks that actually work.", learning: "Practical frameworks for personal and financial growth", note: null, imageUrl: "/images/books/mindup-front.jpg", buyUrl: "https://www.amazon.in/dp/B0D86GYL5S", free: true, featured: true, sortOrder: 1, currentlyReading: false },
   { id: "fb-bk-2", type: "PUBLISHED" as const, title: "Azure", author: "Sagar Lad", tagline: "Navigate your 20s with clarity and confidence", description: "Azure is your companion for navigating the chaos of your twenties — from career decisions to relationships to building real confidence.", learning: "Navigating your 20s with intention and purpose", note: null, imageUrl: "/images/books/azure-front.webp", buyUrl: "https://www.amazon.in/dp/B0D86GYL5S", free: true, featured: true, sortOrder: 2, currentlyReading: false },
-  { id: "fb-bk-r1", type: "READ" as const, title: "Atomic Habits", author: "James Clear", tagline: "Tiny changes, remarkable results", description: "A practical guide to building good habits and breaking bad ones. Clear breaks down the science of habit formation into four simple laws.", learning: "Systems matter more than goals — design your environment for success", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 1, currentlyReading: false },
-  { id: "fb-bk-r2", type: "READ" as const, title: "The Psychology of Money", author: "Morgan Housel", tagline: "Timeless lessons on wealth, greed, and happiness", description: "Housel explores how people think about money — the weird ways we make decisions, the role of luck, and why doing nothing is often the best financial strategy.", learning: "Wealth is what you don't see — it's the money not spent", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 2, currentlyReading: false },
-  { id: "fb-bk-r3", type: "READ" as const, title: "Think and Grow Rich", author: "Napoleon Hill", tagline: "The landmark bestseller now revised and updated", description: "The 1937 classic that introduced the idea that success begins with a burning desire and a definite plan. Revised with modern commentary.", learning: "Desire backed by definite purpose is the starting point of all achievement", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 3, currentlyReading: false },
-  { id: "fb-bk-r4", type: "READ" as const, title: "The Alchemist", author: "Paulo Coelho", tagline: "A fable about following your dreams", description: "A mystical story about Santiago, an Andalusian shepherd boy who travels from Spain to Egypt in search of treasure buried near the Pyramids.", learning: "When you want something, all the universe conspires to help you achieve it", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 4, currentlyReading: false },
-  { id: "fb-bk-r5", type: "READ" as const, title: "Deep Work", author: "Cal Newport", tagline: "Rules for focused success in a distracted world", description: "Newport makes the case that the ability to focus without distraction is becoming increasingly rare and increasingly valuable in today's economy.", learning: "Focus is a skill that can be trained — protect your attention like your most valuable asset", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 5, currentlyReading: false },
+  { id: "fb-bk-r1", type: "READ" as const, title: "Atomic Habits", author: "James Clear", tagline: "Tiny changes, remarkable results", description: "A practical guide to building good habits and breaking bad ones.", learning: "Systems matter more than goals", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 1, currentlyReading: false },
+  { id: "fb-bk-r2", type: "READ" as const, title: "The Psychology of Money", author: "Morgan Housel", tagline: "Timeless lessons on wealth, greed, and happiness", description: "Housel explores how people think about money.", learning: "Wealth is what you don't see", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 2, currentlyReading: false },
+  { id: "fb-bk-r3", type: "READ" as const, title: "Think and Grow Rich", author: "Napoleon Hill", tagline: "The landmark bestseller", description: "The 1937 classic on success.", learning: "Desire backed by definite purpose", note: null, imageUrl: null, buyUrl: null, free: false, featured: false, sortOrder: 3, currentlyReading: false },
 ];
 
 const FALLBACK_POSTS = [
@@ -87,266 +76,198 @@ export type VideoCard = {
   categorySlug?: string | null;
 };
 
-export const getCategories = unstable_cache(
-  async () => {
-    const result = await dbSafe(
-      () => prisma.category.findMany({
-        orderBy: { name: "asc" },
-        include: { _count: { select: { posts: true, videos: true } } },
-      }),
-      null,
-    );
-    if (result && result.length > 0) return result;
-    console.warn("[content] getCategories: DB returned empty, using fallback");
-    return FALLBACK_CATEGORIES;
-  },
-  ["categories"],
-  { revalidate: CACHE_TTL, tags: ["content", "categories"] }
-);
+// ── Content fetchers ──────────────────────────────────────────────────
+// All use dbSafe for Supabase wake-up retries. No unstable_cache —
+// page-level `revalidate` + React `cache()` handles deduplication.
+// admin writes call `revalidateTag("content")` to bust the ISR cache.
 
-export const getPublishedVideos = unstable_cache(
-  async (take?: number, platform?: "youtube" | "instagram", skip?: number) => {
-    const rows = await dbSafe(
-      () => prisma.video.findMany({
-        where: { published: true, deletedAt: null },
-        orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
-        ...(take ? { take } : {}),
-        ...(skip ? { skip } : {}),
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          embedUrl: true,
-          thumbnail: true,
-          content: true,
-          category: { select: { slug: true } },
-        },
-      }),
-      null,
-    );
-    if (!rows) return FALLBACK_VIDEOS;
-    return rows
-      .map((v) => ({ ...v, content: v.content }))
-      .filter((v) =>
-        platform
-          ? platform === "instagram"
-            ? isInstagramUrl(v.embedUrl)
-            : !isInstagramUrl(v.embedUrl)
-          : true
-      );
-  },
-  ["videos"],
-  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
-);
+export const getCategories = cache(async () => {
+  const result = await dbSafe(
+    () => prisma.category.findMany({
+      orderBy: { name: "asc" },
+      include: { _count: { select: { posts: true, videos: true } } },
+    }),
+    null,
+  );
+  if (result && result.length > 0) return result;
+  console.warn("[content] getCategories: DB down, using fallback");
+  return FALLBACK_CATEGORIES;
+});
 
-export const getPublishedVideoBySlug = unstable_cache(
-  async (slug: string) => {
-    return dbSafe(
-      () => prisma.video.findFirst({
-        where: { slug, published: true, deletedAt: null },
-        select: {
-          id: true,
-          title: true,
-          slug: true,
-          embedUrl: true,
-          thumbnail: true,
-          content: true,
-          layout: true,
-          createdAt: true,
-          category: { select: { slug: true, name: true } },
-        },
-      }),
-      null,
+export const getPublishedVideos = cache(async (take?: number, platform?: "youtube" | "instagram", skip?: number) => {
+  const rows = await dbSafe(
+    () => prisma.video.findMany({
+      where: { published: true, deletedAt: null },
+      orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+      ...(take ? { take } : {}),
+      ...(skip ? { skip } : {}),
+      select: {
+        id: true, title: true, slug: true, embedUrl: true,
+        thumbnail: true, content: true,
+        category: { select: { slug: true } },
+      },
+    }),
+    null,
+  );
+  if (!rows) return FALLBACK_VIDEOS;
+  return rows
+    .map((v) => ({ ...v, content: v.content }))
+    .filter((v) =>
+      platform
+        ? platform === "instagram"
+          ? isInstagramUrl(v.embedUrl)
+          : !isInstagramUrl(v.embedUrl)
+        : true
     );
-  },
-  ["video-by-slug"],
-  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
-);
+});
 
-export const getQuotes = unstable_cache(
-  async () => {
-    const result = await dbSafe(
-      () => prisma.quote.findMany({
-        orderBy: { createdAt: "asc" },
-        select: { id: true, text: true, tag: true },
-      }),
-      null,
-    );
-    if (result && result.length > 0) return result;
-    return FALLBACK_QUOTES;
-  },
-  ["quotes"],
-  { revalidate: CACHE_TTL, tags: ["content", "quotes"] }
-);
+export const getPublishedVideoBySlug = cache(async (slug: string) => {
+  return dbSafe(
+    () => prisma.video.findFirst({
+      where: { slug, published: true, deletedAt: null },
+      select: {
+        id: true, title: true, slug: true, embedUrl: true,
+        thumbnail: true, content: true, layout: true, createdAt: true,
+        category: { select: { slug: true, name: true } },
+      },
+    }),
+    null,
+  );
+});
 
-export async function getPublishedBooks(type?: "PUBLISHED" | "READ" | "EBOOK") {
+export const getQuotes = cache(async () => {
+  const result = await dbSafe(
+    () => prisma.quote.findMany({
+      orderBy: { createdAt: "asc" },
+      select: { id: true, text: true, tag: true },
+    }),
+    null,
+  );
+  if (result && result.length > 0) return result;
+  return FALLBACK_QUOTES;
+});
+
+export const getPublishedBooks = cache(async (type?: "PUBLISHED" | "READ" | "EBOOK") => {
   const books = await dbSafe(
     () => prisma.book.findMany({
       where: { published: true, deletedAt: null, ...(type ? { type } : {}) },
       orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { createdAt: "asc" }],
       select: {
-        id: true,
-        type: true,
-        title: true,
-        author: true,
-        tagline: true,
-        description: true,
-        learning: true,
-        note: true,
-        imageUrl: true,
-        buyUrl: true,
-        free: true,
-        featured: true,
-        sortOrder: true,
+        id: true, type: true, title: true, author: true, tagline: true,
+        description: true, learning: true, note: true, imageUrl: true,
+        buyUrl: true, free: true, featured: true, sortOrder: true,
         currentlyReading: true,
       },
     }),
     null,
   );
   if (books && books.length > 0) {
-    console.log(`[content] getPublishedBooks(${type ?? "all"}): DB returned ${books.length} books`);
+    console.log(`[content] getPublishedBooks(${type ?? "all"}): ${books.length} books from DB`);
     return books;
   }
   const fb = type ? FALLBACK_BOOKS.filter((b) => b.type === type) : FALLBACK_BOOKS;
-  console.warn(`[content] getPublishedBooks: DB empty/down, returning ${fb.length} fallback books`);
+  console.warn(`[content] getPublishedBooks: DB down, returning ${fb.length} fallback`);
   return fb;
-}
+});
 
 // ── Blog listing helpers ──────────────────────────────────────────────
-// Wrapped in unstable_cache so the blog listing page doesn't hit the DB
-// on every request. Revalidates weekly + instantly on admin writes via
-// revalidateTag("content").
 
-export const getPostCount = unstable_cache(
-  async (where?: Record<string, unknown>) => {
-    const count = await dbSafe(
-      () => prisma.post.count({ where: where ?? VISIBLE_POST_WHERE }),
-      null,
-    );
-    return count ?? 18;
-  },
-  ["post-count"],
-  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
-);
+export const getPostCount = cache(async (where?: Record<string, unknown>) => {
+  const count = await dbSafe(
+    () => prisma.post.count({ where: where ?? VISIBLE_POST_WHERE }),
+    null,
+  );
+  return count ?? 18;
+});
 
-export const getVideoCount = unstable_cache(
-  async () => {
-    const count = await dbSafe(
-      () => prisma.video.count({ where: { published: true, deletedAt: null } }),
-      null,
-    );
-    return count ?? 6;
-  },
-  ["video-count"],
-  { revalidate: CACHE_TTL, tags: ["content", "videos"] }
-);
+export const getVideoCount = cache(async () => {
+  const count = await dbSafe(
+    () => prisma.video.count({ where: { published: true, deletedAt: null } }),
+    null,
+  );
+  return count ?? 6;
+});
 
-export const getPostList = unstable_cache(
-  async (
-    where: Record<string, unknown>,
-    opts: { take: number; skip: number }
-  ) => {
-    const posts = await dbSafe(
+export const getPostList = cache(async (
+  where: Record<string, unknown>,
+  opts: { take: number; skip: number }
+) => {
+  const posts = await dbSafe(
+    () => prisma.post.findMany({
+      where,
+      select: {
+        id: true, slug: true, title: true, coverImage: true,
+        publishedAt: true, excerpt: true, views: true, likes: true,
+        category: { select: { name: true, slug: true } },
+      },
+      orderBy: { publishedAt: "desc" },
+      take: opts.take,
+      skip: opts.skip,
+    }),
+    null,
+  );
+  if (posts && posts.length > 0) return posts;
+  return FALLBACK_POSTS.slice(opts.skip, opts.skip + opts.take);
+});
+
+export const getFeaturedPosts = cache(async (where: Record<string, unknown>, take: number) => {
+  const posts = await dbSafe(
+    () => prisma.post.findMany({
+      where,
+      select: {
+        id: true, slug: true, title: true, coverImage: true,
+        publishedAt: true, excerpt: true, views: true, likes: true,
+        category: { select: { id: true, name: true, slug: true } },
+      },
+      orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
+      take,
+    }),
+    null,
+  );
+  if (posts && posts.length > 0) {
+    console.log(`[content] getFeaturedPosts: ${posts.length} posts from DB`);
+    return posts;
+  }
+  console.warn("[content] getFeaturedPosts: DB down, returning fallback posts");
+  return FALLBACK_POSTS.slice(0, take).map((p) => ({
+    ...p,
+    views: 0,
+    likes: 0,
+    category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
+  }));
+});
+
+export const getRelatedPosts = cache(async (postId: string, categoryId: string | null) => {
+  const where = {
+    ...VISIBLE_POST_WHERE,
+    NOT: { id: postId },
+    ...(categoryId ? { categoryId } : { categoryId: null }),
+  };
+  let related = await dbSafe(
+    () => prisma.post.findMany({
+      where,
+      select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
+      orderBy: { publishedAt: "desc" },
+      take: 3,
+    }),
+    null,
+  );
+  if (!related || related.length === 0) return [];
+  if (related.length < 3) {
+    related = await dbSafe(
       () => prisma.post.findMany({
-        where,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          coverImage: true,
-          publishedAt: true,
-          excerpt: true,
-          views: true,
-          likes: true,
-          category: { select: { name: true, slug: true } },
-        },
-        orderBy: { publishedAt: "desc" },
-        take: opts.take,
-        skip: opts.skip,
-      }),
-      null,
-    );
-    if (posts && posts.length > 0) return posts;
-    return FALLBACK_POSTS.slice(opts.skip, opts.skip + opts.take);
-  },
-  ["post-list"],
-  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
-);
-
-export const getFeaturedPosts = unstable_cache(
-  async (where: Record<string, unknown>, take: number) => {
-    const posts = await dbSafe(
-      () => prisma.post.findMany({
-        where,
-        select: {
-          id: true,
-          slug: true,
-          title: true,
-          coverImage: true,
-          publishedAt: true,
-          excerpt: true,
-          views: true,
-          likes: true,
-          category: { select: { id: true, name: true, slug: true } },
-        },
-        orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
-        take,
-      }),
-      null,
-    );
-    if (posts && posts.length > 0) {
-      console.log(`[content] getFeaturedPosts: DB returned ${posts.length} posts`);
-      return posts;
-    }
-    console.warn("[content] getFeaturedPosts: DB empty/down, returning fallback posts");
-    return FALLBACK_POSTS.slice(0, take).map((p) => ({
-      ...p,
-      views: 0,
-      likes: 0,
-      category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
-    }));
-  },
-  ["featured-posts"],
-  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
-);
-
-export const getRelatedPosts = unstable_cache(
-  async (postId: string, categoryId: string | null) => {
-    const where = {
-      ...VISIBLE_POST_WHERE,
-      NOT: { id: postId },
-      ...(categoryId ? { categoryId } : { categoryId: null }),
-    };
-    let related = await dbSafe(
-      () => prisma.post.findMany({
-        where,
+        where: { ...VISIBLE_POST_WHERE, NOT: { id: postId } },
         select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
         orderBy: { publishedAt: "desc" },
         take: 3,
       }),
-      null,
+      related,
     );
-    if (!related || related.length === 0) return [];
-    if (related.length < 3) {
-      related = await dbSafe(
-        () => prisma.post.findMany({
-          where: { ...VISIBLE_POST_WHERE, NOT: { id: postId } },
-          select: { title: true, slug: true, excerpt: true, coverImage: true, publishedAt: true },
-          orderBy: { publishedAt: "desc" },
-          take: 3,
-        }),
-        related,
-      );
-    }
-    return (related ?? []).slice(0, 3);
-  },
-  ["related-posts"],
-  { revalidate: CACHE_TTL, tags: ["content", "posts"] }
-);
+  }
+  return (related ?? []).slice(0, 3);
+});
 
-// Active announcement for the homepage banner / popup.
-// NOT wrapped in unstable_cache: single-row query, always fresh.
-// React `cache` deduplicates within a single request (generateMetadata + render).
+// Active announcement — always fresh, single-row query.
 export const getActiveAnnouncement = cache(async () => {
   try {
     return await prisma.announcement.findFirst({
