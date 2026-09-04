@@ -146,7 +146,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
 
       {/* Carousel area with side arrows */}
       <div
-        className="relative touch-pan-y select-none"
+        className="relative touch-pan-y select-none overflow-hidden"
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -282,7 +282,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
 
       {/* Bottom Dot Pagination */}
       {total > 1 && (
-        <div className="mt-10 flex justify-center">
+        <div className="mt-14 md:mt-16 flex justify-center">
           <DotPagination total={total} current={index} onChange={setIndex} />
         </div>
       )}

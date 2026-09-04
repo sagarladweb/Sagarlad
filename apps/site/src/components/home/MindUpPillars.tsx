@@ -56,6 +56,14 @@ function traceArc(startDeg: number, endDeg: number): string {
   return `M ${ox} ${oy} A ${OUTER} ${OUTER} 0 ${large} 1 ${ex} ${ey}`;
 }
 
+/** Actual arc length of traceArc (GAP-adjusted), matching the drawn path. */
+function traceArcLength(startDeg: number, endDeg: number): number {
+  const s = startDeg + GAP;
+  const e = endDeg - GAP;
+  const spanRad = ((e - s) * Math.PI) / 180;
+  return spanRad * OUTER;
+}
+
 type RingProps = {
   active: string | null;
   activePillar: MindUpPillar | null;
@@ -80,7 +88,6 @@ function PillarRing({
   onPlayToggle,
 }: RingProps) {
   const arcLen = 2 * Math.PI * MID;
-  const segArc = arcLen / MINDUP_PILLARS.length;
 
   return (
     <div className="mx-auto w-full max-w-[340px] sm:max-w-[400px] lg:max-w-[480px]">
@@ -189,6 +196,7 @@ function PillarRing({
           {playing && MINDUP_PILLARS.map((p, i) => {
             const start = 240 + i * STEP;
             const d = traceArc(start, start + STEP);
+            const arcLen = traceArcLength(start, start + STEP);
             const status = i < playIdx ? "done" : i === playIdx ? "active" : "pending";
             if (status === "pending") return null;
 
@@ -200,8 +208,8 @@ function PillarRing({
                 stroke={p.color}
                 strokeWidth={3}
                 strokeLinecap="round"
-                strokeDasharray={segArc}
-                strokeDashoffset={status === "done" ? 0 : segArc * (1 - playProgress)}
+                strokeDasharray={arcLen}
+                strokeDashoffset={status === "done" ? 0 : arcLen * (1 - playProgress)}
                 opacity={status === "done" ? 0.8 : 1}
               />
             );
