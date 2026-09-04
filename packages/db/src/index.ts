@@ -1,5 +1,3 @@
-import { parse } from "pg-connection-string";
-import type { ConnectionOptions } from "tls";
 import pg from "pg";
 import { PrismaClient } from "./generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -42,19 +40,11 @@ function createClient() {
   if (!url) {
     throw new Error("DATABASE_URL is not set");
   }
-  const config = parse(url);
-  const connectionString = `postgresql://${encodeURIComponent(
-    config.user ?? ""
-  )}:${encodeURIComponent(config.password ?? "")}@${config.host}:${config.port ?? 5432}/${
-    config.database ?? ""
-  }`;
-
-  const ssl: boolean | ConnectionOptions = config.ssl ? true : { rejectUnauthorized: false };
 
   const max = Math.min(Math.max(parseInt(process.env.DATABASE_POOL_MAX ?? "8", 10) || 8, 1), 10);
   const pool = new pg.Pool({
-    connectionString,
-    ssl,
+    connectionString: url,
+    ssl: { rejectUnauthorized: false },
     max,
     family: 4,
     connectionTimeoutMillis: 10000,

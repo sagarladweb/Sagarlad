@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const isDev = process.env.NODE_ENV !== "production";
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["sharp", "jsdom", "@google-analytics/data"],
+  serverExternalPackages: ["sharp", "jsdom", "pg", "@prisma/adapter-pg", "@google-analytics/data"],
   images: {
     remotePatterns: [
       {
