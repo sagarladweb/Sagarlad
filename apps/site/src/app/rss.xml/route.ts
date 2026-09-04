@@ -14,10 +14,6 @@ function escapeXml(str: string) {
     .replace(/'/g, "&apos;");
 }
 
-function stripHtml(html: string) {
-  return html.replace(/<[^>]*>/g, "").replace(/\s+/g, " ").trim();
-}
-
 export async function GET() {
   const posts = await dbSafe(
     () =>
@@ -29,7 +25,6 @@ export async function GET() {
           title: true,
           slug: true,
           excerpt: true,
-          content: true,
           publishedAt: true,
           updatedAt: true,
           coverImage: true,
@@ -45,7 +40,7 @@ export async function GET() {
       const url = `${SITE.url}/blog/${post.slug}`;
       const description = post.excerpt
         ? escapeXml(post.excerpt)
-        : escapeXml(stripHtml(post.content).slice(0, 300));
+        : "";
       const pubDate = post.publishedAt.toUTCString();
       const category = post.category?.name ? escapeXml(post.category.name) : "";
       const author = post.author?.name ?? SITE.name;

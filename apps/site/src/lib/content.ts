@@ -295,7 +295,6 @@ export const getFeaturedPosts = unstable_cache(
           coverImage: true,
           publishedAt: true,
           excerpt: true,
-          content: true,
           category: { select: { id: true, name: true, slug: true } },
         },
         orderBy: [{ featured: "desc" }, { publishedAt: "desc" }],
@@ -305,7 +304,6 @@ export const getFeaturedPosts = unstable_cache(
       console.warn("[content] getFeaturedPosts failed:", (err as Error).message);
       return FALLBACK_POSTS.slice(0, take).map((p) => ({
         ...p,
-        content: p.excerpt,
         category: { id: "fallback-cat", name: "Life Lessons", slug: "life-lessons" },
       }));
     }

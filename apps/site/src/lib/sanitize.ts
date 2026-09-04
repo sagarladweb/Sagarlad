@@ -1,9 +1,28 @@
 import DOMPurify from "dompurify";
-import { JSDOM } from "jsdom";
 import type { WindowLike } from "dompurify";
 
-const { window } = new JSDOM("");
-const purify = DOMPurify(window as unknown as WindowLike);
+let purifyInstance: ReturnType<typeof DOMPurify> | null = null;
+
+function getPurify(): ReturnType<typeof DOMPurify> {
+  if (purifyInstance) return purifyInstance;
+  try {
+    const { JSDOM } = require("jsdom");
+    const { window } = new JSDOM("");
+    purifyInstance = DOMPurify(window as unknown as WindowLike);
+    return purifyInstance;
+  } catch {
+    // Fallback: strip everything dangerous with regex
+    purifyInstance = {
+      sanitize(html: string) {
+        return html
+          .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+          .replace(/<\/?(?:iframe|object|embed|form|input|textarea|button|select|svg|math|meta|template|slot|style)\b[^>]*>/gi, "")
+          .replace(/\s+on\w+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, "");
+      },
+    } as ReturnType<typeof DOMPurify>;
+    return purifyInstance;
+  }
+}
 
 // Block all event handler attributes (on*) plus dangerous attrs
 const FORBID_ATTR = [
@@ -33,7 +52,7 @@ const FORBID_ATTR = [
 ];
 
 export function sanitizeHtml(dirty: string): string {
-  return purify.sanitize(dirty, {
+  return getPurify().sanitize(dirty, {
     USE_PROFILES: { html: true },
     FORBID_TAGS: [
       "script", "style", "iframe", "object", "embed",

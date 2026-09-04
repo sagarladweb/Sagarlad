@@ -57,7 +57,7 @@ function createClient() {
     ssl,
     max,
     family: 4,
-    connectionTimeoutMillis: 3000,
+    connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
     query_timeout: 10000,
     statement_timeout: 10000,

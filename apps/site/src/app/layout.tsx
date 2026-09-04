@@ -100,7 +100,8 @@ export default async function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   // Self-contained heartbeat: keeps Supabase alive + auto-publishes scheduled
   // posts. Runs once per 60s. Zero external dependencies.
-  heartbeat();
+  // Fire-and-forget: don't block page load on a DB write.
+  heartbeat().catch(() => {});
 
   const announcement = await getActiveAnnouncement();
 

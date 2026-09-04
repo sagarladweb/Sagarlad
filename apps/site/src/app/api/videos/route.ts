@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma, dbSafe } from "@/lib/db";
-import { isInstagramUrl } from "@/lib/instagram";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,10 +16,18 @@ export async function GET(request: Request) {
       ? Math.min(Math.max(Math.trunc(limitRaw), 1), 48)
       : PAGE_SIZE;
 
+    // Platform filter pushed to DB instead of fetching all rows
+    const platformFilter =
+      platform === "instagram"
+        ? { embedUrl: { contains: "instagram.com" } }
+        : platform === "youtube"
+          ? { embedUrl: { not: { contains: "instagram.com" } } }
+          : {};
+
     const all = await dbSafe(
       () =>
         prisma.video.findMany({
-          where: { published: true, deletedAt: null },
+          where: { published: true, deletedAt: null, ...platformFilter },
           orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
           select: {
             id: true,
@@ -35,14 +42,9 @@ export async function GET(request: Request) {
       []
     );
 
-    const filtered =
-      platform === "youtube" || platform === "instagram"
-        ? all.filter((v) => (platform === "instagram" ? isInstagramUrl(v.embedUrl) : !isInstagramUrl(v.embedUrl)))
-        : all;
-
-    const start = cursor ? filtered.findIndex((v) => v.id === cursor) + 1 : 0;
-    const page = filtered.slice(start, start + limit);
-    const nextCursor = start + limit < filtered.length ? page[page.length - 1].id : null;
+    const start = cursor ? all.findIndex((v) => v.id === cursor) + 1 : 0;
+    const page = all.slice(start, start + limit);
+    const nextCursor = start + limit < all.length ? page[page.length - 1].id : null;
 
     return NextResponse.json({ videos: page, nextCursor });
   } catch {

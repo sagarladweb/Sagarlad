@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     try {
       post = await prisma.post.findUnique({
         where: { slug: safeSlug },
-        select: { id: true, likes: true },
+        select: { id: true },
       });
     } catch {
       return NextResponse.json({ error: "DB error" }, { status: 500 });
@@ -43,20 +43,15 @@ export async function POST(request: Request) {
     // simple: the client manages dedup via localStorage, and the server
     // just increments/decrements. For a low-traffic blog this is fine.
 
-    const newLikes =
-      action === "like"
-        ? Math.max(0, post.likes + 1)
-        : Math.max(0, post.likes - 1);
-
     let updated;
     try {
       updated = await prisma.post.update({
         where: { id: post.id },
-        data: { likes: newLikes },
+        data: { likes: action === "like" ? { increment: 1 } : { decrement: 1 } },
         select: { likes: true },
       });
     } catch {
-      return NextResponse.json({ likes: post.likes, liked: action === "unlike" }, { status: 500 });
+      return NextResponse.json({ likes: 0, liked: action === "unlike" }, { status: 500 });
     }
 
     return NextResponse.json({

@@ -8,7 +8,7 @@ type FeaturedPost = {
   slug: string;
   title: string;
   excerpt: string | null;
-  content: string;
+  content?: string;
   coverImage: string | null;
   publishedAt: Date | string;
   category: { id: string; name: string; slug: string } | null;

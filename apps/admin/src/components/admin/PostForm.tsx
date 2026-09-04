@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, Suspense, lazy } from "react";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -24,6 +24,10 @@ import {
   Plus,
 } from "lucide-react";
 import { TipTapEditor } from "@/components/admin/TipTapEditor";
+
+const LazyTipTapEditor = lazy(() =>
+  import("@/components/admin/TipTapEditor").then((m) => ({ default: m.TipTapEditor }))
+);
 import { Dropdown } from "@/components/ui/Dropdown";
 import { SchedulePicker } from "@/components/ui/SchedulePicker";
 import { showToast } from "@/components/admin/Toast";
@@ -657,7 +661,8 @@ export function PostForm({
           <div className="w-full">
             <span className="sr-only">Post</span>
             {hydrated ? (
-              <TipTapEditor
+              <Suspense fallback={<div className="h-64 animate-pulse bg-muted rounded" />}>
+                <LazyTipTapEditor
                 initialContent={form.content}
                 onChange={(html) => {
                   setForm((f) => ({ ...f, content: html }));
@@ -672,6 +677,7 @@ export function PostForm({
                 stickyToolbarOffset={isFullscreen ? "top-0" : "top-14 md:top-0"}
                 postTitle={form.slug || form.title}
               />
+              </Suspense>
             ) : (
               <div className="flex min-h-[300px] items-center justify-center rounded-2xl border border-border bg-card">
                 <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
