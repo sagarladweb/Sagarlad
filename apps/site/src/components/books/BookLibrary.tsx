@@ -67,7 +67,7 @@ export function BookLibrary({ books, variant }: { books: BookItem[]; variant: Va
   }, [active, target]);
 
   const ctaLabel = () =>
-    variant === "published" ? "Get your Copy" : variant === "ebook" ? "Download" : "Buy this Book";
+    variant === "published" ? "Get Copy" : variant === "ebook" ? "Download" : "Buy this Book";
 
   const openDownload = (b: BookItem) => {
     setTarget({ id: b.id, title: b.title, free: b.free });

@@ -137,36 +137,46 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
       />
 
       {/* Section Header */}
-      <div className="mb-12 md:mb-16 text-center md:text-left" data-animate suppressHydrationWarning>
+      <div className="mb-12 md:mb-16 text-center" data-animate suppressHydrationWarning>
         <Pill>The Library</Pill>
         <h2 className="mt-6 font-display text-3xl md:text-4xl font-bold text-[#1e293b]">
           Featured books
         </h2>
       </div>
 
-      {/* Carousel area with side arrows */}
-      <div
-        className="relative touch-pan-y select-none px-0 md:px-16"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerLeave={onPointerUp}
-      >
-        {/* Left arrow */}
+      {/* Carousel area with side arrows — arrows at screen edges */}
+      <div className="relative">
         {total > 1 && (
           <button
             type="button"
             onClick={prev}
             aria-label="Previous book"
-            className="btn-premium absolute left-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
+            className="btn-premium absolute left-0 md:-left-4 lg:-left-8 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
         )}
+        {total > 1 && (
+          <button
+            type="button"
+            onClick={next}
+            aria-label="Next book"
+            className="btn-premium absolute right-0 md:-right-4 lg:-right-8 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        )}
 
-        {/* Book slide */}
-        <div key={book.id} className="book-slide-enter">
-          <article className="flex flex-col md:flex-row items-center gap-10 md:gap-16 lg:gap-20">
+        <div
+          className="touch-pan-y select-none px-0 md:px-20"
+          onPointerDown={onPointerDown}
+          onPointerMove={onPointerMove}
+          onPointerUp={onPointerUp}
+          onPointerLeave={onPointerUp}
+        >
+          {/* Book slide */}
+          <div key={book.id} className="book-slide-enter">
+            <article className="flex flex-col md:flex-row items-center gap-10 md:gap-16 lg:gap-20">
             {/* Book Cover */}
             <div
               className="w-full md:w-2/5 lg:w-2/5 shrink-0 flex justify-center"
@@ -233,7 +243,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
             </div>
 
             {/* Text Content */}
-            <div className="w-full md:flex-1 text-center md:text-left">
+            <div className="w-full md:flex-1 text-center">
               <span className="inline-block text-[10px] font-semibold uppercase tracking-[0.25em] text-[#94a3b8] border border-[#e2e8f0] rounded-full px-4 py-1">
                 {book.tagline ?? "The flagship book"}
               </span>
@@ -252,7 +262,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
               </div>
 
               {/* CTA button */}
-              <div className="mt-8 flex items-center justify-center md:justify-start">
+              <div className="mt-8 flex items-center justify-center">
                 <a
                   href={book.buyUrl ?? "/books"}
                   target="_blank"
@@ -266,18 +276,7 @@ export function BookCarousel({ books }: { books: BookCarouselBook[] }) {
             </div>
           </article>
         </div>
-
-        {/* Right arrow */}
-        {total > 1 && (
-          <button
-            type="button"
-            onClick={next}
-            aria-label="Next book"
-            className="btn-premium absolute right-0 top-1/2 -translate-y-1/2 z-20 hidden md:grid h-12 w-12 place-items-center rounded-full border border-[#e2e8f0] bg-white text-[#475569] shadow-sm hover:border-[#1e293b] hover:text-[#1e293b]"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        )}
+        </div>
       </div>
 
       {/* Bottom Dot Pagination */}
