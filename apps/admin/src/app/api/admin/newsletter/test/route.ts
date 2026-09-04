@@ -33,9 +33,15 @@ export async function POST(request: Request) {
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
     console.error("[newsletter] test send failed:", msg);
+    // 401 from Brevo = IP not whitelisted; return a clear message
+    const isBrevoAuth = /Brevo 401/i.test(msg);
     return NextResponse.json(
-      { error: `Test send failed: ${msg}` },
-      { status: 500 }
+      {
+        error: isBrevoAuth
+          ? "Brevo rejected the request — the server IP is not whitelisted. Go to Brevo → Settings → Authorized IPs and add the IP, or disable IP restrictions."
+          : `Test send failed: ${msg}`,
+      },
+      { status: isBrevoAuth ? 403 : 502 }
     );
   }
 }
